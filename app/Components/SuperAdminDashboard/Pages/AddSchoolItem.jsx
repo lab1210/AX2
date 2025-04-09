@@ -7,7 +7,10 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { BiChevronDown } from "react-icons/bi";
 import { Country, State, City } from "country-state-city";
 import { LuUpload } from "react-icons/lu";
-import { createSchool } from "../../../Service/schoolService"; // Ensure this path is correct
+import {
+  createSchool,
+  createSchoolSubscription,
+} from "../../../Service/schoolService"; // Ensure this path is correct
 
 const AddSchoolItem = () => {
   const searchParams = useSearchParams();
@@ -27,6 +30,10 @@ const AddSchoolItem = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
+  const [amountPerStudent, setAmountPerStudent] = useState("");
+  const numberOfStudents = 100; // Hardcoded for now
+
+  const expectedAmountPaid = amountPerStudent * numberOfStudents || 0;
 
   const countries = Country.getAllCountries();
   const states = selectedCountry
@@ -83,9 +90,12 @@ const AddSchoolItem = () => {
       !email ||
       !selectedCountry ||
       !selectedState ||
-      !selectedCity
+      !selectedCity ||
+      !amountPerStudent
     ) {
-      setError("Please fill in all required fields.");
+      setError(
+        "Please fill in all required general and subscription information."
+      );
       setLoading(false);
       return;
     }
@@ -102,32 +112,63 @@ const AddSchoolItem = () => {
     formData.append("city", selectedCity.name);
     formData.append("region", "South West"); // Adjust as needed
     if (schoolLogo) {
-      formData.append("logo", schoolLogo);
+      formData.append("logo", schoolLogo); // Logo is correctly appended as File object
     }
 
     try {
-      const response = await createSchool(formData);
-      if (response?.status === 201) {
-        setSuccessMessage("School created successfully!");
-        // Optionally reset the form fields
-        setSchoolName("");
-        setShortName("");
-        setSchoolType("");
-        setEducationLevel("");
-        setPhoneNumber("");
-        setEmail("");
-        setSelectedCountry(null);
-        setSelectedState(null);
-        setSelectedCity(null);
-        setSchoolLogo(null);
-        setLogoPreview("/icons.png");
+      const schoolResponse = await createSchool(formData);
+
+      if (schoolResponse?.status === 201 && schoolResponse.data?.id) {
+        setSuccessMessage(
+          "School created successfully! Now creating subscription..."
+        );
+
+        const subscriptionData = {
+          school: schoolResponse.data.id, // Use the ID of the newly created school
+          amount_per_student: parseFloat(amountPerStudent),
+          amount_paid: expectedAmountPaid,
+          expired_date: new Date(
+            new Date().setFullYear(new Date().getFullYear() + 1)
+          )
+            .toISOString()
+            .split("T")[0], // Example: 1 year from now
+          active_date: new Date().toISOString().split("T")[0], // Today's date
+        };
+
+        const subscriptionResponse = await createSchoolSubscription(
+          subscriptionData
+        );
+
+        if (subscriptionResponse?.status === 201) {
+          setSuccessMessage("School and subscription created successfully!");
+          setSchoolName("");
+          setShortName("");
+          setSchoolType("");
+          setEducationLevel("");
+          setPhoneNumber("");
+          setEmail("");
+          setSelectedCountry(null);
+          setSelectedState(null);
+          setSelectedCity(null);
+          setSchoolLogo(null);
+          setLogoPreview("/icons.png");
+          setAmountPerStudent("");
+        } else {
+          setError(
+            `Error creating subscription: ${
+              subscriptionResponse?.data?.message || "Something went wrong"
+            }`
+          );
+        }
       } else {
-        setError("Please fill in all required fields.");
-        setLoading(false);
-        return;
+        setError(
+          `Error creating school: ${
+            schoolResponse?.data?.message || "Something went wrong"
+          }`
+        );
       }
     } catch (error) {
-      setError(`Error creating school: ${error.message}`);
+      setError(`An unexpected error occurred: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -135,7 +176,7 @@ const AddSchoolItem = () => {
 
   return (
     <SuperAdminLayout>
-      <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0  z-10 shadow-md  flex justify-between items-center ">
+      <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0  z-10 shadow-md   flex justify-between items-center ">
         <DashboardHeader />
         <Link href={`/Super-Admin/Manage-Existing-Schools?adminId=${adminId}`}>
           <button className="bg-[#07508F] text-white p-2 rounded-lg cursor-pointer ">
@@ -143,16 +184,23 @@ const AddSchoolItem = () => {
           </button>
         </Link>
       </div>
-      <div className="bg-[#D4D4D4] h-screen p-4 sm:overflow-auto lg:overflow-hidden ">
-        <div className="sm:flex sm:flex-col h-screen sm:gap-2 lg:grid lg:grid-cols-[2.5fr_1fr] overflow-auto  gap-3 lg:h-screen ">
-          <div className="bg-[#ffffff] rounded-lg flex flex-col lg:overflow-y-auto lg:max-h-[calc(100vh-95px)] lg:overflow-auto no-scrollbar">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-[#D4D4D4] h-screen p-4 sm:overflow-auto lg:overflow-hidden  gap-3 lg:h-screen "
+      >
+        <div className="sm:flex sm:flex-col h-screen sm:gap-2 lg:grid lg:grid-cols-[2.5fr_1fr] overflow-auto   ">
+          <div className="bg-[#ffffff] rounded-lg flex flex-col lg:overflow-y-auto lg:max-h-[calc(100vh-95px)] lg:overflow-auto no-scrollbar pb-2">
             <div>
               <p className="font-bold text-xl p-6">
                 General School Information
               </p>
               <hr className="w-full border-t border-[#978F8F]" />
             </div>
-            <form onSubmit={handleSubmit} className="flex-grow flex flex-col ">
+            <div className="flex-grow flex flex-col ">
+              {error && <p className="pl-6 text-red-500">{error}</p>}
+              {successMessage && (
+                <p className="pl-6 text-green-500">{successMessage}</p>
+              )}
               <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0 ">
                 <div className="flex flex-col gap-1 mb-2">
                   <label
@@ -284,6 +332,7 @@ const AddSchoolItem = () => {
                   School Address
                 </label>
                 <div className="grid grid-cols-2 gap-3 mt-1 ">
+                  {/* ... (Address Select Fields - unchanged) ... */}
                   <div className="grid grid-cols-1 mb-2">
                     <select
                       className="w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4]"
@@ -343,26 +392,11 @@ const AddSchoolItem = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex justify-end pr-6 pb-2  mt-auto ">
-                <button
-                  type="submit"
-                  className={`bg-[#07508F] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer ${
-                    loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  disabled={loading}
-                >
-                  {loading ? "Saving..." : "Save"}
-                </button>
-              </div>
-              {error && <p className="pl-6 text-red-500">{error}</p>}
-              {successMessage && (
-                <p className="pl-6 text-green-500">{successMessage}</p>
-              )}
-            </form>
+            </div>
           </div>
           <div className="flex flex-col gap-2 h-screen  ">
             <div className="bg-[#ffffff] rounded-lg drop-shadow-lg p-4  flex flex-col">
-              <p className="font-bold sm:tex-lg xl:text-xl xl:mb-2 sm:mb-4 ">
+              <p className="font-bold sm:text-lg xl:text-xl xl:mb-2 sm:mb-4 ">
                 LOGO
               </p>
               <div className="flex flex-col items-center justify-center mt-2">
@@ -398,35 +432,52 @@ const AddSchoolItem = () => {
                 SUBSCRIPTION PLAN
               </p>
               <div>
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center ">
                   <p className="font-semibold text-xs text-[#9C9B9B]">
                     Amount Per Student:
                   </p>
-                  <p className="font-semibold text-xs text-[#9C9B9B]">N1500</p>
+                  <div className="w-24">
+                    <input
+                      type="number"
+                      id="amountPerStudent"
+                      className="w-full text-right text-sm text-[#333] rounded-md focus:outline-none border-[1px]  border-[#d4d4d4]"
+                      value={amountPerStudent}
+                      onChange={(e) => setAmountPerStudent(e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="flex justify-between">
                   <p className="font-semibold text-xs ">No of Students:</p>
-                  <p className="font-semibold text-xs ">N100</p>
+                  <p className="font-semibold text-xs ">{numberOfStudents}</p>
                 </div>
 
                 <div className="flex justify-between">
                   <p className="font-semibold text-xs ">
-                    Amount Expected to be paid::
+                    Amount Expected to be paid:
                   </p>
-                  <p className="font-semibold text-xs ">N1500</p>
+                  <p className="font-semibold text-xs ">
+                    ₦{expectedAmountPaid.toLocaleString()}
+                  </p>
                 </div>
               </div>
 
               <div className="flex justify-center pt-4 ">
-                <button className="bg-[#4084B1] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer ">
-                  Activate
+                <button
+                  type="submit"
+                  className={`bg-[#07508F] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save"}
                 </button>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      </form>
     </SuperAdminLayout>
   );
 };

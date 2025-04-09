@@ -160,3 +160,44 @@ export const updateSchoolSubscription = async (
     throw error;
   }
 };
+
+export const createSchoolSubscription = async (subscriptionData) => {
+  try {
+    const headers = createAuthHeaders();
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return null;
+    }
+
+    const url = `${BASE_URL}/schools/subscriptions/`;
+    const response = await axios.post(url, subscriptionData, { headers });
+    return response;
+  } catch (error) {
+    console.error("Error creating school subscription:", error);
+    throw error;
+  }
+};
+
+export const getSchoolSubscriptionById = async (subscriptionId) => {
+  try {
+    const headers = createAuthHeaders();
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return null;
+    }
+
+    const url = `${BASE_URL}/schools/subscriptions/${subscriptionId}/update/`;
+    const response = await axios.get(url, { headers });
+    return response;
+  } catch (error) {
+    console.error(
+      `Error fetching school subscription with ID ${subscriptionId}:`,
+      error
+    );
+    throw error;
+  }
+};
