@@ -1,0 +1,271 @@
+.FeeContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.firstCard,
+.secondCard,
+.thirdCard {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 15px;
+}
+
+.firstCard {
+  display: flex;
+  align-items: center;
+}
+
+@media (min-width: 768px) {
+  .firstCard {
+    padding: 25px 10px;
+    justify-content: space-between;
+  }
+  .firstCardItem1 .TopSection,
+  .firstCardItem2 .TopSection {
+    padding: 15px;
+    grid-template-columns: 180px 1fr;
+    justify-content: space-between;
+  }
+  .dropdown {
+    gap: 10px;
+  }
+  .dropdown label {
+    font-size: 10px;
+  }
+  .dropdown select {
+    font-size: 12px;
+    padding: 2px;
+  }
+
+  .firstrow button {
+    font-size: 14px;
+    padding: 14px 30px;
+  }
+  .secondrow p {
+    font-size: 12px;
+  }
+  .tableBottom p {
+    font-size: 10px;
+  }
+  .tableBottomItem p span {
+    padding: 2px;
+  }
+}
+@media (min-width: 1250px) {
+  .firstCard {
+    padding: 25px 10px;
+    justify-content: space-around;
+  }
+  .firstCardItem1 .TopSection,
+  .firstCardItem2 .TopSection {
+    padding: 20px;
+    grid-template-columns: 200px 1fr;
+    justify-content: space-between;
+  }
+  .dropdown {
+    gap: 30px;
+  }
+  .dropdown label {
+    font-size: 12px;
+  }
+  .dropdown select {
+    font-size: 14px;
+    padding: 5px;
+  }
+
+  .firstrow button {
+    font-size: 16px;
+
+    padding: 16px 32px;
+  }
+  .secondrow p {
+    font-size: 14px;
+  }
+  .tableBottom p {
+    font-size: 13px;
+    font-weight: 600;
+  }
+  .tableBottomItem p span {
+    padding: 3px;
+  }
+}
+
+.firstCardItem1 {
+  background-color: rgba(64, 132, 177, 1);
+  color: rgba(255, 255, 255, 1);
+  border-radius: 20px;
+}
+.firstCardItem1 .TopSection,
+.firstCardItem2 .TopSection {
+  display: grid;
+  justify-content: space-between;
+  align-items: center;
+}
+.firstCardItem1 .BottomSection,
+.firstCardItem2 .BottomSection {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-bottom-left-radius: 20px;
+  border-bottom-right-radius: 20px;
+  padding: 5px;
+}
+
+.firstCardItem2 {
+  background-color: rgba(249, 65, 68, 1);
+  color: rgba(255, 255, 255, 1);
+  border-radius: 20px;
+}
+
+.Cardimage {
+  max-width: 50px;
+}
+.Cardimage img {
+  width: 100%;
+  object-fit: cover;
+}
+
+.CardDetails h4 {
+  margin-bottom: 10px;
+  font-weight: 700;
+  font-size: 20px;
+}
+.CardDetails p,
+.info p {
+  font-weight: 400;
+  font-size: 12px;
+}
+.info {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.info div {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 1);
+  display: flex;
+  align-items: center;
+  padding: 2px;
+}
+.firstCardItem1 .info svg {
+  color: #39779f;
+}
+.firstCardItem2 .info svg {
+  color: #e03a3d;
+}
+.info div svg {
+  object-fit: contain;
+  width: 100%;
+}
+
+.secondCard {
+  padding: 20px;
+}
+.thirdCard {
+  padding: 20px;
+}
+.firstrow {
+  display: grid;
+  grid-template-columns: 1fr 1fr auto;
+  margin-bottom: 30px;
+}
+.dropdown {
+  display: flex;
+  align-items: center;
+}
+.dropdown label {
+  font-weight: 400;
+}
+.dropdown select {
+  background-color: #cfcfcf66;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+  font-weight: 400;
+}
+
+.firstrow button {
+  background-color: #0b71b5;
+  color: #ffffff;
+  font-weight: 700;
+  border: none;
+  outline: none;
+  border-radius: 8px;
+  transition: background-color 0.3s ease-in-out;
+}
+.firstrow button:hover {
+  background-color: #f94144;
+  opacity: 0.7;
+}
+.secondrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.secondrow p {
+  font-weight: 700;
+}
+
+.feesTable thead {
+  background-color: #f94144;
+  color: #ffffff;
+  font-weight: 700;
+  text-align: left;
+}
+
+.feesTable table {
+  border-radius: 4px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+.feesTable tbody {
+  background-color: #ffffff;
+  font-size: 14px;
+}
+
+.feesTable th,
+.feesTable td {
+  border: 1px solid #cfcfcfcf;
+  padding: 6px 12px 6px 12px;
+  min-height: 60px;
+}
+.red {
+  color: #dd1b10;
+}
+
+.tableBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.tableBottomItem p {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+.tableBottomItem p span {
+  background-color: #cfcfcf66;
+  border-radius: 10px;
+  font-weight: 400;
+}
+.filter,
+.red {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.filter span,
+.red span {
+  color: #cfcfcfcf;
+  cursor: pointer;
+}
+
+.redSpan {
+  background-color: #f94144 !important;
+  color: #ffffff;
+}

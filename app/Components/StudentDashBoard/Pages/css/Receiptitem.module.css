@@ -1,0 +1,153 @@
+.ReceiptGrid {
+  display: grid;
+  grid-template-rows: auto auto;
+}
+.ReceiptPageTitle,
+.ReceiptPageContent {
+  background-color: #ffffff;
+  margin-bottom: 20px;
+}
+
+.ReceiptPageTitle {
+  border-radius: 15px;
+  padding: 20px;
+}
+.ReceiptPageContent {
+  border-radius: 10px;
+  padding: 20px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.firstRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dropdown {
+  display: flex;
+  gap: 30px;
+  align-items: center;
+}
+
+.dropdown select {
+  outline: none;
+  border: none;
+  background-color: #cfcfcf66;
+  border-radius: 10px;
+  padding: 10px;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.printButton button {
+  background-color: #0b71b5;
+  border: none;
+  outline: none;
+  color: #ffffff;
+  font-weight: 700;
+  padding: 10px 40px;
+  font-size: 16px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.head {
+  text-align: center;
+  border-bottom: 1px solid #cfcfcf;
+  padding: 20px;
+  margin-bottom: 25px;
+}
+
+.studentInfo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  gap: 10px;
+}
+
+.title {
+  margin-bottom: 30px;
+}
+
+.ReceiptTable thead {
+  background-color: #80adcb;
+  color: #ffffff;
+  text-align: left;
+  font-weight: 700;
+}
+
+.ReceiptTable {
+  border-collapse: collapse;
+  margin-bottom: 30px;
+}
+
+.ReceiptTable tbody {
+  font-size: 14px;
+}
+.ReceiptTable th,
+.ReceiptTable td {
+  padding: 10px 12px 10px 12px;
+  min-height: 60px;
+}
+
+.ReceiptTotal {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  gap: 10px;
+}
+
+@media (min-width: 768px) {
+  .ReceiptTable th,
+  .ReceiptTable td {
+    padding: 8px;
+    min-height: 60px;
+  }
+  .title {
+    font-size: 14px;
+  }
+  .studentInfo {
+    font-size: 12px;
+  }
+  .ReceiptTotal p {
+    font-size: 12px;
+  }
+  .ReceiptTotalContainer {
+    grid-template-columns: 30px 1fr auto;
+  }
+}
+@media (min-width: 1250px) {
+  .ReceiptTable th,
+  .ReceiptTable td {
+    padding: 10px 12px 10px 12px;
+    min-height: 60px;
+  }
+  .title {
+    font-size: 18px;
+  }
+  .studentInfo {
+    font-size: 14px;
+  }
+  .ReceiptTotal p {
+    font-size: 14px;
+  }
+  .ReceiptTotalContainer {
+    grid-template-columns: 80px 1fr auto;
+  }
+}
+
+.ReceiptTotalContainer {
+  display: grid;
+}
+
+.ReceiptTotal div {
+  color: #4084b1;
+  background-color: #cfcfcf66;
+  border-radius: 10px;
+  padding: 5px;
+  font-size: 18px;
+}

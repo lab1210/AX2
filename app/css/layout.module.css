@@ -1,0 +1,477 @@
+.loadingContainer {
+  position: absolute; /* Or fixed, depending on your layout */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%); /* Center the container */
+  display: flex;
+  justify-content: center; /* Center horizontally */
+  align-items: center; /* Center vertically */
+  width: 100%;
+  height: 100%;
+  z-index: 1000; /* Ensure it's on top */
+}
+
+.spinner {
+  border: 4px solid rgba(0, 64, 128, 1);
+  border-top: 4px solid rgba(249, 65, 68, 1);
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.LayoutGrid {
+  display: grid;
+  width: 100%;
+  height: 100vh;
+}
+
+@media (min-width: 768px) {
+  .LayoutGrid {
+    grid-template-columns: 150px minmax(200px, 1fr) 250px;
+    padding: 10px 15px 0px 15px;
+  }
+  .eventDetails h4,
+  .eventDetails p {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .eventDetails h4 {
+    max-width: 100px;
+  }
+  .eventDetails p {
+    max-width: 150px;
+  }
+  .right {
+    padding: 0 10px 0 12px;
+  }
+}
+@media (min-width: 1200px) {
+  .LayoutGrid {
+    grid-template-columns: 160px 1fr 300px;
+    padding: 15px 15px 0px 15px;
+  }
+  .eventDetails h4 {
+    max-width: 150px;
+  }
+  .eventDetails p {
+    max-width: 150px;
+  }
+  .right {
+    padding: 0 0 0 22px;
+  }
+}
+
+.left {
+  background-color: rgba(255, 255, 255, 1);
+  display: flex;
+  flex-direction: column;
+  padding-top: 20px;
+  height: 100vh;
+}
+.middle {
+  display: grid;
+  grid-template-rows: 61px 1fr;
+  height: 100vh;
+}
+.header {
+  background-color: rgba(255, 255, 255, 1);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.right {
+  background-color: rgba(255, 255, 255, 1);
+  height: 100vh;
+}
+.content {
+  /* background-color: rgba(217, 217, 217, 0.4); */
+  border-radius: 10px;
+  /* padding: 30px 20px 0 20px; */
+  overflow: auto;
+  -ms-overflow-style: none; /* Hide scrollbar in IE and Edge */
+  scrollbar-width: none; /* Hide scrollbar in Firefox */
+}
+.logoimg {
+  max-width: 60px;
+}
+
+.logoimg img {
+  width: 100%;
+  object-fit: cover;
+}
+.Logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+.logoTxt {
+  font-weight: 700;
+  font-size: 18px;
+}
+.leftList ul {
+  list-style-type: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.leftListItem {
+  display: flex;
+  gap: 10px;
+  font-weight: 400;
+  font-size: 16px;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out;
+}
+
+.leftListItem a {
+  display: flex;
+  gap: 10px;
+}
+.leftListItem:hover {
+  color: rgba(185, 185, 185, 0.4);
+}
+.leftListItem a .active {
+  color: rgba(249, 65, 68, 1);
+}
+
+.leftsidebar {
+  height: 100vh;
+}
+.logout {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logout button {
+  color: #ffffff;
+  background-color: rgba(249, 65, 68, 1);
+  border: none;
+  border-radius: 10px;
+  padding: 6px 20px;
+  font-weight: 700;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: opacity 0.3s ease-in-out;
+}
+.logout button:hover {
+  opacity: 0.8;
+}
+
+.icon {
+  position: relative;
+}
+.icon svg {
+  color: rgba(51, 54, 63, 1);
+  width: 100%;
+  cursor: pointer;
+  transition: color 0.3s ease-in-out;
+}
+
+.notificationcount {
+  position: absolute;
+  background-color: rgba(249, 65, 68, 1);
+  border-radius: 50%;
+  width: 8px;
+  height: 8px;
+  top: 5px;
+  right: 5px;
+  transition: background-color 0.3s ease;
+}
+.notificationcounthide {
+  display: none;
+}
+
+.icon:hover .icon svg {
+  color: rgba(185, 185, 185, 0.4);
+}
+
+.icon:hover .notificationcount {
+  background-color: rgba(185, 185, 185, 0.4);
+  transform: scale(0.9);
+}
+
+.profilename {
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+  font-size: 16px;
+  gap: 10px;
+}
+@media (min-width: 768px) {
+  .username {
+    display: none;
+  }
+  .profileimg {
+    max-width: 70px;
+    max-height: 70px;
+    border-radius: 50%;
+  }
+  .NotificationProfile {
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 3px;
+  }
+  .leftList ul {
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 30px;
+  }
+  .leftListItem {
+    padding: 11px;
+  }
+}
+
+@media (min-width: 1250px) {
+  .username {
+    display: block;
+  }
+  .profileimg {
+    max-width: 50px;
+    max-height: 50px;
+    border-radius: 50%;
+  }
+  .NotificationProfile {
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  .leftList ul {
+    list-style-type: none;
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+  }
+  .leftListItem {
+    padding: 11px;
+  }
+}
+.NotificationProfile {
+  display: flex;
+  gap: 15px;
+}
+
+.profileimg img {
+  width: 100%;
+  object-fit: cover;
+}
+.NameIcon {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+.profilename svg {
+  cursor: pointer;
+}
+
+.events {
+  background-color: rgba(0, 64, 128, 1);
+  color: rgba(255, 255, 255, 1);
+  border-radius: 15px;
+  font-weight: 700;
+  margin-bottom: 15px;
+  box-shadow: 1px 5px 7px 0px #00000040;
+}
+.top {
+  padding: 12px 10px 10px 20px;
+}
+.calender {
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+.calender .title {
+  font-size: 8px;
+  margin-bottom: 5px;
+  color: rgba(217, 217, 217, 1);
+}
+.calender .day {
+  font-size: 10px;
+}
+.top h2,
+.TopN h2 {
+  font-weight: 700;
+  font-size: 20px;
+}
+.MonthArrow {
+  display: flex;
+  justify-content: space-between;
+}
+.arrows {
+  display: flex;
+  gap: 5px;
+}
+.arrows div {
+  background-color: rgba(255, 255, 255, 1);
+  color: #000;
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+.arrows div svg {
+  cursor: pointer;
+}
+.weekdays {
+  color: rgba(212, 212, 212, 1);
+  display: flex;
+  /* gap: 20px; */
+  justify-content: space-between;
+  font-size: 10px;
+}
+.dates {
+  display: flex;
+  justify-content: space-between;
+  /* gap: 32px; */
+  font-size: 10px;
+}
+.Dategrid {
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  gap: 8px;
+}
+.eventlist ul {
+  list-style-type: none;
+}
+.eventlist {
+  padding: 0 5px 5px 5px;
+}
+.eventItem {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  padding: 5px;
+}
+.eventDate {
+  display: flex;
+  flex-direction: column;
+  color: #000;
+  align-items: center;
+  height: fit-content;
+  border-radius: 10px;
+  background-color: #ffffff;
+  width: fit-content;
+}
+
+.eventDate .day {
+  font-weight: 400;
+  font-size: 10px;
+}
+.eventDate .date {
+  font-size: 28px;
+}
+
+.eventDetails h5 {
+  color: rgba(255, 255, 255, 1);
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 2px;
+}
+.eventDetails p {
+  color: #000;
+  font-weight: 400;
+  font-size: 8px;
+}
+
+.eventDetails {
+  display: flex;
+  align-items: center;
+}
+.changebg {
+  background-color: rgba(64, 132, 177, 1);
+  border-radius: 10px;
+}
+
+.eventlist li {
+  transition: background-color 0.3s ease; /* Add a transition for smooth effect */
+}
+.eventDateClicked {
+  background-color: transparent !important;
+}
+.eventDateClicked .day {
+  color: rgba(255, 255, 255, 1);
+}
+.eventDetailsClicked {
+  color: rgba(128, 173, 203, 1) !important;
+}
+
+.eventDetails .detailarrow {
+  background-color: rgba(255, 255, 255, 1);
+  color: #000;
+  border-radius: 50%;
+  width: 15px;
+  height: 15px;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+}
+
+.notification {
+  background-color: rgba(249, 65, 68, 1);
+  color: rgba(255, 255, 255, 1);
+  border-radius: 15px;
+  font-weight: 700;
+  padding: 10px 15px 6px 15px;
+  box-shadow: 1px 5px 7px 0px #00000040;
+}
+.Rightcontainer hr {
+  border: 1px solid rgba(255, 255, 255, 1);
+}
+.TopN {
+  text-align: center;
+  margin-bottom: 10px;
+}
+.TopN h2 {
+  margin-bottom: 5px;
+}
+.notificationdetails {
+  display: flex;
+  flex-direction: column;
+  color: #000;
+}
+.notificationList ul {
+  list-style-type: none;
+}
+.notificationList li {
+  background-color: rgba(255, 255, 255, 1);
+  border-radius: 5px;
+  margin-bottom: 4px;
+  padding: 3px 6px;
+  display: flex;
+  align-items: center;
+}
+.Ntitle {
+  font-size: 12px;
+}
+.Ndesc {
+  font-size: 10px;
+  font-weight: 400;
+}
+.Narrow {
+  background-color: rgba(249, 65, 68, 1);
+  color: #000;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  font-weight: 700;
+}
+.Narrow svg {
+  object-fit: cover;
+}

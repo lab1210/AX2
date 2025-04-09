@@ -1,0 +1,146 @@
+.DashboardContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
+.top {
+  background-color: rgba(0, 64, 128, 1);
+  border-radius: 15px;
+  padding: 15px 10px 15px 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.greeting {
+  color: rgba(255, 255, 255, 1);
+  font-weight: 700;
+}
+.greeting h1 {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+}
+.greeting p {
+  font-size: 1rem;
+}
+.topImg {
+  max-width: 200px;
+  height: auto;
+}
+.topImg img {
+  width: 100%;
+  object-fit: contain;
+}
+.overview {
+  background-color: rgba(255, 255, 255, 1);
+  font-weight: 700;
+  border-radius: 15px;
+  padding: 25px 10px 15px 10px;
+}
+
+.overview h2 {
+  margin-bottom: 10px;
+}
+.overviewCards {
+  display: grid;
+  gap: 10px;
+}
+.overviewCardItem {
+  border-radius: 10px;
+  padding: 20px;
+  color: rgba(255, 255, 255, 1);
+  display: grid;
+  align-items: center;
+  grid-template-columns: 60px 1fr;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.content:hover {
+  opacity: 0.6;
+}
+.content:hover p {
+  transform: scale(0.9);
+}
+.content {
+  cursor: pointer;
+}
+.iconContainer {
+  display: flex;
+  width: fit-content;
+  height: auto;
+  align-items: center;
+  color: white;
+  border-radius: 10px;
+  padding-right: 8px;
+}
+.iconContainer svg {
+  object-fit: contain;
+}
+.overviewCardItem h4 {
+  font-size: 18px;
+  margin-bottom: 10px;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+.overviewCardItem p {
+  font-size: 12px;
+  max-width: 100%;
+}
+
+@media (min-width: 1024px) {
+  .overviewCardItem p {
+    overflow-wrap: break-word;
+  }
+  .overviewCards {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+@media (min-width: 1200px) {
+  .overviewCards {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.Fees {
+  background-color: rgba(11, 113, 181, 1);
+}
+.result {
+  background-color: rgba(249, 65, 68, 1);
+}
+.attendance {
+  background-color: rgba(255, 221, 41, 1);
+}
+.Registration {
+  background-color: rgba(255, 46, 121, 1);
+}
+.timetable {
+  background-color: rgba(57, 1, 129, 1);
+}
+.health {
+  background-color: rgba(0, 128, 0, 1);
+}
+
+.Fees .iconContainer {
+  background-color: rgba(128, 173, 203, 1);
+}
+
+.result .iconContainer {
+  background-color: rgba(242, 100, 92, 1);
+}
+
+.attendance .iconContainer {
+  background-color: rgba(255, 232, 112, 1);
+}
+
+.Registration .iconContainer {
+  background-color: rgba(254, 109, 161, 1);
+}
+
+.timetable .iconContainer {
+  background-color: rgba(103, 57, 163, 1);
+}
+
+.health .iconContainer {
+  background-color: rgba(107, 181, 107, 1);
+}

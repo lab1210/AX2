@@ -1,0 +1,36 @@
+{
+  "name": "schoolapp",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.0",
+    "@mui/material": "^6.4.6",
+    "@tailwindcss/postcss": "^4.0.14",
+    "axios": "^1.8.4",
+    "country-state-city": "^3.2.1",
+    "date-fns": "^4.1.0",
+    "framer-motion": "^12.5.0",
+    "html2pdf.js": "^0.10.3",
+    "next": "15.1.7",
+    "react": "^19.0.0",
+    "react-calendar": "^5.1.0",
+    "react-dom": "^19.0.0",
+    "react-icons": "^5.5.0",
+    "react-modal": "^3.16.3",
+    "react-select": "^5.10.0",
+    "recharts": "^2.15.1"
+  },
+  "devDependencies": {
+    "autoprefixer": "^10.4.21",
+    "faker": "^6.6.6",
+    "postcss": "^8.5.3",
+    "tailwindcss": "^4.0.14"
+  }
+}

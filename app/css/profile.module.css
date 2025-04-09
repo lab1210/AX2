@@ -1,0 +1,149 @@
+.Reg_form_Container {
+  background-color: #23303c;
+}
+.Reg_header {
+  background-color: rgba(1, 66, 122, 1);
+  color: rgba(255, 255, 255, 1);
+  display: flex;
+  justify-content: space-between;
+  padding: 20px 30px 20px 30px;
+  font-weight: 700;
+  align-items: center;
+}
+
+.Reg_header svg {
+  cursor: pointer;
+}
+.Profilebox {
+  display: flex;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.Profilecontent {
+  box-shadow: 0px 4px 10px 4px rgba(0, 0, 0, 0.15);
+  border-top-left-radius: 30px;
+  border-top-right-radius: 30px;
+  background-color: #fdfdfd;
+  padding: 10px 80px 60px 80px;
+  min-width: 480px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 30px;
+}
+.orangedash {
+  background-color: #ffa500;
+  width: 15%;
+  height: 20px;
+  border-radius: 8px;
+  height: 4px;
+}
+.Profile_details {
+  display: flex;
+  flex-direction: column;
+}
+
+.Profile_pic {
+  border-radius: 50%;
+  width: 70px;
+  height: 70px;
+  background-color: #0000001a;
+  position: relative;
+}
+.title {
+  color: #01427a;
+  margin-bottom: 20px;
+  font-size: 20px;
+}
+.Profile_pic img {
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.Profile_pic_upload {
+  color: #ffffff;
+  background-color: #01427a;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+  font-size: 12px;
+  padding: 4px 4px 4px 4px;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  bottom: 0;
+  right: 0px;
+}
+
+.ProfileRow1 {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 30px;
+}
+.AddPic button {
+  background-color: rgba(1, 66, 122, 1);
+  opacity: 50%;
+  font-weight: 400;
+  font-size: 18px;
+  color: rgba(255, 255, 255, 1);
+  padding: 6px 40px 6px 40px;
+  border-radius: 10px;
+  cursor: pointer;
+  border: none;
+}
+
+.ProfileInputs {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+.ProfileInputItem {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.ProfileInputItem label {
+  color: rgba(128, 128, 128, 1);
+  font-weight: 700;
+  font-size: 16px;
+}
+.ProfileInputItem input::placeholder {
+  font-weight: 700;
+  font-size: 12px;
+  color: rgba(11, 10, 10, 0.2);
+}
+.ProfileInputItem input {
+  outline: none;
+  border: 1px solid rgba(217, 217, 217, 1);
+  color: rgba(0, 0, 0, 0.2);
+  padding: 10px 16px;
+  border-radius: 5px;
+}
+
+.SaveButton {
+  background-color: rgba(1, 66, 122, 1);
+  opacity: 50%;
+  font-weight: 400;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 1);
+  padding: 6px 40px 6px 40px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+.error {
+  font-size: 12px;
+  color: rgba(242, 100, 92, 1);
+  font-weight: 700;
+}
