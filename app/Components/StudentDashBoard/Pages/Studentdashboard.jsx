@@ -228,18 +228,12 @@ export default function Studentdashboard() {
             Overview
           </h2>
           <div className="relative">
-            <Swiper
-              direction={"horizontal"}
-              slidesPerView={"auto"}
-              spaceBetween={10}
-              modules={[Pagination]}
-              className="mySwiper"
-            >
+            <div className="flex overflow-x-auto space-x-4 no-scrollbar py-2">
               {overview.map((item, idx) => (
-                <SwiperSlide key={idx} style={{ width: "auto" }}>
+                <div key={idx} className="flex-shrink-0 w-auto">
                   <Link
                     href={`${item.Link}?schoolid=${schoolId}&userid=${userId}`}
-                    className={`rounded-xl flex flex-col items-left p-3 gap-2 ${item.bg} text-white`}
+                    className={`rounded-xl flex flex-col items-start p-3 gap-2 ${item.bg} text-white`}
                   >
                     <div
                       className={`w-10 h-10 ${item.iconBg} rounded-xl flex items-center justify-center text-white`}
@@ -255,39 +249,49 @@ export default function Studentdashboard() {
                       </span>
                     </div>
                   </Link>
-                </SwiperSlide>
+                </div>
               ))}
-            </Swiper>
+            </div>
           </div>
         </div>
 
         {/* Events Section */}
         <div className="p-4">
-  <div className="flex items-center justify-between mb-2">
-    <h3 className="text-base font-semibold text-gray-700">Events</h3>
-    <Link href="#" className="text-sm text-blue-600">
-      view all
-    </Link>
-  </div>
-  <div className="bg-white rounded p-3 flex flex-col gap-3"> {/* Changed background color to white for consistency */}
-    {dummyevents.map((event, index) => (
-      <div key={index} className="flex items-center justify-between"> {/* Use justify-between for arrow positioning */}
-        <div className="flex-1 flex flex-col"> {/* Container for title and description */}
-          <h4 className="text-md font-semibold text-[#004080] mb-1"> {/* Added margin-bottom for spacing */}
-            {event.title}
-          </h4>
-          <p className="text-xs text-[#242424]">{event.description}</p>
+          <div className="flex items-center justify-between mb-2">
+            <h3 className="text-base font-semibold text-gray-700">Events</h3>
+            <Link href="#" className="text-sm text-blue-600">
+              view all
+            </Link>
+          </div>
+          <div className="bg-white rounded p-3 flex flex-col gap-3">
+            {" "}
+            {/* Changed background color to white for consistency */}
+            {dummyevents.map((event, index) => (
+              <div key={index} className="flex items-center justify-between">
+                {" "}
+                {/* Use justify-between for arrow positioning */}
+                <div className="flex-1 flex flex-col">
+                  {" "}
+                  {/* Container for title and description */}
+                  <h4 className="text-md font-semibold text-[#004080] mb-1">
+                    {" "}
+                    {/* Added margin-bottom for spacing */}
+                    {event.title}
+                  </h4>
+                  <p className="text-xs text-[#242424]">{event.description}</p>
+                </div>
+                <div className="ml-4 w-8 h-8 rounded-full bg-[#F94144] flex items-center justify-center">
+                  {" "}
+                  {/* Adjusted margin */}
+                  <BsChevronRight
+                    size={16}
+                    className="text-[#000000] font-bold"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="ml-4 w-8 h-8 rounded-full bg-[#F94144] flex items-center justify-center"> {/* Adjusted margin */}
-          <BsChevronRight
-            size={16}
-            className="text-[#000000] font-bold"
-          />
-        </div>
-      </div>
-    ))}
-  </div>
-</div>
 
         {/* Notifications */}
         <div className="p-4">
