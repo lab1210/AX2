@@ -7,11 +7,11 @@ import { useUser } from "./StudentDashBoard/context/UserProvider";
 import { HiMenu } from "react-icons/hi";
 
 const Layout = ({ children }) => {
-  const { user, isLoading, checkUser, setUser } = useUser();
+  // const { user, isLoading, checkUser, setUser } = useUser();
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathName = usePathname();
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
-
+  const isLoading = false; // Replace with actual loading state
   const generateTitle = (path) => {
     const parts = path.split("/");
     const formattedParts = parts.slice(2).map((part) => {
@@ -30,9 +30,9 @@ const Layout = ({ children }) => {
     return formattedParts.join(" / ") || "Dashboard";
   };
 
-  useEffect(() => {
-    if (!checkUser()) return;
-  }, [user, isLoading, checkUser]);
+  // useEffect(() => {
+  //   if (!checkUser()) return;
+  // }, [user, isLoading, checkUser]);
 
   useEffect(() => {
     const title = generateTitle(pathName);
@@ -49,27 +49,28 @@ const Layout = ({ children }) => {
 
   return (
     <div className="w-full h-screen grid md:grid-cols-[70%_30%] xl:grid-cols-[160px_1fr_300px] p-3 pt-[15px]">
-        <Suspense>
-          <LeftSidebar 
-          setUser={setUser}
-          showMobileSidebar={showMobileSidebar} 
+      <Suspense>
+        <LeftSidebar
+          // setUser={setUser}
+          showMobileSidebar={showMobileSidebar}
           setShowMobileSidebar={setShowMobileSidebar}
-           />
-        </Suspense>
+        />
+      </Suspense>
 
       <div className="grid grid-rows-[61px_1fr] h-screen">
         <div className="bg-white sticky top-0 z-10 p-4 flex items-center gap-4">
-          <button 
+          <button
             className="lg:hidden text-2xl ml-2"
             onClick={() => setShowMobileSidebar(true)}
           >
             <HiMenu className="w-6 h-6 text-gray-800" />
           </button>
-          
+
           {typeof headerTitle === "object" ? (
             <h2 className="text-xl font-bold">
               <span className="text-gray-500">{headerTitle.firstPart}</span>
-              {" / "}{headerTitle.restParts}
+              {" / "}
+              {headerTitle.restParts}
             </h2>
           ) : (
             <h2 className="text-xl font-bold">{headerTitle}</h2>
@@ -81,7 +82,7 @@ const Layout = ({ children }) => {
       </div>
 
       <div className="bg-white h-screen md:px-3 xl:pl-6">
-        <RightSidebar user={user} />
+        <RightSidebar />
       </div>
     </div>
   );

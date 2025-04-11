@@ -14,8 +14,7 @@ import { useSearchParams } from "next/navigation";
 const Studentdashboard = () => {
   const { user, isLoading } = useUser();
   const searchParams = useSearchParams();
-  const schoolId = searchParams.get("schoolid");
-  const userId = searchParams.get("userid");
+  const studentId = searchParams.get("studentId");
 
   const overview = [
     {
@@ -118,7 +117,7 @@ const Studentdashboard = () => {
             {overview.map((item, index) => (
               <Link
                 key={index}
-                href={`${item.Link}?schoolid=${schoolId}&userid=${userId}`}
+                href={`${item.Link}?studentId=${studentId}`}
                 className={`relative ${
                   cardBg[item.id]
                 } rounded-md p-6 text-white flex items-center gap-4 hover:opacity-90 transition`}
@@ -131,7 +130,9 @@ const Studentdashboard = () => {
                   {item.icon}
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-md md:text-md lg:text-lg font-bold mb-1 text-white">{item.title}</h4>
+                  <h4 className="text-md md:text-md lg:text-lg font-bold mb-1 text-white">
+                    {item.title}
+                  </h4>
                   <p className="text-sm text-white">{item.description}</p>
                 </div>
               </Link>
