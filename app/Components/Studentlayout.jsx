@@ -1,11 +1,11 @@
 // Layout.jsx
 "use client";
 import React, { Suspense, useEffect, useState } from "react";
-import LeftSidebar from "./StudentDashBoard/LeftSidebar"; // Adjust path if necessary
+import LeftSidebar from "./StudentDashBoard/LeftSidebar"; 
 import { usePathname } from "next/navigation";
-import RightSidebar from "./StudentDashBoard/RightSidebar"; // Adjust path if necessary
-import { useUser } from "./StudentDashBoard/context/UserProvider"; // Adjust path if necessary
-import BottomNavBar from "./StudentDashBoard/BottomNavBar"; // Import the bottom nav component
+import RightSidebar from "./StudentDashBoard/RightSidebar"; 
+import { useUser } from "./StudentDashBoard/context/UserProvider"; 
+import BottomNavBar from "./StudentDashBoard/BottomNavBar"; 
 
 const Layout = ({ children }) => {
   const { user, isLoading, checkUser, setUser } = useUser();

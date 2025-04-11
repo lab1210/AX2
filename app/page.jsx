@@ -40,10 +40,11 @@ export default function Login() {
           router.push(url);
           console.log("Redirecting to:", url);
         } else if (roleName === "Student") {
-          const studentId = response.student?.id;
+          const studentId = response.student?.student_id;
           const url = `/Student/DashBoard/?studentId=${studentId}`;
-          router.push(url);
           console.log("Redirecting to:", url);
+          router.push(url);
+          // console.log("Redirecting to:", url);
         } else if (roleName === "Super Admin") {
           const adminId = response.super_admin?.id;
           const url = `/Super-Admin/DashBoard?adminId=${adminId}`;
