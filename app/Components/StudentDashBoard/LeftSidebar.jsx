@@ -8,21 +8,25 @@ import { RiBookShelfLine } from "react-icons/ri";
 import { MdOutlineCalendarMonth } from "react-icons/md";
 import { LiaHeartbeatSolid } from "react-icons/lia";
 import { FaRegUser } from "react-icons/fa6";
-import { HiMenu } from "react-icons/hi"; 
+import { HiMenu } from "react-icons/hi";
 import { useSearchParams, usePathname } from "next/navigation";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { logout } from "@/app/Service/AuthService";
 
 const LeftSidebar = ({ setUser, showMobileSidebar, setShowMobileSidebar }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const schoolId = searchParams.get("schoolid");
-  const userId = searchParams.get("userid");
+  const studentId = searchParams.get("studentId");
   const pathname = usePathname();
 
-  const handleLogout = () => {
-    router.push("/");
-    setUser(null);
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   const StudentLeft = [
@@ -70,14 +74,14 @@ const LeftSidebar = ({ setUser, showMobileSidebar, setShowMobileSidebar }) => {
 
   return (
     <>
-    <div className="lg:hidden fixed top-4 left-4 z-10">
-    <button
-      onClick={() => setShowMobileSidebar(true)}
-      className="mobile-menu-button"
-    >
-      <HiMenu className="w-6 h-6 text-gray-800" />
-    </button>
-  </div>
+      <div className="lg:hidden fixed top-4 left-4 z-10">
+        <button
+          onClick={() => setShowMobileSidebar(true)}
+          className="mobile-menu-button"
+        >
+          <HiMenu className="w-6 h-6 text-gray-800" />
+        </button>
+      </div>
 
       <div className="hidden lg:flex h-screen bg-white flex-col w-[300px]">
         <div className="flex flex-col mb-3 px-4">
@@ -99,7 +103,7 @@ const LeftSidebar = ({ setUser, showMobileSidebar, setShowMobileSidebar }) => {
                 className="md:p-[11px] p-2.5 hover:text-gray-400 rounded-lg transition-colors"
               >
                 <Link
-                  href={`${item.route}?schoolid=${schoolId}&userid=${userId}`}
+                  href={`${item.route}?studentId=${studentId}`}
                   className=" max-w-5 flex items-center gap-1 text-base font-normal text-left"
                 >
                   <span
@@ -146,7 +150,11 @@ const LeftSidebar = ({ setUser, showMobileSidebar, setShowMobileSidebar }) => {
             </div>
             <div className="flex flex-col items-center mb-3 px-4">
               <div className="max-w-[60px] w-full">
-                <img src="/logo.svg" alt="logo" className="w-full object-cover" />
+                <img
+                  src="/logo.svg"
+                  alt="logo"
+                  className="w-full object-cover"
+                />
               </div>
               <div className="font-bold text-lg text-center">
                 <p>Foursquare</p>
@@ -155,9 +163,12 @@ const LeftSidebar = ({ setUser, showMobileSidebar, setShowMobileSidebar }) => {
             </div>
             <ul className="list-none flex flex-col gap-3">
               {StudentLeft.map((item, index) => (
-                <li key={index} className="p-2 hover:bg-gray-200 rounded transition-colors">
+                <li
+                  key={index}
+                  className="p-2 hover:bg-gray-200 rounded transition-colors"
+                >
                   <Link
-                    href={`${item.route}?schoolid=${schoolId}&userid=${userId}`}
+                    href={`${item.route}?studentId=${studentId}`}
                     onClick={() => setShowMobileSidebar(false)} // close overlay on navigation
                     className="flex items-center gap-2 text-base font-normal"
                   >
@@ -167,7 +178,7 @@ const LeftSidebar = ({ setUser, showMobileSidebar, setShowMobileSidebar }) => {
                 </li>
               ))}
             </ul>
-            {/* Logout Button */}  
+            {/* Logout Button */}
             <div className="mb-1">
               <button
                 onClick={handleLogout}
@@ -177,8 +188,11 @@ const LeftSidebar = ({ setUser, showMobileSidebar, setShowMobileSidebar }) => {
                 Logout
               </button>
             </div>
-          </div> 
-          <div className="flex-1" onClick={() => setShowMobileSidebar(false)}></div>
+          </div>
+          <div
+            className="flex-1"
+            onClick={() => setShowMobileSidebar(false)}
+          ></div>
         </div>
       )}
     </>

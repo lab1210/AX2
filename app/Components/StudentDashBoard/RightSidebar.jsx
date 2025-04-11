@@ -20,7 +20,7 @@ import {
 } from "date-fns";
 import Link from "next/link";
 
-const RightSidebar = ({ user }) => {
+const RightSidebar = () => {
   const dummyevents = [
     {
       date: "2025-02-27",
@@ -91,21 +91,19 @@ const RightSidebar = ({ user }) => {
         </div>
 
         <div className="relative flex items-center gap-2">
-          <div 
-            className="flex items-center gap-2 cursor-pointer" 
+          <div
+            className="flex items-center gap-2 cursor-pointer"
             onClick={toggleDropdown}
           >
             <div className="rounded-full overflow-hidden w-12 h-12 md:w-10 md:h-10 xl:w-12 xl:h-12">
-              {user?.profilePic && (
-                <img
-                  src={user.profilePic}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              )}
+              <img
+                src="/female.png"
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
             </div>
             <div className="hidden xl:flex items-center gap-1">
-              <p className="font-bold text-sm">{user?.username}</p>
+              <p className="font-bold text-sm">Default User</p>
               <IoChevronDownOutline className="w-3 h-3" />
             </div>
           </div>
@@ -113,16 +111,20 @@ const RightSidebar = ({ user }) => {
           {isDropdownOpen && (
             <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-3 z-50">
               <div className="mb-2 text-gray-800 cursor-pointer hover:text-[#F94144] p-2 rounded active:text-[#F94144]">
-                <Link a href="/Student/Profile"> Profile </Link>
+                <Link a href="/Student/Profile">
+                  {" "}
+                  Profile{" "}
+                </Link>
               </div>
               <div className="mb-2 text-gray-800 cursor-pointer hover:text-[#F94144] p-2 rounded active:text-[#F94144]">
-              <Link a href=""> Settings </Link>
+                <Link a href="">
+                  {" "}
+                  Settings{" "}
+                </Link>
               </div>
               <div className="flex items-center gap-2 text-gray-800 cursor-pointer hover:text-[#F94144] p-2 rounded active:text-[#F94144]">
                 <IoLogOutOutline className="w-4 h-4" />
-                <span>
-                Logout
-                </span>
+                <span>Logout</span>
               </div>
             </div>
           )}

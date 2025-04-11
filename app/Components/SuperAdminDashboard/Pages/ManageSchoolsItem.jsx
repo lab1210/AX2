@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import SuperAdminLayout from "../SuperAdminLayout";
 import DashboardHeader from "../DashboardHeader";
 import { RiEqualizerLine } from "react-icons/ri";
@@ -8,14 +8,16 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
 import { getSchools, deleteSchool } from "../../../Service/schoolService"; // Import school service functions
-import { debounce } from "lodash"; // Import debounce for search
 
 const ManageSchoolsItem = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
   const adminId = searchParams.get("adminId");
 
-  // State for schools data and loading
+  // State for all schools data fetched from the API
+  const [allSchools, setAllSchools] = useState([]);
+
+  // State for the displayed schools data after filtering and pagination
   const [schoolsData, setSchoolsData] = useState({
     count: 0,
     results: [],
@@ -40,14 +42,14 @@ const ManageSchoolsItem = () => {
   const [detailModalVisible, setDetailModalVisible] = useState(false);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
-  // Function to fetch schools with pagination and search
-  const fetchSchools = useCallback(async () => {
+  // Function to fetch all schools without search parameters
+  const fetchAllSchools = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getSchools({}, searchTerm, currentPage, pageSize);
+      const response = await getSchools({}, currentPage, 1000); // Fetch a large number or adjust as needed
       if (response?.status === 200) {
-        setSchoolsData(response.data);
+        setAllSchools(response.data.results);
       } else {
         setError(
           `Failed to fetch schools: ${response?.statusText || "Unknown error"}`
@@ -58,12 +60,51 @@ const ManageSchoolsItem = () => {
     } finally {
       setLoading(false);
     }
-  }, [searchTerm, currentPage, pageSize]);
+  }, [currentPage]);
 
-  // Effect to fetch schools on initial load and when page/page size changes
+  // Effect to fetch all schools on initial load and when page changes (for initial data)
   useEffect(() => {
-    fetchSchools();
-  }, [fetchSchools]);
+    fetchAllSchools();
+  }, [fetchAllSchools]);
+
+  // Function to filter schools based on searchTerm
+  const filteredSchools = useMemo(() => {
+    if (!searchTerm) {
+      return allSchools;
+    }
+    const lowerCaseSearchTerm = searchTerm.toLowerCase();
+    return allSchools.filter(
+      (school) =>
+        school.school_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+        school.short_name.toLowerCase().includes(lowerCaseSearchTerm) ||
+        school.school_type.toLowerCase().includes(lowerCaseSearchTerm)
+      // (school.reg_date &&
+      //   school.reg_date.toLowerCase().includes(lowerCaseSearchTerm)) ||
+      // school.status.toLowerCase().includes(lowerCaseSearchTerm)
+    );
+  }, [allSchools, searchTerm]);
+
+  // Calculate pagination values
+  const startIndex = useMemo(
+    () => (currentPage - 1) * pageSize,
+    [currentPage, pageSize]
+  );
+  const endIndex = useMemo(() => startIndex + pageSize, [startIndex, pageSize]);
+
+  // Function to paginate the filtered schools
+  const paginatedSchools = useMemo(() => {
+    return filteredSchools.slice(startIndex, endIndex);
+  }, [filteredSchools, startIndex, endIndex]);
+
+  // Update schoolsData whenever paginatedSchools or filteredSchools changes
+  useEffect(() => {
+    setSchoolsData({
+      count: filteredSchools.length,
+      results: paginatedSchools,
+      next: endIndex < filteredSchools.length ? true : null,
+      previous: startIndex > 0 ? true : null,
+    });
+  }, [filteredSchools, paginatedSchools, startIndex, endIndex]);
 
   // Function to open detail modal
   const openDetailModal = (school) => {
@@ -95,7 +136,7 @@ const ManageSchoolsItem = () => {
         if (response?.status === 200) {
           console.log("School deleted successfully:", response.data);
           closeDeleteModal();
-          fetchSchools(); // Refresh the school list
+          fetchAllSchools(); // Refresh the school list
           // Optionally show a success message to the user
         } else {
           console.error("Error deleting school:", response);
@@ -116,15 +157,6 @@ const ManageSchoolsItem = () => {
     setSearchTerm(event.target.value);
     setCurrentPage(1); // Reset to the first page on search
   };
-
-  // Debounce the search function to avoid excessive API calls
-  const debouncedSearch = useCallback(debounce(fetchSchools, 300), [
-    fetchSchools,
-  ]);
-
-  useEffect(() => {
-    debouncedSearch();
-  }, [searchTerm, debouncedSearch]);
 
   return (
     <SuperAdminLayout>
@@ -292,7 +324,7 @@ const ManageSchoolsItem = () => {
             ) : (
               <table className="min-w-full table-auto">
                 <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
-                  <tr className="border-b-[#ABABAB] border-b">
+                  <tr className="border-b-[#ABABABAB] border-b">
                     <th className="pt-3 pb-3 pl-12 text-left font-bold text-[#333333]">
                       School Name
                     </th>
@@ -317,7 +349,7 @@ const ManageSchoolsItem = () => {
                   {schoolsData.results.map((item) => (
                     <tr
                       key={item.id}
-                      className="border-b-[#ABABAB] border-b font-semibold text-xs cursor-pointer"
+                      className="border-b-[#ABABABAB] border-b font-semibold text-xs cursor-pointer"
                       onClick={() => openDetailModal(item)}
                     >
                       <td className="pt-2 pb-2 pl-12 text-[#333333]">

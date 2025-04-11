@@ -464,48 +464,45 @@ const EditSchoolItem = () => {
             </div>
           </div>
           <div className="flex flex-col gap-2 h-screen ">
-            <div className="bg-[#ffffff] rounded-lg drop-shadow-lg p-4 flex flex-col">
+            <div className="bg-[#ffffff] rounded-lg drop-shadow-lg p-4  flex flex-col">
               <p className="font-bold sm:text-lg xl:text-xl xl:mb-2 sm:mb-4 ">
                 LOGO
               </p>
               <div className="flex flex-col items-center justify-center mt-2">
-                <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] border-[#333333] flex items-center relative justify-center w-48 h-35">
-                  <div className="w-12 h-12">
+                <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] border-[#333333] flex items-center relative  justify-center w-48 h-35">
+                  <div className="w-full h-full flex items-center justify-center">
                     <img
-                      className="w-full h-full"
+                      className="max-w-full max-h-full object-contain"
                       src={logoPreview}
                       alt="school-logo-preview"
                     />
-                    <input
-                      type="file"
-                      id="logo-upload"
-                      className="hidden"
-                      onChange={handleLogoUpload}
-                      accept="image/*"
-                    />
                   </div>
+                  <input
+                    type="file"
+                    id="logo-upload"
+                    className="hidden"
+                    onChange={handleLogoUpload}
+                    accept="image/*"
+                  />
                 </div>
-                <div>
-                  <button
-                    onClick={() =>
-                      document.getElementById("logo-upload").click()
-                    }
-                    className="text-[#07508F]  border-[1.5px] rounded-lg cursor-pointer  border-dashed  w-48 p-2 flex items-center justify-between"
-                  >
-                    Upload School LOGO
-                    <span>
-                      <LuUpload size={20} />
-                    </span>
-                  </button>
-                </div>
+                <button
+                  onClick={() => document.getElementById("logo-upload").click()}
+                  className="text-[#07508F] border-[1.5px] rounded-lg cursor-pointer  border-dashed  w-48 p-2 flex items-center justify-between"
+                >
+                  Upload School LOGO
+                  <span>
+                    <LuUpload size={20} />
+                  </span>
+                </button>
               </div>
             </div>
+
             <div className="bg-[#ffffff] xl:gap-0 lg:gap-2 h-auto rounded-lg pt-5 pl-5 pr-5 xl:pb-2 pb-8 drop-shadow-lg flex flex-col">
               <p className="font-bold sm:text-lg xl:text-xl mb-4 ">
                 SUBSCRIPTION PLAN
               </p>
               <div>
-                <div className="flex justify-between items-center mb-2">
+                <div className="flex justify-between items-center ">
                   <p className="font-semibold text-xs text-[#9C9B9B]">
                     Amount Per Student:
                   </p>
@@ -513,7 +510,7 @@ const EditSchoolItem = () => {
                     <input
                       type="number"
                       id="amountPerStudent"
-                      className="w-full text-right text-sm text-[#333] rounded-md focus:outline-none border-[1px]  border-[#d4d4d4]"
+                      className="w-full text-right text-sm text-[#333] rounded-md focus:outline-none border-[1px]  border-[#d4d4d4]"
                       value={amountPerStudent}
                       onChange={(e) => setAmountPerStudent(e.target.value)}
                       required
@@ -521,12 +518,12 @@ const EditSchoolItem = () => {
                   </div>
                 </div>
 
-                <div className="flex justify-between mb-2">
+                <div className="flex justify-between">
                   <p className="font-semibold text-xs ">No of Students:</p>
                   <p className="font-semibold text-xs ">{numberOfStudents}</p>
                 </div>
 
-                <div className="flex justify-between mb-2">
+                <div className="flex justify-between">
                   <p className="font-semibold text-xs ">
                     Amount Expected to be paid:
                   </p>

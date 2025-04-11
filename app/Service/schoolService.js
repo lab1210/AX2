@@ -23,12 +23,7 @@ export const createSchool = async (schoolData) => {
   }
 };
 
-export const getSchools = async (
-  filters = {},
-  search = "",
-  page = 1,
-  pageSize = 10
-) => {
+export const getSchools = async (filters = {}, page = 1, pageSize = 10) => {
   try {
     const headers = createAuthHeaders();
     if (!headers.Authorization) {
@@ -42,14 +37,13 @@ export const getSchools = async (
 
     // Add filters as query parameters
     for (const key in filters) {
-      if (filters[key]) {
+      if (
+        filters[key] !== undefined &&
+        filters[key] !== null &&
+        filters[key] !== ""
+      ) {
         url += `&${key}=${filters[key]}`;
       }
-    }
-
-    // Add search query parameter
-    if (search) {
-      url += `&search=${search}`;
     }
 
     const response = await axios.get(url, { headers });
@@ -59,7 +53,6 @@ export const getSchools = async (
     throw error;
   }
 };
-
 export const getSchoolById = async (schoolId) => {
   try {
     const headers = createAuthHeaders();
