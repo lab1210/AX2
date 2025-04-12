@@ -9,6 +9,22 @@ const ReceiptItem = () => {
   const { user, isLoading } = useUser();
   const [downloadPdf, setDownloadPdf] = useState(null);
 
+  const receipts = [
+    {
+      purpose: "Admission Acceptance Fee",
+      TransactionNumber: "TD01",
+      AmountBilled: 52000,
+      AmountPaid: 52000,
+      // PaymentDate: "07/09/23", // Removed from receipts
+    },
+    {
+      purpose: "Extracurricular Sports Mentorship",
+      TransactionNumber: "TD04",
+      AmountBilled: 20000,
+      AmountPaid: 20000,
+      //PaymentDate: "07/09/23", // Removed from receipts
+    },
+  ];
   useEffect(() => {
     import("../../Print/DownloadasPdf").then((module) => {
       setDownloadPdf(() => module.default);
@@ -25,10 +41,7 @@ const ReceiptItem = () => {
 
   const handleDownloadPDF = () => {
     if (downloadPdf) {
-      downloadPdf(
-        ".ReceiptPageContent", 
-        `${user.username}-Receipt.pdf`
-      );
+      downloadPdf(".ReceiptPageContent", `${user.username}-Receipt.pdf`);
     } else {
       console.error("downloadPdf not loaded yet.");
     }
@@ -116,7 +129,7 @@ const ReceiptItem = () => {
                   </tr>
                 </thead>
                 <tbody className="text-[14px]">
-                  {user.receipts.map((item, index) => {
+                  {receipts.map((item, index) => {
                     const currentDate = new Date();
                     return (
                       <tr key={index}>
@@ -158,7 +171,7 @@ const ReceiptItem = () => {
               <div className="flex items-center font-bold gap-[10px]">
                 <p>Total Payment</p>
                 <div className="text-[#4084b1] bg-[#cfcfcf66] rounded-[10px] p-[5px] text-[18px]">
-                  {user.receipts
+                  {receipts
                     .reduce((sum, fee) => sum + fee.AmountPaid, 0)
                     .toLocaleString("en-NG", {
                       useGrouping: true,

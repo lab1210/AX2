@@ -35,6 +35,43 @@ const MakePaymentItem = () => {
       </div>
     );
   }
+  const fees = [
+    {
+      purpose: "Admission Acceptance Fee",
+      TransactionNumber: "TD01",
+      AmountBilled: 52000,
+      AmountPaid: 52000,
+      PaymentDate: "07/09/23",
+    },
+    {
+      purpose: "School fees for 1st Term",
+      TransactionNumber: "TD02",
+      AmountBilled: 250000,
+      AmountPaid: 0,
+      PaymentDate: "Pending",
+    },
+    {
+      purpose: "PTA dues",
+      TransactionNumber: "TD03",
+      AmountBilled: 2000,
+      AmountPaid: 0,
+      PaymentDate: "Pending",
+    },
+    {
+      purpose: "Extracurricular Sports Mentorship",
+      TransactionNumber: "TD04",
+      AmountBilled: 20000,
+      AmountPaid: 20000,
+      PaymentDate: "07/09/23",
+    },
+    {
+      purpose: "Payment Charge",
+      TransactionNumber: "PC01",
+      AmountBilled: 650,
+      AmountPaid: 0,
+      PaymentDate: "Pending",
+    },
+  ];
 
   const formatCardNumber = (value) => {
     const digits = value.replace(/\D/g, "");
@@ -61,7 +98,7 @@ const MakePaymentItem = () => {
     router.push(`/Student/Fees-Payment/Receipt`);
   };
 
-  const filteredFees = user.fees.filter(
+  const filteredFees = fees.filter(
     (item) => item.AmountBilled !== item.AmountPaid
   );
   const adjustedFees = filteredFees.map((item) => {
@@ -96,7 +133,11 @@ const MakePaymentItem = () => {
               <span
                 className={`
                   w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                  ${card || bankPin ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]" : "border-2 border-[#c9c9c9] text-[#c9c9c9]"}
+                  ${
+                    card || bankPin
+                      ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                      : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                  }
                 `}
               >
                 &#10004;
@@ -118,7 +159,11 @@ const MakePaymentItem = () => {
               <span
                 className={`
                   w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                  ${details ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]" : "border-2 border-[#c9c9c9] text-[#c9c9c9]"}
+                  ${
+                    details
+                      ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                      : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                  }
                 `}
               >
                 &#10004;
@@ -140,7 +185,11 @@ const MakePaymentItem = () => {
               <span
                 className={`
                   w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                  ${payment ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]" : "border-2 border-[#c9c9c9] text-[#c9c9c9]"}
+                  ${
+                    payment
+                      ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                      : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                  }
                 `}
               >
                 &#10004;
@@ -161,7 +210,11 @@ const MakePaymentItem = () => {
             <span
               className={`
                 w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                ${confirm ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]" : "border-2 border-[#c9c9c9] text-[#c9c9c9]"}
+                ${
+                  confirm
+                    ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                    : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                }
               `}
             >
               &#10004;
@@ -205,7 +258,11 @@ const MakePaymentItem = () => {
                     <span
                       className={`
                         w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                        ${card ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]" : "border-2 border-[#c9c9c9] text-[#c9c9c9]"}
+                        ${
+                          card
+                            ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                            : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                        }
                       `}
                       onClick={() => {
                         bankPin
@@ -218,7 +275,11 @@ const MakePaymentItem = () => {
                     <h3>Credit/Debit Card</h3>
                   </div>
                   <div className="max-w-[60px]">
-                    <img src="/CardLogo.png" alt="" className="w-full object-cover" />
+                    <img
+                      src="/CardLogo.png"
+                      alt=""
+                      className="w-full object-cover"
+                    />
                   </div>
                 </div>
                 {card && (
@@ -228,13 +289,19 @@ const MakePaymentItem = () => {
                       <div
                         className={`
                           flex flex-col text-[12px]
-                          ${cardNumber.length > 0 && cardNumber.length < 25 ? "text-[#dd1b10]" : "text-gray-700"}
+                          ${
+                            cardNumber.length > 0 && cardNumber.length < 25
+                              ? "text-[#dd1b10]"
+                              : "text-gray-700"
+                          }
                         `}
                       >
                         <label className="font-bold" htmlFor="cardNumber">
                           Card number
                         </label>
-                        <p className="text-[#5e5e5e]">Enter the 16-digit card number on the card</p>
+                        <p className="text-[#5e5e5e]">
+                          Enter the 16-digit card number on the card
+                        </p>
                       </div>
                       <div className="relative">
                         <span className="absolute left-[10px] top-1/2 -translate-y-1/2">
@@ -280,7 +347,9 @@ const MakePaymentItem = () => {
                         <label className="font-bold" htmlFor="cardOwner">
                           Card Owner
                         </label>
-                        <p className="text-[#5e5e5e]">Enter the name on the card</p>
+                        <p className="text-[#5e5e5e]">
+                          Enter the name on the card
+                        </p>
                       </div>
                       <div className="relative">
                         <input
@@ -303,14 +372,16 @@ const MakePaymentItem = () => {
                         <label className="font-bold" htmlFor="cardExpiryMonth">
                           Expiry Date
                         </label>
-                        <p className="text-[#5e5e5e]">Enter the expiration date of the card</p>
+                        <p className="text-[#5e5e5e]">
+                          Enter the expiration date of the card
+                        </p>
                       </div>
                       <div className="flex min-w-[200px]">
                         <div className="flex items-center gap-[5px] mr-[10px]">
                           <input
                             type="text"
                             name="cardExpiryMonth"
-                            onClick={(e) => e.stopPropagation()} 
+                            onClick={(e) => e.stopPropagation()}
                             onChange={(e) => {
                               setCardExpiryMonth(e.target.value);
                               checkFields();
@@ -367,7 +438,11 @@ const MakePaymentItem = () => {
                       />
                       <label
                         htmlFor="remember"
-                        className={`${remember ? "text-[#1ed760] font-bold text-[14px]" : "text-[14px] font-bold"}`}
+                        className={`${
+                          remember
+                            ? "text-[#1ed760] font-bold text-[14px]"
+                            : "text-[14px] font-bold"
+                        }`}
                       >
                         Remember this card
                       </label>
@@ -389,7 +464,11 @@ const MakePaymentItem = () => {
                     <span
                       className={`
                         w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                        ${bankPin ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]" : "border-2 border-[#c9c9c9] text-[#c9c9c9]"}
+                        ${
+                          bankPin
+                            ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                            : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                        }
                       `}
                       onClick={() => {
                         card
@@ -402,7 +481,11 @@ const MakePaymentItem = () => {
                     <h3>Bank Pin</h3>
                   </div>
                   <div className="max-w-[60px]">
-                    <img src="/CardLogo.png" alt="" className="w-full object-cover" />
+                    <img
+                      src="/CardLogo.png"
+                      alt=""
+                      className="w-full object-cover"
+                    />
                   </div>
                 </div>
                 {bankPin && (
@@ -412,13 +495,19 @@ const MakePaymentItem = () => {
                       <div
                         className={`
                           flex flex-col text-[12px]
-                          ${cardNumber.length > 0 && cardNumber.length < 25 ? "text-[#dd1b10]" : "text-gray-700"}
+                          ${
+                            cardNumber.length > 0 && cardNumber.length < 25
+                              ? "text-[#dd1b10]"
+                              : "text-gray-700"
+                          }
                         `}
                       >
                         <label className="font-bold" htmlFor="cardNumber">
                           Card number
                         </label>
-                        <p className="text-[#5e5e5e]">Enter the 16-digit card number on the card</p>
+                        <p className="text-[#5e5e5e]">
+                          Enter the 16-digit card number on the card
+                        </p>
                       </div>
                       <div className="relative">
                         <span className="absolute left-[10px] top-1/2 -translate-y-1/2">
@@ -463,7 +552,9 @@ const MakePaymentItem = () => {
                         <label className="font-bold" htmlFor="cardOwner">
                           Card Owner
                         </label>
-                        <p className="text-[#5e5e5e]">Enter the name on the card</p>
+                        <p className="text-[#5e5e5e]">
+                          Enter the name on the card
+                        </p>
                       </div>
                       <div className="relative">
                         <input
@@ -485,7 +576,9 @@ const MakePaymentItem = () => {
                         <label className="font-bold" htmlFor="cardExpiryMonth">
                           Expiry Date
                         </label>
-                        <p className="text-[#5e5e5e]">Enter the expiration date of the card</p>
+                        <p className="text-[#5e5e5e]">
+                          Enter the expiration date of the card
+                        </p>
                       </div>
                       <div className="flex min-w-[200px]">
                         <div className="flex items-center gap-[5px] mr-[10px]">
@@ -548,7 +641,11 @@ const MakePaymentItem = () => {
                       />
                       <label
                         htmlFor="remember"
-                        className={`${remember ? "text-[#1ed760] font-bold text-[14px]" : "text-[14px] font-bold"}`}
+                        className={`${
+                          remember
+                            ? "text-[#1ed760] font-bold text-[14px]"
+                            : "text-[14px] font-bold"
+                        }`}
                       >
                         Remember this card
                       </label>
