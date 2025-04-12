@@ -20,7 +20,7 @@ import {
 } from "date-fns";
 import Link from "next/link";
 
-const RightSidebar = () => {
+const RightSidebar = ({ user }) => {
   const dummyevents = [
     {
       date: "2025-02-27",
@@ -96,14 +96,16 @@ const RightSidebar = () => {
             onClick={toggleDropdown}
           >
             <div className="rounded-full overflow-hidden w-12 h-12 md:w-10 md:h-10 xl:w-12 xl:h-12">
-              <img
-                src="/female.png"
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
+              {user?.profilePic && (
+                <img
+                  src={user.profilePic}
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
+              )}
             </div>
             <div className="hidden xl:flex items-center gap-1">
-              <p className="font-bold text-sm">Default User</p>
+              <p className="font-bold text-sm">{user?.username}</p>
               <IoChevronDownOutline className="w-3 h-3" />
             </div>
           </div>

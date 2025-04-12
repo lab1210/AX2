@@ -12,6 +12,7 @@ const Layout = ({ children }) => {
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathName = usePathname();
 
+
   const generateTitle = (path) => {
     const parts = path.split("/");
     const formattedParts = parts.slice(2).map((part) => {
@@ -76,6 +77,7 @@ const Layout = ({ children }) => {
           <RightSidebar user={user} />
         </div>
       </div>
+
        <BottomNavBar />
     </>
   );
