@@ -1,17 +1,16 @@
 // Layout.jsx
 "use client";
 import React, { Suspense, useEffect, useState } from "react";
-import LeftSidebar from "./StudentDashBoard/LeftSidebar"; 
+import LeftSidebar from "./StudentDashBoard/LeftSidebar";
 import { usePathname } from "next/navigation";
-import RightSidebar from "./StudentDashBoard/RightSidebar"; 
-import { useUser } from "./StudentDashBoard/context/UserProvider"; 
-import BottomNavBar from "./StudentDashBoard/BottomNavBar"; 
+import RightSidebar from "./StudentDashBoard/RightSidebar";
+import { useUser } from "./StudentDashBoard/context/UserProvider";
+import BottomNavBar from "./StudentDashBoard/BottomNavbar";
 
 const Layout = ({ children }) => {
   const { user, isLoading, checkUser, setUser } = useUser();
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathName = usePathname();
-
 
   const generateTitle = (path) => {
     const parts = path.split("/");
@@ -50,11 +49,10 @@ const Layout = ({ children }) => {
   return (
     <>
       <div className="w-full h-screen grid grid-cols-1 lg:grid-cols-[15%_60%_25%] xl:grid-cols-[10%_70%_20%] overflow-hidden bg-gray-100">
-
         <div className="hidden lg:block">
-            <Suspense>
-                <LeftSidebar setUser={setUser} />
-            </Suspense>
+          <Suspense>
+            <LeftSidebar setUser={setUser} />
+          </Suspense>
         </div>
 
         <div className="grid grid-rows-[auto_1fr] overflow-hidden h-full">
@@ -78,7 +76,7 @@ const Layout = ({ children }) => {
         </div>
       </div>
 
-       <BottomNavBar />
+      <BottomNavBar />
     </>
   );
 };

@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Layout from "../../Studentlayout";
+import Layout from "../../../Components/Studentlayout";
 import { useUser } from "../context/UserProvider";
 import { FaArrowRight } from "react-icons/fa";
 import dummysession from "../../../Components/session";
@@ -43,6 +43,43 @@ const FeesPaymentItem = () => {
       console.error("downloadPdf not loaded yet.");
     }
   };
+  const fees = [
+    {
+      purpose: "Admission Acceptance Fee",
+      TransactionNumber: "TD01",
+      AmountBilled: 52000,
+      AmountPaid: 52000,
+      PaymentDate: "07/09/23",
+    },
+    {
+      purpose: "School fees for 1st Term",
+      TransactionNumber: "TD02",
+      AmountBilled: 250000,
+      AmountPaid: 0,
+      PaymentDate: "Pending",
+    },
+    {
+      purpose: "PTA dues",
+      TransactionNumber: "TD03",
+      AmountBilled: 2000,
+      AmountPaid: 0,
+      PaymentDate: "Pending",
+    },
+    {
+      purpose: "Extracurricular Sports Mentorship",
+      TransactionNumber: "TD04",
+      AmountBilled: 20000,
+      AmountPaid: 20000,
+      PaymentDate: "07/09/23",
+    },
+    {
+      purpose: "Payment Charge",
+      TransactionNumber: "PC01",
+      AmountBilled: 650,
+      AmountPaid: 0,
+      PaymentDate: "Pending",
+    },
+  ];
 
   const formatCurrency = (amount) => {
     return amount.toLocaleString("en-US", {
@@ -51,15 +88,12 @@ const FeesPaymentItem = () => {
     });
   };
 
-  const totalAmountBilled = user.fees.reduce(
+  const totalAmountBilled = fees.reduce(
     (sum, fee) => sum + fee.AmountBilled,
     0
   );
 
-  const totalAmountPaid = user.fees.reduce(
-    (sum, fee) => sum + fee.AmountPaid,
-    0
-  );
+  const totalAmountPaid = fees.reduce((sum, fee) => sum + fee.AmountPaid, 0);
 
   const totalAmountPending = totalAmountBilled - totalAmountPaid;
 
@@ -194,7 +228,7 @@ const FeesPaymentItem = () => {
               </thead>
 
               <tbody>
-                {user.fees.map((item, index) => (
+                {fees.map((item, index) => (
                   <tr key={index} className="border-b border-gray-200">
                     <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
                       {index + 1}

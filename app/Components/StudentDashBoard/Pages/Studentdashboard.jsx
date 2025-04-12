@@ -10,10 +10,6 @@ import { BiPieChart } from "react-icons/bi";
 import { LiaHeartbeatSolid } from "react-icons/lia";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Pagination } from "swiper/modules";
-import "swiper/css";
-import "swiper/css/pagination";
 import {
   BsChevronRight,
   BsCalendarEvent,
@@ -128,7 +124,7 @@ export default function Studentdashboard() {
     );
   }
 
-  const name = user?.username?.split(" ")[0] || "User";
+  const name = user?.username || "User";
 
   return (
     <Layout>
