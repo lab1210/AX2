@@ -133,7 +133,7 @@ const RightSidebar = ({ user }) => {
         </div>
       </div>
 
-      <div className="space-y-3">
+      <div className="space-y-2">
         {/* Events Section */}
         <div className="bg-[#004080] text-white rounded-xl p-2 shadow-lg">
           <div className="space-y-1.5">

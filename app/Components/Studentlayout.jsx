@@ -1,16 +1,17 @@
+// Layout.jsx
 "use client";
 import React, { Suspense, useEffect, useState } from "react";
-import LeftSidebar from "./StudentDashBoard/LeftSidebar";
+import LeftSidebar from "./StudentDashBoard/LeftSidebar"; 
 import { usePathname } from "next/navigation";
-import RightSidebar from "./StudentDashBoard/RightSidebar";
-import { useUser } from "./StudentDashBoard/context/UserProvider";
-import { HiMenu } from "react-icons/hi";
+import RightSidebar from "./StudentDashBoard/RightSidebar"; 
+import { useUser } from "./StudentDashBoard/context/UserProvider"; 
+import BottomNavBar from "./StudentDashBoard/BottomNavBar"; 
 
 const Layout = ({ children }) => {
   const { user, isLoading, checkUser, setUser } = useUser();
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathName = usePathname();
-  const [showMobileSidebar, setShowMobileSidebar] = useState(false);
+
 
   const generateTitle = (path) => {
     const parts = path.split("/");
@@ -26,7 +27,6 @@ const Layout = ({ children }) => {
         restParts: formattedParts.slice(1).join(" / "),
       };
     }
-
     return formattedParts.join(" / ") || "Dashboard";
   };
 
@@ -48,43 +48,38 @@ const Layout = ({ children }) => {
   }
 
   return (
-    <div className="w-full h-screen grid md:grid-cols-[70%_30%] xl:grid-cols-[160px_1fr_300px] p-3 pt-[15px]">
-      <Suspense>
-        <LeftSidebar
-          setUser={setUser}
-          showMobileSidebar={showMobileSidebar}
-          setShowMobileSidebar={setShowMobileSidebar}
-        />
-      </Suspense>
+    <>
+      <div className="w-full h-screen grid grid-cols-1 lg:grid-cols-[15%_60%_25%] xl:grid-cols-[10%_70%_20%] overflow-hidden bg-gray-100">
 
-      <div className="grid grid-rows-[61px_1fr] h-screen">
-        <div className="bg-white sticky top-0 z-10 p-4 flex items-center gap-4">
-          <button
-            className="lg:hidden text-2xl ml-2"
-            onClick={() => setShowMobileSidebar(true)}
-          >
-            <HiMenu className="w-6 h-6 text-gray-800" />
-          </button>
-
-          {typeof headerTitle === "object" ? (
-            <h2 className="text-xl font-bold">
-              <span className="text-gray-500">{headerTitle.firstPart}</span>
-              {" / "}
-              {headerTitle.restParts}
-            </h2>
-          ) : (
-            <h2 className="text-xl font-bold">{headerTitle}</h2>
-          )}
+        <div className="hidden lg:block">
+            <Suspense>
+                <LeftSidebar setUser={setUser} />
+            </Suspense>
         </div>
-        <div className="rounded-lg overflow-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-          {children}
+
+        <div className="grid grid-rows-[auto_1fr] overflow-hidden h-full">
+          <div className="bg-white sticky top-0 z-10 p-4 flex items-center gap-4 lg:rounded-t-lg">
+            {typeof headerTitle === "object" ? (
+              <h2 className="text-xl font-bold">
+                <span className="text-gray-500">{headerTitle.firstPart}</span>
+                {" / "}
+                {headerTitle.restParts}
+              </h2>
+            ) : (
+              <h2 className="text-xl font-bold">{headerTitle}</h2>
+            )}
+          </div>
+          <div className="bg-white p-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-16 lg:pb-4 lg:rounded-b-lg">
+            {children}
+          </div>
+        </div>
+        <div className="hidden lg:block bg-white h-full rounded-lg px-6 xl:pl-6 overflow-hidden">
+          <RightSidebar user={user} />
         </div>
       </div>
 
-      <div className="bg-white h-screen md:px-3 xl:pl-6">
-        <RightSidebar user={user} />
-      </div>
-    </div>
+       <BottomNavBar />
+    </>
   );
 };
 
