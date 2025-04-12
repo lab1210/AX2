@@ -7,11 +7,11 @@ import { useUser } from "./StudentDashBoard/context/UserProvider";
 import { HiMenu } from "react-icons/hi";
 
 const Layout = ({ children }) => {
-  // const { user, isLoading, checkUser, setUser } = useUser();
+  const { user, isLoading, checkUser, setUser } = useUser();
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathName = usePathname();
   const [showMobileSidebar, setShowMobileSidebar] = useState(false);
-  const isLoading = false; // Replace with actual loading state
+
   const generateTitle = (path) => {
     const parts = path.split("/");
     const formattedParts = parts.slice(2).map((part) => {
@@ -30,9 +30,9 @@ const Layout = ({ children }) => {
     return formattedParts.join(" / ") || "Dashboard";
   };
 
-  // useEffect(() => {
-  //   if (!checkUser()) return;
-  // }, [user, isLoading, checkUser]);
+  useEffect(() => {
+    if (!checkUser()) return;
+  }, [user, isLoading, checkUser]);
 
   useEffect(() => {
     const title = generateTitle(pathName);
@@ -51,7 +51,7 @@ const Layout = ({ children }) => {
     <div className="w-full h-screen grid md:grid-cols-[70%_30%] xl:grid-cols-[160px_1fr_300px] p-3 pt-[15px]">
       <Suspense>
         <LeftSidebar
-          // setUser={setUser}
+          setUser={setUser}
           showMobileSidebar={showMobileSidebar}
           setShowMobileSidebar={setShowMobileSidebar}
         />
@@ -82,7 +82,7 @@ const Layout = ({ children }) => {
       </div>
 
       <div className="bg-white h-screen md:px-3 xl:pl-6">
-        <RightSidebar />
+        <RightSidebar user={user} />
       </div>
     </div>
   );
