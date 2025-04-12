@@ -24,17 +24,17 @@ const dummyevents = [
     description:
       "The 2nd term Inter-House sports has been rescheduled for  Thur 15th - Fri 16th October 2023",
   },
-  {
-    title: "Boarders Meeting",
-    description:
-      " All JSS1-SS3 boarding school students will be having a meeting by 3pm on Friday 29th October, 2023",
-  },
+  // {
+  //   title: "Boarders Meeting",
+  //   description:
+  //     " All JSS1-SS3 boarding school students will be having a meeting by 3pm on Friday 29th October, 2023",
+  // },
 
-  {
-    title: "Spelling Bee",
-    description:
-      "The international spelling bee competition will hold on the 26th and 27th of October, 2023",
-  },
+  // {
+  //   title: "Spelling Bee",
+  //   description:
+  //     "The international spelling bee competition will hold on the 26th and 27th of October, 2023",
+  // },
 ];
 
 const dummyNotifications = [
@@ -44,12 +44,12 @@ const dummyNotifications = [
     title: "Upcoming Fees Payment for the 2023/2024 Session",
     description: "Updates on school fees for all junior and senior students",
   },
-  {
-    day: "Mon",
-    date: "25",
-    title: "Mid-term Tests",
-    description: "Mid term tests will start on Monday 25th October, 2023",
-  },
+  // {
+  //   day: "Mon",
+  //   date: "25",
+  //   title: "Mid-term Tests",
+  //   description: "Mid term tests will start on Monday 25th October, 2023",
+  // },
 ];
 
 export default function Studentdashboard() {
@@ -61,17 +61,8 @@ export default function Studentdashboard() {
   // Same overview data
   const overview = [
     {
-      id: "result",
-      icon: <LuNotepadText size={24} />,
-      title: "Result",
-      description: "View continuous assessment",
-      Link: "/Student/Result",
-      bg: "bg-[rgba(249,65,68,1)]",
-      iconBg: "bg-[rgba(242,100,92,1)]",
-    },
-    {
       id: "Fees",
-      icon: <IoWalletOutline size={24} />,
+      icon: <IoWalletOutline />,
       title: "School Fees Payment",
       description: "Pay fees seamlessly",
       Link: "/Student/Fees-Payment",
@@ -79,8 +70,17 @@ export default function Studentdashboard() {
       iconBg: "bg-[rgba(128,173,203,1)]",
     },
     {
+      id: "result",
+      icon: <LuNotepadText />,
+      title: "Result",
+      description: "View continuous assessment",
+      Link: "/Student/Result",
+      bg: "bg-[rgba(409,65,68,1)]",
+      iconBg: "bg-[rgba(402,100,92,1)]",
+    },
+    {
       id: "attendance",
-      icon: <BiPieChart size={24} />,
+      icon: <BiPieChart />,
       title: "Attendance",
       description: "View class & event attendance",
       Link: "/Student/Attendance",
@@ -89,7 +89,7 @@ export default function Studentdashboard() {
     },
     {
       id: "Registration",
-      icon: <RiBookShelfLine size={24} />,
+      icon: <RiBookShelfLine />,
       title: "Subject Registration",
       description: "Register subjects for the session",
       Link: "/Student/Subject-Registration/Register",
@@ -98,7 +98,7 @@ export default function Studentdashboard() {
     },
     {
       id: "timetable",
-      icon: <MdOutlineCalendarMonth size={24} />,
+      icon: <MdOutlineCalendarMonth />,
       title: "Timetable",
       description: "Be on track with every class",
       Link: "/Student/Timetable",
@@ -107,7 +107,7 @@ export default function Studentdashboard() {
     },
     {
       id: "health",
-      icon: <LiaHeartbeatSolid size={24} />,
+      icon: <LiaHeartbeatSolid />,
       title: "Health Record",
       description: "Document your medical history",
       Link: "/Student/Health-Record/Record",
@@ -131,45 +131,43 @@ export default function Studentdashboard() {
       {/*========== Desktop Version (unchanged) ==========*/}
       <div className="hidden lg:block">
         {/* Your existing desktop code goes here */}
-        <div className="min-h-screen bg-[#e9e9e9] p-4 md:p-6 flex flex-col items-center">
-          <div className="w-full max-w-5xl bg-[#004080] rounded-md shadow p-6 md:p-8 flex flex-col md:flex-row justify-between items-center text-white mb-8">
-            <div className="mb-4 md:mb-0">
-              <h2 className="text-2xl md:text-3xl font-bold mb-2">
-                Hi, {name}
-              </h2>
-              <p className="text-base">
+        <div className="h-screen rounded-lg bg-[#e9e9e9] p-10 pl-3 pr-3 flex flex-col gap-5 items-center">
+          <div className="w-full bg-[#004080] rounded-lg shadow  flex flex-row justify-between items-center text-white ">
+            <div className="p-4">
+              <h2 className="text-4xl font-bold mb-3">Hi, {name}</h2>
+              <p className="text-sm">
                 Welcome to the official Foursquare student portal.
               </p>
             </div>
-            <div className="max-w-[180px] w-full">
+            <div className="max-w-[240px] h-full object-contain ">
               <img
                 src="/female_teacher.svg"
                 alt="Teacher illustration"
-                className="object-contain w-full"
+                className=" w-full h-full"
               />
             </div>
           </div>
 
           {/* Overview Section */}
-          <div className="w-full max-w-5xl bg-white rounded-md shadow p-6 md:p-4 font-bold">
+          <div className="w-full bg-white rounded-lg shadow p-6 pl-3 pr-3 font-bold">
             <h2 className="text-2xl mb-4 text-gray-800">Overview</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
               {overview.map((item, index) => (
                 <Link
                   key={index}
                   href={`${item.Link}?schoolid=${schoolId}&userid=${userId}`}
-                  className={`relative ${item.bg} rounded-md p-9 text-white flex items-center gap-4 hover:opacity-90 transition`}
+                  className={`relative ${item.bg} rounded-lg p-7 pl-3 pr-3 text-white grid xl:grid-cols-[70px_auto] lg:grid-cols-[80px_auto] items-center hover:opacity-90 transition`}
                 >
                   <div
-                    className={`w-12 h-12 md:w-15 md:h-15 ${item.iconBg} rounded-md flex items-center justify-center text-white`}
+                    className={`xl:w-14 lg:w-16 xl:h-10 lg:h-12 pr-2 ${item.iconBg} rounded-lg flex items-center justify-center text-7xl text-white font-extrabold`}
                   >
                     {item.icon}
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-md md:text-md lg:text-lg font-bold mb-1 text-white">
+                    <h4 className="text-md md:text-md xl:text-sm lg:text-base font-bold mb-1 text-white">
                       {item.title}
                     </h4>
-                    <p className="text-sm text-white">{item.description}</p>
+                    <p className="text-xs text-white">{item.description}</p>
                   </div>
                 </Link>
               ))}

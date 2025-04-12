@@ -1,5 +1,5 @@
 "use client";
-import React from "react"; 
+import React from "react";
 import { TbDashboard, TbLogout } from "react-icons/tb";
 import { IoWalletOutline } from "react-icons/io5";
 import { LuNotepadText } from "react-icons/lu";
@@ -68,61 +68,61 @@ const LeftSidebar = ({ setUser }) => {
   ];
 
   return (
-    <>
-      <div className="h-screen bg-white flex flex-col">
-        <div className="flex flex-col mb-3 px-4 pt-4"> 
-          <div className="max-w-[60px] w-full">
-            <img src="/logo.svg" alt="logo" className="w-full object-cover" />
-          </div>
-          <div className="font-bold text-lg">
-            <p>Foursquare</p>
-            <p>Student Portal</p>
-          </div>
+    <div className="h-screen bg-white flex flex-col">
+      <div className="flex flex-col mb-3 px-4 pt-4 items-center justify-center">
+        <div className="max-w-[60px] w-full">
+          <img src="/logo.svg" alt="logo" className="w-full object-cover" />
         </div>
+        <div className="font-bold text-base">
+          <p>Foursquare</p>
+          <p>Student Portal</p>
+        </div>
+      </div>
 
-        <div className="flex-1 flex flex-col text-center overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"> 
-          <ul className="list-none flex flex-col md:mb-[20px] xl:mb-0.5 px-2"> 
-            {StudentLeft.map((item, index) => (
-              <li
-                key={index}
-                className="md:p-[11px] p-2.5 hover:text-gray-400 rounded-lg transition-colors"
+      <div className="flex-1 flex flex-col justify-between text-center overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+        <ul className="list-none flex flex-col  pl-2">
+          {StudentLeft.map((item, index) => (
+            <li
+              key={index}
+              className=" xl:p-2 lg:p-2.5 hover:text-gray-400 rounded-lg transition-colors"
+            >
+              <Link
+                href={`${item.route}?schoolid=${schoolId}&userid=${userId}`}
+                className=" flex items-center text-left gap-2"
               >
-                <Link
-                  href={`${item.route}?schoolid=${schoolId}&userid=${userId}`}
-                  className="max-w-5 flex items-center gap-1 text-base font-normal text-left"
+                <span
+                  className={` ${
+                    pathname === item.route
+                      ? "text-[#F94144]"
+                      : "text-gray-700 hover:text-gray-400"
+                  }`}
                 >
-                  <span
-                    className={`text-3xl ${
-                      pathname === item.route
-                        ? "text-[#F94144]"
-                        : "text-gray-700 hover:text-gray-400"
-                    }`}
-                  >
-                    {item.icon}
-                  </span>
-                  <span
-                    className={`${
-                      pathname === item.route
-                        ? "text-[#F94144]"
-                        : "text-gray-700 hover:text-gray-300 "
-                    }`}
-                  >
-                    {item.Name}
-                  </span>
-                </Link>
-              </li>
-            ))}
-          </ul>
+                  {item.icon}
+                </span>
+                <span
+                  className={`${
+                    pathname === item.route
+                      ? "text-[#F94144]"
+                      : "text-gray-700 hover:text-gray-300 "
+                  }`}
+                >
+                  {item.Name}
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <div className="flex justify-center mb-5">
           <button
             onClick={handleLogout}
-            className="w-full bg-[#F94144] text-white rounded-lg px-3 py-2.5 font-bold text-base flex items-center justify-center gap-2.5 hover:bg-[#D81A2D] transition-colors cursor-pointer"
+            className=" bg-[#F94144] p-1.5 pl-3 pr-3 flex items-center text-white rounded-lg  font-bold text-base  gap-2.5 hover:bg-[#D81A2D] transition-colors cursor-pointer"
           >
             <TbLogout className="text-xl" />
             Logout
           </button>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 
