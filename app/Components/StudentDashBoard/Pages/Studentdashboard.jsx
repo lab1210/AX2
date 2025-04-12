@@ -55,8 +55,7 @@ const dummyNotifications = [
 export default function Studentdashboard() {
   const { user, isLoading } = useUser();
   const searchParams = useSearchParams();
-  const schoolId = searchParams.get("schoolid");
-  const userId = searchParams.get("userid");
+  const studentId = searchParams.get("studentId");
 
   // Same overview data
   const overview = [
@@ -155,7 +154,7 @@ export default function Studentdashboard() {
               {overview.map((item, index) => (
                 <Link
                   key={index}
-                  href={`${item.Link}?schoolid=${schoolId}&userid=${userId}`}
+                  href={`${item.Link}?studentId=${studentId}`}
                   className={`relative ${item.bg} rounded-lg p-7 pl-3 pr-3 text-white grid xl:grid-cols-[70px_auto] lg:grid-cols-[80px_auto] items-center hover:opacity-90 transition`}
                 >
                   <div
@@ -199,7 +198,7 @@ export default function Studentdashboard() {
               </p>
               <div>
                 <Link
-                  href={`${overview[0].Link}?schoolid=${schoolId}&userid=${userId}`}
+                  href={`${overview[0].Link}?studentId=${studentId}`}
                   className="bg-[#F94144] text-white px-3 py-3 rounded-lg text-sm cursor-pointer p-2"
                 >
                   View courses
@@ -226,7 +225,7 @@ export default function Studentdashboard() {
               {overview.map((item, idx) => (
                 <div key={idx} className="flex-shrink-0 w-auto">
                   <Link
-                    href={`${item.Link}?schoolid=${schoolId}&userid=${userId}`}
+                    href={`${item.Link}?studentId=${studentId}`}
                     className={`rounded-xl flex flex-col items-start p-3 gap-2 ${item.bg} text-white`}
                   >
                     <div
