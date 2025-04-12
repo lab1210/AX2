@@ -48,7 +48,7 @@ const Layout = ({ children }) => {
 
   return (
     <>
-      <div className="w-full h-screen grid grid-cols-1 lg:grid-cols-[15%_60%_25%] xl:grid-cols-[10%_70%_20%] overflow-hidden bg-gray-100">
+      <div className="w-full h-screen grid grid-cols-1 xl:grid-cols-[160px_1fr_280px] lg:grid-cols-[160px_1fr_230px] overflow-hidden bg-gray-100">
         <div className="hidden lg:block">
           <Suspense>
             <LeftSidebar setUser={setUser} />
@@ -56,7 +56,7 @@ const Layout = ({ children }) => {
         </div>
 
         <div className="grid grid-rows-[auto_1fr] overflow-hidden h-full">
-          <div className="bg-white sticky top-0 z-10 p-4 flex items-center gap-4 lg:rounded-t-lg">
+          <div className="bg-white sticky top-0 z-10 p-3 pb-1.5 flex items-center gap-4 lg:rounded-t-lg">
             {typeof headerTitle === "object" ? (
               <h2 className="text-xl font-bold">
                 <span className="text-gray-500">{headerTitle.firstPart}</span>
@@ -64,14 +64,14 @@ const Layout = ({ children }) => {
                 {headerTitle.restParts}
               </h2>
             ) : (
-              <h2 className="text-xl font-bold">{headerTitle}</h2>
+              <h2 className="text-2xl font-bold">{headerTitle}</h2>
             )}
           </div>
           <div className="bg-white p-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-16 lg:pb-4 lg:rounded-b-lg">
             {children}
           </div>
         </div>
-        <div className="hidden lg:block bg-white h-full rounded-lg px-6 xl:pl-6 overflow-hidden">
+        <div className="hidden lg:block bg-white h-full rounded-lg pr-4  overflow-hidden">
           <RightSidebar user={user} />
         </div>
       </div>

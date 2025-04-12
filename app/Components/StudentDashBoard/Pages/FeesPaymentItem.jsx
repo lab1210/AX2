@@ -104,7 +104,7 @@ const FeesPaymentItem = () => {
         <div className="flex flex-col gap-4 md:flex-row md:justify-between bg-white rounded-xl p-4">
           <Link
             href={`/Student/Fees-Payment/Make-Payment?schoolid=${schoolId}&userid=${userId}`}
-            className="bg-blue-800 text-white rounded-2xl flex-1"
+            className="bg-[#4084B1] text-white rounded-2xl flex-1"
           >
             <div className="grid grid-cols-[1fr_auto] items-center justify-between p-4 text-white">
               <div>
@@ -119,7 +119,7 @@ const FeesPaymentItem = () => {
               <div className="flex items-center gap-2 justify-center">
                 <p className="text-sm text-white">More info</p>
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                  <FaArrowRight className="text-blue-600 text-xs" />
+                  <FaArrowRight className="text-[#4084B1] text-xs" />
                 </div>
               </div>
             </div>
@@ -134,7 +134,7 @@ const FeesPaymentItem = () => {
                 <h4 className="text-xl font-bold mb-2">Receipt</h4>
                 <p className="text-sm">view receipt</p>
               </div>
-              <div className="max-w-[50px]">
+              <div className="max-w-[55px]">
                 <img src="/Glyph.png" alt="" className="w-full object-cover" />
               </div>
             </div>
@@ -189,7 +189,7 @@ const FeesPaymentItem = () => {
 
             <button
               onClick={handleDownloadPDF}
-              className="bg-blue-700 text-white rounded-lg px-4 py-2 text-sm hover:bg-red-500 transition-colors duration-300"
+              className="bg-[#4084B1] text-white rounded-lg px-4 py-2 text-sm hover:bg-red-500 transition-colors duration-300"
             >
               Print
             </button>
