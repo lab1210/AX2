@@ -2,25 +2,20 @@
 import React, { useState, useEffect } from "react";
 import dummysession from "../../../Components/session";
 import dummyterm from "../../../Components/Term";
-import { useUser } from "../context/UserProvider";
 import Layout from "../../../Components/Studentlayout";
+import { getUserDetails } from "@/app/Service/AuthService";
 
 export default function ResultOverviewPage() {
-  // Example data for the report sheet
-  const studentInfo = {
-    name: "Ife Babalola Adesina",
-    studentId: "001",
-    class: "JSS1",
-    gradeYear: "7",
-    session: "2023/2024",
-    age: 14,
-  };
-
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [session, setSession] = useState(dummysession[0]);
   const [term, setTerm] = useState("");
-  const { user, isLoading } = useUser();
-  
-    
+
+  useEffect(() => {
+    const userData = getUserDetails();
+    setUser(userData);
+    setIsLoading(false);
+  }, []);
 
   // Example result data
   const subjects = [
@@ -67,20 +62,20 @@ export default function ResultOverviewPage() {
     }
   };
   const [downloadPdf, setDownloadPdf] = useState(null);
-  
-  useEffect(() => {
-      import("../../Print/DownloadasPdf").then((module) => {
-        setDownloadPdf(() => module.default);
-      });
-    }, []);
 
-    if (isLoading) {
-      return (
-        <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-          <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
-        </div>
-      );
-    }
+  useEffect(() => {
+    import("../../../../api/generatePdf").then((module) => {
+      setDownloadPdf(() => module.default);
+    });
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
 
   return (
     <Layout>
@@ -91,9 +86,9 @@ export default function ResultOverviewPage() {
           </h1>
         </div>
         <div className="w-full max-w-5xl bg-white rounded-md shadow p-6 md:p-8 thirdCard">
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 mb-8 justify-between">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 mb-8 justify-between">
             <div className="flex items-center gap-1">
-              <label className="text-sm">Select Session :</label>
+              <label className="text-sm">Select Session:</label>
               <select
                 className="bg-gray-100 rounded-lg px-2 py-1 text-sm"
                 value={session}
@@ -124,7 +119,7 @@ export default function ResultOverviewPage() {
 
             <button
               onClick={handleDownloadPDF}
-              className="bg-blue-700 text-white rounded-lg px-4 py-2 text-sm hover:bg-red-500 transition-colors duration-300"
+              className="bg-[#4084B1] text-white rounded-lg px-4 py-2 text-sm hover:bg-red-500 transition-colors duration-300"
             >
               Print
             </button>
@@ -133,14 +128,14 @@ export default function ResultOverviewPage() {
           {/* School Name / Student Info */}
           <div className="text-center mb-6">
             <h2 className="text-lg lg:text-xl font-bold text-gray-800 mb-1">
-              Foursquare International Secondary School
+              {user?.student?.school}
             </h2>
             <p className="text-sm text-gray-600 font-semibold">
-              Name: {studentInfo.name} &nbsp;|&nbsp; Student ID:{" "}
-              {studentInfo.studentId} &nbsp;|&nbsp; Class: {studentInfo.class}{" "}
-              &nbsp;|&nbsp; Grade Year: {studentInfo.gradeYear} &nbsp;|&nbsp;
-              Session: {studentInfo.session} &nbsp;|&nbsp; Age:{" "}
-              {studentInfo.age}
+              Name:
+              {user?.student?.first_name + " " + user?.student?.last_name}
+              &nbsp;|&nbsp; Student ID: {user.id} &nbsp;|&nbsp; Class: {""}
+              &nbsp;|&nbsp; Grade Year: {""} &nbsp;|&nbsp; Session: {""}{" "}
+              &nbsp;|&nbsp; Age: {""}
             </p>
           </div>
 
@@ -169,9 +164,7 @@ export default function ResultOverviewPage() {
                     <td className="py-2 px-4">{subj.ca}</td>
                     <td className="py-2 px-4">{subj.midTerm}</td>
                     <td className="py-2 px-4">{subj.exam}</td>
-                    <td className="py-2 px-4  text-gray-800">
-                      {subj.total}
-                    </td>
+                    <td className="py-2 px-4  text-gray-800">{subj.total}</td>
                   </tr>
                 ))}
               </tbody>
@@ -200,17 +193,16 @@ export default function ResultOverviewPage() {
                 GPA:{" "}
                 <span className="font-semibold bg-[#F2645C] p-1">4.23</span>
               </p>
-              </div>
-              
-                <div className="flex flex-col gap-2">
-                  <p className="text-sm text-white p-2 bg-[#F2645C] font-semibold">
-                    Principal's Comment:{" "}
-                  </p>
-                  <span className="text-sm">
-                    Excellent work. More effort is needed to reach the desired
-                    goal
-                  </span>
-                </div>
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <p className="text-sm text-white p-2 bg-[#F2645C] font-semibold">
+                Principal's Comment:{" "}
+              </p>
+              <span className="text-sm">
+                Excellent work. More effort is needed to reach the desired goal
+              </span>
+            </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2">

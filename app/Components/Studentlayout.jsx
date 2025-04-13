@@ -4,14 +4,21 @@ import React, { Suspense, useEffect, useState } from "react";
 import LeftSidebar from "./StudentDashBoard/LeftSidebar";
 import { usePathname } from "next/navigation";
 import RightSidebar from "./StudentDashBoard/RightSidebar";
-import { useUser } from "./StudentDashBoard/context/UserProvider";
 import BottomNavBar from "./StudentDashBoard/BottomNavbar";
+import { useRouter } from "next/navigation";
+import {
+  clearAuthToken,
+  getAuthToken,
+  getUserDetails,
+  refreshToken,
+} from "../Service/AuthService";
 
 const Layout = ({ children }) => {
-  const { user, isLoading, checkUser, setUser } = useUser();
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathName = usePathname();
-
+  const router = useRouter();
   const generateTitle = (path) => {
     const parts = path.split("/");
     const formattedParts = parts.slice(2).map((part) => {
@@ -30,8 +37,36 @@ const Layout = ({ children }) => {
   };
 
   useEffect(() => {
-    if (!checkUser()) return;
-  }, [user, isLoading, checkUser]);
+    const initializeUser = async () => {
+      const token = getAuthToken();
+      if (!token) {
+        router.push("/");
+        return;
+      }
+      try {
+        const userDetails = getUserDetails();
+        setUser(userDetails);
+        setIsLoading(false);
+      } catch (err) {
+        try {
+          const newToken = await refreshToken(token);
+          if (newToken) {
+            const refreshedUserDetails = getUserDetails();
+            setUser(refreshedUserDetails);
+          } else {
+            clearAuthToken();
+            router.push("/");
+          }
+        } catch (refresherr) {
+          clearAuthToken();
+          router.push("/");
+        } finally {
+          setIsLoading(false);
+        }
+      }
+    };
+    initializeUser();
+  }, [router]);
 
   useEffect(() => {
     const title = generateTitle(pathName);
@@ -51,7 +86,7 @@ const Layout = ({ children }) => {
       <div className="w-full h-screen grid grid-cols-1 xl:grid-cols-[160px_1fr_280px] lg:grid-cols-[160px_1fr_230px] overflow-hidden bg-gray-100">
         <div className="hidden lg:block">
           <Suspense>
-            <LeftSidebar setUser={setUser} />
+            <LeftSidebar setUser={setUser} user={user} />
           </Suspense>
         </div>
 
@@ -76,7 +111,7 @@ const Layout = ({ children }) => {
         </div>
       </div>
 
-      <BottomNavBar />
+      <BottomNavBar setUser={setUser} user={user} />
     </>
   );
 };
