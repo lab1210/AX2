@@ -73,10 +73,7 @@ const ReceiptItem = () => {
             </div>
             {/* printButton */}
             <div>
-              <button
-                onClick={handleDownloadPDF}
-                className="bg-[#0b71b5] text-white font-bold px-10 py-2.5 rounded-[10px] cursor-pointer"
-              >
+              <button className="bg-[#0b71b5] text-white font-bold px-10 py-2.5 rounded-[10px] cursor-pointer">
                 Print
               </button>
             </div>
