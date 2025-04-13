@@ -51,24 +51,6 @@ export default function ResultOverviewPage() {
     { grade: "F", scorePoint: "0 points", scoreRange: "0 - 44" },
   ];
 
-  const handleDownloadPDF = () => {
-    if (downloadPdf) {
-      downloadPdf(
-        ".thirdCard",
-        `${user.username}-Result-${session}-${term}.pdf`
-      );
-    } else {
-      console.error("downloadPdf not loaded yet.");
-    }
-  };
-  const [downloadPdf, setDownloadPdf] = useState(null);
-
-  useEffect(() => {
-    import("../../../../api/generatePdf").then((module) => {
-      setDownloadPdf(() => module.default);
-    });
-  }, []);
-
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
@@ -117,10 +99,7 @@ export default function ResultOverviewPage() {
               </select>
             </div>
 
-            <button
-              onClick={handleDownloadPDF}
-              className="bg-[#4084B1] text-white rounded-lg px-4 py-2 text-sm hover:bg-red-500 transition-colors duration-300"
-            >
+            <button className="bg-[#4084B1] text-white rounded-lg px-4 py-2 text-sm hover:bg-red-500 transition-colors duration-300">
               Print
             </button>
           </div>
