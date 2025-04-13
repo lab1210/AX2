@@ -8,7 +8,7 @@ import { LuArrowDownUp } from "react-icons/lu";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getUserDetails } from "@/app/Service/AuthService";
-import html2pdf from "html2pdf.js";
+
 const FeesPaymentItem = () => {
   const [term, setTerm] = useState("");
   const [session, setSession] = useState(dummysession[0]);
@@ -16,24 +16,13 @@ const FeesPaymentItem = () => {
   const studentId = searchParams.get("studentId");
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const componentRef = useRef();
+
   useEffect(() => {
     const userData = getUserDetails();
     setUser(userData);
     setIsLoading(false);
   }, []);
 
-  const downloadPdf = (ref, filename) => {
-    const element = ref.current;
-    const opt = {
-      margin: 0.5,
-      filename: filename,
-      image: { type: "jpeg", quality: 0.98 },
-      html2canvas: { scale: 2 },
-      jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
-    };
-    html2pdf().set(opt).from(element).save();
-  };
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
@@ -154,7 +143,7 @@ const FeesPaymentItem = () => {
         </div>
 
         {/* Table Section */}
-        <div ref={componentRef} className=" w-full bg-white rounded-xl p-5 ">
+        <div className=" w-full bg-white rounded-xl p-5 ">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 mb-8">
             <div className="flex items-center gap-2">
               <label className="text-sm">Select Session :</label>
@@ -186,17 +175,7 @@ const FeesPaymentItem = () => {
               </select>
             </div>
             <div>
-              <button
-                onClick={() => {
-                  downloadPdf(
-                    componentRef,
-                    `${
-                      user?.student?.first_name + user?.student?.last_name
-                    }-Fees-Statement.pdf`
-                  );
-                }}
-                className="bg-[#0b71b5] text-white font-bold px-10 py-2.5 rounded-[10px] cursor-pointer"
-              >
+              <button className="bg-[#0b71b5] text-white font-bold px-10 py-2.5 rounded-[10px] cursor-pointer">
                 Print
               </button>
             </div>
