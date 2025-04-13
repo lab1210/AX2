@@ -91,16 +91,20 @@ const RightSidebar = ({ user }) => {
             onClick={toggleDropdown}
           >
             <div className="rounded-full overflow-hidden w-12 h-12 md:w-10 md:h-10 xl:w-12 xl:h-12">
-              {user?.profilePic && (
-                <img
-                  src={user.profilePic}
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              )}
+              <img
+                src={
+                  user.student.profile_picture_path === null
+                    ? "/female.png"
+                    : user.student.profile_picture_path
+                }
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
             </div>
-            <div className="hidden xl:flex items-center gap-1">
-              <p className="font-bold text-sm">{user?.username}</p>
+            <div className="hidden lg:flex items-center gap-1">
+              <p className="font-bold text-sm">
+                {user?.student?.first_name + " " + user?.student?.last_name}
+              </p>
               <IoChevronDownOutline className="w-3 h-3" />
             </div>
           </div>

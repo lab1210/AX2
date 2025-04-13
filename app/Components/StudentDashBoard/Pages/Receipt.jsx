@@ -2,12 +2,13 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../../Studentlayout";
 import dummysession from "../../session";
-import { useUser } from "../context/UserProvider";
+import { getUserDetails } from "@/app/Service/AuthService";
 
 const ReceiptItem = () => {
   const [session, setSession] = useState(dummysession[0]);
-  const { user, isLoading } = useUser();
   const [downloadPdf, setDownloadPdf] = useState(null);
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const receipts = [
     {
@@ -26,9 +27,15 @@ const ReceiptItem = () => {
     },
   ];
   useEffect(() => {
-    import("../../Print/DownloadasPdf").then((module) => {
+    import("../../../../api/generatePdf").then((module) => {
       setDownloadPdf(() => module.default);
     });
+  }, []);
+
+  useEffect(() => {
+    const userData = getUserDetails();
+    setUser(userData);
+    setIsLoading(false);
   }, []);
 
   if (isLoading) {
@@ -93,15 +100,16 @@ const ReceiptItem = () => {
             {/* head */}
             <div className="text-center border-b border-[#cfcfcf] p-5 mb-[25px]">
               <div className="mb-[30px]">
-                <h2 className="text-xl font-bold">
-                  Foursquare International Secondary School
-                </h2>
+                <h2 className="text-xl font-bold">{user.student.school}</h2>
                 <h2 className="text-xl font-bold">Proof of Fees Payment</h2>
               </div>
               <div className="flex items-center justify-center font-bold gap-[10px]">
-                <p>Name: {user.username}</p>
-                <p>Student ID: {user.userId}</p>
-                <p>Class: {user.class}</p>
+                <p>
+                  Name:
+                  {user?.student?.first_name + " " + user?.student?.last_name}
+                </p>
+                <p>Student ID: {user.id}</p>
+                <p>Class: </p>
                 <p>Session: {session}</p>
               </div>
             </div>

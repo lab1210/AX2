@@ -1,30 +1,39 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Layout from "../../../Components/Studentlayout";
-import { useUser } from "../context/UserProvider";
 import { FaArrowRight } from "react-icons/fa";
 import dummysession from "../../../Components/session";
 import dummyterm from "../../../Components/Term";
 import { LuArrowDownUp } from "react-icons/lu";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-
+import { getUserDetails } from "@/app/Service/AuthService";
+import html2pdf from "html2pdf.js";
 const FeesPaymentItem = () => {
-  const { user, isLoading } = useUser();
   const [term, setTerm] = useState("");
   const [session, setSession] = useState(dummysession[0]);
   const searchParams = useSearchParams();
-  const schoolId = searchParams.get("schoolid");
-  const userId = searchParams.get("userid");
-
-  const [downloadPdf, setDownloadPdf] = useState(null);
-
+  const studentId = searchParams.get("studentId");
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const componentRef = useRef();
   useEffect(() => {
-    import("../../Print/DownloadasPdf").then((module) => {
-      setDownloadPdf(() => module.default);
-    });
+    const userData = getUserDetails();
+    setUser(userData);
+    setIsLoading(false);
   }, []);
 
+  const downloadPdf = (ref, filename) => {
+    const element = ref.current;
+    const opt = {
+      margin: 0.5,
+      filename: filename,
+      image: { type: "jpeg", quality: 0.98 },
+      html2canvas: { scale: 2 },
+      jsPDF: { unit: "in", format: "letter", orientation: "portrait" },
+    };
+    html2pdf().set(opt).from(element).save();
+  };
   if (isLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
@@ -33,16 +42,6 @@ const FeesPaymentItem = () => {
     );
   }
 
-  const handleDownloadPDF = () => {
-    if (downloadPdf) {
-      downloadPdf(
-        ".thirdCard",
-        `${user.username}-Statement-of-Account-${session}-${term}.pdf`
-      );
-    } else {
-      console.error("downloadPdf not loaded yet.");
-    }
-  };
   const fees = [
     {
       purpose: "Admission Acceptance Fee",
@@ -103,7 +102,7 @@ const FeesPaymentItem = () => {
         {/* First Card Section */}
         <div className="flex flex-col gap-4 md:flex-row md:justify-between bg-white rounded-xl p-4">
           <Link
-            href={`/Student/Fees-Payment/Make-Payment?schoolid=${schoolId}&userid=${userId}`}
+            href={`/Student/Fees-Payment/Make-Payment?studentId=${studentId}`}
             className="bg-[#4084B1] text-white rounded-2xl flex-1"
           >
             <div className="grid grid-cols-[1fr_auto] items-center justify-between p-4 text-white">
@@ -126,7 +125,7 @@ const FeesPaymentItem = () => {
           </Link>
 
           <Link
-            href={`/Student/Fees-Payment/Receipt?schoolid=${schoolId}&userid=${userId}`}
+            href={`/Student/Fees-Payment/Receipt?studentId=${studentId}`}
             className="bg-red-500 text-white rounded-2xl flex-1"
           >
             <div className="grid grid-cols-[1fr_auto] items-center justify-between p-4 text-white">
@@ -155,7 +154,7 @@ const FeesPaymentItem = () => {
         </div>
 
         {/* Table Section */}
-        <div className="w-full bg-white rounded-xl p-5 thirdCard">
+        <div ref={componentRef} className=" w-full bg-white rounded-xl p-5 ">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 mb-8">
             <div className="flex items-center gap-2">
               <label className="text-sm">Select Session :</label>
@@ -186,18 +185,29 @@ const FeesPaymentItem = () => {
                 ))}
               </select>
             </div>
-
-            <button
-              onClick={handleDownloadPDF}
-              className="bg-[#4084B1] text-white rounded-lg px-4 py-2 text-sm hover:bg-red-500 transition-colors duration-300"
-            >
-              Print
-            </button>
+            <div>
+              <button
+                onClick={() => {
+                  downloadPdf(
+                    componentRef,
+                    `${
+                      user?.student?.first_name + user?.student?.last_name
+                    }-Fees-Statement.pdf`
+                  );
+                }}
+                className="bg-[#0b71b5] text-white font-bold px-10 py-2.5 rounded-[10px] cursor-pointer"
+              >
+                Print
+              </button>
+            </div>
           </div>
 
           <div className="w-[80%] md:w-full flex flex-wrap gap-4 mb-6 justify-between">
-            <p className="text-sm">Name: {user.username}</p>
-            <p className="text-sm">Student ID: {user.userId}</p>
+            <p className="text-sm">
+              Name:
+              {user?.student?.first_name + " " + user?.student?.last_name}
+            </p>
+            <p className="text-sm">Student ID: {user.id}</p>
             <p className="text-sm">Class: {user.class}</p>
             <p className="text-sm">Session: {session}</p>
           </div>
@@ -228,35 +238,43 @@ const FeesPaymentItem = () => {
               </thead>
 
               <tbody>
-                {fees.map((item, index) => (
-                  <tr key={index} className="border-b border-gray-200">
-                    <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
-                      {index + 1}
-                    </td>
-                    <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
-                      {item.purpose}
-                    </td>
-                    <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
-                      {item.TransactionNumber}
-                    </td>
-                    <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
-                      {formatCurrency(item.AmountBilled)}
-                    </td>
-                    <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
-                      {formatCurrency(item.AmountPaid)}
-                    </td>
-                    <td
-                      className={`p-2 md:p-3 flex items-center gap-2 text-xs md:text-sm ${
-                        item.PaymentDate === "Pending"
-                          ? "text-red-500"
-                          : "text-gray-700"
-                      }`}
-                    >
-                      {item.PaymentDate}
-                      <LuArrowDownUp className="text-gray-400 cursor-pointer text-xs md:text-sm" />
+                {fees.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className="text-center py-4 text-gray-500">
+                      No fee records available.
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  fees.map((item, index) => (
+                    <tr key={index} className="border-b border-gray-200">
+                      <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
+                        {index + 1}
+                      </td>
+                      <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
+                        {item.purpose}
+                      </td>
+                      <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
+                        {item.TransactionNumber}
+                      </td>
+                      <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
+                        {formatCurrency(item.AmountBilled)}
+                      </td>
+                      <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
+                        {formatCurrency(item.AmountPaid)}
+                      </td>
+                      <td
+                        className={`p-2 md:p-3 flex items-center gap-2 text-xs md:text-sm ${
+                          item.PaymentDate === "Pending"
+                            ? "text-red-500"
+                            : "text-gray-700"
+                        }`}
+                      >
+                        {item.PaymentDate}
+                        <LuArrowDownUp className="text-gray-400 cursor-pointer text-xs md:text-sm" />
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>

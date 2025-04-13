@@ -1,21 +1,15 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../../../Components/Studentlayout";
-import { useUser } from "../context/UserProvider";
 import { IoWalletOutline } from "react-icons/io5";
 import { LuNotepadText } from "react-icons/lu";
 import { MdOutlineCalendarMonth } from "react-icons/md";
 import { RiBookShelfLine } from "react-icons/ri";
-import { BiPieChart } from "react-icons/bi";
+import { BiChevronRight, BiPieChart } from "react-icons/bi";
 import { LiaHeartbeatSolid } from "react-icons/lia";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import {
-  BsChevronRight,
-  BsCalendarEvent,
-  BsBellFill,
-  BsPersonCircle,
-} from "react-icons/bs";
+import { getUserDetails } from "@/app/Service/AuthService";
 
 // Dummy data for events and notifications (replace with API calls)
 const dummyevents = [
@@ -53,9 +47,16 @@ const dummyNotifications = [
 ];
 
 export default function Studentdashboard() {
-  const { user, isLoading } = useUser();
   const searchParams = useSearchParams();
   const studentId = searchParams.get("studentId");
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const userData = getUserDetails();
+    setUser(userData);
+    setIsLoading(false);
+  }, []);
 
   // Same overview data
   const overview = [
@@ -123,7 +124,7 @@ export default function Studentdashboard() {
     );
   }
 
-  const name = user?.username || "User";
+  const name = user?.student.first_name || "User";
 
   return (
     <Layout>
@@ -276,7 +277,7 @@ export default function Studentdashboard() {
                 <div className="ml-4 w-8 h-8 rounded-full bg-[#F94144] flex items-center justify-center">
                   {" "}
                   {/* Adjusted margin */}
-                  <BsChevronRight
+                  <BiChevronRight
                     size={16}
                     className="text-[#000000] font-bold"
                   />
@@ -316,7 +317,7 @@ export default function Studentdashboard() {
                   </p>
                 </div>
                 <div className="mr-3 w-8 h-8 rounded-full bg-[#f9f9f9] flex items-center justify-center">
-                  <BsChevronRight
+                  <BiChevronRight
                     size={16}
                     className="text-[#000000] font-bold"
                   />

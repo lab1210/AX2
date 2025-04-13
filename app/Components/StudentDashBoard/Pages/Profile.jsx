@@ -1,21 +1,11 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "../../Studentlayout";
-import { useUser } from "../context/UserProvider";
+import { getUserDetails } from "@/app/Service/AuthService";
 
 export default function ProfilePage() {
-  const { isLoading } = useUser();
-
-  // Example user data
-  const user = {
-    avatar: "/female.png",
-    name: "Ife Babalola Adesina",
-    className: "SSS 1B",
-    studentId: "001",
-    gender: "Female",
-    classTeacher: "Mr Damilola Adesuwa",
-    status: "Art Student",
-  };
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   // Example subjects
   const registeredSubjects = [
@@ -28,6 +18,11 @@ export default function ProfilePage() {
     "Agricultural Science",
     "Civic Education",
   ];
+  useEffect(() => {
+    const userData = getUserDetails();
+    setUser(userData);
+    setIsLoading(false);
+  }, []);
 
   if (isLoading) {
     return (
@@ -46,35 +41,41 @@ export default function ProfilePage() {
             <div className="flex items-center gap-4 mb-6">
               <div className="w-16 h-16 rounded-full overflow-hidden">
                 <img
-                  src={user.avatar}
+                  src={
+                    user.student.profile_picture_path === null
+                      ? "/female.png"
+                      : user.student.profile_picture_path
+                  }
                   alt="Avatar"
                   className="object-cover w-full h-full"
                 />
               </div>
               <h2 className="max-w-50 text-xl md:text-2xl font-bold text-gray-800">
-                {user.name}
+                {user?.student?.first_name + " " + user?.student?.last_name}
               </h2>
             </div>
           </div>
 
           {/* Details */}
           <div className="bg-white rounded-md shadow p-6 md:p-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">Details</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">
+              Details
+            </h3>
             <div className="grid grid-row gap-2 text-md text-gray-700 mb-4">
               <p>
-                <span className="font-bold">Class:</span> {user.className}
+                <span className="font-bold">Class: </span>
               </p>
               <p>
-                <span className="font-bold">Student ID:</span> {user.studentId}
+                <span className="font-bold">Student ID:</span> {user.id}
               </p>
               <p>
-                <span className="font-bold">Gender:</span> {user.gender}
+                <span className="font-bold">Gender:</span>
               </p>
               <p>
-                <span className="font-bold">Class teacher:</span> {user.classTeacher}
+                <span className="font-bold">Class teacher:</span>{" "}
               </p>
               <p>
-                <span className="font-bold">Status:</span> {user.status}
+                <span className="font-bold">Status:</span>
               </p>
             </div>
           </div>
@@ -82,7 +83,8 @@ export default function ProfilePage() {
           {/* Registered Subjects Card */}
           <div className="bg-white rounded-md shadow p-6 md:p-8">
             <p className="text-sm text-gray-400 mb-2 font-medium">
-              {registeredSubjects.length} Registered Subjects for 1st Term 2023/2024 Session
+              {registeredSubjects.length} Registered Subjects for 1st Term
+              2023/2024 Session
             </p>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-800">
               {registeredSubjects.map((subj, idx) => (
@@ -99,15 +101,19 @@ export default function ProfilePage() {
         <div className="bg-white rounded-md p-4 flex flex-col items-center mb-4">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-2">
             <img
-              src={user.avatar}
+              src={
+                user.student.profile_picture_path === null
+                  ? "/female.png"
+                  : user.student.profile_picture_path
+              }
               alt="Avatar"
               className="object-cover w-full h-full"
             />
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-1 text-center">
-            {user.name}
+            {user?.student?.first_name + " " + user?.student?.last_name}
           </h2>
-          <p className="text-sm text-gray-600 text-center">{user.className}</p>
+          <p className="text-sm text-gray-600 text-center"></p>
         </div>
 
         {/* Details */}
@@ -115,16 +121,16 @@ export default function ProfilePage() {
           <h3 className="text-lg font-semibold text-gray-800 mb-2">Details</h3>
           <div className="flex flex-col gap-2 text-md text-gray-700">
             <p>
-              <span className="font-bold">Student ID:</span> {user.studentId}
+              <span className="font-bold">Student ID:</span> {user.id}
             </p>
             <p>
-              <span className="font-bold">Gender:</span> {user.gender}
+              <span className="font-bold">Gender:</span>
             </p>
             <p>
-              <span className="font-bold">Class teacher:</span> {user.classTeacher}
+              <span className="font-bold">Class teacher:</span>{" "}
             </p>
             <p>
-              <span className="font-bold">Status:</span> {user.status}
+              <span className="font-bold">Status:</span>
             </p>
           </div>
         </div>

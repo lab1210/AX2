@@ -6,13 +6,14 @@ import Link from "next/link";
 import { PiEyeLight } from "react-icons/pi";
 import { IoEyeOffOutline } from "react-icons/io5";
 import { useRouter } from "next/navigation";
-import { Login as LoginService } from "./Service/AuthService";
+import { getUserDetails, Login as LoginService } from "./Service/AuthService";
 export default function Login() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
@@ -22,49 +23,45 @@ export default function Login() {
     e.preventDefault();
     console.log("handleSubmit function CALLED");
     setError("");
+    setLoading(true);
 
     if (!username || !password) {
       setError("Please enter both username and password");
+      setLoading(false);
       return;
     }
     try {
-      const response = await LoginService(username, password);
-      console.log("Login successful", response);
+      await LoginService(username, password);
+      const { roles, teacher, student, super_admin, school_admin } =
+        getUserDetails();
 
-      if (response.user_roles && response.user_roles.length > 0) {
-        const roleName = response.user_roles[0].role.name;
-        console.log("Role Name:", roleName);
-        if (roleName === "Teacher") {
-          const teacherID = response.teacher?.id;
-          const url = `/Teacher/DashBoard/?teacherID=${teacherID}`;
-          router.push(url);
-          console.log("Redirecting to:", url);
-        } else if (roleName === "Student") {
-          const studentId = response.student?.student_id;
-          const url = `/Student/DashBoard/?studentId=${studentId}`;
-          console.log("Redirecting to:", url);
-          router.push(url);
-          // console.log("Redirecting to:", url);
-        } else if (roleName === "Super Admin") {
-          const adminId = response.super_admin?.id;
-          const url = `/Super-Admin/DashBoard?adminId=${adminId}`;
-          router.push(url);
-          console.log("Redirecting to:", url);
-        } else if (roleName === "School Admin") {
-          const schooladminId = response.school_admin?.id;
-          const url = `/School-Admin/DashBoard?schooladminId=${schooladminId}`;
-          router.push(url);
-          console.log("Redirecting to:", url);
-        } else {
+      const roleName = roles[0]?.role?.name;
+      console.log("Logged in as:", roleName);
+
+      switch (roleName) {
+        case "Teacher":
+          router.push(`/Teacher/DashBoard/?teacherID=${teacher?.teacher_id}`);
+          break;
+        case "Student":
+          router.push(`/Student/DashBoard/?studentId=${student?.student_id}`);
+          break;
+        case "Super Admin":
+          router.push(`/Super-Admin/DashBoard?adminId=${super_admin?.id}`);
+          break;
+        case "School Admin":
+          router.push(
+            `/School-Admin/DashBoard?schooladminId=${school_admin?.schooladmin_id}`
+          );
+          break;
+        default:
           console.warn("Unknown user role", roleName);
           router.push("/");
-        }
-      } else {
-        router.push("/");
       }
     } catch (err) {
       console.error("Login failed", err);
       setError("Invalid username or password");
+    } finally {
+      setLoading(false);
     }
   };
   return (
@@ -120,7 +117,9 @@ export default function Login() {
                 {error && <p className={styles.error}>{error}</p>}
               </div>
               <div className={styles.loginbtn}>
-                <button type="submit">LOG IN</button>
+                <button type="submit" disabled={loading}>
+                  {loading ? "Logging in..." : "LOG IN"}
+                </button>
               </div>
             </form>
             <p className={styles.NoAccount}>
