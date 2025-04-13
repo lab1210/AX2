@@ -6,7 +6,6 @@ import { getUserDetails } from "@/app/Service/AuthService";
 
 const ReceiptItem = () => {
   const [session, setSession] = useState(dummysession[0]);
-  const [downloadPdf, setDownloadPdf] = useState(null);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -26,11 +25,6 @@ const ReceiptItem = () => {
       //PaymentDate: "07/09/23", // Removed from receipts
     },
   ];
-  useEffect(() => {
-    import("../../../../api/generatePdf").then((module) => {
-      setDownloadPdf(() => module.default);
-    });
-  }, []);
 
   useEffect(() => {
     const userData = getUserDetails();
@@ -45,14 +39,6 @@ const ReceiptItem = () => {
       </div>
     );
   }
-
-  const handleDownloadPDF = () => {
-    if (downloadPdf) {
-      downloadPdf(".ReceiptPageContent", `${user.username}-Receipt.pdf`);
-    } else {
-      console.error("downloadPdf not loaded yet.");
-    }
-  };
 
   return (
     <Layout>
