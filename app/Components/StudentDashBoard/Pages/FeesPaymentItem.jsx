@@ -87,9 +87,9 @@ const FeesPaymentItem = () => {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-5 p-4 bg-[#f0f0f0] min-h-screen">
+      <div className="flex flex-col gap-5 p-4 xl:pt-10 xl:pr-8  bg-[#f0f0f0] rounded-lg min-h-screen">
         {/* First Card Section */}
-        <div className="flex flex-col gap-4 md:flex-row md:justify-between bg-white rounded-xl p-4">
+        <div className="flex flex-col xl:gap-12 gap-8 md:flex-row md:justify-between bg-white rounded-xl p-6 pl-3 pr-3 xl:pl-14 xl:pr-14">
           <Link
             href={`/Student/Fees-Payment/Make-Payment?studentId=${studentId}`}
             className="bg-[#4084B1] text-white rounded-2xl flex-1"
@@ -138,17 +138,17 @@ const FeesPaymentItem = () => {
         </div>
 
         {/* Statement Section */}
-        <div className="bg-white rounded-xl p-5">
+        <div className="bg-white rounded-xl p-5 pt-3 pb-3">
           <h3 className="text-xl font-bold">Statement of Account</h3>
         </div>
 
         {/* Table Section */}
-        <div className=" w-full bg-white rounded-xl p-5 ">
-          <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 mb-8">
+        <div className=" w-full bg-white rounded-xl  ">
+          <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 mb-8 p-5 pb-0">
             <div className="flex items-center gap-2">
-              <label className="text-sm">Select Session :</label>
+              <label className="text-xs">Select Session :</label>
               <select
-                className="bg-gray-100 rounded-lg px-2 py-1 text-sm"
+                className="bg-gray-100 rounded-lg p-1 text-sm outline-0"
                 value={session}
                 onChange={(e) => setSession(e.target.value)}
               >
@@ -161,9 +161,9 @@ const FeesPaymentItem = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-sm">Select Term :</label>
+              <label className="text-xs">Select Term :</label>
               <select
-                className="bg-gray-100 rounded-lg px-2 py-1 text-sm"
+                className="bg-gray-100 rounded-lg p-1 outline-0 text-sm"
                 value={term}
                 onChange={(e) => setTerm(e.target.value)}
               >
@@ -175,42 +175,41 @@ const FeesPaymentItem = () => {
               </select>
             </div>
             <div>
-              <button className="bg-[#0b71b5] text-white font-bold px-10 py-2.5 rounded-[10px] cursor-pointer">
+              <button className="bg-[#0b71b5] text-white font-bold p-3 pl-5 pr-5 rounded-[10px] cursor-pointer">
                 Print
               </button>
             </div>
           </div>
 
-          <div className="w-[80%] md:w-full flex flex-wrap gap-4 mb-6 justify-between">
-            <p className="text-sm">
-              Name:
-              {user?.student?.first_name + " " + user?.student?.last_name}
+          <div className="w-[80%] md:w-full font-bold xl:text-sm text-xs flex flex-wrap gap-4 mb-6 justify-center">
+            <p>
+              Name: {user?.student?.first_name + " " + user?.student?.last_name}
             </p>
-            <p className="text-sm">Student ID: {user.id}</p>
-            <p className="text-sm">Class: {user.class}</p>
-            <p className="text-sm">Session: {session}</p>
+            <p>Student ID: {user.id}</p>
+            <p>Class: {user.class}</p>
+            <p>Session: {session}</p>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-red-500 text-white">
+          <div className="overflow-x-auto pl-3 pr-3">
+            <table className="w-full  table-fixed">
+              <thead className="bg-red-500 text-white ">
                 <tr>
-                  <th className="p-2 md:p-3 text-left border-r border-gray-200 text-xs md:text-sm">
+                  <th className="p-[3px] pl-2 w-1/12 text-left border-r border-gray-200 text-xs md:text-[13.4px]">
                     S/N
                   </th>
-                  <th className="p-2 md:p-3 text-left border-r border-gray-200 text-xs md:text-sm">
+                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-xs md:text-[13.4px]">
                     Purpose
                   </th>
-                  <th className="p-2 md:p-3 text-left border-r border-gray-200 text-xs md:text-sm">
+                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-xs md:text-[13.4px]">
                     Transaction Number
                   </th>
-                  <th className="p-2 md:p-3 text-left border-r border-gray-200 text-xs md:text-sm">
+                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-xs md:text-[13.4px]">
                     Amount Billed
                   </th>
-                  <th className="p-2 md:p-3 text-left border-r border-gray-200 text-xs md:text-sm">
+                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-xs md:text-[13.4px]">
                     Amount Paid
                   </th>
-                  <th className="p-2 md:p-3 text-left text-xs md:text-sm">
+                  <th className="p-[3px] pl-2 w-1 text-left text-xs md:text-sm">
                     Payment Date
                   </th>
                 </tr>
@@ -226,30 +225,32 @@ const FeesPaymentItem = () => {
                 ) : (
                   fees.map((item, index) => (
                     <tr key={index} className="border-b border-gray-200">
-                      <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
+                      <td className="p-2  border-r border-gray-200 text-xs ">
                         {index + 1}
                       </td>
-                      <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
+                      <td className="p-2  border-r border-gray-200 text-xs ">
                         {item.purpose}
                       </td>
-                      <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
+                      <td className="p-2  border-r border-gray-200 text-xs ">
                         {item.TransactionNumber}
                       </td>
-                      <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
+                      <td className="p-2  border-r border-gray-200 text-xs ">
                         {formatCurrency(item.AmountBilled)}
                       </td>
-                      <td className="p-2 md:p-3 border-r border-gray-200 text-xs md:text-sm">
+                      <td className="p-2  border-r border-gray-200 text-xs ">
                         {formatCurrency(item.AmountPaid)}
                       </td>
                       <td
-                        className={`p-2 md:p-3 flex items-center gap-2 text-xs md:text-sm ${
+                        className={`p-2   text-xs  ${
                           item.PaymentDate === "Pending"
                             ? "text-red-500"
                             : "text-gray-700"
                         }`}
                       >
-                        {item.PaymentDate}
-                        <LuArrowDownUp className="text-gray-400 cursor-pointer text-xs md:text-sm" />
+                        <span className="flex  items-center gap-2">
+                          {item.PaymentDate}
+                          <LuArrowDownUp className="text-gray-400 cursor-pointer" />
+                        </span>
                       </td>
                     </tr>
                   ))
@@ -258,26 +259,26 @@ const FeesPaymentItem = () => {
             </table>
           </div>
 
-          <div className="flex flex-wrap justify-between gap-4 mt-6">
-            <div className="flex items-center gap-2">
-              <p className="text-sm">Amount brought forward:</p>
-              <span className="bg-gray-100 rounded px-2 text-sm">Nil</span>
+          <div className="flex flex-wrap justify-between  mt-6 pl-5 pr-5 pb-3">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-xs">Amount brought forward:</p>
+              <span className="bg-gray-100 rounded-lg px-2 text-sm">Nil</span>
             </div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm">Total Charges:</p>
-              <span className="bg-gray-100 rounded px-2 text-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-xs">Total Charges:</p>
+              <span className="bg-gray-100 rounded-lg px-2 text-sm">
                 {formatCurrency(totalAmountBilled)}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm">Amount Paid:</p>
-              <span className="bg-gray-100 rounded px-2 text-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-xs">Amount Paid:</p>
+              <span className="bg-gray-100 rounded-lg px-2 text-sm">
                 {formatCurrency(totalAmountPaid)}
               </span>
             </div>
-            <div className="flex items-center gap-2">
-              <p className="text-sm">Amount Pending:</p>
-              <span className="bg-red-500 text-white rounded px-2 text-sm">
+            <div className="flex items-center gap-2 mb-2">
+              <p className="text-xs">Amount Pending:</p>
+              <span className="bg-red-500 text-white rounded-lg px-2 text-sm">
                 {formatCurrency(totalAmountPending)}
               </span>
             </div>
