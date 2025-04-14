@@ -90,7 +90,7 @@ const LeftSidebar = ({ setUser, user }) => {
               >
                 <span
                   className={`${
-                    pathname === item.route
+                    pathname.startsWith(item.route)
                       ? "text-[#F94144]"
                       : "text-gray-700 hover:text-gray-400"
                   }`}
@@ -99,7 +99,7 @@ const LeftSidebar = ({ setUser, user }) => {
                 </span>
                 <span
                   className={`${
-                    pathname === item.route
+                    pathname.startsWith(item.route)
                       ? "text-[#F94144]"
                       : "text-gray-700 hover:text-gray-300"
                   }`}

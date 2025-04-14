@@ -42,125 +42,125 @@ const ReceiptItem = () => {
 
   return (
     <Layout>
-      {/* ReceiptGrid: grid with two auto rows */}
-      <div className="grid grid-rows-[auto_auto]">
-        {/* ReceiptPageTitle */}
-        <div className="bg-white mb-5 rounded-[15px] p-5">
-          <h2 className="text-xl font-bold">Financial Transaction Receipt</h2>
-        </div>
-        {/* ReceiptPageContent */}
-        <div className="bg-white mb-5 rounded-[10px] py-5 px-10 flex flex-col gap-5">
-          {/* firstRow */}
-          <div className="flex justify-between items-center">
-            {/* dropdown */}
-            <div className="flex gap-[30px] items-center">
-              <label htmlFor="session" className="font-bold">
-                Select Session :
-              </label>
-              <select
-                name="session"
-                value={session}
-                onChange={(e) => setSession(e.target.value)}
-                required
-                className="outline-none border-0 bg-[#cfcfcf66] rounded-[10px] p-2.5 text-base font-normal"
-              >
-                {dummysession.map((item, index) => (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </div>
-            {/* printButton */}
-            <div>
-              <button className="bg-[#0b71b5] text-white font-bold px-10 py-2.5 rounded-[10px] cursor-pointer">
-                Print
-              </button>
-            </div>
+      <div className="flex flex-col gap-5 p-4 xl:pt-10 xl:pr-8  bg-[#f0f0f0] rounded-lg min-h-screen">
+        {/* ReceiptGrid: grid with two auto rows */}
+        <div>
+          {/* ReceiptPageTitle */}
+          <div className="bg-white mb-5 rounded-[15px] p-5">
+            <h2 className="text-xl font-bold">Financial Transaction Receipt</h2>
           </div>
-          {/* secondRow */}
-          <div className="flex flex-col gap-5">
-            {/* head */}
-            <div className="text-center border-b border-[#cfcfcf] p-5 mb-[25px]">
-              <div className="mb-[30px]">
-                <h2 className="text-xl font-bold">{user.student.school}</h2>
-                <h2 className="text-xl font-bold">Proof of Fees Payment</h2>
+          {/* ReceiptPageContent */}
+          <div className="bg-white mb-5 rounded-[10px] flex flex-col gap-5">
+            {/* firstRow */}
+            <div className="flex justify-between items-center px-10 pt-5">
+              {/* dropdown */}
+              <div className="flex gap-[30px] items-center">
+                <label htmlFor="session">Select Session :</label>
+                <select
+                  name="session"
+                  value={session}
+                  onChange={(e) => setSession(e.target.value)}
+                  required
+                  className="outline-none border-0 bg-[#cfcfcf66] rounded-[10px] p-2.5 text-base font-normal"
+                >
+                  {dummysession.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
               </div>
-              <div className="flex items-center justify-center font-bold gap-[10px]">
-                <p>
-                  Name:
-                  {user?.student?.first_name + " " + user?.student?.last_name}
-                </p>
-                <p>Student ID: {user.id}</p>
-                <p>Class: </p>
-                <p>Session: {session}</p>
+              {/* printButton */}
+              <div>
+                <button className="bg-[#0b71b5] text-white font-bold px-10 py-2.5 rounded-[10px] cursor-pointer">
+                  Print
+                </button>
               </div>
             </div>
-            {/* Receipt Table */}
-            <div>
-              <table className="border-collapse mb-[30px] w-full">
-                <thead className="bg-[#80adcb] text-white text-left font-bold">
-                  <tr>
-                    <th className="py-[10px] px-[12px] min-h-[60px]">S/N</th>
-                    <th className="py-[10px] px-[12px] min-h-[60px]">
-                      Purpose
-                    </th>
-                    <th className="py-[10px] px-[12px] min-h-[60px]">
-                      Transaction Number
-                    </th>
-                    <th className="py-[10px] px-[12px] min-h-[60px]">
-                      Amount Billed
-                    </th>
-                    <th className="py-[10px] px-[12px] min-h-[60px]">
-                      Amount Paid
-                    </th>
-                    <th className="py-[10px] px-[12px] min-h-[60px]">
-                      Payment Date
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="text-[14px]">
-                  {receipts.map((item, index) => {
-                    const currentDate = new Date();
-                    return (
-                      <tr key={index}>
-                        <td className="py-[10px] px-[12px] min-h-[60px] font-bold">
-                          {index + 1}
-                        </td>
-                        <td className="py-[10px] px-[12px] min-h-[60px]">
-                          {item.purpose}
-                        </td>
-                        <td className="py-[10px] px-[12px] min-h-[60px]">
-                          {item.TransactionNumber}
-                        </td>
-                        <td className="py-[10px] px-[12px] min-h-[60px]">
-                          {item.AmountBilled.toLocaleString("en-NG", {
-                            useGrouping: true,
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </td>
-                        <td className="py-[10px] px-[12px] min-h-[60px]">
-                          {item.AmountPaid.toLocaleString("en-NG", {
-                            useGrouping: true,
-                            minimumFractionDigits: 2,
-                            maximumFractionDigits: 2,
-                          })}
-                        </td>
-                        <td className="py-[10px] px-[12px] min-h-[60px]">
-                          {currentDate.toLocaleDateString()}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-            {/* ReceiptTotalContainer */}
-            <div className="grid md:[grid-template-columns:30px_1fr_auto] xl:[grid-template-columns:80px_1fr_auto]">
-              <div></div>
-              <div className="flex items-center font-bold gap-[10px]">
-                <p>Total Payment</p>
+            {/* secondRow */}
+            <div className="flex flex-col gap-5">
+              {/* head */}
+              <div className="text-center border-[#cfcfcf]">
+                <div className="mb-[30px]">
+                  <h2 className="text-xl font-bold">{user.student.school}</h2>
+                  <h2 className="text-xl font-bold">Proof of Fees Payment</h2>
+                </div>
+                <div className="flex text-sm items-center justify-center font-bold gap-[10px]">
+                  <p>
+                    Name:{" "}
+                    <span>
+                      {user?.student?.first_name +
+                        " " +
+                        user?.student?.last_name}
+                    </span>
+                  </p>
+                  <p>Student ID: {user.id}</p>
+                  <p>Class: </p>
+                  <p>Session: {session}</p>
+                </div>
+                <hr className="text-[#cfcfcf] w-full mt-5 mb-5" />
+              </div>
+              {/* Receipt Table */}
+              <div className="px-10">
+                <table className="border-collapse mb-[18px] w-full table-fixed">
+                  <thead className="bg-[#80adcb] text-white xl:text-base text-[13.4px]  text-left font-bold">
+                    <tr>
+                      <th className="py-[10px] px-[12px] w-1/2 ">S/N</th>
+                      <th className="py-[10px] px-[12px] w-1/2 ">Purpose</th>
+                      <th className="py-[10px] px-[12px] w-1/2 ">
+                        Transaction Number
+                      </th>
+                      <th className="py-[10px] px-[12px] w-1/2 ">
+                        Amount Billed
+                      </th>
+                      <th className="py-[10px] px-[12px] w-1/2 ">
+                        Amount Paid
+                      </th>
+                      <th className="py-[10px] px-[12px] w-1/2 ">
+                        Payment Date
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="xl:text-sm text-xs">
+                    {receipts.map((item, index) => {
+                      const currentDate = new Date();
+                      return (
+                        <tr key={index}>
+                          <td className="py-[10px] px-[12px] w-1/2  font-bold">
+                            {index + 1}
+                          </td>
+                          <td className="py-[10px] px-[12px] w-1/2 ">
+                            {item.purpose}
+                          </td>
+                          <td className="py-[10px] px-[12px] w-1/2 ">
+                            {item.TransactionNumber}
+                          </td>
+                          <td className="py-[10px] px-[12px] w-1/2 ">
+                            {item.AmountBilled.toLocaleString("en-NG", {
+                              useGrouping: true,
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                          <td className="py-[10px] px-[12px] w-1/2 ">
+                            {item.AmountPaid.toLocaleString("en-NG", {
+                              useGrouping: true,
+                              minimumFractionDigits: 2,
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                          <td className="py-[10px] px-[12px] w-1/2 ">
+                            {currentDate.toLocaleDateString()}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              {/* ReceiptTotalContainer */}
+              <div className="pl-35 mb-10 flex items-center font-bold gap-[10px]">
+                <p className="text-sm">Total Payment</p>
                 <div className="text-[#4084b1] bg-[#cfcfcf66] rounded-[10px] p-[5px] text-[18px]">
                   {receipts
                     .reduce((sum, fee) => sum + fee.AmountPaid, 0)
@@ -171,7 +171,6 @@ const ReceiptItem = () => {
                     })}
                 </div>
               </div>
-              <div></div>
             </div>
           </div>
         </div>

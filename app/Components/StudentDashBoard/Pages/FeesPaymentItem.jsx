@@ -87,7 +87,7 @@ const FeesPaymentItem = () => {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-5 p-4 xl:pt-10 xl:pr-8  bg-[#f0f0f0] rounded-lg min-h-screen">
+      <div className="flex flex-col gap-5 p-4 xl:pt-10 xl:pr-8  bg-[#f0f0f0] rounded-lg h-screen">
         {/* First Card Section */}
         <div className="flex flex-col xl:gap-12 gap-8 md:flex-row md:justify-between bg-white rounded-xl p-6 pl-3 pr-3 xl:pl-14 xl:pr-14">
           <Link
