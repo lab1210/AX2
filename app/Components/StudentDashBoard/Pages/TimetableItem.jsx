@@ -96,7 +96,7 @@ export default function TimetablePage() {
 
   return (
     <Layout>
-      <div className="min-h-screen bg-gray-100 p-4 flex flex-col rounded-lg">
+      <div className="min-h-screen bg-gray-100 p-4 pr-10 pl-6 flex flex-col rounded-lg">
         {/* Header Card */}
         <div className=" bg-white rounded-lg p-6 pt-3 pb-3 mb-6 shadow xl:w-fit w-full">
           <h1 className="text-lg  md:text-xl font-bold text-gray-800">
@@ -110,11 +110,11 @@ export default function TimetablePage() {
             <thead>
               <tr>
                 {/* Empty corner cell */}
-                <th className="py-1 px-2 bg-[#69577d] text-white font-semibold"></th>
+                <th className="py-1 px-1 bg-[#69577d] text-white font-semibold"></th>
                 {days.map((day) => (
                   <th
                     key={day}
-                    className="py-1 px-2  bg-[#69577d] text-white font-semibold"
+                    className="py-1 px-1  bg-[#69577d] text-white font-semibold"
                   >
                     {day}
                   </th>
@@ -131,10 +131,10 @@ export default function TimetablePage() {
                   {days.map((day) => {
                     const content = schedule[day][rowIndex];
                     const isNoContent = !content || content.trim() === "";
-                    const cellClassName = `py-1 px-2  text-center text-xs font-semibold  ${
+                    const cellClassName = `py-1 px-1  text-center text-xs font-semibold  ${
                       isNoContent
                         ? "bg-[#69577d] border-0"
-                        : "bg-white border-[1.5px] border-black/80 border-l"
+                        : "bg-white border-[1.3px] border-black/80 border-l"
                     }`;
                     return (
                       <td key={`${day}-${rowIndex}`} className={cellClassName}>
