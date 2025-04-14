@@ -136,7 +136,7 @@ export default function Studentdashboard() {
             <div className="p-4">
               <h2 className="text-4xl font-bold mb-3">Hi, {name}</h2>
               <p className="text-sm">
-                Welcome to the official Foursquare student portal.
+                Welcome to the official {user.student.school} student portal.
               </p>
             </div>
             <div className="max-w-[240px] h-full object-contain ">
