@@ -131,7 +131,7 @@ export default function Studentdashboard() {
       {/*========== Desktop Version (unchanged) ==========*/}
       <div className="hidden lg:block">
         {/* Your existing desktop code goes here */}
-        <div className="h-screen rounded-lg bg-[#e9e9e9] p-10 pl-3 pr-3 flex flex-col gap-5 items-center">
+        <div className=" rounded-lg bg-[#e9e9e9] p-10 pl-3 pr-3 flex flex-col gap-5 items-center">
           <div className="w-full bg-[#004080] rounded-lg shadow  flex flex-row justify-between items-center text-white ">
             <div className="p-4">
               <h2 className="text-4xl font-bold mb-3">Hi, {name}</h2>
