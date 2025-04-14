@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import Layout from "../../../Components/Studentlayout"; 
+import Layout from "../../../Components/Studentlayout";
 import { useUser } from "../context/UserProvider";
 
 export default function TimetablePage() {
@@ -20,11 +20,67 @@ export default function TimetablePage() {
   ];
 
   const schedule = {
-    Monday: ["ENG LANG", "MATH", "BREAK", "PHYSICS", "BIOLOGY", "LUNCH", "GOVT", "GEO", "CHEMISTRY", "FUR MATH", "LIT"],
-    Tuesday: ["HIST", "FUR MATH", "BREAK", "CHEMISTRY", "CIVIC", "LUNCH", "ECONS", "DATA PROCESSING", "FUR MATH", "LIT", "MATH"],
-    Wednesday: ["MATH", "ENG LIT", "BREAK", "FRENCH", "GEO", "LUNCH", "BIO PRACT", "CHEM PRACT", "PHYS PRACT", "CHEM PRACT", "BIO PRACT"],
-    Thursday: ["FUR MATH", "BIO PRACT", "BREAK", "CHEM PRACT", "PHYS PRACT", "LUNCH", "ENG LANG", "MATH", "GOVT", "GEO", "CHEMISTRY"],
-    Friday: ["GEO PRACT", "CHEM TUTORIAL", "BREAK", "FREE STUDY", "PHYS TUTORIAL", "LUNCH", "CLASS FINAL"],
+    Monday: [
+      "ENG LANG",
+      "MATH",
+      "BREAK",
+      "PHYSICS",
+      "BIOLOGY",
+      "LUNCH",
+      "GOVT",
+      "GEO",
+      "CHEMISTRY",
+      "FUR MATH",
+      "LIT",
+    ],
+    Tuesday: [
+      "HIST",
+      "FUR MATH",
+      "BREAK",
+      "CHEMISTRY",
+      "CIVIC",
+      "LUNCH",
+      "ECONS",
+      "DATA PROCESSING",
+      "FUR MATH",
+      "LIT",
+      "MATH",
+    ],
+    Wednesday: [
+      "MATH",
+      "ENG LIT",
+      "BREAK",
+      "FRENCH",
+      "GEO",
+      "LUNCH",
+      "BIO PRACT",
+      "CHEM PRACT",
+      "PHYS PRACT",
+      "CHEM PRACT",
+      "BIO PRACT",
+    ],
+    Thursday: [
+      "FUR MATH",
+      "BIO PRACT",
+      "BREAK",
+      "CHEM PRACT",
+      "PHYS PRACT",
+      "LUNCH",
+      "ENG LANG",
+      "MATH",
+      "GOVT",
+      "GEO",
+      "CHEMISTRY",
+    ],
+    Friday: [
+      "GEO PRACT",
+      "CHEM TUTORIAL",
+      "BREAK",
+      "FREE STUDY",
+      "PHYS TUTORIAL",
+      "LUNCH",
+      "CLASS FINAL",
+    ],
   };
 
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
@@ -40,53 +96,56 @@ export default function TimetablePage() {
 
   return (
     <Layout>
-      <div className="h-screen bg-gray-100 p-4 flex flex-col items-center">
+      <div className="min-h-screen bg-gray-100 p-4 flex flex-col rounded-lg">
         {/* Header Card */}
-        <div className="w-full max-w-4xl bg-white rounded-md p-6 mb-6 shadow">
-          <h1 className="text-lg lg:text-2xl md:text-xl font-bold text-gray-800">
+        <div className=" bg-white rounded-lg p-6 pt-3 pb-3 mb-6 shadow xl:w-fit w-full">
+          <h1 className="text-lg  md:text-xl font-bold text-gray-800">
             2023/2024 SS1 1st Term Timetable
           </h1>
         </div>
 
         {/* Timetable Container */}
-        <div className="w-full max-w-4xl overflow-x-auto">
-          <div className=" p-2 rounded-md shadow">
-            <table className="w-full table-auto text-md text-gray-800">
-              <thead>
-                <tr>
-                  {/* Empty corner cell */}
-                  <th className="py-2 px-4 bg-[#69577d] text-white font-semibold"></th>
-                  {days.map((day) => (
-                    <th
-                      key={day}
-                      className="py-2 px-4  bg-[#69577d] text-white font-semibold"
-                    >
-                      {day}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {times.map((time, rowIndex) => (
-                  <tr key={rowIndex}>
-
-                    <td className="py-2 px-4 text-white bg-[#69577d] font-bold items-center">
-                      {time}
-                    </td>
-                    {/* Day columns */}
-                    {days.map((day) => (
-                      <td
-                        key={`${day}-${rowIndex}`}
-                        className="py-2 px-4 border border-gray-300 bg-white text-center border-l"
-                      >
-                        {schedule[day][rowIndex]}
-                      </td>
-                    ))}
-                  </tr>
+        <div className="w-full no-scrollbar">
+          <table className="w-full table-fixed text-gray-800">
+            <thead>
+              <tr>
+                {/* Empty corner cell */}
+                <th className="py-1 px-2 bg-[#69577d] text-white font-semibold"></th>
+                {days.map((day) => (
+                  <th
+                    key={day}
+                    className="py-1 px-2  bg-[#69577d] text-white font-semibold"
+                  >
+                    {day}
+                  </th>
                 ))}
-              </tbody>
-            </table>
-          </div>
+              </tr>
+            </thead>
+            <tbody>
+              {times.map((time, rowIndex) => (
+                <tr key={rowIndex}>
+                  <td className="py-1 px-4 text-white bg-[#69577d] font-bold items-center text-center ">
+                    {time}
+                  </td>
+                  {/* Day columns */}
+                  {days.map((day) => {
+                    const content = schedule[day][rowIndex];
+                    const isNoContent = !content || content.trim() === "";
+                    const cellClassName = `py-1 px-2  text-center text-xs font-semibold  ${
+                      isNoContent
+                        ? "bg-[#69577d] border-0"
+                        : "bg-white border-[1.5px] border-black/80 border-l"
+                    }`;
+                    return (
+                      <td key={`${day}-${rowIndex}`} className={cellClassName}>
+                        {content}
+                      </td>
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </div>
     </Layout>
