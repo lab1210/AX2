@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../../Studentlayout";
 import { getUserDetails } from "@/app/Service/AuthService";
+import { FaCamera } from "react-icons/fa6";
+import { MdOutlineCamera, MdOutlineCameraAlt } from "react-icons/md";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
@@ -36,10 +38,10 @@ export default function ProfilePage() {
     <Layout>
       {/* Desktop View (unchanged) */}
       <div className="hidden lg:block">
-        <div className="min-h-screen bg-[#D9D9D9] p-4 md:p-8 flex flex-col space-y-6">
-          <div className="bg-white flex items-center rounded-md p-6 md:p-8">
+        <div className="min-h-screen bg-[#D9D9D9] rounded-lg p-4 md:p-8 flex flex-col space-y-6">
+          <div className="bg-white flex items-center rounded-lg p-6 ">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-16 h-16 rounded-full overflow-hidden">
+              <div className="w-22 h-19 rounded-full overflow-hidden relative">
                 <img
                   src={
                     user.student.profile_picture_path === null
@@ -47,8 +49,11 @@ export default function ProfilePage() {
                       : user.student.profile_picture_path
                   }
                   alt="Avatar"
-                  className="object-cover w-full h-full"
+                  className="object-cover w-full h-full  "
                 />
+                <div className="absolute bottom-0 cursor-pointer bg-black/50 w-full">
+                  <MdOutlineCameraAlt className="ml-9 mb-1 mt-1" size={18} />
+                </div>
               </div>
               <h2 className="max-w-50 text-xl md:text-2xl font-bold text-gray-800">
                 {user?.student?.first_name + " " + user?.student?.last_name}
@@ -57,11 +62,9 @@ export default function ProfilePage() {
           </div>
 
           {/* Details */}
-          <div className="bg-white rounded-md shadow p-6 md:p-8">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">
-              Details
-            </h3>
-            <div className="grid grid-row gap-2 text-md text-gray-700 mb-4">
+          <div className="bg-white rounded-lg shadow p-6 pt-4 pb-4">
+            <h3 className="font-semibold text-[#808080] mb-2">Details</h3>
+            <div className="grid grid-row gap-2 text-md text-gray-700">
               <p>
                 <span className="font-bold">Class: </span>
               </p>
@@ -81,12 +84,12 @@ export default function ProfilePage() {
           </div>
 
           {/* Registered Subjects Card */}
-          <div className="bg-white rounded-md shadow p-6 md:p-8">
-            <p className="text-sm text-gray-400 mb-2 font-medium">
+          <div className="bg-white rounded-lg shadow p-6 pt-4 pb-6">
+            <p className=" text-[#808080] mb-2 font-semibold max-w-90">
               {registeredSubjects.length} Registered Subjects for 1st Term
               2023/2024 Session
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-sm text-gray-800">
+            <div className="grid sm:grid-cols-2 gap-2 text-sm text-gray-800 max-w-90 pl-5">
               {registeredSubjects.map((subj, idx) => (
                 <p key={idx}>{subj}</p>
               ))}
