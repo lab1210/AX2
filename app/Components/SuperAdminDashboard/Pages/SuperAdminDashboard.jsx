@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import SuperAdminLayout from "../SuperAdminLayout";
 import { usePathname } from "next/navigation";
 import { IoIosNotificationsOutline } from "react-icons/io";
-import Image from "next/image";
 import { MdCoPresent } from "react-icons/md";
 import { RiPresentationFill } from "react-icons/ri";
 import { PiStudentFill } from "react-icons/pi";
