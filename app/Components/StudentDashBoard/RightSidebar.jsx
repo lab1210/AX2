@@ -132,9 +132,9 @@ const RightSidebar = ({ user }) => {
         </div>
       </div>
 
-      <div className="grid grid-rows-2 gap-4 max-h-screen">
+      <div className="flex flex-col justify-between gap-4 sm:gap-6 2xl:gap-20 max-h-screen">
         {/* Events Section */}
-        <div className="bg-[#004080] text-white rounded-xl p-2 shadow-lg flex-1">
+        <div className="bg-[#004080]   text-white rounded-xl p-2 shadow-lg flex-1">
           <div className="space-y-1.5">
             <h2 className="text-xl font-bold">Events</h2>
             <div className="h-[50%]">

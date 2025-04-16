@@ -9,6 +9,8 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
 import { getSchools, deleteSchool } from "../../../Service/schoolService"; // Import school service functions
 
+const ITEMS_PER_PAGE = 10; // You can adjust this value
+
 const ManageSchoolsItem = () => {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -18,18 +20,13 @@ const ManageSchoolsItem = () => {
   const [allSchools, setAllSchools] = useState([]);
 
   // State for the displayed schools data after filtering and pagination
-  const [schoolsData, setSchoolsData] = useState({
-    count: 0,
-    results: [],
-    next: null,
-    previous: null,
-  });
+  const [schoolsData, setSchoolsData] = useState([]);
+  const [totalSchools, setTotalSchools] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(10); // You can make this configurable
 
   // State for search
   const [searchTerm, setSearchTerm] = useState("");
@@ -47,9 +44,10 @@ const ManageSchoolsItem = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getSchools({}, currentPage, 1000); // Fetch a large number or adjust as needed
+      const response = await getSchools({}, currentPage, ITEMS_PER_PAGE);
       if (response?.status === 200) {
         setAllSchools(response.data.results);
+        setTotalSchools(response.data.count);
       } else {
         setError(
           `Failed to fetch schools: ${response?.statusText || "Unknown error"}`
@@ -84,27 +82,13 @@ const ManageSchoolsItem = () => {
     );
   }, [allSchools, searchTerm]);
 
-  // Calculate pagination values
-  const startIndex = useMemo(
-    () => (currentPage - 1) * pageSize,
-    [currentPage, pageSize]
-  );
-  const endIndex = useMemo(() => startIndex + pageSize, [startIndex, pageSize]);
-
-  // Function to paginate the filtered schools
-  const paginatedSchools = useMemo(() => {
-    return filteredSchools.slice(startIndex, endIndex);
-  }, [filteredSchools, startIndex, endIndex]);
-
-  // Update schoolsData whenever paginatedSchools or filteredSchools changes
+  // Update schoolsData whenever filteredSchools changes (for search)
   useEffect(() => {
-    setSchoolsData({
-      count: filteredSchools.length,
-      results: paginatedSchools,
-      next: endIndex < filteredSchools.length ? true : null,
-      previous: startIndex > 0 ? true : null,
-    });
-  }, [filteredSchools, paginatedSchools, startIndex, endIndex]);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    setSchoolsData(filteredSchools.slice(startIndex, endIndex));
+    setTotalSchools(filteredSchools.length);
+  }, [filteredSchools, currentPage]);
 
   // Function to open detail modal
   const openDetailModal = (school) => {
@@ -136,15 +120,12 @@ const ManageSchoolsItem = () => {
         if (response?.status === 200) {
           console.log("School deleted successfully:", response.data);
           closeDeleteModal();
-          fetchAllSchools(); // Refresh the school list
-          // Optionally show a success message to the user
+          fetchAllSchools();
         } else {
           console.error("Error deleting school:", response);
-          // Optionally show an error message to the user
         }
       } catch (error) {
         console.error("Error deleting school:", error);
-        // Optionally show an error message to the user
       }
     }
   };
@@ -156,6 +137,33 @@ const ManageSchoolsItem = () => {
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
     setCurrentPage(1); // Reset to the first page on search
+  };
+
+  const totalPages = Math.ceil(totalSchools / ITEMS_PER_PAGE);
+
+  const renderPaginationButtons = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <div className="flex justify-center mt-4 pb-4">
+        {pageNumbers.map((number) => (
+          <button
+            key={number}
+            onClick={() => handlePageChange(number)}
+            className={`mx-1 px-3 py-1 rounded-md ${
+              currentPage === number
+                ? "bg-[#4084B1] text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            {number}
+          </button>
+        ))}
+      </div>
+    );
   };
 
   return (
@@ -318,7 +326,9 @@ const ManageSchoolsItem = () => {
           {/* Table */}
           <div className="bg-[#ffffff] rounded-lg overflow-x-auto">
             {loading ? (
-              <div className="p-8 text-center">Loading schools...</div>
+              <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+                <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
+              </div>
             ) : error ? (
               <div className="p-8 text-center text-red-500">{error}</div>
             ) : (
@@ -346,88 +356,105 @@ const ManageSchoolsItem = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {schoolsData.results.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="border-b-[#ABABABAB] border-b font-semibold text-xs cursor-pointer"
-                      onClick={() => openDetailModal(item)}
-                    >
-                      <td className="pt-2 pb-2 pl-12 text-[#333333]">
-                        {item.school_name}
-                      </td>
-                      <td className="pt-2 pb-2 text-[#333333]">
-                        {item.school_type}
-                      </td>
-                      <td className="pt-2 pb-2 text-[#333333]">
-                        {item.short_name}
-                      </td>
-                      <td className="pt-2 pb-2 text-[#333333]">
-                        {item.reg_date || "N/A"}
-                      </td>
-                      <td className="pt-2 pb-2 ">
-                        <span
-                          className={`${
-                            item.status === "Active"
-                              ? "bg-[#E8F8F0] text-[#1BB66E]"
-                              : "bg-[#FEECEC] text-[#F94144] "
-                          } rounded-2xl py-1 text-sm`}
-                          style={{
-                            minWidth: "80px",
-                            display: "inline-block",
-                            textAlign: "center",
-                          }}
-                        >
-                          {item.status}
-                        </span>
-                      </td>
-                      <td className="pt-2 pb-2 text-[#333333]">
-                        <div className="flex gap-4">
-                          <Link
-                            href={`/Super-Admin/Manage-Existing-Schools/Edit-School?adminId=${adminId}&schoolId=${item.id}`}
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <FiEdit3
-                              className="text-[#80ADCB] cursor-pointer"
-                              size={15}
-                            />
-                          </Link>
-                          <FiTrash2
-                            className="text-[#F94144] cursor-pointer"
-                            size={15}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              openDeleteModal(item);
+                  {schoolsData.length > 0 ? (
+                    schoolsData.map((item) => (
+                      <tr
+                        key={item.id}
+                        className="border-b-[#ABABABAB] border-b font-semibold text-xs cursor-pointer"
+                        onClick={() => openDetailModal(item)}
+                      >
+                        <td className="pt-2 pb-2 pl-12 text-[#333333]">
+                          {item.school_name}
+                        </td>
+                        <td className="pt-2 pb-2 text-[#333333]">
+                          {item.school_type}
+                        </td>
+                        <td className="pt-2 pb-2 text-[#333333]">
+                          {item.short_name}
+                        </td>
+                        <td className="pt-2 pb-2 text-[#333333]">
+                          {item.reg_date || "N/A"}
+                        </td>
+                        <td className="pt-2 pb-2 ">
+                          <span
+                            className={`${
+                              item.status === "Active"
+                                ? "bg-[#E8F8F0] text-[#1BB66E]"
+                                : "bg-[#FEECEC] text-[#F94144] "
+                            } rounded-2xl py-1 text-sm`}
+                            style={{
+                              minWidth: "80px",
+                              display: "inline-block",
+                              textAlign: "center",
                             }}
-                          />
-                        </div>
+                          >
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="pt-2 pb-2 text-[#333333]">
+                          <div className="flex gap-4">
+                            <Link
+                              href={`/Super-Admin/Manage-Existing-Schools/Edit-School?adminId=<span class="math-inline">\{adminId\}&schoolId\=</span>{item.id}`}
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              <FiEdit3
+                                className="text-[#80ADCB] cursor-pointer"
+                                size={15}
+                              />
+                            </Link>
+                            <FiTrash2
+                              className="text-[#F94144] cursor-pointer"
+                              size={15}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                openDeleteModal(item);
+                              }}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan="6"
+                        className="text-center py-4 text-gray-500"
+                      >
+                        {loading ? (
+                          <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+                            <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
+                          </div>
+                        ) : error ? (
+                          "Error loading Schools."
+                        ) : (
+                          "No School Found."
+                        )}
                       </td>
                     </tr>
-                  ))}
+                  )}
                 </tbody>
               </table>
             )}
           </div>
 
           {/* Pagination */}
-          {schoolsData.count > 0 && (
-            <div className="bg-[#ffffff] rounded-lg p-4 flex justify-center items-center gap-4">
-              <button
-                onClick={() => handlePageChange(currentPage - 1)}
-                disabled={!schoolsData.previous}
-                className="px-3 py-1 rounded-md bg-[#E6EFF5] text-[#333333] disabled:opacity-50"
-              >
-                Previous
-              </button>
-              <span>
-                Page {currentPage} of {Math.ceil(schoolsData.count / pageSize)}
-              </span>
-              <button
-                onClick={() => handlePageChange(currentPage + 1)}
-                disabled={!schoolsData.next}
-                className="px-3 py-1 rounded-md bg-[#E6EFF5] text-[#333333] disabled:opacity-50"
-              >
-                Next
-              </button>
+          {totalSchools > ITEMS_PER_PAGE && (
+            <div className="bg-[#ffffff] mt-2 rounded-lg p-4 flex justify-center items-center gap-4">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (number) => (
+                  <button
+                    key={number}
+                    onClick={() => handlePageChange(number)}
+                    className={`mx-1 px-3 py-1 rounded-md ${
+                      currentPage === number
+                        ? "bg-[#4084B1] text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    {number}
+                  </button>
+                )
+              )}
             </div>
           )}
         </div>

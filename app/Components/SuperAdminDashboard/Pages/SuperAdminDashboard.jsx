@@ -21,36 +21,11 @@ import {
 } from "recharts";
 import { FaFemale, FaMale } from "react-icons/fa";
 import DashboardHeader from "../DashboardHeader";
+import { getSuperAdmins } from "@/app/Service/userService";
+import { getSchools } from "@/app/Service/schoolService";
 
 const SuperAdminDashboardItem = () => {
   //Overview Cards
-
-  const Overview = [
-    {
-      background: "#390181",
-      Title: "No of Schools",
-      icon: <MdCoPresent className="w-full h-full" />,
-      subtitle: 200,
-    },
-    {
-      background: "#00274E",
-      Title: "No of Teachers",
-      icon: <RiPresentationFill className="w-full h-full" />,
-      subtitle: 245,
-    },
-    {
-      background: "#0B71B5",
-      Title: "No of Students",
-      icon: <PiStudentFill className="w-full h-full" />,
-      subtitle: 300,
-    },
-    {
-      background: "#AE2E30",
-      Title: "Total No of Users",
-      icon: <FaRegUser className="w-full h-full " />,
-      subtitle: 545,
-    },
-  ];
 
   // Sample data for payments chart
   const data = [
@@ -76,6 +51,104 @@ const SuperAdminDashboardItem = () => {
   const schoolActivityData = [
     { name: "Active Schools", value: 75, color: "#8B0000" }, // Dark Red
     { name: "Inactive Schools", value: 25, color: "#FF6666" }, // Light Red
+  ];
+
+  const [schoolCount, setSchoolCount] = useState(0);
+  const [superAdminCount, setSuperAdminCount] = useState(0);
+  const [isLoadingSchools, setIsLoadingSchools] = useState(true);
+  const [isLoadingSuperAdmins, setIsLoadingSuperAdmins] = useState(true);
+  const [errorSchools, setErrorSchools] = useState(null);
+  const [errorSuperAdmins, setErrorSuperAdmins] = useState(null);
+  useEffect(() => {
+    const fetchSchoolCount = async () => {
+      setIsLoadingSchools(true);
+      try {
+        const response = await getSchools({ page_size: 1 });
+        console.log("School API Response:", response); // Log the entire response
+        if (response && response.data && response.data.count !== undefined) {
+          // Access count from response.data
+          setSchoolCount(response.data.count);
+          console.log("School Count from Data:", response.data.count);
+        } else if (response && response.data) {
+          // Fallback to data.length (less reliable, only if you fetched all)
+          setSchoolCount(response.data.results.length);
+          console.log(
+            "School Count from Data Length:",
+            response.data.results.length
+          );
+        } else {
+          setErrorSchools("Could not fetch school count.");
+          console.log("Could not fetch school count.");
+        }
+      } catch (error) {
+        console.error("Error fetching school count:", error);
+        setErrorSchools("Error fetching school count.");
+      } finally {
+        setIsLoadingSchools(false);
+      }
+    };
+
+    const fetchSuperAdminCount = async () => {
+      setIsLoadingSuperAdmins(true);
+      try {
+        const response = await getSuperAdmins({ page_size: 1 }); // Fetch only one to get the total count from headers
+        console.log("Super Admin API Response:", response); // Log the entire response
+        if (response && response.data && response.data.count !== undefined) {
+          // Access count from response.data
+          setSuperAdminCount(response.data.count);
+          console.log("Super Admin Count from Data:", response.data.count);
+        } else if (response && response.data) {
+          // Fallback to data.length (less reliable, only if you fetched all)
+          setSuperAdminCount(response.data.results.length);
+          console.log(
+            "Super Admin Count from Data Length:",
+            response.data.results.length
+          );
+        } else {
+          setErrorSuperAdmins("Could not fetch Super Admin count.");
+          console.log("Could not fetch Super Admin count.");
+        }
+      } catch (error) {
+        console.error("Error fetching super admin count:", error);
+        setErrorSuperAdmins("Error fetching super admin count.");
+      } finally {
+        setIsLoadingSuperAdmins(false);
+      }
+    };
+
+    fetchSchoolCount();
+    fetchSuperAdminCount();
+  }, []);
+
+  const Overview = [
+    {
+      background: "#390181",
+      Title: "No of Schools",
+      icon: <MdCoPresent className="w-full h-full" />,
+      subtitle: isLoadingSchools ? "..." : errorSchools ? "Error" : schoolCount,
+    },
+    {
+      background: "#00274E",
+      Title: "No of Teachers",
+      icon: <RiPresentationFill className="w-full h-full" />,
+      subtitle: 245,
+    },
+    {
+      background: "#0B71B5",
+      Title: "No of Students",
+      icon: <PiStudentFill className="w-full h-full" />,
+      subtitle: 300,
+    },
+    {
+      background: "#AE2E30",
+      Title: "No of Super Admins",
+      icon: <FaRegUser className="w-full h-full " />,
+      subtitle: isLoadingSuperAdmins
+        ? "..."
+        : errorSuperAdmins
+        ? "Error"
+        : superAdminCount,
+    },
   ];
 
   return (

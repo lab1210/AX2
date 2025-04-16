@@ -1,48 +1,166 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import SuperAdminLayout from "../SuperAdminLayout";
 import DashboardHeader from "../DashboardHeader";
 import { RiEqualizerLine } from "react-icons/ri";
-import Subscribe from "../../Subscribtion";
 import { FiEdit3 } from "react-icons/fi";
 import { FaCheck } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
+import {
+  getSchoolSubscriptions,
+  updateSchoolSubscription,
+} from "@/app/Service/schoolService";
+
+const itemsPerPage = 10; // You can adjust this value
+
 const MonitorSubscribtionItem = () => {
-  // State to track selected school
-  const [selectedSchoolSubscribe, setSelectedSchoolSubscribe] = useState(null);
+  const [subscriptions, setSubscriptions] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [apiError, setApiError] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
-  const [modalTransform, setModalTransform] = useState("translateX(-100%)");
-  const [modalOpacity, setModalOpacity] = useState(0);
+  // State for the edit modal
+  const [selectedSubscription, setSelectedSubscription] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editAmountPerStudent, setEditAmountPerStudent] = useState("");
+  const [editAmountPaid, setEditAmountPaid] = useState("");
+  const [editExpireDate, setEditExpireDate] = useState("");
+  const [updateLoading, setUpdateLoading] = useState(false);
+  const [updateApiError, setUpdateApiError] = useState(null);
 
-  // Function to open modal
-  const openModal = (school) => {
-    setSelectedSchoolSubscribe(school);
-    setTimeout(() => {
-      setModalTransform("translateX(0)");
-      setModalOpacity(1);
-    }, 0);
+  // Function to format currency
+  const formatCurrency = (amount) => {
+    if (typeof amount === "number") {
+      return new Intl.NumberFormat("en-NG", {
+        style: "currency",
+        currency: "NGN",
+      }).format(amount);
+    }
+    return "N/A";
   };
 
-  // Function to close modal
+  // Function to fetch school subscriptions
+  const fetchSubscriptions = useCallback(async () => {
+    setLoading(true);
+    setApiError(null);
+    try {
+      const response = await getSchoolSubscriptions();
+      if (response?.status === 200 && response.data) {
+        setSubscriptions(response.data);
+      } else {
+        setApiError("Failed to fetch school subscriptions.");
+      }
+    } catch (error) {
+      console.error("Error fetching school subscriptions:", error);
+      setApiError("An error occurred while fetching subscriptions.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchSubscriptions();
+  }, [fetchSubscriptions]);
+
+  // Function to open the edit modal
+  const openModal = (subscription) => {
+    setSelectedSubscription(subscription);
+    setEditAmountPerStudent(String(subscription.amount_per_student));
+    setEditAmountPaid(String(subscription.amount_paid));
+    setEditExpireDate(subscription.expired_date);
+    setIsModalOpen(true);
+  };
+
+  // Function to close the edit modal
   const closeModal = () => {
-    setModalTransform("translateX(-100%)");
-    setModalOpacity(0);
-    setTimeout(() => {
-      setSelectedSchoolSubscribe(null);
-    }, 300);
+    setIsModalOpen(false);
+    setSelectedSubscription(null);
+    setUpdateApiError(null);
   };
+
+  // Function to handle saving the edited subscription data
+  const handleSaveSubscription = async () => {
+    if (!selectedSubscription?.subscription_id) {
+      console.error("No subscription ID found for the selected subscription.");
+      return;
+    }
+
+    setUpdateLoading(true);
+    setUpdateApiError(null);
+
+    const updatedSubscriptionData = {
+      amount_per_student: parseFloat(editAmountPerStudent),
+      amount_paid: parseFloat(editAmountPaid),
+      expired_date: editExpireDate,
+    };
+
+    try {
+      const response = await updateSchoolSubscription(
+        selectedSubscription.subscription_id,
+        updatedSubscriptionData
+      );
+
+      if (response?.status === 200) {
+        console.log("Subscription updated successfully:", response.data);
+        closeModal();
+        fetchSubscriptions(); // Refetch subscriptions to update the list
+      } else {
+        setUpdateApiError(
+          response?.data?.message || "Failed to update subscription."
+        );
+      }
+    } catch (error) {
+      console.error("Error updating subscription:", error);
+      setUpdateApiError("An error occurred while updating the subscription.");
+    } finally {
+      setUpdateLoading(false);
+    }
+  };
+
+  // Filter subscriptions based on search query
+  const filteredSubscriptions = subscriptions.filter((sub) =>
+    sub.school_name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredSubscriptions.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const totalPages = Math.ceil(filteredSubscriptions.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const handleSearch = (e) => {
+    setSearchQuery(e.target.value);
+    setCurrentPage(1); // Reset to the first page on search
+  };
+
+  if (loading) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (apiError) {
+    return <div>Error: {apiError}</div>;
+  }
+
   return (
     <SuperAdminLayout>
-      {selectedSchoolSubscribe && (
+      {isModalOpen && selectedSubscription && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
             className="absolute inset-0 bg-black/65"
             onClick={closeModal}
           ></div>
-          <div
-            className="relative bg-white  rounded-md shadow-lg  z-50 transition-transform min-w-110 duration-600 ease-in-out"
-            style={{ transform: modalTransform, opacity: modalOpacity }}
-          >
+          <div className="relative bg-white rounded-md shadow-lg z-50 transition-transform min-w-110 duration-600 ease-in-out">
             <div className="flex justify-end pt-5 pr-5">
               <span onClick={closeModal} className="cursor-pointer">
                 <IoClose size={20} />
@@ -51,36 +169,47 @@ const MonitorSubscribtionItem = () => {
             <div className="text-center font-bold text-gray-400]">
               <p>SUBSCRIPTION PLAN</p>
             </div>
-            <form className="flex flex-col  mt-5 pl-10 pr-10 gap-2">
-              <div className="flex justify-between  font-semibold text-[#AEAEAE]">
+            <form className="flex flex-col mt-5 pl-10 pr-10 gap-2">
+              <div className="flex justify-between font-semibold text-[#AEAEAE]">
                 <p>Amount Per Student:</p>
                 <input
                   type="text"
-                  className=" text-sm  text-center pl-2 pr-2  focus:outline-none  border-[2px]  border-[#d4d4d4]  "
-                  defaultValue={selectedSchoolSubscribe.AmountPerStudent}
+                  className="text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
+                  value={editAmountPerStudent}
+                  onChange={(e) => setEditAmountPerStudent(e.target.value)}
                 />
               </div>
-              <div className="flex justify-between  font-semibold ">
+              <div className="flex justify-between font-semibold ">
                 <p className="text-[#01427A]">Amount Paid:</p>
                 <input
                   type="text"
-                  className="text-[#AEAEAE] text-sm  text-center pl-2 pr-2  focus:outline-none  border-[2px]  border-[#d4d4d4]  "
-                  defaultValue={selectedSchoolSubscribe.AmountPaid}
+                  className="text-[#AEAEAE] text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
+                  value={editAmountPaid}
+                  onChange={(e) => setEditAmountPaid(e.target.value)}
                 />
               </div>
 
-              <div className="flex justify-between  font-semibold ">
+              <div className="flex justify-between font-semibold ">
                 <p className="text-[#01427A]">Expired Date:</p>
                 <input
                   type="text"
-                  className="text-[#AEAEAE] text-sm  text-center pl-2 pr-2  focus:outline-none  border-[2px]  border-[#d4d4d4]  "
-                  defaultValue={selectedSchoolSubscribe.Expire}
+                  className="text-[#AEAEAE] text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
+                  value={editExpireDate}
+                  onChange={(e) => setEditExpireDate(e.target.value)}
                 />
               </div>
+              {updateApiError && (
+                <p className="text-red-500 text-sm">{updateApiError}</p>
+              )}
               <div className="pb-10 pt-5">
-                <button className="text-white rounded-md pt-1 cursor-pointer pb-1 bg-[#4084B1] w-full">
-                  {" "}
-                  Save
+                <button
+                  onClick={handleSaveSubscription}
+                  disabled={updateLoading}
+                  className={`text-white rounded-md pt-1 cursor-pointer pb-1 w-full ${
+                    updateLoading ? "bg-gray-400" : "bg-[#4084B1]"
+                  }`}
+                >
+                  {updateLoading ? "Saving..." : "Save"}
                 </button>
               </div>
             </form>
@@ -96,6 +225,8 @@ const MonitorSubscribtionItem = () => {
               type="text"
               placeholder="Search School"
               className="w-full outline-none bg-transparent text-[#AEAEAE] text-sm p-2 pl-5"
+              value={searchQuery}
+              onChange={handleSearch}
             />
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -146,66 +277,82 @@ const MonitorSubscribtionItem = () => {
               </tr>
             </thead>
             <tbody>
-              {Subscribe.map((item, index) => {
-                return (
-                  <tr
-                    key={index}
-                    className="border-b-[#978F8F] border-b font-semibold text-xs cursor-pointer "
-                  >
-                    <td className="pt-2 pb-2 pl-12 text-[#333333]">
-                      {item.SchoolName}
-                    </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
-                      {item.NoOfStudents}
-                    </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
-                      {"N" + item.AmountPerStudent}
-                    </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
-                      {"N" + item.AmountExpected}
-                    </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
-                      {"N" + item.AmountPaid}
-                    </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
-                      {item.StartDate}
-                    </td>
-                    <td className="pt-2 pb-2 text-[#333333]">{item.Expire}</td>
-
-                    <td className="pt-2 pb-2 flex items-center  gap-2">
-                      <span
-                        className={`${
-                          item.Status === "Active"
-                            ? " text-[#1BB66E] "
-                            : " text-[#F94144] "
-                        } font-bold `}
-                      >
-                        {item.Status}
-                      </span>
-                      <span
-                        className={`${
-                          item.Status === "Active"
-                            ? " bg-[#1BB66E]"
-                            : " bg-[#F94144]"
-                        } font-bold text-white text-center rounded-xs`}
-                      >
-                        {item.Status === "Active" ? <FaCheck /> : <IoClose />}
-                      </span>
-                    </td>
-                    <td className="pt-2 pb-2 pr-8 pl-5 text-[#333333]">
-                      <div className="flex gap-4">
-                        <FiEdit3
-                          className="text-[#80ADCB] cursor-pointer"
-                          size={15}
-                          onClick={() => openModal(item)}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
+              {currentItems.map((item) => (
+                <tr
+                  key={item.subscription_id}
+                  className="border-b-[#978F8F] border-b font-semibold text-xs cursor-pointer "
+                >
+                  <td className="pt-2 pb-2 pl-12 text-[#333333]">
+                    {item.school_name}
+                  </td>
+                  <td className="pt-2 pb-2 text-[#333333]">
+                    {item.live_number_students}
+                  </td>
+                  <td className="pt-2 pb-2 text-[#333333]">
+                    {formatCurrency(item.amount_per_student)}
+                  </td>
+                  <td className="pt-2 pb-2 text-[#333333]">
+                    {formatCurrency(item.live_expected_fee)}
+                  </td>
+                  <td className="pt-2 pb-2 text-[#333333]">
+                    {formatCurrency(item.amount_paid)}
+                  </td>
+                  <td className="pt-2 pb-2 text-[#333333]">
+                    {item.active_date}
+                  </td>
+                  <td className="pt-2 pb-2 text-[#333333]">
+                    {item.expired_date}
+                  </td>
+                  <td className="pt-2 pb-2 flex items-center  gap-2">
+                    <span
+                      className={`${
+                        item.live_is_active
+                          ? " text-[#1BB66E] "
+                          : " text-[#F94144] "
+                      } font-bold `}
+                    >
+                      {item.live_is_active ? "Active" : "Inactive"}
+                    </span>
+                    <span
+                      className={`${
+                        item.live_is_active ? " bg-[#1BB66E]" : " bg-[#F94144]"
+                      } font-bold text-white text-center rounded-xs`}
+                    >
+                      {item.live_is_active ? <FaCheck /> : <IoClose />}
+                    </span>
+                  </td>
+                  <td className="pt-2 pb-2 pr-8 pl-5 text-[#333333]">
+                    <div className="flex gap-4">
+                      <FiEdit3
+                        className="text-[#80ADCB] cursor-pointer"
+                        size={15}
+                        onClick={() => openModal(item)}
+                      />
+                    </div>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
+          {filteredSubscriptions.length > itemsPerPage && (
+            <div className="flex justify-center mt-4 pb-4">
+              {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                (number) => (
+                  <button
+                    key={number}
+                    onClick={() => paginate(number)}
+                    className={`mx-1 px-3 py-1 rounded-md ${
+                      currentPage === number
+                        ? "bg-[#4084B1] text-white"
+                        : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                    }`}
+                  >
+                    {number}
+                  </button>
+                )
+              )}
+            </div>
+          )}
         </div>
       </div>
     </SuperAdminLayout>
