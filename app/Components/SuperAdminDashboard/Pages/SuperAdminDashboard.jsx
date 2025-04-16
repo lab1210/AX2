@@ -141,7 +141,7 @@ const SuperAdminDashboardItem = () => {
     },
     {
       background: "#AE2E30",
-      Title: "No of Super Admins",
+      Title: "No of Users",
       icon: <FaRegUser className="w-full h-full " />,
       subtitle: isLoadingSuperAdmins
         ? "..."
