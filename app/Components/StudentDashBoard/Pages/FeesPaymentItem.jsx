@@ -107,7 +107,7 @@ const FeesPaymentItem = () => {
               <div className="flex items-center gap-2 justify-center">
                 <p className="text-sm text-white">More info</p>
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                  <FaArrowRight className="text-[#4084B1] text-xs" />
+                  <FaArrowRight className="text-[#4084B1] text-sm 2xl:text-lg" />
                 </div>
               </div>
             </div>
@@ -130,7 +130,7 @@ const FeesPaymentItem = () => {
               <div className="flex items-center gap-2 justify-center">
                 <p className="text-sm text-white">More info</p>
                 <div className="w-4 h-4 bg-white rounded-full flex items-center justify-center">
-                  <FaArrowRight className="text-red-500 text-xs" />
+                  <FaArrowRight className="text-red-500 text-sm 2xl:text-lg" />
                 </div>
               </div>
             </div>
@@ -146,7 +146,7 @@ const FeesPaymentItem = () => {
         <div className=" w-full bg-white rounded-xl  ">
           <div className="grid grid-cols-1 md:grid-cols-[1fr_1fr_auto] gap-4 mb-8 p-5 pb-0">
             <div className="flex items-center gap-2">
-              <label className="text-xs">Select Session :</label>
+              <label className="text-sm 2xl:text-md">Select Session :</label>
               <select
                 className="bg-gray-100 rounded-lg p-1 text-sm outline-0"
                 value={session}
@@ -161,7 +161,7 @@ const FeesPaymentItem = () => {
             </div>
 
             <div className="flex items-center gap-2">
-              <label className="text-xs">Select Term :</label>
+              <label className="text-sm 2xl:text-md">Select Term :</label>
               <select
                 className="bg-gray-100 rounded-lg p-1 outline-0 text-sm"
                 value={term}
@@ -181,7 +181,7 @@ const FeesPaymentItem = () => {
             </div>
           </div>
 
-          <div className="w-[80%] md:w-full font-bold xl:text-sm text-xs flex flex-wrap gap-4 mb-6 justify-center">
+          <div className="w-[80%] md:w-full font-bold text-sm 2xl:text-md flex flex-wrap gap-4 mb-6 justify-center">
             <p>
               Name: {user?.student?.first_name + " " + user?.student?.last_name}
             </p>
@@ -190,26 +190,26 @@ const FeesPaymentItem = () => {
             <p>Session: {session}</p>
           </div>
 
-          <div className="overflow-x-auto pl-3 pr-3">
+          <div className="overflow-x-auto pl-3 pr-3 p-2">
             <table className="w-full  table-fixed">
-              <thead className="bg-red-500 text-white ">
+              <thead className="bg-red-500 text-white text-md xl:text-xl">
                 <tr>
-                  <th className="p-[3px] pl-2 w-1/12 text-left border-r border-gray-200 text-xs md:text-[13.4px]">
+                  <th className="p-[3px] pl-2 w-1/12 text-left border-r border-gray-200 text-sm 2xl:text-lg md:text-[13.4px]">
                     S/N
                   </th>
-                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-xs md:text-[13.4px]">
+                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-sm 2xl:text-lg md:text-[13.4px]">
                     Purpose
                   </th>
-                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-xs md:text-[13.4px]">
+                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-sm 2xl:text-lg md:text-[13.4px]">
                     Transaction Number
                   </th>
-                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-xs md:text-[13.4px]">
+                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-sm 2xl:text-lg md:text-[13.4px]">
                     Amount Billed
                   </th>
-                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-xs md:text-[13.4px]">
+                  <th className="p-[3px] pl-2 w-1 text-left border-r border-gray-200 text-sm 2xl:text-lg md:text-[13.4px]">
                     Amount Paid
                   </th>
-                  <th className="p-[3px] pl-2 w-1 text-left text-xs md:text-sm">
+                  <th className="p-[3px] pl-2 w-1 text-left text-sm 2xl:text-lg md:text-sm">
                     Payment Date
                   </th>
                 </tr>
@@ -225,23 +225,23 @@ const FeesPaymentItem = () => {
                 ) : (
                   fees.map((item, index) => (
                     <tr key={index} className="border-b border-gray-200">
-                      <td className="p-2  border-r border-gray-200 text-xs ">
+                      <td className="p-2  border-r border-gray-200 text-sm 2xl:text-md">
                         {index + 1}
                       </td>
-                      <td className="p-2  border-r border-gray-200 text-xs ">
+                      <td className="p-2  border-r border-gray-200 text-sm 2xl:text-md ">
                         {item.purpose}
                       </td>
-                      <td className="p-2  border-r border-gray-200 text-xs ">
+                      <td className="p-2  border-r border-gray-200 text-sm 2xl:text-md ">
                         {item.TransactionNumber}
                       </td>
-                      <td className="p-2  border-r border-gray-200 text-xs ">
+                      <td className="p-2  border-r border-gray-200 text-sm 2xl:text-md ">
                         {formatCurrency(item.AmountBilled)}
                       </td>
-                      <td className="p-2  border-r border-gray-200 text-xs ">
+                      <td className="p-2  border-r border-gray-200 text-sm 2xl:text-md ">
                         {formatCurrency(item.AmountPaid)}
                       </td>
                       <td
-                        className={`p-2   text-xs  ${
+                        className={`p-2   text-sm 2xl:text-md  ${
                           item.PaymentDate === "Pending"
                             ? "text-red-500"
                             : "text-gray-700"
@@ -261,23 +261,23 @@ const FeesPaymentItem = () => {
 
           <div className="flex flex-wrap justify-between  mt-6 pl-5 pr-5 pb-3">
             <div className="flex items-center gap-2 mb-2">
-              <p className="text-xs">Amount brought forward:</p>
+              <p className="text-sm 2xl:text-lg">Amount brought forward:</p>
               <span className="bg-gray-100 rounded-lg px-2 text-sm">Nil</span>
             </div>
             <div className="flex items-center gap-2 mb-2">
-              <p className="text-xs">Total Charges:</p>
+              <p className="text-sm 2xl:text-lg">Total Charges:</p>
               <span className="bg-gray-100 rounded-lg px-2 text-sm">
                 {formatCurrency(totalAmountBilled)}
               </span>
             </div>
             <div className="flex items-center gap-2 mb-2">
-              <p className="text-xs">Amount Paid:</p>
+              <p className="text-sm 2xl:text-lg">Amount Paid:</p>
               <span className="bg-gray-100 rounded-lg px-2 text-sm">
                 {formatCurrency(totalAmountPaid)}
               </span>
             </div>
             <div className="flex items-center gap-2 mb-2">
-              <p className="text-xs">Amount Pending:</p>
+              <p className="text-sm 2xl:text-lg">Amount Pending:</p>
               <span className="bg-red-500 text-white rounded-lg px-2 text-sm">
                 {formatCurrency(totalAmountPending)}
               </span>

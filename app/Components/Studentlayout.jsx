@@ -83,7 +83,7 @@ const Layout = ({ children }) => {
 
   return (
     <>
-      <div className="w-full h-screen grid grid-cols-1 xl:grid-cols-[160px_1fr_280px] lg:grid-cols-[160px_1fr_230px] overflow-hidden bg-gray-100">
+      <div className="w-full h-screen grid grid-cols-1 xl:grid-cols-[180px_1fr_260px] lg:grid-cols-[160px_1fr_230px] overflow-hidden bg-gray-100">
         <div className="hidden lg:block">
           <Suspense>
             <LeftSidebar setUser={setUser} user={user} />

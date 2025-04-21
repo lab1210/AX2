@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Layout from "../../../Components/Studentlayout";
+import { PiPencilSimpleLine } from "react-icons/pi";
 
 export default function RecordSummary() {
   const router = useRouter();
@@ -35,11 +36,12 @@ export default function RecordSummary() {
     );
   }
 
-  // Destructure the data for convenience
   const {
     name,
     className,
     dob,
+    age,
+    classes,
     gender,
     weight,
     height,
@@ -56,7 +58,15 @@ export default function RecordSummary() {
     hearingDifficulties,
     hearingDetails,
     currentMedication,
+    currentMedicationDetails,
     emergencyCondition,
+    emergencyConditionDetails,
+    heartChallenges,
+    heartChallengesDetails,
+    physicalDisabilities,
+    physicalDisabilitiesDetails,
+    dietaryNeeds,
+    dietaryNeedsDetails,
   } = healthRecord;
 
   return (
@@ -64,7 +74,6 @@ export default function RecordSummary() {
       {/* Desktop View (unchanged) */}
       <div className="hidden lg:block">
         <div className="bg-gray-100 min-h-screen p-4 md:p-8">
-          {/* Top Card: Student Name + Image */}
           <div className="bg-white rounded-md shadow p-6 flex items-center gap-4 mb-4">
             <div className="w-16 h-16 rounded-full overflow-hidden">
               <img
@@ -94,6 +103,9 @@ export default function RecordSummary() {
               </p>
               <p>
                 <span className="font-bold">Gender:</span> {gender}
+              </p>
+              <p>
+                <span className="font-bold">Age:</span> {age}
               </p>
             </div>
           </div>
@@ -133,13 +145,17 @@ export default function RecordSummary() {
                 <p className="text-black font-semibold mb-1">
                   Current Medication:
                 </p>
-                <p className="text-black">{currentMedication || "N/A"}</p>
+                <p className="text-black">
+                  {currentMedicationDetails || "N/A"}
+                </p>
               </div>
               <div className="flex justify-between">
                 <p className="text-black font-semibold mb-1">
                   Emergency Condition:
                 </p>
-                <p className="text-black">{emergencyCondition || "N/A"}</p>
+                <p className="text-black">
+                  {emergencyConditionDetails || "N/A"}
+                </p>
               </div>
             </div>
           </div>
@@ -160,49 +176,44 @@ export default function RecordSummary() {
 
             <div className="overflow-x-auto">
               <table className="w-full text-left">
-                <thead>
-                  <tr className="border-b border-gray-300">
-                    <th className="py-2 font-semibold text-gray-600 border-r border-gray-300">
-                      Medical Informations
-                    </th>
-                    <th className="py-2 font-semibold text-gray-600 border-r border-gray-300">
-                      Response
-                    </th>
-                    <th className="py-2 font-semibold text-gray-600">Details</th>
-                  </tr>
-                </thead>
                 <tbody>
                   {/* Had Surgery */}
                   <tr className="border-b border-gray-300">
                     <td className="py-2 border-r border-gray-300">
                       Had surgery before?
                     </td>
-                    <td className="py-2 border-r border-gray-300">
+                    <td className="py-2 border-r border-gray-300 text-center">
                       {hadSurgery === "Yes" ? "Yes" : "No"}
                     </td>
-                    <td className="py-2">
+                    <td className="py-2 text-right">
                       {hadSurgery === "Yes" ? surgeryDetails || "N/A" : "Nil"}
                     </td>
                   </tr>
 
                   {/* Eye Defect */}
                   <tr className="border-b border-gray-300">
-                    <td className="py-2 border-r border-gray-300">Eye defect?</td>
-                    <td className="py-2 border-r border-gray-300 mr-5">
+                    <td className="py-2 border-r border-gray-300">
+                      Eye defect?
+                    </td>
+                    <td className="py-2 border-r border-gray-300 text-center">
                       {hasEyeDefect === "Yes" ? "Yes" : "No"}
                     </td>
-                    <td className="py-2">
-                      {hasEyeDefect === "Yes" ? eyeDefectDetails || "N/A" : "Nil"}
+                    <td className="py-2 text-right">
+                      {hasEyeDefect === "Yes"
+                        ? eyeDefectDetails || "N/A"
+                        : "Nil"}
                     </td>
                   </tr>
 
                   {/* Allergies */}
                   <tr className="border-b border-gray-300">
-                    <td className="py-2 border-r border-gray-300">Allergies?</td>
                     <td className="py-2 border-r border-gray-300">
+                      Allergies?
+                    </td>
+                    <td className="py-2 border-r border-gray-300 text-center">
                       {allergies === "Yes" ? "Yes" : "No"}
                     </td>
-                    <td className="py-2">
+                    <td className="py-2 text-right">
                       {allergies === "Yes" ? allergiesDetails || "N/A" : "Nil"}
                     </td>
                   </tr>
@@ -212,10 +223,10 @@ export default function RecordSummary() {
                     <td className="py-2 border-r border-gray-300">
                       Regular Medications?
                     </td>
-                    <td className="py-2 border-r border-gray-300">
+                    <td className="py-2 border-r border-gray-300 text-center">
                       {regularMedications === "Yes" ? "Yes" : "No"}
                     </td>
-                    <td className="py-2">
+                    <td className="py-2 text-right">
                       {regularMedications === "Yes"
                         ? medicationsDetails || "N/A"
                         : "Nil"}
@@ -227,12 +238,51 @@ export default function RecordSummary() {
                     <td className="py-2 border-r border-gray-300">
                       Hearing Difficulties?
                     </td>
-                    <td className="py-2 border-r border-gray-300">
+                    <td className="py-2 border-r border-gray-300 text-center">
                       {hearingDifficulties === "Yes" ? "Yes" : "No"}
                     </td>
-                    <td className="py-2">
+                    <td className="py-2 text-right">
                       {hearingDifficulties === "Yes"
                         ? hearingDetails || "N/A"
+                        : "Nil"}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300">
+                    <td className="py-2 border-r border-gray-300 text-left">
+                      Heart challenges?
+                    </td>
+                    <td className="py-2 border-r border-gray-300 p-2 text-center">
+                      {heartChallenges === "Yes" ? "Yes" : "No"}
+                    </td>
+                    <td className="py-2 text-right">
+                      {heartChallenges === "Yes"
+                        ? heartChallengesDetails || "N/A"
+                        : "Nil"}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300">
+                    <td className="py-2 border-r border-gray-300 text-left">
+                      Physical disabilities?
+                    </td>
+                    <td className="py-2 border-r border-gray-300 p-2 text-center">
+                      {physicalDisabilities === "Yes" ? "Yes" : "No"}
+                    </td>
+                    <td className="py-2 text-right">
+                      {physicalDisabilities === "Yes"
+                        ? physicalDisabilitiesDetails || "N/A"
+                        : "Nil"}
+                    </td>
+                  </tr>
+                  <tr className="border-b border-gray-300">
+                    <td className="py-2 border-r border-gray-300 text-left">
+                      Dietary Needs?
+                    </td>
+                    <td className="py-2 border-r border-gray-300 p-2 text-center">
+                      {dietaryNeeds === "Yes" ? "Yes" : "No"}
+                    </td>
+                    <td className="py-2 text-right">
+                      {dietaryNeeds === "Yes"
+                        ? dietaryNeedsDetails || "N/A"
                         : "Nil"}
                     </td>
                   </tr>
@@ -244,9 +294,8 @@ export default function RecordSummary() {
       </div>
 
       {/* Mobile/Tablet View */}
-      <div className="block lg:hidden bg-gray-100 p-4">
-        {/* Top Card: Student Name + Image */}
-        <div className="bg-white rounded-md shadow p-4 flex flex-col items-center mb-4">
+      <div className="block lg:hidden bg-white">
+        <div className="bg-white rounded-md p-4 flex flex-col items-center mb-4">
           <div className="w-24 h-24 rounded-full overflow-hidden mb-2">
             <img
               src="/female.png"
@@ -261,25 +310,28 @@ export default function RecordSummary() {
         </div>
 
         {/* Student Info Card */}
-        <div className="bg-white rounded-md shadow p-4 mb-4">
-          <h2 className="text-lg font-semibold text-[#01427A] mb-2">
-            Student Information
-          </h2>
+        <div className="bg-white rounded-md p-4 mb-4">
           <div className="flex flex-col gap-2 text-sm text-gray-700">
-            <p>
-              <span className="font-bold">DOB:</span> {dob}
-            </p>
-            <p>
-              <span className="font-bold">Gender:</span> {gender}
-            </p>
+            <div className="flex justify-between">
+              <span className="font-bold">Name:</span>
+              <span>{name}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-bold">Age:</span>
+              <span>{age}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="font-bold">Class:</span>
+              <span>{classes}</span>
+            </div>
           </div>
         </div>
 
         {/* Current Health Record */}
         <div className="bg-[#E6ECF2] rounded-md shadow p-4 mb-4">
           <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-semibold text-gray-800">
-              Health Record
+            <h2 className="text-md font-semibold text-[#01427A]">
+              Student's Health Summary
             </h2>
             <button
               onClick={handleEdit}
@@ -291,82 +343,158 @@ export default function RecordSummary() {
 
           <div className="flex flex-col gap-2 text-sm text-gray-700">
             <div className="flex justify-between">
-              <p className="font-semibold">Body Weight:</p>
-              <p>{weight || "N/A"}</p>
+              <span className="font-semibold">Body Weight:</span>
+              <span>{weight || "N/A"}</span>
             </div>
             <div className="flex justify-between">
-              <p className="font-semibold">Height:</p>
-              <p>{height || "N/A"}</p>
+              <span className="font-semibold">Height:</span>
+              <span>{height || "N/A"}</span>
             </div>
             <div className="flex justify-between">
-              <p className="font-semibold">Blood Group:</p>
-              <p>{bloodGroup || "N/A"}</p>
+              <span className="font-semibold">Blood Group:</span>
+              <span>{bloodGroup || "N/A"}</span>
             </div>
             <div className="flex justify-between">
-              <p className="font-semibold">Genotype:</p>
-              <p>{genotype || "N/A"}</p>
+              <span className="font-semibold">Genotype:</span>
+              <span>{genotype || "N/A"}</span>
             </div>
             <div className="flex justify-between">
-              <p className="font-semibold">Current Medication:</p>
-              <p>{currentMedication || "N/A"}</p>
+              <span className="font-semibold">Current Medication:</span>
+              <span>{currentMedicationDetails || "N/A"}</span>
             </div>
             <div className="flex justify-between">
-              <p className="font-semibold">Emergency Condition:</p>
-              <p>{emergencyCondition || "N/A"}</p>
+              <span className="font-semibold">Emergency Condition:</span>
+              <span>{emergencyConditionDetails || "N/A"}</span>
             </div>
           </div>
         </div>
 
         {/* Past Health Record */}
-        <div className="bg-white rounded-md shadow p-4">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-lg font-bold text-[#01427A]">
-              Past Records
-            </h2>
+        <div>
+          <div className="flex justify-between items-center mb-2 bg-[#004080] rounded-lg p-2">
+            <h2 className="text-lg font-bold text-white">Past Records</h2>
             <button
               onClick={handleViewAll}
               className="text-sm text-blue-600 hover:underline"
             >
+              <PiPencilSimpleLine
+                size={20}
+                className="text-white cursor-pointer font-medium"
+              />
+            </button>
+          </div>
+          <div className="flex justify-between items-center mb-2 p-2">
+            <h2 className="text-lg font-bold text-black">Medical Records</h2>
+            <button
+              onClick={handleViewAll}
+              className="text-sm text-blue-600 hover:underline font-medium"
+            >
               View all
             </button>
           </div>
-
-          <div className="flex flex-col gap-2 text-sm text-gray-700">
-            <div className="flex justify-between">
-              <p className="font-semibold">Had surgery before?</p>
-              <p>{hadSurgery === "Yes" ? "Yes" : "No"}</p>
-            </div>
-            {hadSurgery === "Yes" && (
-              <p className="ml-4 text-xs italic">Details: {surgeryDetails || "N/A"}</p>
-            )}
-            <div className="flex justify-between">
-              <p className="font-semibold">Eye defect?</p>
-              <p>{hasEyeDefect === "Yes" ? "Yes" : "No"}</p>
-            </div>
-            {hasEyeDefect === "Yes" && (
-              <p className="ml-4 text-xs italic">Details: {eyeDefectDetails || "N/A"}</p>
-            )}
-            <div className="flex justify-between">
-              <p className="font-semibold">Allergies?</p>
-              <p>{allergies === "Yes" ? "Yes" : "No"}</p>
-            </div>
-            {allergies === "Yes" && (
-              <p className="ml-4 text-xs italic">Details: {allergiesDetails || "N/A"}</p>
-            )}
-            <div className="flex justify-between">
-              <p className="font-semibold">Regular Medications?</p>
-              <p>{regularMedications === "Yes" ? "Yes" : "No"}</p>
-            </div>
-            {regularMedications === "Yes" && (
-              <p className="ml-4 text-xs italic">Details: {medicationsDetails || "N/A"}</p>
-            )}
-            <div className="flex justify-between">
-              <p className="font-semibold">Hearing Difficulties?</p>
-              <p>{hearingDifficulties === "Yes" ? "Yes" : "No"}</p>
-            </div>
-            {hearingDifficulties === "Yes" && (
-              <p className="ml-4 text-xs italic">Details: {hearingDetails || "N/A"}</p>
-            )}
+          <div className="overflow-x-auto p-2">
+            <table className="w-full text-center">
+              <tbody>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 border-r border-gray-300 text-left">
+                    Had surgery before?
+                  </td>
+                  <td className="py-2 border-r border-gray-300">
+                    {hadSurgery === "Yes" ? "Yes" : "No"}
+                  </td>
+                  <td className="py-2 text-right">
+                    {hadSurgery === "Yes" ? surgeryDetails || "N/A" : "Nil"}
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 border-r border-gray-300 text-left">
+                    Eye defect?
+                  </td>
+                  <td className="py-2 border-r border-gray-300">
+                    {hasEyeDefect === "Yes" ? "Yes" : "No"}
+                  </td>
+                  <td className="py-2 text-right">
+                    {hasEyeDefect === "Yes" ? eyeDefectDetails || "N/A" : "Nil"}
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 border-r border-gray-300 text-left">
+                    Allergies?
+                  </td>
+                  <td className="py-2 border-r border-gray-300">
+                    {allergies === "Yes" ? "Yes" : "No"}
+                  </td>
+                  <td className="py-2 text-right">
+                    {allergies === "Yes" ? allergiesDetails || "N/A" : "Nil"}
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 border-r border-gray-300 text-left">
+                    Regular Medications?
+                  </td>
+                  <td className="py-2 border-r border-gray-300">
+                    {regularMedications === "Yes" ? "Yes" : "No"}
+                  </td>
+                  <td className="py-2 text-right">
+                    {regularMedications === "Yes"
+                      ? medicationsDetails || "N/A"
+                      : "Nil"}
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 border-r border-gray-300 text-left">
+                    Hearing Difficulties?
+                  </td>
+                  <td className="py-2 border-r border-gray-300 p-2">
+                    {hearingDifficulties === "Yes" ? "Yes" : "No"}
+                  </td>
+                  <td className="py-2 text-right">
+                    {hearingDifficulties === "Yes"
+                      ? hearingDetails || "N/A"
+                      : "Nil"}
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 border-r border-gray-300 text-left">
+                    Heart challenges?
+                  </td>
+                  <td className="py-2 border-r border-gray-300 p-2">
+                    {heartChallenges === "Yes" ? "Yes" : "No"}
+                  </td>
+                  <td className="py-2 text-right">
+                    {heartChallenges === "Yes"
+                      ? heartChallengesDetails || "N/A"
+                      : "Nil"}
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 border-r border-gray-300 text-left">
+                    Physical disabilities?
+                  </td>
+                  <td className="py-2 border-r border-gray-300 p-2">
+                    {physicalDisabilities === "Yes" ? "Yes" : "No"}
+                  </td>
+                  <td className="py-2 text-right">
+                    {physicalDisabilities === "Yes"
+                      ? physicalDisabilitiesDetails || "N/A"
+                      : "Nil"}
+                  </td>
+                </tr>
+                <tr className="border-b border-gray-300">
+                  <td className="py-2 border-r border-gray-300 text-left">
+                    Dietary Needs?
+                  </td>
+                  <td className="py-2 border-r border-gray-300 p-2">
+                    {dietaryNeeds === "Yes" ? "Yes" : "No"}
+                  </td>
+                  <td className="py-2 text-right">
+                    {dietaryNeeds === "Yes"
+                      ? dietaryNeedsDetails || "N/A"
+                      : "Nil"}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>

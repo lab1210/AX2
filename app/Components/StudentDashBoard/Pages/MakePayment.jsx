@@ -117,14 +117,14 @@ const MakePaymentItem = () => {
         className={`
           grid
           md:[grid-template-rows:110px_100px_1fr_1fr]
-          xl:[grid-template-rows:110px_100px_1fr] bg-[#f0f0f0]
+          xl:[grid-template-rows:150px_100px_1fr] bg-[#f0f0f0] p-5
         `}
       >
         {/* Payment Steps */}
         <div
           className={`
-            grid grid-cols-[110px_110px_110px_110px] rounded-[10px] mb-[30px] bg-white
-            md:py-[15px] md:px-[60px]
+            grid grid-cols-[200px_110px_120px_110px] rounded-[10px] mb-[30px] bg-white
+            md:py-[15px] md:px-[60px] mt-4
           `}
         >
           {/* Step 1: Choose payment method */}
@@ -223,7 +223,7 @@ const MakePaymentItem = () => {
           </div>
         </div>
         {/* Payment Options Header */}
-        <div className="rounded-[10px] mb-[20px] flex items-center px-[30px] bg-white">
+        <div className="rounded-[10px] mb-[20px] flex items-center px-[30px] bg-white font-medium text-md 2xl:text-lg">
           <h2>Payment Options</h2>
         </div>
         {/* Payment Options / Details Container */}
@@ -242,7 +242,7 @@ const MakePaymentItem = () => {
             xl:grid xl:grid-cols-[3fr_auto] xl:gap-[10px]
           `}
         >
-          <div className="flex flex-col bg-white p-[10px]">
+          <div className="flex flex-col bg-white p-5">
             <div className="flex flex-col bg-white pt-[10px] px-[8px] rounded-[10px]">
               {/* Credit/Debit Card Option */}
               <div
@@ -305,7 +305,7 @@ const MakePaymentItem = () => {
                       </div>
                       <div className="relative">
                         <span className="absolute left-[10px] top-1/2 -translate-y-1/2">
-                          <FaRegCreditCard size={40} />
+                          <FaRegCreditCard size={20} />
                         </span>
                         <input
                           type="text"
@@ -367,7 +367,7 @@ const MakePaymentItem = () => {
                       <div></div>
                     </div>
                     {/* Expiry and CVV Inputs */}
-                    <div className="grid grid-cols-[4fr_1fr_1fr] items-center">
+                    <div className="grid grid-cols-2 justify-between">
                       <div className="flex flex-col text-[12px]">
                         <label className="font-bold" htmlFor="cardExpiryMonth">
                           Expiry Date
@@ -376,8 +376,8 @@ const MakePaymentItem = () => {
                           Enter the expiration date of the card
                         </p>
                       </div>
-                      <div className="flex min-w-[200px]">
-                        <div className="flex items-center gap-[5px] mr-[10px]">
+                      <div className="flex min-w-[50px]">
+                        <div className="flex items-center gap-[5px] mr-[10px] ml-10">
                           <input
                             type="text"
                             name="cardExpiryMonth"
@@ -387,7 +387,7 @@ const MakePaymentItem = () => {
                               checkFields();
                             }}
                             value={cardExpiryMonth}
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-medium text-[12px] rounded-[5px]"
+                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-medium text-[12px] rounded-[5px] p-2"
                           />
                           <h3>/</h3>
                           <input
@@ -400,7 +400,7 @@ const MakePaymentItem = () => {
                             }}
                             value={cardExpiryYear}
                             placeholder="23"
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[50px] outline-none font-medium text-[12px] rounded-[5px]"
+                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-medium text-[12px] rounded-[5px] p-2"
                           />
                         </div>
                         <div className="flex items-center gap-[10px]">
@@ -420,7 +420,7 @@ const MakePaymentItem = () => {
                             }}
                             value={cardCvv}
                             placeholder="012"
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-medium text-[12px] rounded-[5px]"
+                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-10 outline-none font-medium text-[12px] rounded-[5px] p-2"
                           />
                         </div>
                       </div>
@@ -511,7 +511,7 @@ const MakePaymentItem = () => {
                       </div>
                       <div className="relative">
                         <span className="absolute left-[10px] top-1/2 -translate-y-1/2">
-                          <FaRegCreditCard size={40} />
+                          <FaRegCreditCard size={20} />
                         </span>
                         <input
                           type="text"
@@ -571,7 +571,7 @@ const MakePaymentItem = () => {
                       </div>
                       <div></div>
                     </div>
-                    <div className="grid grid-cols-[4fr_1fr_1fr] items-center">
+                    <div className="grid grid-cols-2 justify-between">
                       <div className="flex flex-col text-[12px]">
                         <label className="font-bold" htmlFor="cardExpiryMonth">
                           Expiry Date
@@ -580,8 +580,8 @@ const MakePaymentItem = () => {
                           Enter the expiration date of the card
                         </p>
                       </div>
-                      <div className="flex min-w-[200px]">
-                        <div className="flex items-center gap-[5px] mr-[10px]">
+                      <div className="flex min-w-[50px]">
+                        <div className="flex items-center gap-[5px] mr-[10px] ml-10">
                           <input
                             type="text"
                             name="cardExpiryMonth"
@@ -591,7 +591,7 @@ const MakePaymentItem = () => {
                               checkFields();
                             }}
                             value={cardExpiryMonth}
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-medium text-[12px] rounded-[5px]"
+                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-medium text-[12px] rounded-[5px] p-2"
                           />
                           <h3>/</h3>
                           <input
@@ -604,7 +604,7 @@ const MakePaymentItem = () => {
                             }}
                             value={cardExpiryYear}
                             placeholder="23"
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[50px] outline-none font-medium text-[12px] rounded-[5px]"
+                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-medium text-[12px] rounded-[5px] p-2"
                           />
                         </div>
                         <div className="flex items-center gap-[10px]">
@@ -624,7 +624,7 @@ const MakePaymentItem = () => {
                             }}
                             value={cardCvv}
                             placeholder="012"
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-medium text-[12px] rounded-[5px]"
+                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-10 p-2 outline-none font-medium text-[12px] rounded-[5px]"
                           />
                         </div>
                       </div>
