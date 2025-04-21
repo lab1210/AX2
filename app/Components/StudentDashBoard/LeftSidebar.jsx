@@ -67,7 +67,7 @@ const LeftSidebar = ({ setUser, user }) => {
 
   return (
     <div className="h-screen bg-white flex flex-col">
-      <div className="flex flex-col mb-3  pt-4 items-center justify-center">
+      <div className="flex flex-col mb-3 pt-4 items-center justify-center">
         <div className="max-w-[60px] w-full">
           <img src="/logo.svg" alt="logo" className="w-full object-cover" />
         </div>
@@ -82,7 +82,7 @@ const LeftSidebar = ({ setUser, user }) => {
           {StudentLeft.map((item, index) => (
             <li
               key={index}
-              className="xl:p-2 lg:p-2.5 hover:text-gray-400 rounded-lg transition-colors"
+              className="2xl:p-2.5 xl:p-2 lg:p-2.5 hover:text-gray-400 rounded-lg transition-colors xl:text-md 2xl:text-lg"
             >
               <Link
                 href={`${item.route}?studentId=${user?.student?.student_id}`}
@@ -114,7 +114,7 @@ const LeftSidebar = ({ setUser, user }) => {
         <div className="flex justify-center mb-5">
           <button
             onClick={handleLogout}
-            className="bg-[#F94144] p-1.5 pl-3 pr-3 flex items-center text-white rounded-lg font-bold text-base gap-2.5 hover:bg-[#D81A2D] transition-colors cursor-pointer"
+            className="bg-[#F94144] p-1.5 pl-3 pr-3 flex items-center text-white rounded-lg font-bold text-base gap-2.5 hover:bg-[#D81A2D] transition-colors cursor-pointer xl:p.2.5 xl:pl-4 xl:pr-4 2xl:p-3"
           >
             <TbLogout className="text-xl" />
             Logout

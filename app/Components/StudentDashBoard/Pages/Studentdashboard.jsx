@@ -18,17 +18,17 @@ const dummyevents = [
     description:
       "The 2nd term Inter-House sports has been rescheduled for  Thur 15th - Fri 16th October 2023",
   },
-  // {
-  //   title: "Boarders Meeting",
-  //   description:
-  //     " All JSS1-SS3 boarding school students will be having a meeting by 3pm on Friday 29th October, 2023",
-  // },
+  {
+    title: "Boarders Meeting",
+    description:
+      " All JSS1-SS3 boarding school students will be having a meeting by 3pm on Friday 29th October, 2023",
+  },
 
-  // {
-  //   title: "Spelling Bee",
-  //   description:
-  //     "The international spelling bee competition will hold on the 26th and 27th of October, 2023",
-  // },
+  {
+    title: "Spelling Bee",
+    description:
+      "The international spelling bee competition will hold on the 26th and 27th of October, 2023",
+  },
 ];
 
 const dummyNotifications = [
@@ -38,12 +38,12 @@ const dummyNotifications = [
     title: "Upcoming Fees Payment for the 2023/2024 Session",
     description: "Updates on school fees for all junior and senior students",
   },
-  // {
-  //   day: "Mon",
-  //   date: "25",
-  //   title: "Mid-term Tests",
-  //   description: "Mid term tests will start on Monday 25th October, 2023",
-  // },
+  {
+    day: "Mon",
+    date: "25",
+    title: "Mid-term Tests",
+    description: "Mid term tests will start on Monday 25th October, 2023",
+  },
 ];
 
 export default function Studentdashboard() {
@@ -159,15 +159,15 @@ export default function Studentdashboard() {
                   className={`relative ${item.bg} rounded-lg p-7 pl-3 pr-3 text-white grid xl:grid-cols-[70px_auto] lg:grid-cols-[80px_auto] items-center hover:opacity-90 transition`}
                 >
                   <div
-                    className={`xl:w-14 lg:w-16 xl:h-10 lg:h-12 pr-2 ${item.iconBg} rounded-lg flex items-center justify-center text-7xl text-white font-extrabold`}
+                    className={`xl:w-15 lg:w-13 xl:h-15 lg:h-13 pr-2 ${item.iconBg} rounded-lg flex items-center justify-center text-7xl text-white font-extrabold`}
                   >
                     {item.icon}
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-md md:text-md xl:text-sm lg:text-base font-bold mb-1 text-white">
+                    <h4 className="text-md lg:text-md 2xl:text-xl lg:text-base font-bold mb-1 text-white">
                       {item.title}
                     </h4>
-                    <p className="text-xs text-white">{item.description}</p>
+                    <p className="text-xs 2xl:text-md text-white">{item.description}</p>
                   </div>
                 </Link>
               ))}
@@ -227,14 +227,14 @@ export default function Studentdashboard() {
                 <div key={idx} className="flex-shrink-0 w-auto">
                   <Link
                     href={`${item.Link}?studentId=${studentId}`}
-                    className={`rounded-xl flex flex-col items-start p-3 gap-2 ${item.bg} text-white`}
+                    className={`rounded-xl flex flex-col items-start p-3 gap-2 ${item.bg} text-white md:text-3xl`}
                   >
                     <div
                       className={`w-10 h-10 ${item.iconBg} rounded-xl flex items-center justify-center text-white`}
                     >
                       {item.icon}
                     </div>
-                    <div className="flex flex-col text-sm">
+                    <div className="flex flex-col text-sm md:text-lg md:p-1">
                       <span className="font-semibold text-left text-white">
                         {item.title}
                       </span>
@@ -250,7 +250,7 @@ export default function Studentdashboard() {
         </div>
 
         {/* Events Section */}
-        <div className="p-4">
+        <div className="p-4 md:text-lg">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-base font-semibold text-gray-700">Events</h3>
             <Link href="#" className="text-sm text-blue-600">
@@ -259,24 +259,19 @@ export default function Studentdashboard() {
           </div>
           <div className="bg-white rounded p-3 flex flex-col gap-3">
             {" "}
-            {/* Changed background color to white for consistency */}
             {dummyevents.map((event, index) => (
               <div key={index} className="flex items-center justify-between">
                 {" "}
-                {/* Use justify-between for arrow positioning */}
                 <div className="flex-1 flex flex-col">
                   {" "}
-                  {/* Container for title and description */}
                   <h4 className="text-md font-semibold text-[#004080] mb-1">
                     {" "}
-                    {/* Added margin-bottom for spacing */}
                     {event.title}
                   </h4>
                   <p className="text-xs text-[#242424]">{event.description}</p>
                 </div>
                 <div className="ml-4 w-8 h-8 rounded-full bg-[#F94144] flex items-center justify-center">
                   {" "}
-                  {/* Adjusted margin */}
                   <BiChevronRight
                     size={16}
                     className="text-[#000000] font-bold"
@@ -288,7 +283,7 @@ export default function Studentdashboard() {
         </div>
 
         {/* Notifications */}
-        <div className="p-4">
+        <div className="p-4 md:text-lg">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-base font-semibold text-black">
               Notifications

@@ -27,12 +27,12 @@ const RightSidebar = ({ user }) => {
       title: "Upcoming Fees Payment for the 2023/2024 Session",
       description: "Updates on school fees for all junior and senior students",
     },
-    // {
-    //   date: "2025-02-01",
-    //   title: "Parents and Teachers Meeting on Zoom",
-    //   description:
-    //     "Conference call with all parents having a child in JSS1 and 2 in preparation for the upcoming session",
-    // },
+    {
+      date: "2025-02-01",
+      title: "Parents and Teachers Meeting on Zoom",
+      description:
+        "Conference call with all parents having a child in JSS1 and 2 in preparation for the upcoming session",
+    },
   ];
 
   const dummyNotifications = [
@@ -44,6 +44,10 @@ const RightSidebar = ({ user }) => {
     {
       title: "Mid-term Tests",
       description: "Mid term tests will start on Monday 25th October, 2023",
+    },
+    {
+      title: "Borders Meeting",
+      description: "All JSS1-SS3 boarding school students will be having a meeting by 3pm on Friday 29th October, 2023",
     },
   ];
 

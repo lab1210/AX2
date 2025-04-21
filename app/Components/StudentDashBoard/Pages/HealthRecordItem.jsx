@@ -22,12 +22,76 @@ export default function HealthRecordPage() {
   const [medicationsDetails, setMedicationsDetails] = useState("");
   const [hearingDifficulties, setHearingDifficulties] = useState("");
   const [hearingDetails, setHearingDetails] = useState("");
+  const [physicalDisabilities, setPhysicalDisabilities] = useState("");
+  const [physicalDisabilitiesDetails, setPhysicalDisabilitiesDetails] =
+    useState("");
+  const [heartChallenges, setHeartChallenges] = useState("");
+  const [heartChallengesDetails, setHeartChallengesDetails] = useState("");
+  const [dietaryNeeds, setDietaryNeeds] = useState("");
+  const [dietaryNeedsDetails, setDietaryNeedsDetails] = useState("");
+  const [onMedicationCurrently, setOnMedicationCurrently] = useState("");
+  const [currentMedicationDetails, setCurrentMedicationDetails] = useState("");
+  const [medicalEmergencyCondition, setMedicalEmergencyCondition] =
+    useState("");
+  const [emergencyConditionDetails, setEmergencyConditionDetails] =
+    useState("");
+  const [proceedButtonActive, setProceedButtonActive] = useState(false);
 
   useEffect(() => {
     const userData = getUserDetails();
     setUser(userData);
     setIsLoading(false);
   }, []);
+
+  useEffect(() => {
+    const isWeightFilled = weight.trim() !== "";
+    const isHeightFilled = height.trim() !== "";
+    const isBloodGroupFilled = bloodGroup.trim() !== "";
+    const isGenotypeFilled = genotype.trim() !== "";
+    const isHadSurgerySelected = hadSurgery !== "";
+    const isHasEyeDefectSelected = hasEyeDefect !== "";
+    const isAllergiesSelected = allergies !== "";
+    const isRegularMedicationsSelected = regularMedications !== "";
+    const isHearingDifficultiesSelected = hearingDifficulties !== "";
+    const isPhysicalDisabilitiesSelected = physicalDisabilities !== "";
+    const isHeartChallengesSelected = heartChallenges !== "";
+    const isDietaryNeedsSelected = dietaryNeeds !== "";
+    const isOnMedicationCurrentlySelected = onMedicationCurrently !== "";
+    const isMedicalEmergencyConditionSelected =
+      medicalEmergencyCondition !== "";
+
+    setProceedButtonActive(
+      isWeightFilled &&
+        isHeightFilled &&
+        isBloodGroupFilled &&
+        isGenotypeFilled &&
+        isHadSurgerySelected &&
+        isHasEyeDefectSelected &&
+        isAllergiesSelected &&
+        isRegularMedicationsSelected &&
+        isHearingDifficultiesSelected &&
+        isPhysicalDisabilitiesSelected &&
+        isHeartChallengesSelected &&
+        isDietaryNeedsSelected &&
+        isOnMedicationCurrentlySelected &&
+        isMedicalEmergencyConditionSelected
+    );
+  }, [
+    weight,
+    height,
+    bloodGroup,
+    genotype,
+    hadSurgery,
+    hasEyeDefect,
+    allergies,
+    regularMedications,
+    hearingDifficulties,
+    physicalDisabilities,
+    heartChallenges,
+    dietaryNeeds,
+    onMedicationCurrently,
+    medicalEmergencyCondition,
+  ]);
 
   if (isLoading) {
     return (
@@ -38,6 +102,10 @@ export default function HealthRecordPage() {
   }
   const handleProceed = (e) => {
     e.preventDefault();
+    if (!proceedButtonActive) {
+      alert("Please fill in all the required fields and select radio options.");
+      return;
+    }
     const healthRecord = {
       name: user?.student?.first_name + " " + user?.student?.last_name,
       className: "",
@@ -57,6 +125,16 @@ export default function HealthRecordPage() {
       medicationsDetails,
       hearingDifficulties,
       hearingDetails,
+      physicalDisabilities,
+      physicalDisabilitiesDetails,
+      heartChallenges,
+      heartChallengesDetails,
+      dietaryNeeds,
+      dietaryNeedsDetails,
+      onMedicationCurrently,
+      currentMedicationDetails,
+      medicalEmergencyCondition,
+      emergencyConditionDetails,
     };
 
     localStorage.setItem("healthRecord", JSON.stringify(healthRecord));
@@ -64,19 +142,69 @@ export default function HealthRecordPage() {
     router.push("/Student/Health-Record/RecordSummary");
   };
 
+  const renderQuestion = (
+    question,
+    state,
+    setState,
+    detailsState,
+    setDetailsState
+  ) => (
+    <div className="mb-4">
+      <p className="mb-1">{question}</p>
+      <div className="flex items-center gap-2 mb-1">
+        <label>
+          <input
+            type="radio"
+            name={question.replace(/ /g, "")}
+            value="Yes"
+            checked={state === "Yes"}
+            onChange={(e) => setState(e.target.value)}
+            required 
+          />
+          Yes
+        </label>
+        <label>
+          <input
+            type="radio"
+            name={question.replace(/ /g, "")}
+            value="No"
+            checked={state === "No"}
+            onChange={(e) => setState(e.target.value)}
+            required 
+          />
+          No
+        </label>
+      </div>
+      {state === "Yes" &&
+        detailsState !== undefined &&
+        setDetailsState !== undefined && (
+          <div className="flex items-center gap-2">
+            <p className="mt-1">If Yes, Kindly Specify</p>
+            <input
+              type="text"
+              value={detailsState}
+              onChange={(e) => setDetailsState(e.target.value)}
+              placeholder="Enter details"
+              className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none w-full sm:w-auto"
+            />
+          </div>
+        )}
+    </div>
+  );
+
   return (
     <Layout>
       <div className="min-h-screen bg-[#f0f0f0] p-4 md:p-8">
-        <div className="bg-white rounded-md shadow p-6 flex items-center gap-4 mb-4">
+        <div className="bg-white rounded-md shadow p-6 flex flex-col md:flex-row items-center gap-4 mb-4">
           <div className="w-16 h-16 rounded-full overflow-hidden">
             <img
               src={
-                user.student.profile_picture_path === null
+                user?.student?.profile_picture_path === null
                   ? "/female.png"
-                  : user.student.profile_picture_path
+                  : user?.student?.profile_picture_path
               }
               alt="Avatar"
-              className="object-cover h-full"
+              className="object-cover h-full w-full"
             />
           </div>
           <h1 className="text-xl md:text-2xl font-bold text-gray-800">
@@ -89,12 +217,12 @@ export default function HealthRecordPage() {
           <h2 className="text-lg font-semibold text-[#01427A] mb-4">
             Student Information
           </h2>
-          <div className="grid gap-2 text-sm text-gray-700">
+          <div className="grid gap-4 text-sm text-gray-700 grid-rows-4">
             <p>
               <span className="font-bold">Class:</span> {""}
             </p>
             <p>
-              <span className="font-bold">Student ID:</span> {user.id}
+              <span className="font-bold">Student ID:</span> {user?.id}
             </p>
             <p>
               <span className="font-bold">DOB:</span> {""}
@@ -110,238 +238,154 @@ export default function HealthRecordPage() {
           <h2 className="text-lg font-semibold text-gray-800 mb-4">
             Personal Data
           </h2>
-          <div className="grid grid-cols-2 gap-4 mb-4">
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600">Weight</label>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <label className="text-sm text-gray-600 w-full sm:w-auto">
+                Weight
+              </label>
               <input
                 type="text"
                 value={weight}
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="e.g. 70kg"
-                className="border-b-[1px] border-gray-300 rounded p-1 focus:border-gray-500 outline-none"
+                className="border-b-[1px] border-gray-300 rounded p-1 focus:border-gray-500 outline-none w-full sm:w-auto"
+                required 
               />
             </div>
             {/* Height */}
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600 mb-1">Height (ft)</label>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <label className="text-sm text-gray-600 w-full sm:w-auto">
+                Height (ft)
+              </label>
               <input
                 type="text"
                 value={height}
                 onChange={(e) => setHeight(e.target.value)}
                 placeholder="e.g. 5.5ft"
-                className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none"
+                className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none w-full sm:w-auto"
+                required 
               />
             </div>
             {/* Blood Group */}
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600 mb-1">Blood Group</label>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <label className="text-sm text-gray-600 w-full sm:w-auto">
+                Blood Group
+              </label>
               <input
                 type="text"
                 value={bloodGroup}
                 onChange={(e) => setBloodGroup(e.target.value)}
                 placeholder="e.g. O+"
-                className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none"
+                className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none w-full sm:w-auto"
+                required 
               />
             </div>
             {/* Genotype */}
-            <div className="flex items-center gap-2">
-              <label className="text-sm text-gray-600 mb-1">Genotype</label>
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+              <label className="text-sm text-gray-600 w-full sm:w-auto">
+                Genotype
+              </label>
               <input
                 type="text"
                 value={genotype}
                 onChange={(e) => setGenotype(e.target.value)}
                 placeholder="e.g. AS"
-                className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none"
+                className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none w-full sm:w-auto"
+                required 
               />
             </div>
           </div>
+        </div>
 
-          {/* Medical Questions */}
+        {/* Medical Questions */}
+        <div className=" bg-white rounded-md shadow p-6 mb-4">
           <h2 className="text-lg font-semibold text-gray-800 mb-2">
             Medical Questions
           </h2>
-          <div className="grid grid-cols-2 gap-4 text-sm text-gray-700">
-            {/* Surgery question */}
-            <div>
-              <p className="mb-1">Have you had surgery before?</p>
-              <div className="flex items-center gap-2">
-                <label>
-                  <input
-                    type="radio"
-                    name="surgery"
-                    value="Yes"
-                    onChange={(e) => setHadSurgery(e.target.value)}
-                  />
-                  Yes
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="surgery"
-                    value="No"
-                    onChange={(e) => setHadSurgery(e.target.value)}
-                  />
-                  No
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="mt-1">If Yes, Kindly Specify</p>
-                <input
-                  type="text"
-                  value={surgeryDetails}
-                  onChange={(e) => setSurgeryDetails(e.target.value)}
-                  placeholder="Enter details"
-                  className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none"
-                />
-              </div>
-            </div>
-
-            {/* Eye defect question */}
-            <div>
-              <p className="mb-1">Do you have any eye defect?</p>
-              <div className="flex items-center gap-2">
-                <label>
-                  <input
-                    type="radio"
-                    name="eyeDefect"
-                    value="Yes"
-                    onChange={(e) => setHasEyeDefect(e.target.value)}
-                  />
-                  Yes
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="eyeDefect"
-                    value="No"
-                    onChange={(e) => setHasEyeDefect(e.target.value)}
-                  />
-                  No
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="mt-1">If Yes, Kindly Specify</p>
-                <input
-                  type="text"
-                  value={eyeDefectDetails}
-                  onChange={(e) => setEyeDefectDetails(e.target.value)}
-                  placeholder="Enter details"
-                  className="border-b border-gray-300 rounded p-1 outline-none"
-                />
-              </div>
-            </div>
-            {/*Allegies*/}
-            <div>
-              <p className="mb-1">Do you have any Allegies?</p>
-              <div className="flex items-center gap-2">
-                <label>
-                  <input
-                    type="radio"
-                    name="allegies"
-                    value="Yes"
-                    onChange={(e) => setAllergies(e.target.value)}
-                  />
-                  Yes
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="allegies"
-                    value="No"
-                    onChange={(e) => setAllergies(e.target.value)}
-                  />
-                  No
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="mt-1">If Yes, Kindly Specify</p>
-                <input
-                  type="text"
-                  value={allergiesDetails}
-                  onChange={(e) => setAllergiesDetails(e.target.value)}
-                  placeholder="Enter details"
-                  className="border-b border-gray-300 rounded p-1 outline-none"
-                />
-              </div>
-            </div>
-            {/*Regular Medication */}
-            <div>
-              <p className="mb-1">Do you take any medication regularly?</p>
-              <div className="flex items-center gap-2">
-                <label>
-                  <input
-                    type="radio"
-                    name="medication"
-                    value="Yes"
-                    onChange={(e) => setRegularMedications(e.target.value)}
-                  />
-                  Yes
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="medication"
-                    value="No"
-                    onChange={(e) => setRegularMedications(e.target.value)}
-                  />
-                  No
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="mt-1">If Yes, Kindly Specify</p>
-                <input
-                  type="text"
-                  value={medicationsDetails}
-                  onChange={(e) => setMedicationsDetails(e.target.value)}
-                  placeholder="Enter details"
-                  className="border-b border-gray-300 rounded p-1 outline-none"
-                />
-              </div>
-            </div>
-            {/*Hearing details */}
-            <div>
-              <p className="mb-1">Do you have any hearing difficulties?</p>
-              <div className="flex items-center gap-2">
-                <label>
-                  <input
-                    type="radio"
-                    name="hearing"
-                    value="Yes"
-                    onChange={(e) => setHearingDifficulties(e.target.value)}
-                  />
-                  Yes
-                </label>
-                <label>
-                  <input
-                    type="radio"
-                    name="hearing"
-                    value="No"
-                    onChange={(e) => setHearingDifficulties(e.target.value)}
-                  />
-                  No
-                </label>
-              </div>
-              <div className="flex items-center gap-2">
-                <p className="mt-1">If Yes, Kindly Specify</p>
-                <input
-                  type="text"
-                  value={hearingDetails}
-                  onChange={(e) => setHearingDetails(e.target.value)}
-                  placeholder="Enter details"
-                  className="border-b border-gray-300 rounded p-1 outline-none"
-                />
-              </div>
-            </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 text-sm text-gray-700">
+            {renderQuestion(
+              "Have you had surgery before?",
+              hadSurgery,
+              setHadSurgery,
+              surgeryDetails,
+              setSurgeryDetails
+            )}
+            {renderQuestion(
+              "Do you have any eye defect?",
+              hasEyeDefect,
+              setHasEyeDefect,
+              eyeDefectDetails,
+              setEyeDefectDetails
+            )}
+            {renderQuestion(
+              "Do you have physical disabilities?",
+              physicalDisabilities,
+              setPhysicalDisabilities,
+              physicalDisabilitiesDetails,
+              setPhysicalDisabilitiesDetails
+            )}
+            {renderQuestion(
+              "Do you have any heart relating challenges?",
+              heartChallenges,
+              setHeartChallenges,
+              heartChallengesDetails,
+              setHeartChallengesDetails
+            )}
+            {renderQuestion(
+              "Do you have any allergy?",
+              allergies,
+              setAllergies,
+              allergiesDetails,
+              setAllergiesDetails
+            )}
+            {renderQuestion(
+              "Do you take any medication that you take on a regular basis?",
+              regularMedications,
+              setRegularMedications,
+              medicationsDetails,
+              setMedicationsDetails
+            )}
+            {renderQuestion(
+              "Do you have regular dietary needs?",
+              dietaryNeeds,
+              setDietaryNeeds,
+              dietaryNeedsDetails,
+              setDietaryNeedsDetails
+            )}
+            {renderQuestion(
+              "Are you on on a medication currently?",
+              onMedicationCurrently,
+              setOnMedicationCurrently,
+              currentMedicationDetails,
+              setCurrentMedicationDetails
+            )}
+            {renderQuestion(
+              "Do you have a medical condition that requires swift / emergency attention?",
+              medicalEmergencyCondition,
+              setMedicalEmergencyCondition,
+              emergencyConditionDetails,
+              setEmergencyConditionDetails
+            )}
+            {renderQuestion(
+              "Do you have any hearing difficulties?",
+              hearingDifficulties,
+              setHearingDifficulties,
+              hearingDetails,
+              setHearingDetails
+            )}
           </div>
-          <div className="flex justify-center">
-            <button
-              type="submit"
-              onClick={handleProceed}
-              className="mt-4 bg-[#004080] text-white font-semibold py-2 px-47 rounded hover:opacity-90 transition-colors cursor-pointer"
-            >
-              Proceed
-            </button>
-          </div>
+        </div>
+        <div className="flex justify-center">
+          <button
+            type="submit"
+            onClick={handleProceed}
+            className={`mt-4 bg-[#004080] text-white font-semibold py-2 px-7 rounded hover:opacity-90 transition-colors cursor-pointer ${
+              !proceedButtonActive ? "opacity-50 cursor-not-allowed" : ""
+            }`}
+            disabled={!proceedButtonActive}
+          >
+            Proceed
+          </button>
         </div>
       </div>
     </Layout>
