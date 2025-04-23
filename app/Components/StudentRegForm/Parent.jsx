@@ -1,5 +1,4 @@
 import React from "react";
-import styles from "../../css/registerform.module.css";
 
 const Parent = ({
   parentInfo,
@@ -14,13 +13,18 @@ const Parent = ({
   RelationshipData,
 }) => {
   return (
-    <div className={styles.sectionlast}>
-      <div className={styles.RegFormTitle}>
+    <div className="w-full mb-5 px-8 py-2.5 sectionlast">
+      <div className="font-bold text-blue-900 mb-4 mt-6 RegFormTitle">
         <h1>Parent's Information</h1>
       </div>
-      <div className={styles.personalInfoGrid}>
-        <div className={styles.personalInfoItem}>
-          <label htmlFor="ParentfirstName">Parent's First Name</label>
+      <div className="w-full grid grid-cols-3 gap-4 row-gap-10 personalInfoGrid">
+        <div className="personalInfoItem">
+          <label
+            htmlFor="ParentfirstName"
+            className="font-bold text-gray-500 text-base block mb-1"
+          >
+            Parent's First Name
+          </label>
           <input
             type="text"
             name="ParentfirstName"
@@ -28,13 +32,21 @@ const Parent = ({
             placeholder="Enter First Name"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
+            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.ParentfirstName && (
-            <p className={styles.error}>{errors.ParentfirstName}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {errors.ParentfirstName}
+            </p>
           )}
         </div>
-        <div className={styles.personalInfoItem}>
-          <label htmlFor="ParentmiddleName">Parent's Middle Name</label>
+        <div className="personalInfoItem">
+          <label
+            htmlFor="ParentmiddleName"
+            className="font-bold text-gray-500 text-base block mb-1"
+          >
+            Parent's Middle Name
+          </label>
           <input
             type="text"
             name="ParentmiddleName"
@@ -42,13 +54,21 @@ const Parent = ({
             placeholder="Enter Middle Name"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
+            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.ParentmiddleName && (
-            <p className={styles.error}>{errors.ParentmiddleName}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {errors.ParentmiddleName}
+            </p>
           )}
         </div>
-        <div className={styles.personalInfoItem}>
-          <label htmlFor="ParentlastName">Parent's Last Name</label>
+        <div className="personalInfoItem">
+          <label
+            htmlFor="ParentlastName"
+            className="font-bold text-gray-500 text-base block mb-1"
+          >
+            Parent's Last Name
+          </label>
           <input
             type="text"
             name="ParentlastName"
@@ -56,13 +76,19 @@ const Parent = ({
             placeholder="Enter Last Name"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
+            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.ParentlastName && (
-            <p className={styles.error}>{errors.ParentlastName}</p>
+            <p className="text-red-500 text-xs mt-1">{errors.ParentlastName}</p>
           )}
         </div>
-        <div className={styles.personalInfoItem}>
-          <label htmlFor="Occupation">Parent's Occupation</label>
+        <div className="personalInfoItem">
+          <label
+            htmlFor="Occupation"
+            className="font-bold text-gray-500 text-base block mb-1"
+          >
+            Parent's Occupation
+          </label>
           <input
             type="text"
             name="Occupation"
@@ -70,13 +96,19 @@ const Parent = ({
             placeholder="Enter  Occupation"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
+            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.Occupation && (
-            <p className={styles.error}>{errors.Occupation}</p>
+            <p className="text-red-500 text-xs mt-1">{errors.Occupation}</p>
           )}
         </div>
-        <div className={styles.personalInfoItem}>
-          <label htmlFor="PhoneNumber">Parent's Phone Number</label>
+        <div className="personalInfoItem">
+          <label
+            htmlFor="PhoneNumber"
+            className="font-bold text-gray-500 text-base block mb-1"
+          >
+            Parent's Phone Number
+          </label>
           <input
             type="text"
             name="PhoneNumber"
@@ -84,13 +116,19 @@ const Parent = ({
             placeholder="Enter Phone No"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
+            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.PhoneNumber && (
-            <p className={styles.error}>{errors.PhoneNumber}</p>
+            <p className="text-red-500 text-xs mt-1">{errors.PhoneNumber}</p>
           )}
         </div>
-        <div className={styles.personalInfoItem}>
-          <label htmlFor="Email">Parent's E-mail</label>
+        <div className="personalInfoItem">
+          <label
+            htmlFor="Email"
+            className="font-bold text-gray-500 text-base block mb-1"
+          >
+            Parent's E-mail
+          </label>
           <input
             type="text"
             name="Email"
@@ -98,11 +136,19 @@ const Parent = ({
             placeholder="Enter E-mail"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
+            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
-          {errors?.Email && <p className={styles.error}>{errors.Email}</p>}
+          {errors?.Email && (
+            <p className="text-red-500 text-xs mt-1">{errors.Email}</p>
+          )}
         </div>
-        <div className={styles.personalInfoItem}>
-          <label htmlFor="EmergencyContact">Emergency Contact</label>
+        <div className="personalInfoItem">
+          <label
+            htmlFor="EmergencyContact"
+            className="font-bold text-gray-500 text-base block mb-1"
+          >
+            Emergency Contact
+          </label>
           <input
             type="text"
             name="EmergencyContact"
@@ -110,20 +156,29 @@ const Parent = ({
             placeholder="Enter Emergency Contact"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
+            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.EmergencyContact && (
-            <p className={styles.error}>{errors.EmergencyContact}</p>
+            <p className="text-red-500 text-xs mt-1">
+              {errors.EmergencyContact}
+            </p>
           )}
         </div>
-        <div className={styles.personalInfoItem}>
-          <label htmlFor="Address">Address</label>
-          <div className={styles.grouppersonalInfoItem}>
+        <div className="personalInfoItem">
+          <label
+            htmlFor="Address"
+            className="font-bold text-gray-500 text-base block mb-1"
+          >
+            Address
+          </label>
+          <div className="grid gap-4 grid-cols-2 grouppersonalInfoItem">
             <div>
               <select
                 name="country"
                 value={parentInfo.country}
                 onChange={handleCountryChange}
                 required
+                className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
               >
                 <option value="" disabled>
                   Select Country
@@ -138,7 +193,7 @@ const Parent = ({
                   })}
               </select>
               {errors?.country && (
-                <p className={styles.error}>{errors.country}</p>
+                <p className="text-red-500 text-xs mt-1">{errors.country}</p>
               )}
             </div>
             <div>
@@ -147,6 +202,7 @@ const Parent = ({
                 value={parentInfo.state}
                 onChange={handleStateChange}
                 required
+                className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
               >
                 <option value="" disabled>
                   Select State
@@ -160,19 +216,22 @@ const Parent = ({
                     );
                   })}
               </select>
-              {errors?.state && <p className={styles.error}>{errors.state}</p>}
+              {errors?.state && (
+                <p className="text-red-500 text-xs mt-1">{errors.state}</p>
+              )}
             </div>
           </div>
         </div>
-        <div className={styles.personalInfoItemcity}>
+        <div className="flex flex-col justify-end personalInfoItemcity">
           <div></div>
-          <div className={styles.grouppersonalInfoItem}>
+          <div className="grid gap-4 grid-cols-2 grouppersonalInfoItem">
             <div>
               <select
                 name="city"
                 value={parentInfo.city}
                 onChange={(e) => handleInputChange(e, setParentInfo)}
                 required
+                className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
               >
                 <option value="" disabled>
                   Select City
@@ -186,18 +245,27 @@ const Parent = ({
                     );
                   })}
               </select>
-              {errors?.city && <p className={styles.error}>{errors.city}</p>}
+              {errors?.city && (
+                <p className="text-red-500 text-xs mt-1">{errors.city}</p>
+              )}
             </div>
             <div></div>
           </div>
         </div>
-        <div className={styles.personalInfoItem}>
-          <label htmlFor="ParentGender"> Gender</label>
+        <div className="personalInfoItem">
+          <label
+            htmlFor="ParentGender"
+            className="font-bold text-gray-500 text-base block mb-1"
+          >
+            {" "}
+            Gender
+          </label>
           <select
             name="ParentGender"
             value={parentInfo.ParentGender}
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
+            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           >
             <option value="" disabled>
               Select Gender
@@ -205,16 +273,24 @@ const Parent = ({
             <option value="male">Male</option>
             <option value="female">Female</option>
           </select>
-          {errors?.gender && <p className={styles.error}>{errors.gender}</p>}
+          {errors?.gender && (
+            <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
+          )}
         </div>
-        <div className={styles.personalInfoItem}>
-          <label htmlFor="Relationship">Relationship</label>
-          <div className={styles.Form_input}>
+        <div className="personalInfoItem">
+          <label
+            htmlFor="Relationship"
+            className="font-bold text-gray-500 text-base block mb-1"
+          >
+            Relationship
+          </label>
+          <div className="Form_input">
             <select
               name="Relationship"
               value={parentInfo.Relationship}
               onChange={(e) => handleInputChange(e, setParentInfo)}
               required
+              className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
             >
               <option value="" disabled>
                 Select Relationship Shared
@@ -228,7 +304,9 @@ const Parent = ({
               })}
             </select>
             {errors?.Relationship && (
-              <p className={styles.error}>{errors?.parentInfo.Relationship}</p>
+              <p className="text-red-500 text-xs mt-1">
+                {errors?.parentInfo.Relationship}
+              </p>
             )}
           </div>
         </div>

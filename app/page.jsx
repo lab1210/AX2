@@ -65,12 +65,12 @@ export default function Login() {
 
   return (
     <>
-      {/* ─── desktop view ──────────────────────────────────── */}
+      {/* ─── desktop view ──────*/}
       <div className="hidden lg:flex w-full h-auto bg-[rgba(217,217,217,0.4)]">
         <LeftAuth />
         <div className="flex flex-col items-center justify-center w-full md:w-[55%] lg:w-1/2 bg-white">
           <div className="shadow-[0px_4px_10px_4px_rgba(0,0,0,0.15)] rounded-lg px-4 py-4 md:p-4 lg:px-[60px] lg:pb-[30px]">
-            <div className="w-[80px] h-[129px] md:w-[220px] mx-auto">
+            <div className="w-[80px] h-[129px] md:w-[220px]">
               <img
                 src="/MySchoolLight.png"
                 alt="Logo"
