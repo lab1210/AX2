@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import styles from "../../../css/registerform.module.css";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -148,7 +147,7 @@ const StudentRegistrationForm = () => {
       newErrors.admissionDate = "Admission date is required";
 
     setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Return true if no errors
+    return Object.keys(newErrors).length === 0;
   };
 
   const handleSubmit = async (e) => {
@@ -171,11 +170,9 @@ const StudentRegistrationForm = () => {
 
         if (response.ok) {
           alert("Registration Successful!");
-          // Redirect or reset form here
         } else {
-          const errorData = await response.json(); // Get error details from backend
+          const errorData = await response.json(); 
           alert(`Registration failed: ${errorData.message || "Unknown error"}`);
-          // Handle specific errors, e.g., display them on the form
         }
       } catch (error) {
         console.error("Error submitting form:", error);
@@ -189,56 +186,63 @@ const StudentRegistrationForm = () => {
     role === "teacher" ? `/Register/Teacher` : `/Register/Student`;
 
   return (
-    <form className={styles.Reg_form_Container} onSubmit={handleSubmit}>
-      <div className={styles.Reg_header}>
-        <h2>Student Registration</h2>
-        <Link href="/Register">
-          <IoIosCloseCircleOutline size={24} />
-        </Link>
-      </div>
-      <div className={styles.Reg_Content}>
-        <Token token={token} setToken={setToken} error={errors.token} />
-        <hr />
-        <Personal
-          personalInfo={personalInfo}
-          setPersonalInfo={setPersonalInfo}
-          errors={errors.personalInfo}
-          handleInputChange={handleInputChange}
-          handleCountryChange={handleCountryChange}
-          handleStateChange={handleStateChange}
-          countries={countries}
-          states={states}
-          cities={cities}
-        />
-        <hr />
-        <Admission
-          admissionInfo={admissionInfo}
-          setadmissionInfo={setadmissionInfo}
-          error={errors.admissionInfo}
-          handleInputChange={handleInputChange}
-          handleDateChange={handleDateChange}
-        />
-        <hr />
-        <Parent
-          parentInfo={parentInfo}
-          setParentInfo={setParentInfo}
-          handleInputChange={handleInputChange}
-          errors={errors.personalInfo}
-          handleCountryChange={handleCountryChange}
-          handleStateChange={handleStateChange}
-          countries={countries}
-          states={states}
-          cities={cities}
-          RelationshipData={RelationshipData}
-        />
-      </div>
-      <div className={styles.next}>
-        <Link href={`${registrationFormPath}/Profile`}>
-          <button>Next Page</button>
-        </Link>
-      </div>
-    </form>
-  );
+    <form className="bg-white max-w-full flex flex-col" onSubmit={handleSubmit}>
+    <div className="bg-[#01427a] text-white flex justify-between items-center px-8 py-5 font-bold">
+      <h2 className="text-2xl">Student Registration</h2>
+      <Link href="/Register">
+        <IoIosCloseCircleOutline className="size-6 cursor-pointer" />
+      </Link>
+    </div>
+
+    <div className="w-full">
+      <Token token={token} setToken={setToken} error={errors.token} />
+      <hr className="border-[#0000001a] -mx-8 my-0" />
+      
+      <Personal
+        personalInfo={personalInfo}
+        setPersonalInfo={setPersonalInfo}
+        errors={errors.personalInfo}
+        handleInputChange={handleInputChange}
+        handleCountryChange={handleCountryChange}
+        handleStateChange={handleStateChange}
+        countries={countries}
+        states={states}
+        cities={cities}
+      />
+      <hr className="border-[#0000001a] -mx-8 my-0" />
+      
+      <Admission
+        admissionInfo={admissionInfo}
+        setadmissionInfo={setadmissionInfo}
+        error={errors.admissionInfo}
+        handleInputChange={handleInputChange}
+        handleDateChange={handleDateChange}
+      />
+      <hr className="border-[#0000001a] -mx-8 my-0" />
+      
+      <Parent
+        parentInfo={parentInfo}
+        setParentInfo={setParentInfo}
+        handleInputChange={handleInputChange}
+        errors={errors.personalInfo}
+        handleCountryChange={handleCountryChange}
+        handleStateChange={handleStateChange}
+        countries={countries}
+        states={states}
+        cities={cities}
+        RelationshipData={RelationshipData}
+      />
+    </div>
+
+    <div className="flex justify-end pr-4 pb-3">
+      <Link href={`${registrationFormPath}/Profile`}>
+        <button className="bg-[#01427a] text-white text-base rounded-lg px-10 py-5 cursor-pointer hover:bg-[#01427a]/90 transition-colors">
+          Next Page
+        </button>
+      </Link>
+    </div>
+  </form>
+);
 };
 
 export default StudentRegistrationForm;
