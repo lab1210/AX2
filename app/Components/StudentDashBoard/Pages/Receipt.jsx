@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import Layout from "../../Studentlayout";
 import dummysession from "../../session";
 import { getUserDetails } from "@/app/Service/AuthService";
+import { useRouter } from "next/navigation";
+import Receipt from "../../../../public/receipt.png";
 
 const ReceiptItem = () => {
   const [session, setSession] = useState(dummysession[0]);
@@ -39,21 +41,17 @@ const ReceiptItem = () => {
       </div>
     );
   }
+  const router = useRouter();
 
   return (
     <Layout>
-      <div className="flex flex-col gap-5 p-4 xl:pt-10 xl:pr-8  bg-[#f0f0f0] rounded-lg min-h-screen">
-        {/* ReceiptGrid: grid with two auto rows */}
+      <div className="hidden lg:flex flex-col gap-5 p-4 xl:pt-10 xl:pr-8  bg-[#f0f0f0] rounded-lg min-h-screen">
         <div>
-          {/* ReceiptPageTitle */}
           <div className="bg-white mb-5 rounded-[15px] p-5">
             <h2 className="text-xl font-bold">Financial Transaction Receipt</h2>
           </div>
-          {/* ReceiptPageContent */}
           <div className="bg-white mb-5 rounded-[10px] flex flex-col gap-5">
-            {/* firstRow */}
             <div className="flex justify-between items-center px-10 pt-5">
-              {/* dropdown */}
               <div className="flex gap-[30px] items-center">
                 <label htmlFor="session">Select Session :</label>
                 <select
@@ -70,16 +68,13 @@ const ReceiptItem = () => {
                   ))}
                 </select>
               </div>
-              {/* printButton */}
               <div>
                 <button className="bg-[#0b71b5] text-white font-bold px-10 py-2.5 rounded-[10px] cursor-pointer">
                   Print
                 </button>
               </div>
             </div>
-            {/* secondRow */}
             <div className="flex flex-col gap-5">
-              {/* head */}
               <div className="text-center border-[#cfcfcf]">
                 <div className="mb-[30px]">
                   <h2 className="text-xl font-bold">{user.student.school}</h2>
@@ -87,7 +82,7 @@ const ReceiptItem = () => {
                 </div>
                 <div className="flex text-sm items-center justify-center font-bold gap-[10px]">
                   <p>
-                    Name:{" "}
+                    Name:
                     <span>
                       {user?.student?.first_name +
                         " " +
@@ -100,7 +95,6 @@ const ReceiptItem = () => {
                 </div>
                 <hr className="text-[#cfcfcf] w-full mt-5 mb-5" />
               </div>
-              {/* Receipt Table */}
               <div className="px-10">
                 <table className="border-collapse mb-[18px] w-full table-fixed">
                   <thead className="bg-[#80adcb] text-white xl:text-base text-[13.4px]  text-left font-bold">
@@ -158,7 +152,6 @@ const ReceiptItem = () => {
                   </tbody>
                 </table>
               </div>
-              {/* ReceiptTotalContainer */}
               <div className="pl-35 mb-10 flex items-center font-bold gap-[10px]">
                 <p className="text-sm">Total Payment</p>
                 <div className="text-[#4084b1] bg-[#cfcfcf66] rounded-[10px] p-[5px] text-[18px]">
@@ -173,6 +166,93 @@ const ReceiptItem = () => {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      {/* Mobile/Tablet View */}
+      <div className="block lg:hidden min-h-screen">
+        <div className="p-4">
+          <img
+            src={
+              user.student.profile_picture_path === null
+                ? "/receipt.png"
+                : user.student.profile_picture_path
+            }
+            alt="receipt"
+            className="w-10 h-10 flex items-center mb-5"
+          />
+          <div className="mb-4">
+            <div className="relative inline-block w-full text-gray-700">
+              <select
+                className="block appearance-none w-full bg-gray-200 border border-gray-300 hover:border-gray-400 px-4 py-2 pr-8 rounded"
+                value={session}
+                onChange={(e) => setSession(e.target.value)}
+              >
+                {dummysession.map((sessionName) => (
+                  <option key={sessionName} value={sessionName}>
+                    {sessionName}
+                  </option>
+                ))}
+              </select>
+              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                <svg
+                  className="fill-current h-4 w-4"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {receipts.map((receipt, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-md border-b border-gray-300 p-4"
+              >
+                <div className="flex justify-between mb-2">
+                  <h3 className="text-md font-semibold">Receipt Number</h3>
+                  <p> {receipt.TransactionNumber}</p>
+                </div>
+                <div className="grid grid-rows-2 gap-2 text-sm text-gray-600 border-t border-gray-300 mb-2">
+                  <div className="flex justify-between gap-2 mt-2">
+                    <p>Date Paid:</p>
+                    <p className="font-semibold text-black">
+                      {new Date().toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <p>Time:</p>
+                    <p className="font-semibold text-black">
+                      {new Date().toLocaleTimeString()}
+                    </p>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <p>Description:</p>
+                    <p className="font-semibold text-black">
+                      {receipt.purpose}
+                    </p>
+                  </div>
+                  <div className="flex justify-between gap-2">
+                    <p>Amount Paid:</p>
+                    <p className="font-semibold text-black">
+                      {receipt.AmountPaid.toLocaleString("en-NG", {
+                        style: "currency",
+                        currency: "NGN",
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <button className="bg-[#004080] text-white font-semibold py-3 rounded-md shadow-md w-full mt-6">
+            Download PDF
+          </button>
         </div>
       </div>
     </Layout>

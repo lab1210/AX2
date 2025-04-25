@@ -1,22 +1,49 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../../../Components/Studentlayout";
 import { useUser } from "../context/UserProvider";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
+import { CheckCircle, XCircle } from "lucide-react";
 
 export default function SubjectRegistrationDemo() {
   const [stream, setStream] = useState("Science");
   const [subjects, setSubjects] = useState([
-    { id: 1, name: "Physics", checked: false },
-    { id: 2, name: "Chemistry", checked: false },
-    { id: 3, name: "Creative Arts", checked: false },
-    { id: 4, name: "Data Processing", checked: false },
-    { id: 5, name: "Biology", checked: false },
+    { id: 1, name: "Physics", checked: false, category: "Science" },
+    { id: 2, name: "Chemistry", checked: false, category: "Science" },
+    { id: 3, name: "Creative Arts", checked: false, category: "Art" },
+    { id: 4, name: "Data Processing", checked: false, category: "Commercial" },
+    { id: 5, name: "Commerce", checked: false, category: "Commercial" },
+    { id: 6, name: "Government", checked: false, category: "Commercial" },
+    { id: 7, name: "Banking and Finance", checked: false, category: "Commercial" },
+    { id: 8, name: "Biology", checked: false, category: "Science" },
+    { id: 9, name: "Mathematics", checked: true, category: "Compulsory" },
+    { id: 10, name: "English Language", checked: true, category: "Compulsory" },
+    { id: 11, name: "Civic Education", checked: true, category: "Compulsory" },
+    { id: 12, name: "Basic Science", checked: true, category: "Compulsory" },
+    { id: 13, name: "Music", checked: false, category: "Art" },
+    { id: 14, name: "Arts and Craft", checked: false, category: "Art" },
+    { id: 15, name: "Geography", checked: false, category: "Art" },
+    { id: 16, name: "Government", checked: false, category: "Art" },
+    { id: 17, name: "Literature in English", checked: false, category: "Art" },
+    { id: 18, name: "Agricultural Science", checked: false, category: "Art" },
+    { id: 19, name: "Tie and Dye", checked: false, category: "Art" },
   ]);
   const { isLoading } = useUser();
   const router = useRouter();
 
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleStreamChange = (value) => {
     setStream(value);
@@ -31,9 +58,11 @@ export default function SubjectRegistrationDemo() {
   };
 
   const handleProceed = () => {
-    const selectedSubjects = subjects.filter((s) => s.checked);
+    const selectedSubjects = subjects.filter(
+      (s) => s.checked && s.category !== "Compulsory"
+    );
     if (selectedSubjects.length < 3) {
-      alert("Please select at least 3 subjects before proceeding.");
+      alert("Please select at least 3 elective subjects before proceeding.");
       return;
     }
     setShowConfirm(true);
@@ -45,8 +74,30 @@ export default function SubjectRegistrationDemo() {
 
   const handleConfirmYes = () => {
     setShowConfirm(false);
-    router.push("/Student/Timetable"); 
+    router.push("/Student/Timetable");
   };
+
+  const getFilteredSubjects = () => {
+    if (stream === "Science") {
+      return subjects.filter(
+        (subject) =>
+          subject.category === "Compulsory" || subject.category === "Science"
+      );
+    } else if (stream === "Art") {
+      return subjects.filter(
+        (subject) =>
+          subject.category === "Compulsory" || subject.category === "Art"
+      );
+    } else if (stream === "Commercial") {
+      return subjects.filter(
+        (subject) =>
+          subject.category === "Compulsory" || subject.category === "Commercial"
+      );
+    }
+    return subjects;
+  };
+
+  const displayedSubjects = getFilteredSubjects();
 
   if (isLoading) {
     return (
@@ -56,17 +107,31 @@ export default function SubjectRegistrationDemo() {
     );
   }
 
+  // Modal Animation Variants
+  const modalVariants = {
+    hidden: { opacity: 0, scale: 0.8 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      transition: { duration: 0.3, ease: "easeInOut" },
+    },
+    exit: { opacity: 0, scale: 0.8, transition: { duration: 0.2 } },
+  };
+
   return (
     <Layout>
       <div className="min-h-screen bg-[#D9D9D9] p-4 md:p-8 flex flex-col items-center relative">
         {/* Main Content */}
-        <div className="bg-white w-full max-w-3xl rounded-lg shadow p-6 md:p-8 mb-8">
+        <div className="bg-white w-full max-w-3xl rounded-lg shadow p-4 md:p-6 mb-6">
           <h1 className="text-center text-2xl md:text-3xl font-bold mb-4">
             SS1 subject registration
           </h1>
-          <div className="flex justify-center gap-8 mb-4">
+          <div className="flex justify-center gap-4 md:gap-8 mb-4">
             {["Science", "Art", "Commercial"].map((val) => (
-              <label key={val} className="flex items-center gap-2 cursor-pointer">
+              <label
+                key={val}
+                className="flex items-center gap-2 cursor-pointer"
+              >
                 <input
                   type="radio"
                   name="stream"
@@ -82,10 +147,10 @@ export default function SubjectRegistrationDemo() {
         </div>
 
         {/* Subject selection card */}
-        <div className="bg-white w-full max-w-3xl rounded-md shadow p-6 md:p-8">
+        <div className="bg-white w-full max-w-3xl rounded-md shadow p-4 md:p-6">
           {/* Step indicators */}
-          <div className="flex items-center justify-center mb-6">
-            <div className="flex items-center space-x-4">
+          <div className="flex items-center justify-center mb-4 md:mb-6">
+            <div className="flex items-center space-x-2 md:space-x-4">
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 flex items-center justify-center bg-green-600 text-white rounded-full">
                   1
@@ -94,7 +159,7 @@ export default function SubjectRegistrationDemo() {
                   select subjects
                 </span>
               </div>
-              <div className="w-16 h-1 bg-gray-300" />
+              <div className="w-8 md:w-16 h-1 bg-gray-300" />
 
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 flex items-center justify-center bg-green-600 text-white rounded-full">
@@ -104,7 +169,7 @@ export default function SubjectRegistrationDemo() {
                   confirm subjects
                 </span>
               </div>
-              <div className="w-16 h-1 bg-gray-300" />
+              <div className="w-8 md:w-16 h-1 bg-gray-300" />
 
               <div className="flex flex-col items-center">
                 <div className="w-8 h-8 flex items-center justify-center bg-gray-300 text-gray-700 rounded-full">
@@ -128,8 +193,13 @@ export default function SubjectRegistrationDemo() {
                 </tr>
               </thead>
               <tbody>
-                {subjects.map((subj, idx) => (
-                  <tr key={subj.id}>
+                {displayedSubjects.map((subj, idx) => (
+                  <tr
+                    key={subj.id}
+                    className={
+                      subj.category === "Compulsory" ? "bg-yellow-100" : ""
+                    }
+                  >
                     <td className="py-2 px-4 ">{idx + 1}</td>
                     <td className="py-2 px-2">{subj.name}</td>
                     <td className="py-3 px-4 text-center">
@@ -138,6 +208,7 @@ export default function SubjectRegistrationDemo() {
                         checked={subj.checked}
                         onChange={() => handleSubjectToggle(subj.id)}
                         className="accent-green-600"
+                        disabled={subj.category === "Compulsory"}
                       />
                     </td>
                   </tr>
@@ -150,7 +221,7 @@ export default function SubjectRegistrationDemo() {
           <div className="text-center mt-6">
             <button
               onClick={handleProceed}
-              className="bg-green-600 text-white px-10 py-2 rounded hover:bg-green-700"
+              className="bg-green-600 text-white px-8 md:px-10 py-2 rounded hover:bg-green-700"
             >
               Proceed
             </button>
@@ -158,29 +229,37 @@ export default function SubjectRegistrationDemo() {
         </div>
 
         {/* Confirm Modal */}
-        {showConfirm && (
-          <div className="absolute inset-0 flex items-center justify-center bg-opacity-50 z-50">
-            <div className="bg-white p-6 rounded shadow-2xl max-w-sm w-full">
-              <h2 className="text-xl font-bold text-center mb-4">
-                Confirm final registration
-              </h2>
-              <div className="flex justify-center gap-6">
-                <button
-                  onClick={handleConfirmNo}
-                  className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700"
-                >
-                  No
-                </button>
-                <button
-                  onClick={handleConfirmYes}
-                  className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700"
-                >
-                  Yes
-                </button>
+        <AnimatePresence>
+          {showConfirm && (
+            <motion.div
+              variants={modalVariants}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              className="fixed inset-0 flex items-center justify-center bg-opacity-50 z-50 backdrop-blur-sm"
+            >
+              <div className="bg-white p-4 md:p-6 rounded shadow-2xl max-w-sm w-full">
+                <h2 className="text-xl font-bold text-center mb-4">
+                  Confirm final registration
+                </h2>
+                <div className="flex justify-center gap-4 md:gap-6">
+                  <button
+                    onClick={handleConfirmNo}
+                    className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 flex items-center gap-2"
+                  >
+                    <XCircle className="w-5 h-5" /> No
+                  </button>
+                  <button
+                    onClick={handleConfirmYes}
+                    className="bg-green-600 text-white px-6 py-2 rounded hover:bg-green-700 flex items-center gap-2"
+                  >
+                    <CheckCircle className="w-5 h-5" /> Yes
+                  </button>
+                </div>
               </div>
-            </div>
-          </div>
-        )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </Layout>
   );
