@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
 
-export default function SubjectRegistrationDemo() {
+export default function SubjectRegistration() {
   const [stream, setStream] = useState("Science");
   const [subjects, setSubjects] = useState([
     { id: 1, name: "Physics", checked: false, category: "Science" },
