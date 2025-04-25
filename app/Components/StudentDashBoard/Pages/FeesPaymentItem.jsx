@@ -8,6 +8,7 @@ import { LuArrowDownUp } from "react-icons/lu";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getUserDetails } from "@/app/Service/AuthService";
+import { ChevronLeft } from "lucide-react";
 
 const FeesPaymentItem = () => {
   const [term, setTerm] = useState("");
@@ -87,7 +88,7 @@ const FeesPaymentItem = () => {
 
   return (
     <Layout>
-      <div className="flex flex-col gap-5 p-4 xl:pt-10 xl:pr-8  bg-[#f0f0f0] rounded-lg min-h-screen">
+      <div className="hidden lg:flex flex-col gap-5 p-4 xl:pt-10 xl:pr-8  bg-[#f0f0f0] rounded-lg min-h-screen">
         {/* First Card Section */}
         <div className="flex flex-col xl:gap-12 gap-8 md:flex-row md:justify-between bg-white rounded-xl p-6 pl-3 pr-3 xl:pl-14 xl:pr-14">
           <Link
@@ -281,6 +282,133 @@ const FeesPaymentItem = () => {
               <span className="bg-red-500 text-white rounded-lg px-2 text-sm">
                 {formatCurrency(totalAmountPending)}
               </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Mobile View */}
+      <div className="bg-white min-h-screen lg:hidden">
+        <div className="p-4 flex flex-col gap-4">
+          <div className="flex gap-4 text-white">
+            <Link
+              href={`/Student/Fees-Payment/Make-Payment?studentId=${studentId}`}
+              className="bg-[#4084B1] text-white rounded-xl flex-1 overflow-hidden"
+            >
+              <div className="p-2 flex">
+                <div className="flex items-start">
+                  <img
+                    src="/Wallet.png"
+                    alt=""
+                    className="w-12 h-12 object-contain text-white"
+                  />
+                </div>
+              </div>
+              <div className="p-4">
+                <h4 className="text-lg font-bold mb-1">Make Payment</h4>
+                <p className="text-sm ">payment made easy</p>
+              </div>
+            </Link>
+
+            <Link
+              href={`/Student/Fees-Payment/Receipt?studentId=${studentId}`}
+              className="bg-red-500 text-white rounded-xl flex-1 overflow-hidden"
+            >
+              <div className=" p-2">
+                <div className="flex items-start">
+                  <img
+                    src="/Glyph.png"
+                    alt=""
+                    className="w-12 h-12 object-contain text-white"
+                  />
+                </div>
+              </div>
+              <div className="p-4">
+                <h4 className="text-lg font-bold mb-1 text-white">Receipt</h4>
+                <p className="text-sm text-white/80">view receipt</p>
+              </div>
+            </Link>
+          </div>
+
+          {/* Statement Section */}
+          <div className="bg-white rounded-xl p-4">
+            <div className="flex items-center justify-between mb-8">
+              <label className="text-lg md:text-xl font-semibold">
+                Statement of Account
+              </label>
+              <select
+                className="bg-gray-100 rounded-lg p-1 text-sm outline-0"
+                value={session}
+                onChange={(e) => setSession(e.target.value)}
+              >
+                {dummysession.map((item, index) => (
+                  <option key={index} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="overflow-x-auto">
+              <div className="flex flex-row justify-between gap-4 mb-3"> 
+              <div className="flex flex-col mb-3">
+              <p className="text-xs text-gray-400"> 07/09/23</p>
+              <p className="text-md text-black font-semibold"> Admission Acceptance Fee</p>
+              <p className="text-sm text-gray-500"> TD01</p>
+              </div>
+              <div>
+                <p className="text-green-500 font-semibold text-sm">52,000.00</p>
+              </div>
+              </div>
+              <div className="flex flex-row justify-between gap-4 mb-3"> 
+              <div className="flex flex-col mb-3">
+              <p className="text-md text-black font-semibold"> Semester School Fee</p>
+              <p className="text-sm text-gray-500"> TD02</p>
+              </div>
+              <div className="flex flex-col">
+                <p className="text-gray-500 font-semibold text-sm">250,000.00</p>
+                <p className="text-red-500 font-semibold text-sm">152,345.00</p>
+              </div>
+              </div>
+              <div className="flex flex-row justify-between gap-4 mb-3"> 
+              <div className="flex flex-col mb-3">
+              <p className="text-xs text-gray-400"> 08/09/23</p>
+              <p className="text-md text-black font-semibold"> PTA Dues</p>
+              <p className="text-sm text-gray-500"> TD02</p>
+              </div>
+              <div>
+                <p className="text-green-500 font-semibold text-sm">2,000.00</p>
+              </div>
+              </div>
+              <div className="flex flex-row justify-between gap-4 mb-3"> 
+              <div className="flex flex-col mb-3">
+              <p className="text-xs text-gray-400"> 07/09/23</p>
+              <p className="text-md text-black font-semibold"> Admission Acceptance Fee</p>
+              <p className="text-sm text-gray-500"> TD01</p>
+              </div>
+              <div>
+                <p className="text-green-500 font-semibold text-sm">52,000.00</p>
+              </div>
+              </div>
+              <div className="flex flex-row justify-between gap-4 mb-3"> 
+              <div className="flex flex-col mb-3">
+              <p className="text-md text-black font-semibold"> Semester School Fee</p>
+              <p className="text-sm text-gray-500"> TD02</p>
+              </div>
+              <div className="flex flex-col">
+                <p className="text-gray-500 font-semibold text-sm">250,000.00</p>
+                <p className="text-red-500 font-semibold text-sm">152,345.00</p>
+              </div>
+              </div>
+              <div className="flex flex-row justify-between gap-4 mb-3"> 
+              <div className="flex flex-col mb-3">
+              <p className="text-xs text-gray-400"> 08/09/23</p>
+              <p className="text-md text-black font-semibold"> PTA Dues</p>
+              <p className="text-sm text-gray-500"> TD02</p>
+              </div>
+              <div>
+                <p className="text-green-500 font-semibold text-sm">2,000.00</p>
+              </div>
+              </div>
             </div>
           </div>
         </div>
