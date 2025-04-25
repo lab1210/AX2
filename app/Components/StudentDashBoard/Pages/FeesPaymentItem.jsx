@@ -8,7 +8,6 @@ import { LuArrowDownUp } from "react-icons/lu";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getUserDetails } from "@/app/Service/AuthService";
-import { ChevronLeft } from "lucide-react";
 
 const FeesPaymentItem = () => {
   const [term, setTerm] = useState("");
