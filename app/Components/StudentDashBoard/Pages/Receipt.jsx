@@ -4,7 +4,6 @@ import Layout from "../../Studentlayout";
 import dummysession from "../../session";
 import { getUserDetails } from "@/app/Service/AuthService";
 import { useRouter } from "next/navigation";
-import Receipt from "../../../../public/receipt.png";
 
 const ReceiptItem = () => {
   const [session, setSession] = useState(dummysession[0]);
@@ -17,14 +16,12 @@ const ReceiptItem = () => {
       TransactionNumber: "TD01",
       AmountBilled: 52000,
       AmountPaid: 52000,
-      // PaymentDate: "07/09/23", // Removed from receipts
     },
     {
       purpose: "Extracurricular Sports Mentorship",
       TransactionNumber: "TD04",
       AmountBilled: 20000,
       AmountPaid: 20000,
-      //PaymentDate: "07/09/23", // Removed from receipts
     },
   ];
 
@@ -168,6 +165,7 @@ const ReceiptItem = () => {
           </div>
         </div>
       </div>
+
       {/* Mobile/Tablet View */}
       <div className="block lg:hidden min-h-screen">
         <div className="p-4">
