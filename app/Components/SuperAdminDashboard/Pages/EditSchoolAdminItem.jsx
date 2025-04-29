@@ -274,8 +274,12 @@ const EditSchoolAdminItem = () => {
     );
   }
 
-  if (errorSchools) {
-    return <div>Error loading schools: {errorSchools}</div>;
+  if (error) {
+    return (
+      <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
+        {errorSchools}
+      </div>
+    );
   }
 
   return (
@@ -294,6 +298,11 @@ const EditSchoolAdminItem = () => {
             {apiSuccess && (
               <div className="mt-4 pl-6 text-green-500">
                 School Admin updated successfully!
+              </div>
+            )}
+            {apiError && (
+              <div className="mt-4 pl-6 font-bold text-red-500">
+                Error: {apiError}
               </div>
             )}
             <div>

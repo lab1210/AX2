@@ -11,9 +11,13 @@ import {
   updateSchoolSubscription,
 } from "@/app/Service/schoolService";
 
-const itemsPerPage = 10; // You can adjust this value
+const itemsPerPage = 7; // You can adjust this value
 
 const MonitorSubscribtionItem = () => {
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString("en-GB");
+  };
+
   const [subscriptions, setSubscriptions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [apiError, setApiError] = useState(null);
@@ -220,7 +224,7 @@ const MonitorSubscribtionItem = () => {
         <DashboardHeader />
 
         <div className="flex items-center gap-4 ">
-          <div className="flex items-center rounded-4xl border lg:min-w-[350px]  border-[#978F8F] ">
+          <div className="flex items-center rounded-4xl border lg:min-w-[350px]  border-[#D0D0D0] ">
             <input
               type="text"
               placeholder="Search School"
@@ -244,34 +248,34 @@ const MonitorSubscribtionItem = () => {
       </div>
       <div className="bg-[#D4D4D4] overflow-auto flex-1 p-4">
         <div className="bg-[#ffffff] rounded-lg overflow-x-auto">
-          <table className="min-w-full table-auto">
+          <table className="min-w-full table-auto border-collapse">
             <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
-              <tr className="border-b-[#978F8F] border-b">
-                <th className="pt-3 pb-3 pl-12 text-left font-bold text-[#333333]">
+              <tr className="border-b-[#D0D0D0] border-b">
+                <th className="pt-3 pb-3 px-5  text-left font-bold text-[#333333]">
                   School Name
                 </th>
-                <th className="pt-3 pb-3  text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
                   No of Students
                 </th>
-                <th className="pt-3 pb-3  text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
                   Amount per Student
                 </th>
-                <th className="pt-3 pb-3  text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
                   Amount Expected
                 </th>
-                <th className="pt-3 pb-3  text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
                   Amount Paid
                 </th>
-                <th className="pt-3 pb-3  text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
                   Start Date
                 </th>
-                <th className="pt-3 pb-3  text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
                   Expiring Date
                 </th>
-                <th className="pt-3 pb-3  text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
                   Status
                 </th>
-                <th className="pt-3 pb-3  text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
                   Edit
                 </th>
               </tr>
@@ -280,30 +284,30 @@ const MonitorSubscribtionItem = () => {
               {currentItems.map((item) => (
                 <tr
                   key={item.subscription_id}
-                  className="border-b-[#978F8F] border-b font-semibold text-xs cursor-pointer "
+                  className="border-b-[#D0D0D0] border-b font-semibold text-xs cursor-pointer "
                 >
-                  <td className="pt-2 pb-2 pl-12 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-[#333333]">
                     {item.school_name}
                   </td>
-                  <td className="pt-2 pb-2 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-[#333333]">
                     {item.live_number_students}
                   </td>
-                  <td className="pt-2 pb-2 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-[#333333]">
                     {formatCurrency(item.amount_per_student)}
                   </td>
-                  <td className="pt-2 pb-2 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-[#333333]">
                     {formatCurrency(item.live_expected_fee)}
                   </td>
-                  <td className="pt-2 pb-2 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-[#333333]">
                     {formatCurrency(item.amount_paid)}
                   </td>
-                  <td className="pt-2 pb-2 text-[#333333]">
-                    {item.active_date}
+                  <td className="pt-3 pb-3 px-5 text-[#333333]">
+                    {formatDate(item.active_date)}
                   </td>
-                  <td className="pt-2 pb-2 text-[#333333]">
-                    {item.expired_date}
+                  <td className="pt-3 pb-3 px-5 text-[#333333]">
+                    {formatDate(item.expired_date)}
                   </td>
-                  <td className="pt-2 pb-2 flex items-center  gap-2">
+                  <td className="pt-3 pb-3 px-5 flex items-center  gap-2">
                     <span
                       className={`${
                         item.live_is_active
@@ -321,7 +325,7 @@ const MonitorSubscribtionItem = () => {
                       {item.live_is_active ? <FaCheck /> : <IoClose />}
                     </span>
                   </td>
-                  <td className="pt-2 pb-2 pr-8 pl-5 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5  text-[#333333]">
                     <div className="flex gap-4">
                       <FiEdit3
                         className="text-[#80ADCB] cursor-pointer"

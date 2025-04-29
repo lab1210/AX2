@@ -9,7 +9,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
 import { getSchools, deleteSchool } from "../../../Service/schoolService"; // Import school service functions
 
-const ITEMS_PER_PAGE = 10; // You can adjust this value
+const ITEMS_PER_PAGE = 7; // You can adjust this value
 
 const ManageSchoolsItem = () => {
   const searchParams = useSearchParams();
@@ -330,11 +330,13 @@ const ManageSchoolsItem = () => {
                 <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
               </div>
             ) : error ? (
-              <div className="p-8 text-center text-red-500">{error}</div>
+              <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
+                {error}
+              </div>
             ) : (
               <table className="min-w-full table-auto">
                 <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
-                  <tr className="border-b-[#ABABABAB] border-b">
+                  <tr className="border-b-[#D0D0D0] border-b">
                     <th className="pt-3 pb-3 pl-12 text-left font-bold text-[#333333]">
                       School Name
                     </th>
@@ -360,22 +362,22 @@ const ManageSchoolsItem = () => {
                     schoolsData.map((item) => (
                       <tr
                         key={item.id}
-                        className="border-b-[#ABABABAB] border-b font-semibold text-xs cursor-pointer"
+                        className="border-b-[#D0D0D0] border-b font-semibold text-xs cursor-pointer"
                         onClick={() => openDetailModal(item)}
                       >
-                        <td className="pt-2 pb-2 pl-12 text-[#333333]">
+                        <td className="pt-3 pb-3 pl-12 text-[#333333]">
                           {item.school_name}
                         </td>
-                        <td className="pt-2 pb-2 text-[#333333]">
+                        <td className="pt-3 pb-3 text-[#333333]">
                           {item.school_type}
                         </td>
-                        <td className="pt-2 pb-2 text-[#333333]">
+                        <td className="pt-3 pb-3 text-[#333333]">
                           {item.short_name}
                         </td>
-                        <td className="pt-2 pb-2 text-[#333333]">
+                        <td className="pt-3 pb-3 text-[#333333]">
                           {item.reg_date || "N/A"}
                         </td>
-                        <td className="pt-2 pb-2 ">
+                        <td className="pt-3 pb-3 ">
                           <span
                             className={`${
                               item.status === "Active"
@@ -391,10 +393,10 @@ const ManageSchoolsItem = () => {
                             {item.status}
                           </span>
                         </td>
-                        <td className="pt-2 pb-2 text-[#333333]">
+                        <td className="pt-3 pb-3 text-[#333333]">
                           <div className="flex gap-4">
                             <Link
-                              href={`/Super-Admin/Manage-Existing-Schools/Edit-School?adminId=<span class="math-inline">\{adminId\}&schoolId\=</span>{item.id}`}
+                              href={`/Super-Admin/Manage-Existing-Schools/Edit-School?adminId=${adminId}&schoolId=${item.id}`}
                               onClick={(e) => e.stopPropagation()}
                             >
                               <FiEdit3
