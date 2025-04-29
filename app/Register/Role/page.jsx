@@ -8,11 +8,11 @@ const RegisterRole = () => {
   const router = useRouter();
 
   const handleRoleSelection = (role) => {
-    localStorage.setItem("userRole", role);
     setTimeout(() => {
-      router.push(`/Register/${role.toLowerCase()}/Registration-Form`);
+      router.push(`/Register/${role.toLowerCase()}/Registration-Form?role=${role}`);
     }, 500);
   };
+  
 
   return (
     <>
@@ -47,7 +47,7 @@ const RegisterRole = () => {
       </div>
 
       {/* ─── mobile & tablet view ───────*/}
-      <div className="bg-[#f2f2f2] w-full h-screen flex flex-col items-center justify-center lg:hidden">
+      <div className="bg-[#f2f2f2] w-full flex flex-col items-center justify-center lg:hidden">
         <div className="flex items-center justify-center bg-[#01427A] rounded-b-[45%] h-96 p-3">
           <button onClick={() => router.back()} className="self-start mb-4">
             <IoChevronBackSharp className="w-6 h-6 text-white " />

@@ -17,7 +17,7 @@ const Parent = ({
       <div className="font-bold text-blue-900 mb-4 mt-6 RegFormTitle">
         <h1>Parent's Information</h1>
       </div>
-      <div className="w-full grid grid-cols-3 gap-4 row-gap-10 personalInfoGrid">
+      <div className="w-full grid grid-cols-1 gap-3 lg:grid lg:grid-cols-3 lg:gap-4 row-gap-10 personalInfoGrid">
         <div className="personalInfoItem">
           <label
             htmlFor="ParentfirstName"
