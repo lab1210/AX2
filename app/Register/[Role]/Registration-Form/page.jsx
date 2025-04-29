@@ -1,17 +1,15 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Country, State, City } from "country-state-city";
-
-import Token from "@/app/Components/StudentRegForm/Token";
-import Personal from "@/app/Components/StudentRegForm/Personal";
-import Admission from "@/app/Components/StudentRegForm/Admission";
-import Parent from "@/app/Components/StudentRegForm/Parent";
-import TeacherDetails from "@/app/Components/TeacherRegForm/Personal";
-import VerifyCV from "@/app/Components/TeacherRegForm/VerifyCV";
+import Token from "../../../Components/StudentRegForm/Token";
+import Personal from "../../../Components/StudentRegForm/Personal";
+import Admission from "../../../Components/StudentRegForm/Admission";
+import Parent from "../../../Components/StudentRegForm/Parent";
+import TeacherDetails from "../../../Components/TeacherRegForm/TeacherDetails";
+import VerifyCV from "../../../Components/TeacherRegForm/verifyCV";
 
 const StudentRegistrationForm = () => {
   const pathname = usePathname();
@@ -102,7 +100,6 @@ const StudentRegistrationForm = () => {
         </Link>
       </div>
 
-      {/* Form Sections */}
       <div className="w-full">
         <Token token={token} setToken={setToken} error={errors.token} />
         <hr className="border-[#0000001a] -mx-8 my-0" />

@@ -1,16 +1,15 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
-import LeftAuth from "@/app/Components/LeftAuth";
+import LeftAuth from "../../Components/LeftAuth";
 import { IoChevronBackSharp } from "react-icons/io5";
 
 const RegisterRole = () => {
   const router = useRouter();
 
   const handleRoleSelection = (role) => {
-    setTimeout(() => {
-      router.push(`/Register/${role.toLowerCase()}/Registration-Form?role=${role}`);
-    }, 500);
+    const formattedRole = role.toLowerCase();
+    router.push(`/Register/${formattedRole}/Registration-Form`);
   };
   
 

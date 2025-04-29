@@ -5,9 +5,8 @@ import { PiEyeLight } from "react-icons/pi";
 import { IoEyeOffOutline, IoChevronBackSharp } from "react-icons/io5";
 import { useRouter } from "next/navigation";
 import dummy from "../Components/dummy";
-import LeftAuth from "@/app/Components/LeftAuth";
+import LeftAuth from "../Components/LeftAuth";
 import Modal from "react-modal";
-// import custommodal from "../Components/modal";
 import useModalStyles from "../Components/testModal";
 import Get_token from "../Components/get-token";
 
