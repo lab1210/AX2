@@ -81,7 +81,7 @@ const Layout = ({ children }) => {
     );
   }
 
-  const isDashboard = pathName === "/Student"; 
+  const isDashboard = pathName === "/Teacher"; 
 
   return (
     <>
