@@ -1,21 +1,89 @@
-import React from "react";
+"use client";
+import React, { useEffect, useState } from "react";
 import SuperAdminLayout from "../SuperAdminLayout";
 import DashboardHeader from "../DashboardHeader";
 import { IoClose, IoFilterOutline } from "react-icons/io5";
-import compliance from "../../compliance";
 import { FaCheck } from "react-icons/fa6";
+import { getComplianceDocs } from "@/app/Service/complianceDocService";
+
+const itemsPerPage = 7; // You can adjust this value
+
 const ManageCompItem = () => {
+  const [complianceData, setComplianceData] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  useEffect(() => {
+    const fetchComplianceData = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await getComplianceDocs();
+        setComplianceData(data);
+        setFilteredData(data);
+      } catch (error) {
+        setError(error.message || "Failed to fetch compliance documents");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchComplianceData();
+  }, []);
+
+  // Pagination logic
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+
+  const handleSearch = (event) => {
+    const searchTerm = event.target.value.toLowerCase();
+    setSearchTerm(searchTerm);
+    setCurrentPage(1);
+    const filtered = complianceData.filter((item) => {
+      return (
+        item.school_name.toLowerCase().includes(searchTerm) ||
+        item.tax_identification_number.toLowerCase().includes(searchTerm) ||
+        item.accreditation_certificates.toLowerCase().includes(searchTerm) ||
+        item.proof_of_registration.toLowerCase().includes(searchTerm) ||
+        (item.uploaded_on &&
+          item.uploaded_on.toLowerCase().includes(searchTerm)) // Check if uploaded_on exists before toLowerCase()
+      );
+    });
+    setFilteredData(filtered);
+  };
+
+  if (loading) {
+    <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+      <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
+    </div>;
+  }
+  if (error) {
+    return (
+      <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
+        {error}
+      </div>
+    );
+  }
   return (
     <SuperAdminLayout>
       <div className="bg-[#ffffff] pl-4 pt-4 pb-3 sm:pr-4 lg:pr-9 sticky top-0 z-10 shadow-md flex justify-between items-center">
         <DashboardHeader />
 
         <div className="flex items-center gap-4 ">
-          <div className="flex items-center rounded-4xl border lg:min-w-[350px]  border-[#978F8F] ">
+          <div className="flex items-center rounded-4xl border lg:min-w-[350px]  border-[#D0D0D0] ">
             <input
               type="text"
-              placeholder="Search School"
+              placeholder="Search Compliance Documents..."
               className="w-full outline-none bg-transparent text-[#AEAEAE] text-sm p-2 pl-5"
+              value={searchTerm}
+              onChange={handleSearch}
             />
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -33,55 +101,59 @@ const ManageCompItem = () => {
       </div>
       <div className="bg-[#D4D4D4] overflow-auto flex-1 p-4">
         <div className="sm:flex sm:flex-col sm:gap-2 lg:grid lg:grid-cols-[3fr_1fr] overflow-auto  gap-3 lg:h-screen ">
-          <div className="bg-[#ffffff] overflow-x-auto ">
-            <table className="min-w-full table-auto">
+          <div className="overflow-x-auto">
+            <table className="min-w-full table-auto border-collapse bg-[#ffffff]">
               <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
-                <tr className="border-b-[#978F8F] border-b">
-                  <th className="p-3 text-left font-bold text-[#333333]">
+                <tr className="border-b-[#D0D0D0] border-b">
+                  <th className="p-3 text-left font-bold px-5 text-[#333333]">
                     School Name
                   </th>
-                  <th className="p-3 text-left font-bold text-[#333333]">
+                  <th className="p-3 text-left font-bold px-5 text-[#333333]">
                     Tax Compliance
                   </th>
-                  <th className="p-3 text-left font-bold text-[#333333]">
+                  <th className="p-3 text-left font-bold px-5 text-[#333333]">
                     Accredition Doc
                   </th>
-                  <th className="p-3 text-left font-bold text-[#333333]">
+                  <th className="p-3 text-left font-bold px-5 text-[#333333]">
                     Proof of Reg.
                   </th>
-                  <th className="p-3 text-left font-bold text-[#333333]">
+                  <th className="p-3 text-left font-bold px-5 text-[#333333]">
                     Uploaded on
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {compliance.map((item, index) => {
-                  return (
+                {filteredData.length > 0 ? (
+                  filteredData.map((item, index) => (
                     <tr
                       key={index}
-                      className="border-b-[#978F8F] border-b font-semibold text-xs cursor-pointer "
+                      className="border-b-[#D0D0D0] border-b font-semibold text-xs cursor-pointer "
                     >
-                      <td className="p-3 text-[#333333]">{item.SchoolName}</td>
+                      <td className="p-3 px-5 text-[#333333]">
+                        {item.school_name}
+                      </td>
 
-                      <td className="xl:p-3 sm:p-8 ">
+                      <td className="p-3 px-5 font-normal ">
                         <div className="flex items-center gap-2">
                           <span
                             className={`${
-                              item.TaxCompliance === "Uploaded"
+                              item.tax_identification_number !== ""
                                 ? " text-[#1BB66E] "
                                 : " text-[#F94144] "
-                            } font-bold `}
+                            }  `}
                           >
-                            {item.TaxCompliance}
+                            {item.tax_identification_number !== ""
+                              ? " Uploaded"
+                              : "Unuploaded"}
                           </span>
                           <span
                             className={`${
-                              item.TaxCompliance === "Uploaded"
+                              item.tax_identification_number !== ""
                                 ? " bg-[#1BB66E]"
                                 : " bg-[#F94144]"
-                            } font-bold text-white text-center rounded-xs`}
+                            }  text-white text-center rounded-xs`}
                           >
-                            {item.TaxCompliance === "Uploaded" ? (
+                            {item.tax_identification_number !== "" ? (
                               <FaCheck />
                             ) : (
                               <IoClose />
@@ -90,25 +162,27 @@ const ManageCompItem = () => {
                         </div>
                       </td>
 
-                      <td className="xl:p-3 sm:p-8 ">
+                      <td className="p-3  px-5  font-normal">
                         <div className="flex items-center gap-2">
                           <span
                             className={`${
-                              item.AccreditionDoc === "Uploaded"
+                              item.accreditation_certificates !== ""
                                 ? " text-[#1BB66E] "
                                 : " text-[#F94144] "
-                            } font-bold `}
+                            }  `}
                           >
-                            {item.AccreditionDoc}
+                            {item.accreditation_certificates !== ""
+                              ? "Uploaded"
+                              : "Unuploaded"}
                           </span>
                           <span
                             className={`${
-                              item.AccreditionDoc === "Uploaded"
+                              item.accreditation_certificates !== ""
                                 ? " bg-[#1BB66E]"
                                 : " bg-[#F94144]"
-                            } font-bold text-white text-center rounded-xs`}
+                            } text-white text-center rounded-xs`}
                           >
-                            {item.AccreditionDoc === "Uploaded" ? (
+                            {item.accreditation_certificates !== "" ? (
                               <FaCheck />
                             ) : (
                               <IoClose />
@@ -117,24 +191,26 @@ const ManageCompItem = () => {
                         </div>
                       </td>
 
-                      <td className="xl:p-3 sm:p-8 flex items-center gap-2">
+                      <td className="font-normal p-3 px-5  flex items-center gap-2">
                         <span
                           className={`${
-                            item.ProofOfReg === "Uploaded"
+                            item.proof_of_registration !== ""
                               ? " text-[#1BB66E] "
                               : " text-[#F94144] "
-                          } font-bold `}
+                          }  `}
                         >
-                          {item.ProofOfReg}
+                          {item.proof_of_registration !== ""
+                            ? "Uploaded"
+                            : "Unuploaded"}
                         </span>
                         <span
                           className={`${
-                            item.ProofOfReg === "Uploaded"
+                            item.proof_of_registration !== ""
                               ? " bg-[#1BB66E]"
                               : " bg-[#F94144]"
-                          } font-bold text-white text-center rounded-xs`}
+                          }  text-white text-center rounded-xs`}
                         >
-                          {item.ProofOfReg === "Uploaded" ? (
+                          {item.proof_of_registration !== "" ? (
                             <FaCheck />
                           ) : (
                             <IoClose />
@@ -142,12 +218,39 @@ const ManageCompItem = () => {
                         </span>
                       </td>
 
-                      <td className="p-3 text-[#333333]">{item.UploadedOn}</td>
+                      <td className="p-3 px-5 text-[#333333]">
+                        {!item.uploaded_on ? "N/A" : item.uploaded_on}
+                      </td>
                     </tr>
-                  );
-                })}
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan="5" className="text-center py-4 text-gray-500">
+                      No Compliance Documents found.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
+            {filteredData.length > itemsPerPage && (
+              <div className="flex justify-center mt-4 pb-4">
+                {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                  (number) => (
+                    <button
+                      key={number}
+                      onClick={() => paginate(number)}
+                      className={`mx-1 px-3 py-1 rounded-md ${
+                        currentPage === number
+                          ? "bg-[#4084B1] text-white"
+                          : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                      }`}
+                    >
+                      {number}
+                    </button>
+                  )
+                )}
+              </div>
+            )}
           </div>
 
           <div className="grid grid-rows-3 gap-3">

@@ -197,9 +197,11 @@ const AddSchoolItem = () => {
               <hr className="w-full border-t border-[#978F8F]" />
             </div>
             <div className="flex-grow flex flex-col ">
-              {error && <p className="pl-6 text-red-500">{error}</p>}
+              {error && <p className="pl-6 font-bold text-red-500">{error}</p>}
               {successMessage && (
-                <p className="pl-6 text-green-500">{successMessage}</p>
+                <p className="pl-6 font-bold text-green-500">
+                  {successMessage}
+                </p>
               )}
               <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0 ">
                 <div className="flex flex-col gap-1 mb-2">

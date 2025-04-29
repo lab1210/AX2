@@ -14,7 +14,7 @@ import {
 import styles from "../../../Super-Admin/css/spinner.module.css";
 import { FaUserPlus } from "react-icons/fa6";
 
-const ITEMS_PER_PAGE = 10; // You can adjust this value
+const ITEMS_PER_PAGE = 7; // You can adjust this value
 
 const ManageSchoolAdminItem = () => {
   const searchParams = useSearchParams();
@@ -205,7 +205,9 @@ const ManageSchoolAdminItem = () => {
 
   if (error) {
     return (
-      <div className="text-red-500">Error loading School Admins: {error}</div>
+      <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
+        {error}
+      </div>
     );
   }
 
@@ -315,7 +317,7 @@ const ManageSchoolAdminItem = () => {
         <DashboardHeader />
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center rounded-4xl border lg:min-w-[300px] border-[#978F8F] ">
+          <div className="flex items-center rounded-4xl border lg:min-w-[300px] border-[#D0D0D0] ">
             <input
               type="text"
               placeholder="Search School Admin"
@@ -345,7 +347,7 @@ const ManageSchoolAdminItem = () => {
         <div className="bg-[#ffffff] rounded-lg overflow-x-auto">
           <table className="min-w-full table-auto ">
             <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs ">
-              <tr className="border-b-[#978F8F] border-b">
+              <tr className="border-b-[#D0D0D0] border-b">
                 <th className="pt-3 pb-3 pl-12 text-left font-bold text-[#333333]">
                   School Admin Name
                 </th>
@@ -372,22 +374,22 @@ const ManageSchoolAdminItem = () => {
                   <tr
                     onClick={() => openDetailModal(item)}
                     key={index}
-                    className="cursor-pointer border-b-[#978F8F] border-b font-semibold text-xs"
+                    className="cursor-pointer border-b-[#D0D0D0] border-b font-semibold text-xs"
                   >
-                    <td className="pt-2 pb-2 pl-12 text-[#333333]">
+                    <td className="pt-3 pb-3 pl-12 text-[#333333]">
                       {item.first_name + " " + item.surname}
                     </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
+                    <td className="pt-3 pb-3 text-[#333333]">
                       {item.school_name}
                     </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
+                    <td className="pt-3 pb-3 text-[#333333]">
                       {item.designation}
                     </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
+                    <td className="pt-3 pb-3 text-[#333333]">
                       {item.phone_number}
                     </td>
-                    <td className="pt-2 pb-2 text-[#333333]">{item.email}</td>
-                    <td className="pt-2 pb-2 text-[#333333]">
+                    <td className="pt-3 pb-3 text-[#333333]">{item.email}</td>
+                    <td className="pt-3 pb-3 text-[#333333]">
                       <div className="flex gap-4">
                         <Link
                           href={`/Super-Admin/Manage-School-Admin/Edit-School-Admin?adminId=${adminId}&schoolAdminId=${item.schooladmin_id}`}

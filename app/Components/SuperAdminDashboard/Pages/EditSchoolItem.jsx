@@ -9,6 +9,7 @@ import { Country, State, City } from "country-state-city";
 import { LuUpload } from "react-icons/lu";
 import {
   getSchoolById,
+  getSchoolSubscriptions,
   updateSchool,
   updateSchoolSubscription,
 } from "../../../Service/schoolService";
@@ -18,7 +19,7 @@ const EditSchoolItem = () => {
   const adminId = searchParams.get("adminId");
   const schoolIdFromParams = searchParams.get("schoolId");
   const router = useRouter();
-
+  const [allSubscriptions, setAllSubscriptions] = useState([]);
   const [schoolId, setSchoolId] = useState(schoolIdFromParams);
   const [schoolName, setSchoolName] = useState("");
   const [shortName, setShortName] = useState("");
@@ -49,27 +50,23 @@ const EditSchoolItem = () => {
     : [];
 
   useEffect(() => {
-    const fetchSchoolDetails = async () => {
+    const fetchSchoolandSubscriptionsDetails = async () => {
       if (schoolId) {
         setLoading(true);
         setError(null);
         try {
-          const response = await getSchoolById(schoolId);
-          if (response?.status === 200 && response.data) {
-            const schoolData = response.data;
+          const schoolResponse = await getSchoolById(schoolId);
+          if (schoolResponse?.status === 200 && schoolResponse.data) {
+            const schoolData = schoolResponse.data;
             console.log("Fetched school data:", schoolData);
 
-            // Set basic fields
+            // Set basic school fields
             setSchoolName(schoolData.school_name || "");
             setShortName(schoolData.short_name || "");
             setSchoolType(schoolData.school_type || "");
             setEducationLevel(schoolData.education_level || "");
             setPhoneNumber(schoolData.phone_number || "");
             setEmail(schoolData.email || "");
-            setAmountPerStudent(
-              schoolData.subscription?.amount_per_student || ""
-            );
-            setSubscriptionId(schoolData.subscription?.id);
 
             // Handle country
             if (schoolData.country) {
@@ -124,16 +121,38 @@ const EditSchoolItem = () => {
           } else {
             setError("Failed to fetch school details.");
           }
+
+          // Fetch all subscriptions
+          const allSubscriptionsResponse = await getSchoolSubscriptions();
+          if (
+            allSubscriptionsResponse?.status === 200 &&
+            allSubscriptionsResponse.data
+          ) {
+            setAllSubscriptions(allSubscriptionsResponse.data);
+
+            // Filter to find the subscription for the current schoolId
+            const schoolSubscription = allSubscriptionsResponse.data.find(
+              (sub) => sub.school === schoolId // Assuming 'school' in subscription is the school ID
+            );
+
+            if (schoolSubscription) {
+              console.log("Found subscription for school:", schoolSubscription);
+              setAmountPerStudent(schoolSubscription.amount_per_student || "");
+              setSubscriptionId(schoolSubscription.id);
+            } else {
+              console.warn("No subscription found for school ID:", schoolId);
+            }
+          }
         } catch (err) {
-          console.error("Error fetching school details:", err);
-          setError("Error fetching school details.");
+          console.error("Error fetching details:", err);
+          setError("Error fetching school and/or subscriptions.");
         } finally {
           setLoading(false);
         }
       }
     };
 
-    fetchSchoolDetails();
+    fetchSchoolandSubscriptionsDetails();
   }, [schoolId]);
 
   const handleLogoUpload = (event) => {
@@ -276,7 +295,11 @@ const EditSchoolItem = () => {
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -302,9 +325,11 @@ const EditSchoolItem = () => {
               <hr className="w-full border-t border-[#978F8F]" />
             </div>
             <div className="flex-grow flex flex-col">
-              {error && <p className="pl-6 text-red-500">{error}</p>}
+              {error && <p className="pl-6 font-bold text-red-500">{error}</p>}
               {successMessage && (
-                <p className="pl-6 text-green-500">{successMessage}</p>
+                <p className="pl-6 font-bold text-green-500">
+                  {successMessage}
+                </p>
               )}
               <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0">
                 <div className="flex flex-col gap-1 mb-2">
