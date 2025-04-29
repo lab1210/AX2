@@ -4,6 +4,7 @@ import Layout from "../../Studentlayout";
 import dummysession from "../../session";
 import { getUserDetails } from "@/app/Service/AuthService";
 import { useRouter } from "next/navigation";
+import Receipt from "../../../public/Receipt.png";
 
 const ReceiptItem = () => {
   const [session, setSession] = useState(dummysession[0]);
@@ -170,13 +171,9 @@ const ReceiptItem = () => {
       <div className="block lg:hidden min-h-screen">
         <div className="p-4">
           <img
-            src={
-              user.student.profile_picture_path === null
-                ? "/receipt.png"
-                : user.student.profile_picture_path
-            }
-            alt="receipt"
-            className="w-10 h-10 flex items-center mb-5"
+            src={Receipt.src}
+            alt="Lunch"
+            className="w-20 h-20 object-contain"
           />
           <div className="mb-4">
             <div className="relative inline-block w-full text-gray-700">
