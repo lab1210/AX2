@@ -107,6 +107,8 @@ export const deleteSchool = async (schoolId) => {
   } catch (error) {
     console.error(`Error deleting school with ID ${schoolId}:`, error);
     throw error;
+  } finally {
+    console.error(response.message);
   }
 };
 
@@ -142,7 +144,7 @@ export const updateSchoolSubscription = async (
       return null; // Or throw an error
     }
 
-    const url = `${BASE_URL}/schools/subscriptions/${subscriptionId}/update/`;
+    const url = `${BASE_URL}/schools/subscriptions/${subscriptionId}/`;
     const response = await axios.patch(url, subscriptionData, { headers });
     return response;
   } catch (error) {

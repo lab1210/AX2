@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Layout from "../../../Components/Studentlayout";
-import { useUser } from "../context/UserProvider";
+import { useUser } from "../../../context/UserProvider";
 import lunchImg from "@/public/LunchImg.png";
 
 export default function TimetablePage() {

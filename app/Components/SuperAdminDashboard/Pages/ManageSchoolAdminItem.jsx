@@ -7,11 +7,14 @@ import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
-import { getSchoolAdmin } from "@/app/Service/schoolAdminService"; // Adjust import path if needed
+import {
+  deleteSchoolAdmin,
+  getSchoolAdmin,
+} from "@/app/Service/schoolAdminService"; // Adjust import path if needed
 import styles from "../../../Super-Admin/css/spinner.module.css";
 import { FaUserPlus } from "react-icons/fa6";
 
-const ITEMS_PER_PAGE = 10; // You can adjust this value
+const ITEMS_PER_PAGE = 7; // You can adjust this value
 
 const ManageSchoolAdminItem = () => {
   const searchParams = useSearchParams();
@@ -21,6 +24,8 @@ const ManageSchoolAdminItem = () => {
   const [allSchoolAdmins, setAllSchoolAdmins] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [deleteError, setDeleteError] = useState(null);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
 
   // State for the displayed school admins after filtering and pagination
   const [schoolAdminsData, setSchoolAdminsData] = useState([]);
@@ -123,17 +128,35 @@ const ManageSchoolAdminItem = () => {
     setDeleteModalVisible(false);
   };
 
-  // Placeholder for delete functionality
-  const handleDeleteSchoolAdmin = () => {
-    if (selectedSchoolDelete?.id) {
-      console.log("Deleting school admin with ID:", selectedSchoolDelete.id);
-      // Implement your delete API call here
-      closeDeleteModal();
-      fetchAllSchoolAdmins(); // Refresh the list after deletion
-      // Optionally show a success/error message
+  const handleDeleteSchoolAdmin = async () => {
+    if (selectedSchoolDelete?.schooladmin_id) {
+      setDeleteError(null);
+      setDeleteSuccess(false);
+      try {
+        const response = await deleteSchoolAdmin(
+          selectedSchoolDelete.schooladmin_id
+        );
+        if (response?.status === 204) {
+          console.log(
+            "School admin with ID:",
+            selectedSchoolDelete.schooladmin_id,
+            "deleted successfully"
+          );
+          setDeleteSuccess(true);
+          closeDeleteModal();
+          fetchAllSchoolAdmins(); // Refresh the list after deletion
+        } else {
+          setDeleteError(
+            `Failed to delete school admin: ${
+              response?.statusText || "Unknown error"
+            }`
+          );
+        }
+      } catch (err) {
+        setDeleteError(`Error deleting school admin: ${err.message}`);
+      }
     }
   };
-
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -147,16 +170,45 @@ const ManageSchoolAdminItem = () => {
   const hasNextPage = currentPage < totalPages;
   const hasPreviousPage = currentPage > 1;
 
+  const renderPaginationButtons = () => {
+    const pageNumbers = [];
+    for (let i = 1; i <= totalPages; i++) {
+      pageNumbers.push(i);
+    }
+
+    return (
+      <div className="flex justify-center mt-4 pb-4">
+        {pageNumbers.map((number) => (
+          <button
+            key={number}
+            onClick={() => handlePageChange(number)}
+            className={`mx-1 px-3 py-1 rounded-md ${
+              currentPage === number
+                ? "bg-[#4084B1] text-white"
+                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+            }`}
+          >
+            {number}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
   if (loading) {
     return (
-      <div className={styles.loadingContainer}>
-        <div className={styles.spinner}></div>
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
       </div>
     );
   }
 
   if (error) {
-    return <div>Error loading School Admins: {error}</div>;
+    return (
+      <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
+        {error}
+      </div>
+    );
   }
 
   return (
@@ -247,6 +299,10 @@ const ManageSchoolAdminItem = () => {
                 </p>
               </div>
               <div className="flex items-center justify-between">
+                <p className="font-semibold text-sm">User Role:</p>
+                <p className="font-bold text-lg">School Admin</p>
+              </div>
+              <div className="flex items-center justify-between">
                 <p className="font-semibold text-sm">Designation:</p>
                 <p className="font-bold text-lg">
                   {selectedSchoolAdmin.designation}
@@ -261,7 +317,7 @@ const ManageSchoolAdminItem = () => {
         <DashboardHeader />
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center rounded-4xl border lg:min-w-[300px] border-[#978F8F] ">
+          <div className="flex items-center rounded-4xl border lg:min-w-[300px] border-[#D0D0D0] ">
             <input
               type="text"
               placeholder="Search School Admin"
@@ -291,7 +347,7 @@ const ManageSchoolAdminItem = () => {
         <div className="bg-[#ffffff] rounded-lg overflow-x-auto">
           <table className="min-w-full table-auto ">
             <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs ">
-              <tr className="border-b-[#978F8F] border-b">
+              <tr className="border-b-[#D0D0D0] border-b">
                 <th className="pt-3 pb-3 pl-12 text-left font-bold text-[#333333]">
                   School Admin Name
                 </th>
@@ -318,25 +374,25 @@ const ManageSchoolAdminItem = () => {
                   <tr
                     onClick={() => openDetailModal(item)}
                     key={index}
-                    className="cursor-pointer border-b-[#978F8F] border-b font-semibold text-xs"
+                    className="cursor-pointer border-b-[#D0D0D0] border-b font-semibold text-xs"
                   >
-                    <td className="pt-2 pb-2 pl-12 text-[#333333]">
+                    <td className="pt-3 pb-3 pl-12 text-[#333333]">
                       {item.first_name + " " + item.surname}
                     </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
+                    <td className="pt-3 pb-3 text-[#333333]">
                       {item.school_name}
                     </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
+                    <td className="pt-3 pb-3 text-[#333333]">
                       {item.designation}
                     </td>
-                    <td className="pt-2 pb-2 text-[#333333]">
+                    <td className="pt-3 pb-3 text-[#333333]">
                       {item.phone_number}
                     </td>
-                    <td className="pt-2 pb-2 text-[#333333]">{item.email}</td>
-                    <td className="pt-2 pb-2 text-[#333333]">
+                    <td className="pt-3 pb-3 text-[#333333]">{item.email}</td>
+                    <td className="pt-3 pb-3 text-[#333333]">
                       <div className="flex gap-4">
                         <Link
-                          href={`/Super-Admin/Manage-School-Admin/Edit-School-Admin?adminId=<span class="math-inline">\{adminId\}&schoolAdminId\=</span>{item.id}`} // Assuming your edit route needs an ID
+                          href={`/Super-Admin/Manage-School-Admin/Edit-School-Admin?adminId=${adminId}&schoolAdminId=${item.schooladmin_id}`}
                           onClick={(e) => e.stopPropagation()}
                         >
                           <FiEdit3
@@ -359,11 +415,15 @@ const ManageSchoolAdminItem = () => {
               ) : (
                 <tr>
                   <td colSpan="6" className="text-center py-4 text-gray-500">
-                    {loading
-                      ? "Loading School Admins..."
-                      : error
-                      ? "Error loading School Admins."
-                      : "No School Admins Found."}
+                    {loading ? (
+                      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+                        <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
+                      </div>
+                    ) : error ? (
+                      "Error loading School Admins."
+                    ) : (
+                      "No School Admins Found."
+                    )}
                   </td>
                 </tr>
               )}
@@ -372,25 +432,23 @@ const ManageSchoolAdminItem = () => {
         </div>
 
         {/* Pagination */}
-        {filteredSchoolAdmins.length > 0 && (
+        {filteredSchoolAdmins.length > ITEMS_PER_PAGE && (
           <div className="bg-[#ffffff] mt-2 rounded-lg p-4 flex justify-center items-center gap-4">
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={!hasPreviousPage}
-              className="px-3 py-1 rounded-md bg-[#E6EFF5] text-[#333333] disabled:opacity-50"
-            >
-              Previous
-            </button>
-            <span>
-              Page {currentPage} of {totalPages}
-            </span>
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={!hasNextPage}
-              className="px-3 py-1 rounded-md bg-[#E6EFF5] text-[#333333] disabled:opacity-50"
-            >
-              Next
-            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+              (number) => (
+                <button
+                  key={number}
+                  onClick={() => handlePageChange(number)}
+                  className={`mx-1 px-3 py-1 rounded-md ${
+                    currentPage === number
+                      ? "bg-[#4084B1] text-white"
+                      : "bg-gray-200 text-gray-700 hover:bg-gray-300"
+                  }`}
+                >
+                  {number}
+                </button>
+              )
+            )}
           </div>
         )}
       </div>

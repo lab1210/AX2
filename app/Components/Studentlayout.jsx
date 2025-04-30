@@ -132,7 +132,7 @@ const Layout = ({ children }) => {
             {children}
           </div>
         </div>
-        <div className="hidden lg:block bg-white h-full rounded-lg pr-4  overflow-hidden">
+        <div className="hidden lg:block bg-white  rounded-lg pr-4  overflow-hidden">
           <RightSidebar user={user} />
         </div>
       </div>

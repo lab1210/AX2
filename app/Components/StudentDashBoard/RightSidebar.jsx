@@ -136,9 +136,9 @@ const RightSidebar = ({ user }) => {
         </div>
       </div>
 
-      <div className="flex flex-col justify-between xl:gap-5 lg:gap-7 max-h-screen">
+      <div className="flex flex-col justify-between gap-4 sm:gap-6 2xl:gap-20 max-h-screen">
         {/* Events Section */}
-        <div className="bg-[#004080] text-white rounded-xl p-2 shadow-lg">
+        <div className="bg-[#004080]   text-white rounded-xl p-2 shadow-lg flex-1">
           <div className="space-y-1.5">
             <h2 className="text-xl font-bold">Events</h2>
             <div className="h-[50%]">
@@ -249,7 +249,7 @@ const RightSidebar = ({ user }) => {
         </div>
 
         {/* Notifications Section */}
-        <div className="bg-[#F94144] text-white rounded-xl p-4 shadow-lg">
+        <div className="bg-[#F94144] text-white rounded-xl p-4 shadow-lg flex-1">
           <div className="text-center mb-4">
             <h2 className="text-xl font-bold">Notification</h2>
             <hr className="my-2 border-white" />

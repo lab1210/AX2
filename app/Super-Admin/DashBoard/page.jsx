@@ -1,8 +1,7 @@
-import { UserProvider } from "@/app/Components/StudentDashBoard/context/UserProvider";
+import { UserProvider } from "../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../css/spinner.module.css";
-import SuperAdminDashboardItem from "@/app/Components/SuperAdminDashboard/Pages/SuperAdminDashboard";
-
+import SuperAdminDashboardItem from "../../Components/SuperAdminDashboard/Pages/SuperAdminDashboard";
 const SuperAdminDashboard = () => {
   return (
     <UserProvider>

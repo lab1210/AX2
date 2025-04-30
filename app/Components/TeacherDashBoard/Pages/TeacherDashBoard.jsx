@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   BarChart,
   Bar,
@@ -9,40 +9,70 @@ import {
   Legend,
   ResponsiveContainer,
   Cell,
-} from 'recharts';
-import LeftSidebar from './LeftSidebar';
-import { Calendar } from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
+} from "recharts";
+import LeftSidebar from "./LeftSidebar";
+import { Calendar } from "react-calendar";
+import "react-calendar/dist/Calendar.css";
 
 const attendanceData = [
-  { day: 'Mon', present: 85, absent: 15 },
-  { day: 'Tues', present: 80, absent: 20 },
-  { day: 'Wed', present: 20, absent: 80 },
-  { day: 'Thurs', present: 75, absent: 25 },
-  { day: 'Fri', present: 90, absent: 10 },
+  { day: "Mon", present: 85, absent: 15 },
+  { day: "Tues", present: 80, absent: 20 },
+  { day: "Wed", present: 20, absent: 80 },
+  { day: "Thurs", present: 75, absent: 25 },
+  { day: "Fri", present: 90, absent: 10 },
 ];
 
 const stats = [
-  { label: 'Total Classes', value: 10, icon: '👥' },
-  { label: 'Total Lessons', value: 10, icon: '💻' },
-  { label: 'Total Assignments', value: 10, icon: '📝' },
+  { label: "Total Classes", value: 10, icon: "👥" },
+  { label: "Total Lessons", value: 10, icon: "💻" },
+  { label: "Total Assignments", value: 10, icon: "📝" },
 ];
 
 const progress = [
-  { className: 'JSS1 A', pupils: 31, percent: 32 },
-  { className: 'JSS1 B', pupils: 26, percent: 43 },
-  { className: 'JSS1 C', pupils: 20, percent: 67 },
+  { className: "JSS1 A", pupils: 31, percent: 32 },
+  { className: "JSS1 B", pupils: 26, percent: 43 },
+  { className: "JSS1 C", pupils: 20, percent: 67 },
 ];
 
 const events = [
-  { date: 12, title: 'Send Mr Ayo class Schedule', subtitle: 'Send Document via email', time: '8 A.M', status: 'today' },
-  { date: 12, title: 'Send Mr Ayo class Schedule', subtitle: 'Send Document via email', time: '8 A.M', status: 'today' },
-  { date: 12, title: 'Meet with Prefects', subtitle: 'Have a work flow', time: '8 A.M', status: 'due' },
-  { date: 25, title: 'JSS1B Test', subtitle: 'Set Question', time: '8 A.M', status: 'upcoming' },
-  { date: 30, title: 'Send a Doc to Admin', subtitle: 'Send Document via email', time: '10:00 A.M', status: 'upcoming' },
+  {
+    date: 12,
+    title: "Send Mr Ayo class Schedule",
+    subtitle: "Send Document via email",
+    time: "8 A.M",
+    status: "today",
+  },
+  {
+    date: 12,
+    title: "Send Mr Ayo class Schedule",
+    subtitle: "Send Document via email",
+    time: "8 A.M",
+    status: "today",
+  },
+  {
+    date: 12,
+    title: "Meet with Prefects",
+    subtitle: "Have a work flow",
+    time: "8 A.M",
+    status: "due",
+  },
+  {
+    date: 25,
+    title: "JSS1B Test",
+    subtitle: "Set Question",
+    time: "8 A.M",
+    status: "upcoming",
+  },
+  {
+    date: 30,
+    title: "Send a Doc to Admin",
+    subtitle: "Send Document via email",
+    time: "10:00 A.M",
+    status: "upcoming",
+  },
 ];
 
-export default function Dashboard() {
+export default function TeacherDashboard() {
   const [date, setDate] = useState(new Date());
 
   return (
@@ -92,7 +122,9 @@ export default function Dashboard() {
                 <p className="text-2xl font-bold">{s.value}</p>
                 <span className="text-xl">{s.icon}</span>
               </div>
-              <p className="text-xs text-green-500 mt-1">+0.5% than last term</p>
+              <p className="text-xs text-green-500 mt-1">
+                +0.5% than last term
+              </p>
             </div>
           ))}
         </div>
@@ -131,10 +163,15 @@ export default function Dashboard() {
 
             {/* Teaching Progress */}
             <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-lg font-semibold mb-4">Teaching Progress in English Language</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                Teaching Progress in English Language
+              </h3>
               <div className="space-y-4">
                 {progress.map((p) => (
-                  <div key={p.className} className="flex items-center justify-between">
+                  <div
+                    key={p.className}
+                    className="flex items-center justify-between"
+                  >
                     <div>
                       <p className="font-medium">{p.className}</p>
                       <p className="text-sm text-gray-500">{p.pupils} pupils</p>
@@ -158,7 +195,12 @@ export default function Dashboard() {
                              a 15.9155 15.9155 0 0 1 0 31.831
                              a 15.9155 15.9155 0 0 1 0 -31.831"
                         />
-                        <text x="18" y="20.35" className="text-xs text-center" textAnchor="middle">
+                        <text
+                          x="18"
+                          y="20.35"
+                          className="text-xs text-center"
+                          textAnchor="middle"
+                        >
                           {p.percent}%
                         </text>
                       </svg>
@@ -176,17 +218,29 @@ export default function Dashboard() {
               </div>
               <ul className="space-y-3">
                 {events.map((e, idx) => {
-                  const bg = e.status === 'due' ? 'bg-red-100' : e.status === 'upcoming' ? 'bg-yellow-100' : 'bg-blue-50';
+                  const bg =
+                    e.status === "due"
+                      ? "bg-red-100"
+                      : e.status === "upcoming"
+                      ? "bg-yellow-100"
+                      : "bg-blue-50";
                   return (
-                    <li key={idx} className={`flex items-center p-3 rounded-lg ${bg}`}>                      
+                    <li
+                      key={idx}
+                      className={`flex items-center p-3 rounded-lg ${bg}`}
+                    >
                       <div className="w-8 h-8 flex items-center justify-center font-bold text-lg">
                         {e.date}
                       </div>
                       <div className="ml-3 flex-1">
                         <p className="font-medium">{e.title}</p>
-                        <p className="text-xs text-gray-500">{e.subtitle} • {e.time}</p>
+                        <p className="text-xs text-gray-500">
+                          {e.subtitle} • {e.time}
+                        </p>
                       </div>
-                      {e.status === 'due' && <span className="w-2 h-2 bg-red-500 rounded-full" />}
+                      {e.status === "due" && (
+                        <span className="w-2 h-2 bg-red-500 rounded-full" />
+                      )}
                     </li>
                   );
                 })}

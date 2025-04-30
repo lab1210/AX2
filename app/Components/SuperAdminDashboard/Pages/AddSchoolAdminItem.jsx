@@ -10,6 +10,7 @@ import DashboardHeader from "../DashboardHeader";
 import { createSchoolAdmin } from "@/app/Service/schoolAdminService";
 import { getSchools } from "@/app/Service/schoolService";
 import { getAllRoles } from "@/app/Service/RoleService";
+
 const AddSchoolAdminItem = () => {
   const searchParams = useSearchParams();
   const adminId = searchParams.get("adminId");
@@ -21,11 +22,11 @@ const AddSchoolAdminItem = () => {
       password: "",
       email: "",
     },
-    user_role: "", // Assuming this is a static ID for 'School Admin' role
-    school: "",
+    user_role: "", // Will be populated with the School Admin role ID
+    school: "", // Will hold the school ID
     surname: "",
     first_name: "",
-    email: "",
+    email: "", // School Admin's personal email
     phone_number: "",
     address: "default address",
     city: "",
@@ -33,7 +34,6 @@ const AddSchoolAdminItem = () => {
     region: "southwest",
     country: "",
     designation: "",
-    school_logo: "/icons.png",
   });
 
   const [schoolsData, setSchoolsData] = useState([]);
@@ -44,8 +44,6 @@ const AddSchoolAdminItem = () => {
   const [selectedState, setSelectedState] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
   const [schoolLogo, setSchoolLogo] = useState("/icons.png");
-  const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [logoError, setLogoError] = useState(null);
   const [apiError, setApiError] = useState(null);
   const [apiSuccess, setApiSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -78,9 +76,9 @@ const AddSchoolAdminItem = () => {
         if (schoolAdminRole) {
           setFormData((prevData) => ({
             ...prevData,
-            user_role: schoolAdminRole.role_id,
+            user_role: schoolAdminRole.id,
           }));
-          setSchoolAdminRoleId(schoolAdminRole.role_id);
+          setSchoolAdminRoleId(schoolAdminRole.id);
         } else {
           console.error("School Admin role not found.");
           setApiError("School Admin role not found.");
@@ -116,28 +114,17 @@ const AddSchoolAdminItem = () => {
       }
     });
   };
-  const handleSchoolChange = (e) => {
-    setFormData({ ...formData, school_name: e.target.value });
-  };
 
-  const handleLogoUpload = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      setUploadingLogo(true);
-      setLogoError(null);
-      try {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setSchoolLogo(reader.result);
-          setFormData({ ...formData, school_logo: reader.result });
-          setUploadingLogo(false);
-        };
-        reader.readAsDataURL(file);
-      } catch (error) {
-        console.error("Error uploading logo:", error);
-        setLogoError("Failed to upload logo.");
-        setUploadingLogo(false);
-      }
+  const handleSchoolChange = (e) => {
+    const selectedSchoolId = e.target.value;
+    setFormData({ ...formData, school: selectedSchoolId });
+    const selectedSchool = schoolsData.find(
+      (school) => school.id === selectedSchoolId
+    );
+    if (selectedSchool && selectedSchool.logo) {
+      setSchoolLogo(selectedSchool.logo);
+    } else {
+      setSchoolLogo("/icons.png");
     }
   };
 
@@ -176,6 +163,7 @@ const AddSchoolAdminItem = () => {
     e.preventDefault();
     setApiError(null);
     setApiSuccess(false);
+    setLoading(true);
 
     const payload = {
       user: formData.user,
@@ -183,7 +171,7 @@ const AddSchoolAdminItem = () => {
       school: formData.school,
       surname: formData.surname,
       first_name: formData.first_name,
-      email: formData.user.email,
+      email: formData.email, // Using the school admin's personal email
       phone_number: formData.phone_number,
       address: formData.address,
       city: formData.city,
@@ -214,12 +202,10 @@ const AddSchoolAdminItem = () => {
           state: "",
           country: "",
           designation: "",
-          school_logo: "/icons.png",
         });
         setSelectedCountry(null);
         setSelectedState(null);
         setSelectedCity(null);
-        setSchoolLogo("/icons.png");
         setTimeout(() => {
           router.push(`/Super-Admin/Manage-School-Admin?adminId=${adminId}`);
         }, 2000);
@@ -232,15 +218,25 @@ const AddSchoolAdminItem = () => {
     } catch (error) {
       console.error("Error creating school admin:", error);
       setApiError(error.message || "An unexpected error occurred.");
+    } finally {
+      setLoading(false);
     }
   };
 
   if (loadingSchools) {
-    return <div>Loading schools...</div>;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   if (errorSchools) {
-    return <div>Error loading schools: {errorSchools}</div>;
+    return (
+      <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
+        {errorSchools}
+      </div>
+    );
   }
 
   return (
@@ -255,7 +251,7 @@ const AddSchoolAdminItem = () => {
       </div>
       <form
         onSubmit={handleSubmit}
-        className="bg-[#D4D4D4] h-screen  p-4 sm:overflow-auto lg:overflow-hidden "
+        className="bg-[#D4D4D4] h-screen  p-4 sm:overflow-auto lg:overflow-hidden  gap-3 lg:h-screen "
       >
         <div className="sm:flex sm:flex-col h-screen sm:gap-2 lg:grid lg:grid-cols-[2.5fr_1fr] overflow-auto  gap-3 lg:h-screen ">
           <div className="bg-[#ffffff] rounded-lg flex flex-col lg:overflow-y-auto lg:max-h-[calc(100vh-95px)] lg:overflow-auto no-scrollbar">
@@ -265,7 +261,9 @@ const AddSchoolAdminItem = () => {
               </div>
             )}
             {apiError && (
-              <div className="mt-4 pl-6 text-red-500">Error: {apiError}</div>
+              <div className="mt-4 pl-6 font-bold text-red-500">
+                Error: {apiError}
+              </div>
             )}
             <div>
               <p className="font-bold text-xl p-6">
@@ -307,8 +305,7 @@ const AddSchoolAdminItem = () => {
                     name="middle_name"
                     className="text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
                     placeholder="Enter Middle Name"
-                    // value={formData.middle_name}
-                    // onChange={handleInputChange}
+                    onChange={handleInputChange}
                   />
                 </div>
                 <div className="flex flex-col gap-1 mb-2 ">
@@ -357,10 +354,10 @@ const AddSchoolAdminItem = () => {
                   <input
                     type="email"
                     id="email"
-                    name="user.email"
+                    name="email"
                     className="text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
                     placeholder="Enter Email"
-                    value={formData.user.email}
+                    value={formData.email}
                     onChange={handleInputChange}
                     required
                   />
@@ -439,7 +436,7 @@ const AddSchoolAdminItem = () => {
                         Select School
                       </option>
                       {schoolsData.map((school) => (
-                        <option key={school.id} value={school.school_name}>
+                        <option key={school.id} value={school.id}>
                           {school.school_name}
                         </option>
                       ))}
@@ -457,14 +454,12 @@ const AddSchoolAdminItem = () => {
                   <input
                     type="text"
                     id="role"
-                    name="role"
-                    value={
-                      schoolsData.find((role) => role.id === formData.user_role)
-                        ?.name || "School Admin"
-                    }
+                    name="role" // Or "display_role" if you prefer
+                    value="School Admin" // Directly set the displayed value
                     readOnly
                     className="text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] font-bold "
                   />
+                  {/* The actual user_role ID is already in formData.user_role */}
                 </div>
               </div>
               <div className="pt-4 pl-6 pr-6 pb-0">
@@ -539,8 +534,8 @@ const AddSchoolAdminItem = () => {
                 LOGO
               </p>
               <div className="flex flex-col items-center justify-center mt-2">
-                <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] border-[#333333] flex items-center relative  justify-center w-48 h-35">
-                  <div className="w-12 h-12">
+                <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] border-[#333333] flex items-center relative  justify-center w-48 h-45">
+                  <div className="w-28 h-28">
                     <img
                       className="w-full h-full"
                       src={schoolLogo}
@@ -550,26 +545,9 @@ const AddSchoolAdminItem = () => {
                       type="file"
                       id="logo-upload"
                       className="hidden"
-                      onChange={handleLogoUpload}
                       accept="image/*"
                     />
                   </div>
-                </div>
-                <div>
-                  <button
-                    onClick={() =>
-                      document.getElementById("logo-upload").click()
-                    }
-                    className="text-[#07508F]  border-[1.5px] rounded-lg cursor-pointer  border-dashed  w-48 p-2 flex items-center justify-between"
-                  >
-                    Upload School LOGO
-                    <span>
-                      <LuUpload size={20} />
-                    </span>
-                  </button>
-                  {logoError && (
-                    <p className="text-red-500 text-xs mt-1">{logoError}</p>
-                  )}
                 </div>
               </div>
             </div>

@@ -9,16 +9,17 @@ import { Country, State, City } from "country-state-city";
 import { LuUpload } from "react-icons/lu";
 import {
   getSchoolById,
+  getSchoolSubscriptions,
   updateSchool,
   updateSchoolSubscription,
-} from "../../../Service/schoolService"; // Ensure this path is correct
+} from "../../../Service/schoolService";
 
 const EditSchoolItem = () => {
   const searchParams = useSearchParams();
   const adminId = searchParams.get("adminId");
-  const schoolIdFromParams = searchParams.get("schoolId"); // Keep this to fetch school data
+  const schoolIdFromParams = searchParams.get("schoolId");
   const router = useRouter();
-
+  const [allSubscriptions, setAllSubscriptions] = useState([]);
   const [schoolId, setSchoolId] = useState(schoolIdFromParams);
   const [schoolName, setSchoolName] = useState("");
   const [shortName, setShortName] = useState("");
@@ -35,7 +36,7 @@ const EditSchoolItem = () => {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [amountPerStudent, setAmountPerStudent] = useState("");
-  const [numberOfStudents, setNumberOfStudents] = useState(100); // Hardcoded for now
+  const [numberOfStudents, setNumberOfStudents] = useState(100);
   const [subscriptionId, setSubscriptionId] = useState(null);
 
   const expectedAmountPaid = amountPerStudent * numberOfStudents || 0;
@@ -49,14 +50,17 @@ const EditSchoolItem = () => {
     : [];
 
   useEffect(() => {
-    const fetchSchoolDetails = async () => {
+    const fetchSchoolandSubscriptionsDetails = async () => {
       if (schoolId) {
         setLoading(true);
         setError(null);
         try {
-          const response = await getSchoolById(schoolId);
-          if (response?.status === 200 && response.data) {
-            const schoolData = response.data;
+          const schoolResponse = await getSchoolById(schoolId);
+          if (schoolResponse?.status === 200 && schoolResponse.data) {
+            const schoolData = schoolResponse.data;
+            console.log("Fetched school data:", schoolData);
+
+            // Set basic school fields
             setSchoolName(schoolData.school_name || "");
             setShortName(schoolData.short_name || "");
             setSchoolType(schoolData.school_type || "");
@@ -64,11 +68,16 @@ const EditSchoolItem = () => {
             setPhoneNumber(schoolData.phone_number || "");
             setEmail(schoolData.email || "");
 
+            // Handle country
             if (schoolData.country) {
-              const country = countries.find(
-                (c) => c.name === schoolData.country
+              const allCountries = Country.getAllCountries();
+              const country = allCountries.find(
+                (c) => c.name === schoolData.country || c.isoCode === "NG" // Nigeria
               );
+              console.log("Found country:", country);
               setSelectedCountry(country || null);
+
+              // Handle state (after country is set)
               if (country && schoolData.state) {
                 const statesOfCountry = State.getStatesOfCountry(
                   country.isoCode
@@ -76,37 +85,75 @@ const EditSchoolItem = () => {
                 const state = statesOfCountry.find(
                   (s) => s.name === schoolData.state
                 );
+                console.log("Found state:", state);
                 setSelectedState(state || null);
+
+                // Handle city (after state is set)
                 if (state && schoolData.city) {
                   const citiesOfState = City.getCitiesOfState(
                     state.countryCode,
                     state.isoCode
                   );
-                  setSelectedCity(
-                    citiesOfState.find((c) => c.name === schoolData.city) ||
-                      null
+                  const city = citiesOfState.find(
+                    (c) => c.name === schoolData.city
                   );
+                  console.log("Found city:", city);
+                  setSelectedCity(city || null);
+                } else {
+                  setSelectedCity(null); // Clear city if no matching city found
                 }
+              } else {
+                setSelectedState(null); // Clear state and city if no matching state found
+                setSelectedCity(null);
               }
+            } else {
+              setSelectedCountry(null); // Clear country, state, and city if no matching country found
+              setSelectedState(null);
+              setSelectedCity(null);
             }
-            setLogoPreview(schoolData.logo || "/icons.png");
-            setAmountPerStudent(
-              schoolData.subscription?.amount_per_student || ""
-            );
-            setSubscriptionId(schoolData.subscription?.id);
+
+            // Handle logo
+            if (schoolData.logo) {
+              setLogoPreview(schoolData.logo);
+            } else {
+              setLogoPreview("/icons.png");
+            }
           } else {
             setError("Failed to fetch school details.");
           }
+
+          // Fetch all subscriptions
+          const allSubscriptionsResponse = await getSchoolSubscriptions();
+          if (
+            allSubscriptionsResponse?.status === 200 &&
+            allSubscriptionsResponse.data
+          ) {
+            setAllSubscriptions(allSubscriptionsResponse.data);
+
+            // Filter to find the subscription for the current schoolId
+            const schoolSubscription = allSubscriptionsResponse.data.find(
+              (sub) => sub.school === schoolId // Assuming 'school' in subscription is the school ID
+            );
+
+            if (schoolSubscription) {
+              console.log("Found subscription for school:", schoolSubscription);
+              setAmountPerStudent(schoolSubscription.amount_per_student || "");
+              setSubscriptionId(schoolSubscription.id);
+            } else {
+              console.warn("No subscription found for school ID:", schoolId);
+            }
+          }
         } catch (err) {
-          setError("Error fetching school details.");
+          console.error("Error fetching details:", err);
+          setError("Error fetching school and/or subscriptions.");
         } finally {
           setLoading(false);
         }
       }
     };
 
-    fetchSchoolDetails();
-  }, [schoolId, countries]);
+    fetchSchoolandSubscriptionsDetails();
+  }, [schoolId]);
 
   const handleLogoUpload = (event) => {
     const file = event.target.files[0];
@@ -139,7 +186,8 @@ const EditSchoolItem = () => {
   };
 
   const handleCityChange = (event) => {
-    const city = cities.find((c) => c.name === event.target.value);
+    const cityName = event.target.value;
+    const city = cities.find((c) => c.name === cityName);
     setSelectedCity(city);
   };
 
@@ -178,7 +226,7 @@ const EditSchoolItem = () => {
     formData.append("country", selectedCountry.name);
     formData.append("state", selectedState.name);
     formData.append("city", selectedCity.name);
-    formData.append("region", "South West"); // Adjust as needed
+    formData.append("region", "South West");
     if (schoolLogo) {
       formData.append("logo", schoolLogo);
     }
@@ -194,7 +242,6 @@ const EditSchoolItem = () => {
         const subscriptionData = {
           amount_per_student: parseFloat(amountPerStudent),
           amount_paid: expectedAmountPaid,
-          // You might want to handle expired_date and active_date based on your logic
         };
 
         let subscriptionResponse;
@@ -240,28 +287,36 @@ const EditSchoolItem = () => {
   };
 
   if (loading) {
-    return <div>Loading school details...</div>;
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
+      </div>
+    );
   }
 
   if (error) {
-    return <div>Error: {error}</div>;
+    return (
+      <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
+        {error}
+      </div>
+    );
   }
 
   return (
     <SuperAdminLayout>
-      <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0  z-10 shadow-md  flex justify-between items-center ">
+      <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
         <DashboardHeader />
         <Link href={`/Super-Admin/Manage-Existing-Schools?adminId=${adminId}`}>
-          <button className="bg-[#07508F] text-white p-2 rounded-lg cursor-pointer ">
+          <button className="bg-[#07508F] text-white p-2 rounded-lg cursor-pointer">
             View Existing School
           </button>
         </Link>
       </div>
       <form
         onSubmit={handleSubmit}
-        className="bg-[#D4D4D4] h-screen  p-4 sm:overflow-auto lg:overflow-hidden "
+        className="bg-[#D4D4D4] h-screen p-4 sm:overflow-auto lg:overflow-hidden"
       >
-        <div className="sm:flex h-screen sm:flex-col sm:gap-2 lg:grid lg:grid-cols-[2.5fr_1fr] overflow-auto  gap-3 lg:h-screen ">
+        <div className="sm:flex h-screen sm:flex-col sm:gap-2 lg:grid lg:grid-cols-[2.5fr_1fr] overflow-auto gap-3 lg:h-screen">
           <div className="bg-[#ffffff] rounded-lg flex flex-col lg:overflow-y-auto lg:max-h-[calc(100vh-95px)] lg:overflow-auto no-scrollbar">
             <div>
               <p className="font-bold text-xl p-6">
@@ -269,12 +324,14 @@ const EditSchoolItem = () => {
               </p>
               <hr className="w-full border-t border-[#978F8F]" />
             </div>
-            <div className="flex-grow flex flex-col ">
-              {error && <p className="pl-6 text-red-500">{error}</p>}
+            <div className="flex-grow flex flex-col">
+              {error && <p className="pl-6 font-bold text-red-500">{error}</p>}
               {successMessage && (
-                <p className="pl-6 text-green-500">{successMessage}</p>
+                <p className="pl-6 font-bold text-green-500">
+                  {successMessage}
+                </p>
               )}
-              <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0 ">
+              <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0">
                 <div className="flex flex-col gap-1 mb-2">
                   <label
                     className="text-[#808080] font-semibold"
@@ -285,7 +342,7 @@ const EditSchoolItem = () => {
                   <input
                     type="text"
                     id="schoolName"
-                    className="text-base font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A] "
+                    className="text-base font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter School Name"
                     value={schoolName}
                     onChange={(e) => setSchoolName(e.target.value)}
@@ -293,7 +350,7 @@ const EditSchoolItem = () => {
                   />
                 </div>
 
-                <div className="flex flex-col gap-1 mb-2 ">
+                <div className="flex flex-col gap-1 mb-2">
                   <label
                     className="text-[#808080] font-semibold"
                     htmlFor="shortName"
@@ -303,7 +360,7 @@ const EditSchoolItem = () => {
                   <input
                     type="text"
                     id="shortName"
-                    className="text-base text-[#01427A] font-bold rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A] "
+                    className="text-base text-[#01427A] font-bold rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter School Short Name"
                     value={shortName}
                     onChange={(e) => setShortName(e.target.value)}
@@ -311,17 +368,17 @@ const EditSchoolItem = () => {
                   />
                 </div>
 
-                <div className="flex flex-col gap-1 mb-2 ">
+                <div className="flex flex-col gap-1 mb-2">
                   <label
                     className="text-[#808080] font-semibold"
                     htmlFor="schoolType"
                   >
                     School Type
                   </label>
-                  <div className="grid grid-cols-1 ">
+                  <div className="grid grid-cols-1">
                     <select
                       id="schoolType"
-                      className=" font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A] "
+                      className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                       value={schoolType}
                       onChange={(e) => setSchoolType(e.target.value)}
                       required
@@ -343,10 +400,10 @@ const EditSchoolItem = () => {
                   >
                     Education Level
                   </label>
-                  <div className="grid grid-cols-1 ">
+                  <div className="grid grid-cols-1">
                     <select
                       id="educationLevel"
-                      className=" font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A] "
+                      className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                       value={educationLevel}
                       onChange={(e) => setEducationLevel(e.target.value)}
                       required
@@ -361,7 +418,7 @@ const EditSchoolItem = () => {
                     <BiChevronDown className="text-[#01427A] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
                   </div>
                 </div>
-                <div className="flex flex-col gap-1 mb-2 ">
+                <div className="flex flex-col gap-1 mb-2">
                   <label
                     className="text-[#808080] font-semibold"
                     htmlFor="phoneNumber"
@@ -371,7 +428,7 @@ const EditSchoolItem = () => {
                   <input
                     type="tel"
                     id="phoneNumber"
-                    className="text-base font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A] "
+                    className="text-base font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter Phone Number"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
@@ -389,7 +446,7 @@ const EditSchoolItem = () => {
                   <input
                     type="email"
                     id="email"
-                    className="text-base font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A] "
+                    className="text-base font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter School Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -401,10 +458,10 @@ const EditSchoolItem = () => {
                 <label className="text-[#808080] font-semibold" htmlFor="">
                   School Address
                 </label>
-                <div className="grid grid-cols-2 gap-3 mt-1 ">
+                <div className="grid grid-cols-2 gap-3 mt-1">
                   <div className="grid grid-cols-1 mb-2">
                     <select
-                      className=" font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A] "
+                      className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                       onChange={handleCountryChange}
                       value={selectedCountry ? selectedCountry.isoCode : ""}
                       required
@@ -422,7 +479,7 @@ const EditSchoolItem = () => {
                   </div>
                   <div className="grid grid-cols-1 mb-2">
                     <select
-                      className=" font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A] "
+                      className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                       onChange={handleStateChange}
                       value={selectedState ? selectedState.isoCode : ""}
                       disabled={!selectedCountry}
@@ -442,7 +499,7 @@ const EditSchoolItem = () => {
 
                   <div className="grid grid-cols-1">
                     <select
-                      className=" font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A] "
+                      className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                       onChange={handleCityChange}
                       value={selectedCity ? selectedCity.name : ""}
                       disabled={!selectedState}
@@ -463,18 +520,21 @@ const EditSchoolItem = () => {
               </div>
             </div>
           </div>
-          <div className="flex flex-col gap-2 h-screen ">
-            <div className="bg-[#ffffff] rounded-lg drop-shadow-lg p-4  flex flex-col">
-              <p className="font-bold sm:text-lg xl:text-xl xl:mb-2 sm:mb-4 ">
+          <div className="flex flex-col gap-2 h-screen">
+            <div className="bg-[#ffffff] rounded-lg drop-shadow-lg p-4 flex flex-col">
+              <p className="font-bold sm:text-lg xl:text-xl xl:mb-2 sm:mb-4">
                 LOGO
               </p>
               <div className="flex flex-col items-center justify-center mt-2">
-                <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] border-[#333333] flex items-center relative  justify-center w-48 h-35">
+                <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] border-[#333333] flex items-center relative justify-center w-48 h-35">
                   <div className="w-full h-full flex items-center justify-center">
                     <img
                       className="max-w-full max-h-full object-contain"
                       src={logoPreview}
                       alt="school-logo-preview"
+                      onError={(e) => {
+                        e.target.src = "/icons.png";
+                      }}
                     />
                   </div>
                   <input
@@ -487,7 +547,7 @@ const EditSchoolItem = () => {
                 </div>
                 <button
                   onClick={() => document.getElementById("logo-upload").click()}
-                  className="text-[#07508F] border-[1.5px] rounded-lg cursor-pointer  border-dashed  w-48 p-2 flex items-center justify-between"
+                  className="text-[#07508F] border-[1.5px] rounded-lg cursor-pointer border-dashed w-48 p-2 flex items-center justify-between"
                 >
                   Upload School LOGO
                   <span>
@@ -498,11 +558,11 @@ const EditSchoolItem = () => {
             </div>
 
             <div className="bg-[#ffffff] xl:gap-0 lg:gap-2 h-auto rounded-lg pt-5 pl-5 pr-5 xl:pb-2 pb-8 drop-shadow-lg flex flex-col">
-              <p className="font-bold sm:text-lg xl:text-xl mb-4 ">
+              <p className="font-bold sm:text-lg xl:text-xl mb-4">
                 SUBSCRIPTION PLAN
               </p>
               <div>
-                <div className="flex justify-between items-center ">
+                <div className="flex justify-between items-center">
                   <p className="font-semibold text-xs text-[#9C9B9B]">
                     Amount Per Student:
                   </p>
@@ -510,7 +570,7 @@ const EditSchoolItem = () => {
                     <input
                       type="number"
                       id="amountPerStudent"
-                      className="w-full text-right text-sm text-[#333] rounded-md focus:outline-none border-[1px]  border-[#d4d4d4]"
+                      className="w-full text-right text-sm text-[#333] rounded-md focus:outline-none border-[1px] border-[#d4d4d4]"
                       value={amountPerStudent}
                       onChange={(e) => setAmountPerStudent(e.target.value)}
                       required
@@ -519,21 +579,21 @@ const EditSchoolItem = () => {
                 </div>
 
                 <div className="flex justify-between">
-                  <p className="font-semibold text-xs ">No of Students:</p>
-                  <p className="font-semibold text-xs ">{numberOfStudents}</p>
+                  <p className="font-semibold text-xs">No of Students:</p>
+                  <p className="font-semibold text-xs">{numberOfStudents}</p>
                 </div>
 
                 <div className="flex justify-between">
-                  <p className="font-semibold text-xs ">
+                  <p className="font-semibold text-xs">
                     Amount Expected to be paid:
                   </p>
-                  <p className="font-semibold text-xs ">
+                  <p className="font-semibold text-xs">
                     ₦{expectedAmountPaid.toLocaleString()}
                   </p>
                 </div>
               </div>
 
-              <div className="flex justify-center pt-4 ">
+              <div className="flex justify-center pt-4">
                 <button
                   type="submit"
                   className={`bg-[#07508F] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer ${

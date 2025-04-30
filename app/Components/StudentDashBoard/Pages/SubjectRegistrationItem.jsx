@@ -1,7 +1,7 @@
 "use client";
 import React, { useState } from "react";
 import Layout from "../../../Components/Studentlayout";
-import { useUser } from "../context/UserProvider";
+import { useUser } from "../../../context/UserProvider";
 import { useRouter } from "next/navigation";
 
 export default function SubjectRegistrationPage() {
@@ -15,7 +15,14 @@ export default function SubjectRegistrationPage() {
     e.preventDefault();
     if (!classYear || !classArm || !department) return;
 
-    console.log("Class Year:", classYear, "Class Arm:", classArm, "Department:", department);
+    console.log(
+      "Class Year:",
+      classYear,
+      "Class Arm:",
+      classArm,
+      "Department:",
+      department
+    );
     router.push("/Student/Subject-Registration/Confirm");
   };
 
@@ -38,7 +45,10 @@ export default function SubjectRegistrationPage() {
             <h2 className="text-md lg:text-lg font-semibold text-[#999999] mb-4 text-center">
               Select Class Year and Class Arm to Proceed to Subject Registration
             </h2>
-            <form onSubmit={handleSubmit} className="max-w-md mx-auto flex flex-col gap-4">
+            <form
+              onSubmit={handleSubmit}
+              className="max-w-md mx-auto flex flex-col gap-4"
+            >
               <div>
                 <select
                   id="classYear"
@@ -93,10 +103,12 @@ export default function SubjectRegistrationPage() {
               <button
                 type="submit"
                 className={`mt-4 font-semibold py-2 px-4 rounded transition-colors 
-                ${classYear && classArm && department 
-                  ? "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer" 
-                  : "bg-gray-400 text-gray-200 cursor-not-allowed"}`}
-                disabled={!classYear || !classArm || !department} 
+                ${
+                  classYear && classArm && department
+                    ? "bg-blue-600 text-white hover:bg-blue-700 cursor-pointer"
+                    : "bg-gray-400 text-gray-200 cursor-not-allowed"
+                }`}
+                disabled={!classYear || !classArm || !department}
               >
                 Proceed
               </button>

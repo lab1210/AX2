@@ -13,12 +13,20 @@ import { GoPaperclip } from "react-icons/go";
 import { LuSendHorizontal } from "react-icons/lu";
 const ChatItem = () => {
   const [selectedchat, setSelectedChat] = useState(null);
+  // const [newMessage, setNewMessage] = useState("");
+  // const [user, setUser] = useState(null);
 
-  const [newMessage, setNewMessage] = useState("");
+  // useEffect(() => {
+  //   const userData = getUserDetails();
+  //   setUser(userData);
+  // }, []);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() === "") return;
+  const handleSendMessage = async () => {
+    // if (!selectedchat || newMessage.trim() === "") return;
+    if (!selectedchat || newMessage.trim() === "") return;
 
+    // const messageContent = newMessage;
+    // const senderId = user.id;
     const updatedChat = { ...selectedchat };
     updatedChat.messages.push({
       sender: "School",

@@ -1,4 +1,4 @@
-import { UserProvider } from "@/app/Components/StudentDashBoard/context/UserProvider";
+import { UserProvider } from "../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../css/spinner.module.css";
 import AddSchoolAdminItem from "@/app/Components/SuperAdminDashboard/Pages/AddSchoolAdminItem";
