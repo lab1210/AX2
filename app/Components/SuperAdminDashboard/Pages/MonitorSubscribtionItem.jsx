@@ -9,7 +9,7 @@ import { IoClose } from "react-icons/io5";
 import {
   getSchoolSubscriptions,
   updateSchoolSubscription,
-} from "@/app/Service/schoolService";
+} from "../../../Service/schoolService";
 
 const itemsPerPage = 7; // You can adjust this value
 

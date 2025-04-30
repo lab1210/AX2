@@ -4,7 +4,7 @@ import SuperAdminLayout from "../SuperAdminLayout";
 import DashboardHeader from "../DashboardHeader";
 import { IoClose, IoFilterOutline } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa6";
-import { getComplianceDocs } from "@/app/Service/complianceDocService";
+import { getComplianceDocs } from "../../../Service/complianceDocService";
 
 const itemsPerPage = 7; // You can adjust this value
 

@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Layout from "../../../Components/Studentlayout";
-import { getUserDetails } from "@/app/Service/AuthService";
+import { getUserDetails } from "../../../Service/AuthService";
 
 export default function HealthRecordPage() {
   const [user, setUser] = useState(null);
@@ -159,7 +159,7 @@ export default function HealthRecordPage() {
             value="Yes"
             checked={state === "Yes"}
             onChange={(e) => setState(e.target.value)}
-            required 
+            required
           />
           Yes
         </label>
@@ -170,7 +170,7 @@ export default function HealthRecordPage() {
             value="No"
             checked={state === "No"}
             onChange={(e) => setState(e.target.value)}
-            required 
+            required
           />
           No
         </label>
@@ -249,7 +249,7 @@ export default function HealthRecordPage() {
                 onChange={(e) => setWeight(e.target.value)}
                 placeholder="e.g. 70kg"
                 className="border-b-[1px] border-gray-300 rounded p-1 focus:border-gray-500 outline-none w-full sm:w-auto"
-                required 
+                required
               />
             </div>
             {/* Height */}
@@ -263,7 +263,7 @@ export default function HealthRecordPage() {
                 onChange={(e) => setHeight(e.target.value)}
                 placeholder="e.g. 5.5ft"
                 className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none w-full sm:w-auto"
-                required 
+                required
               />
             </div>
             {/* Blood Group */}
@@ -277,7 +277,7 @@ export default function HealthRecordPage() {
                 onChange={(e) => setBloodGroup(e.target.value)}
                 placeholder="e.g. O+"
                 className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none w-full sm:w-auto"
-                required 
+                required
               />
             </div>
             {/* Genotype */}
@@ -291,7 +291,7 @@ export default function HealthRecordPage() {
                 onChange={(e) => setGenotype(e.target.value)}
                 placeholder="e.g. AS"
                 className="border-b border-gray-300 rounded p-1 focus:border-gray-500 outline-none w-full sm:w-auto"
-                required 
+                required
               />
             </div>
           </div>

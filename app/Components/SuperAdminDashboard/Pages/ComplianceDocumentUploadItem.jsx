@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { LuUpload } from "react-icons/lu";
 import UploadProgress from "./UploadProgress";
-import { createComplianceDoc } from "@/app/Service/complianceDocService";
+import { createComplianceDoc } from "../../../Service/complianceDocService";
 
 const ComplianceDocumentUploadItem = () => {
   const searchParams = useSearchParams();

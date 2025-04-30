@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { Country, State, City } from "country-state-city";
 import { BiChevronDown } from "react-icons/bi";
-import { getAllRoles } from "@/app/Service/RoleService";
-import { createSuperAdmin } from "@/app/Service/userService";
+import { getAllRoles } from "../../../Service/RoleService";
+import { createSuperAdmin } from "../../../Service/userService";
 
 const AddUser = ({ onClose, onUserAdded }) => {
   const [formData, setFormData] = useState({

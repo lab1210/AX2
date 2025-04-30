@@ -7,9 +7,9 @@ import { BiChevronDown } from "react-icons/bi";
 import { Country, State, City } from "country-state-city";
 import { LuUpload } from "react-icons/lu";
 import DashboardHeader from "../DashboardHeader";
-import { createSchoolAdmin } from "@/app/Service/schoolAdminService";
-import { getSchools } from "@/app/Service/schoolService";
-import { getAllRoles } from "@/app/Service/RoleService";
+import { createSchoolAdmin } from "../../../Service/schoolAdminService";
+import { getSchools } from "../../../Service/schoolService";
+import { getAllRoles } from "../../../Service/RoleService";
 
 const AddSchoolAdminItem = () => {
   const searchParams = useSearchParams();

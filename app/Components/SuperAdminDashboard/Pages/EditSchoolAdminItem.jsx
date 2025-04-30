@@ -6,7 +6,6 @@ import { useSearchParams } from "next/navigation";
 import { BiChevronDown } from "react-icons/bi";
 import { Country, State, City } from "country-state-city";
 import DashboardHeader from "../DashboardHeader";
-import schools from "../../school";
 import { useRouter } from "next/navigation";
 import {
   getSchoolAdminById,
