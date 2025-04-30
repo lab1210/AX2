@@ -1,7 +1,7 @@
-import { UserProvider } from "../../context/UserProvider";
+import { UserProvider } from "../../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../css/spinner.module.css";
-import EditSchoolAdminItem from "@/app/Components/SuperAdminDashboard/Pages/EditSchoolAdminItem";
+import EditSchoolAdminItem from "../../../Components/SuperAdminDashboard/Pages/EditSchoolAdminItem";
 
 const EditSchoolAdmin = () => {
   return (

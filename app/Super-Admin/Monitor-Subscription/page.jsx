@@ -1,7 +1,7 @@
 import { UserProvider } from "../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../css/spinner.module.css";
-import MonitorSubscribtionItem from "@/app/Components/SuperAdminDashboard/Pages/MonitorSubscribtionItem";
+import MonitorSubscribtionItem from "../../Components/SuperAdminDashboard/Pages/MonitorSubscribtionItem";
 
 const page = () => {
   return (

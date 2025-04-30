@@ -1,5 +1,5 @@
 import { UserProvider } from "../../context/UserProvider";
-import ManageSchoolAdminItem from "@/app/Components/SuperAdminDashboard/Pages/ManageSchoolAdminItem";
+import ManageSchoolAdminItem from "../../Components/SuperAdminDashboard/Pages/ManageSchoolAdminItem";
 import React, { Suspense } from "react";
 import styles from "../css/spinner.module.css";
 
