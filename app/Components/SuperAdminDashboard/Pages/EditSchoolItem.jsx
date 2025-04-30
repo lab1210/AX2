@@ -7,6 +7,7 @@ import Link from "next/link";
 import { BiChevronDown } from "react-icons/bi";
 import { Country, State, City } from "country-state-city";
 import { LuUpload } from "react-icons/lu";
+import BlueDropdown from "../../../Components/BlueDropDown";
 import {
   getSchoolById,
   getSchoolSubscriptions,
@@ -170,25 +171,19 @@ const EditSchoolItem = () => {
     }
   };
 
-  const handleCountryChange = (event) => {
-    const countryCode = event.target.value;
-    const country = countries.find((c) => c.isoCode === countryCode);
-    setSelectedCountry(country);
+  const handleCountryChange = (selected) => {
+    setSelectedCountry(selected);
     setSelectedState(null);
     setSelectedCity(null);
   };
 
-  const handleStateChange = (event) => {
-    const stateCode = event.target.value;
-    const state = states.find((s) => s.isoCode === stateCode);
-    setSelectedState(state);
+  const handleStateChange = (selected) => {
+    setSelectedState(selected);
     setSelectedCity(null);
   };
 
-  const handleCityChange = (event) => {
-    const cityName = event.target.value;
-    const city = cities.find((c) => c.name === cityName);
-    setSelectedCity(city);
+  const handleCityChange = (selected) => {
+    setSelectedCity(selected);
   };
 
   const handleSubmit = async (event) => {
@@ -334,7 +329,7 @@ const EditSchoolItem = () => {
               <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0">
                 <div className="flex flex-col gap-1 mb-2">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="schoolName"
                   >
                     School Name
@@ -342,7 +337,7 @@ const EditSchoolItem = () => {
                   <input
                     type="text"
                     id="schoolName"
-                    className="text-base font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter School Name"
                     value={schoolName}
                     onChange={(e) => setSchoolName(e.target.value)}
@@ -352,7 +347,7 @@ const EditSchoolItem = () => {
 
                 <div className="flex flex-col gap-1 mb-2">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="shortName"
                   >
                     School Short Name
@@ -360,7 +355,7 @@ const EditSchoolItem = () => {
                   <input
                     type="text"
                     id="shortName"
-                    className="text-base text-[#01427A] font-bold rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter School Short Name"
                     value={shortName}
                     onChange={(e) => setShortName(e.target.value)}
@@ -370,57 +365,58 @@ const EditSchoolItem = () => {
 
                 <div className="flex flex-col gap-1 mb-2">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="schoolType"
                   >
                     School Type
                   </label>
                   <div className="grid grid-cols-1">
-                    <select
-                      id="schoolType"
-                      className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
-                      value={schoolType}
-                      onChange={(e) => setSchoolType(e.target.value)}
-                      required
-                    >
-                      <option value="" disabled>
-                        Select School Type
-                      </option>
-                      <option value="Private">Private</option>
-                      <option value="Public">Public</option>
-                    </select>
-                    <BiChevronDown className="text-[#01427A] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+                    <BlueDropdown
+                      label={schoolType || "Select School Type"}
+                      items={[
+                        {
+                          label: "Private",
+                          onClick: () => setSchoolType("Private"),
+                        },
+                        {
+                          label: "Public",
+                          onClick: () => setSchoolType("Public"),
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
 
                 <div className="flex flex-col gap-1 mb-2">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="educationLevel"
                   >
                     Education Level
                   </label>
                   <div className="grid grid-cols-1">
-                    <select
-                      id="educationLevel"
-                      className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
-                      value={educationLevel}
-                      onChange={(e) => setEducationLevel(e.target.value)}
-                      required
-                    >
-                      <option value="" disabled>
-                        Select Education Level
-                      </option>
-                      <option value="Primary">Primary</option>
-                      <option value="Junior">Junior Secondary</option>
-                      <option value="Senior">Senior Secondary</option>
-                    </select>
-                    <BiChevronDown className="text-[#01427A] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+                    <BlueDropdown
+                      label={educationLevel || "Select Education Level"}
+                      items={[
+                        {
+                          label: "Primary",
+                          onClick: () => setEducationLevel("Primary"),
+                        },
+                        {
+                          label: "Secondary",
+                          onClick: () => setEducationLevel("Secondary"),
+                        },
+                        {
+                          label: "Tertiary",
+                          onClick: () => setEducationLevel("Tertiary"),
+                        },
+                      ]}
+                    />
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 mb-2">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="phoneNumber"
                   >
                     Phone Number
@@ -438,7 +434,7 @@ const EditSchoolItem = () => {
 
                 <div className="flex flex-col gap-1 mb-2">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="email"
                   >
                     School Email
@@ -454,67 +450,41 @@ const EditSchoolItem = () => {
                   />
                 </div>
               </div>
-              <div className="pt-4 pl-6 pr-6 pb-0">
-                <label className="text-[#808080] font-semibold" htmlFor="">
+              <div className="pt-4 pl-6 pr-6 pb-10">
+                <label
+                  className="text-[#808080] font-semibold text-sm "
+                  htmlFor=""
+                >
                   School Address
                 </label>
                 <div className="grid grid-cols-2 gap-3 mt-1">
                   <div className="grid grid-cols-1 mb-2">
-                    <select
-                      className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
-                      onChange={handleCountryChange}
-                      value={selectedCountry ? selectedCountry.isoCode : ""}
-                      required
-                    >
-                      <option value="" disabled>
-                        Select Country
-                      </option>
-                      {countries.map((country) => (
-                        <option key={country.isoCode} value={country.isoCode}>
-                          {country.name}
-                        </option>
-                      ))}
-                    </select>
-                    <BiChevronDown className="text-[#01427A] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+                    <BlueDropdown
+                      label={selectedCountry?.name || "Select Country"}
+                      items={countries.map((country) => ({
+                        label: country.name,
+                        onClick: () => handleCountryChange(country),
+                      }))}
+                    />
                   </div>
                   <div className="grid grid-cols-1 mb-2">
-                    <select
-                      className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
-                      onChange={handleStateChange}
-                      value={selectedState ? selectedState.isoCode : ""}
-                      disabled={!selectedCountry}
-                      required
-                    >
-                      <option value="" disabled>
-                        Select State
-                      </option>
-                      {states.map((state) => (
-                        <option key={state.isoCode} value={state.isoCode}>
-                          {state.name}
-                        </option>
-                      ))}
-                    </select>
-                    <BiChevronDown className="text-[#01427A] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+                    <BlueDropdown
+                      label={selectedState?.name || "Select State"}
+                      items={states.map((state) => ({
+                        label: state.name,
+                        onClick: () => handleStateChange(state),
+                      }))}
+                    />
                   </div>
 
                   <div className="grid grid-cols-1">
-                    <select
-                      className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
-                      onChange={handleCityChange}
-                      value={selectedCity ? selectedCity.name : ""}
-                      disabled={!selectedState}
-                      required
-                    >
-                      <option value="" disabled>
-                        Select City
-                      </option>
-                      {cities.map((city) => (
-                        <option key={city.name} value={city.name}>
-                          {city.name}
-                        </option>
-                      ))}
-                    </select>
-                    <BiChevronDown className="text-[#01427A] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+                    <BlueDropdown
+                      label={selectedCity?.name || "Select City"}
+                      items={cities.map((city) => ({
+                        label: city.name,
+                        onClick: () => handleCityChange(city),
+                      }))}
+                    />
                   </div>
                 </div>
               </div>
@@ -547,7 +517,7 @@ const EditSchoolItem = () => {
                 </div>
                 <button
                   onClick={() => document.getElementById("logo-upload").click()}
-                  className="text-[#07508F] border-[1.5px] rounded-lg cursor-pointer border-dashed w-48 p-2 flex items-center justify-between"
+                  className="text-[#07508F] border-[#07508F] border-[1.5px] rounded-lg cursor-pointer border-dashed w-48 p-2 flex items-center justify-between"
                 >
                   Upload School LOGO
                   <span>
