@@ -9,6 +9,7 @@ import {
   MessageCircle,
   ChevronLeft,
 } from "lucide-react";
+
 import { useRouter, usePathname } from "next/navigation";
 
 const sidebarItems = [
