@@ -2,7 +2,7 @@
 import { UserProvider } from "../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../css/layout.module.css";
-import ProfilePage from "@/app/Components/StudentDashBoard/Pages/Profile";
+import ProfilePage from "../../Components/StudentDashBoard/Pages/Profile";
 
 const Profile = () => {
   return (
