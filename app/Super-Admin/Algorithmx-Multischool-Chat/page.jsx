@@ -1,7 +1,7 @@
 import { UserProvider } from "../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../css/spinner.module.css";
-import ChatItem from "@/app/Components/SuperAdminDashboard/Pages/ChatItem";
+import ChatItem from "../../Components/SuperAdminDashboard/Pages/ChatItem";
 
 const ChatPage = () => {
   return (
