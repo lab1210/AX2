@@ -7,7 +7,7 @@ import { TbDashboard } from "react-icons/tb";
 import { AiOutlineFileProtect } from "react-icons/ai";
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { LiaUserShieldSolid } from "react-icons/lia";
-import { logout } from "@/app/Service/AuthService";
+import { logout } from "../../Service/AuthService";
 
 const LeftSidebar = () => {
   const router = useRouter();

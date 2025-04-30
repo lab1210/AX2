@@ -1,7 +1,7 @@
 "use client";
 import React from "react";
 import Layout from "../../../Components/Studentlayout";
-import { useUser } from "../context/UserProvider";
+import { useUser } from "../../../context/UserProvider";
 
 export default function AttendancePage() {
   // Example data
