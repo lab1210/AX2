@@ -1,8 +1,8 @@
 "use client";
-import { UserProvider } from "../../context/UserProvider";
+import { UserProvider } from "../../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../../css/layout.module.css";
-import HealthRecordSummary from "@/app/Components/StudentDashBoard/Pages/HealthRecordSummary";
+import HealthRecordSummary from "../../../Components/StudentDashBoard/Pages/HealthRecordSummary";
 
 const RecordSummary = () => {
   return (
