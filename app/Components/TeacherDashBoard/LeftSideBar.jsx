@@ -9,11 +9,7 @@ import {
   MessageCircle,
   ChevronLeft,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { motion, AnimatePresence } from "framer-motion";
-import { usePathname } from "next/navigation";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const sidebarItems = [
   {
@@ -50,6 +46,8 @@ const sidebarItems = [
 
 const LeftSidebar = () => {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const router = useRouter();
+  const pathname = usePathname();
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
@@ -58,33 +56,21 @@ const LeftSidebar = () => {
   return (
     <div
       className={cn(
-        "flex flex-col h-screen bg-white shadow-lg transition-all duration-300 ease-in-out",
-        "border-r border-gray-200",
+        "flex flex-col h-screen bg-white shadow-lg border-r border-gray-200 transition-all duration-300 ease-in-out",
         isCollapsed ? "w-20" : "w-[20%]"
       )}
     >
+      {/* Top section with logo and toggle */}
       <div
         className={cn(
-          "flex items-center justify-between p-4 border-b border-gray-200 transition-all duration-300",
+          "flex items-center p-4 border-b border-gray-200 transition-all duration-300",
           isCollapsed ? "justify-center" : "justify-between"
         )}
       >
-        <AnimatePresence>
-          {!isCollapsed && (
-            <motion.img
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -20 }}
-              transition={{ duration: 0.2 }}
-              src="/logo.png"
-              alt="Foursquare Logo"
-              className="h-8"
-            />
-          )}
-        </AnimatePresence>
-        <Button
-          variant="ghost"
-          size="icon"
+        {!isCollapsed && (
+          <img src="/logo.png" alt="Foursquare Logo" className="h-8" />
+        )}
+        <button
           onClick={toggleCollapse}
           className="text-gray-600 hover:text-blue-500"
         >
@@ -94,60 +80,40 @@ const LeftSidebar = () => {
               isCollapsed ? "rotate-180" : "rotate-0"
             )}
           />
-        </Button>
+        </button>
       </div>
 
-      {/* Scrollable Content Area */}
+      {/* Navigation Links */}
       <div className="flex-1 overflow-y-auto">
         <nav className="flex flex-col space-y-2 p-2">
           {sidebarItems.map((item) => (
-            <Button
+            <button
               key={item.label}
-              variant="ghost"
+              onClick={() => router.push(item.route)}
               className={cn(
-                "flex items-center justify-start gap-2 w-full h-12 px-4 py-3",
-                "text-gray-700 hover:bg-gray-100 hover:text-blue-600",
-                "transition-colors duration-200 rounded-md",
-                "font-medium",
-                isCollapsed ? "justify-center" : "justify-start"
+                "flex items-center gap-2 w-full h-12 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors duration-200 rounded-md font-medium",
+                isCollapsed ? "justify-center" : "justify-start",
+                pathname === item.route ? "bg-blue-100 text-blue-700" : ""
               )}
-              onClick={() => {
-                console.log(`Navigating to ${item.route}`);
-              }}
             >
-              <span className="transition-all duration-300">{item.icon}</span>
-              <AnimatePresence>
-                {!isCollapsed && (
-                  <motion.span
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -20 }}
-                    transition={{ duration: 0.2 }}
-                    className="transition-all duration-300"
-                  >
-                    {item.label}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </Button>
+              <span>{item.icon}</span>
+              {!isCollapsed && <span>{item.label}</span>}
+            </button>
           ))}
         </nav>
       </div>
 
-      {/* Bottom Section - Powered By */}
-      <div
-        className={cn(
-          "p-4 border-t border-gray-200 text-center transition-all duration-300",
-          isCollapsed ? "hidden" : "block"
-        )}
-      >
-        <p className="text-xs text-gray-500">Powered by:</p>
-        <img
-          src="/AlgorithmX.png"
-          alt="AlgorithmX Logo"
-          className="h-6 mx-auto mt-1"
-        />
-      </div>
+      {/* Bottom Section */}
+      {!isCollapsed && (
+        <div className="p-4 border-t border-gray-200 text-center">
+          <p className="text-xs text-gray-500">Powered by:</p>
+          <img
+            src="/AlgorithmX.png"
+            alt="AlgorithmX Logo"
+            className="h-6 mx-auto mt-1"
+          />
+        </div>
+      )}
     </div>
   );
 };
