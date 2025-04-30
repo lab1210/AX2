@@ -278,7 +278,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="first_name"
                     name="first_name"
-                    className="text-base text-[#808080] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter First Name"
                     value={formData.first_name}
                     onChange={handleInputChange}
@@ -297,7 +297,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="middle_name"
                     name="middle_name"
-                    className="text-base text-[#808080] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Middle Name"
                     onChange={handleInputChange}
                   />
@@ -313,7 +313,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="surname"
                     name="surname"
-                    className="text-base text-[#808080] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Last Name"
                     value={formData.surname}
                     onChange={handleInputChange}
@@ -331,7 +331,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="phone_number"
                     name="phone_number"
-                    className="text-base text-[#808080] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Phone Number"
                     value={formData.phone_number}
                     onChange={handleInputChange}
@@ -349,7 +349,7 @@ const AddSchoolAdminItem = () => {
                     type="email"
                     id="email"
                     name="email"
-                    className="text-base text-[#808080] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Email"
                     value={formData.email}
                     onChange={handleInputChange}
@@ -367,7 +367,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="designation"
                     name="designation"
-                    className="text-base text-[#808080] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Designation"
                     value={formData.designation}
                     onChange={handleInputChange}
@@ -385,7 +385,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="username"
                     name="user.username"
-                    className="text-base text-[#808080] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Username"
                     value={formData.user.username}
                     onChange={handleInputChange}
@@ -403,7 +403,7 @@ const AddSchoolAdminItem = () => {
                     type="password"
                     id="password"
                     name="user.password"
-                    className="text-base text-[#808080] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Password"
                     value={formData.user.password}
                     onChange={handleInputChange}

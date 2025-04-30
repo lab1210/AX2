@@ -4,7 +4,7 @@ const Dropdown = ({ label = "Options", items = [] }) => {
   return (
     <Menu as="div" className="relative inline-block text-left ">
       <div>
-        <MenuButton className="border-[2px] p-2 border-[#AEAEAE] inline-flex w-full justify-between rounded-sm bg-white px-3 py-2 sm:text-sm  text-[#808080] shadow-xs  ">
+        <MenuButton className=" focus:outline-accent-foreground border-[2px] p-2 border-[#AEAEAE] inline-flex w-full justify-between rounded-sm bg-white px-3 py-2 sm:text-sm  text-[#808080] shadow-xs  ">
           {label}
           <HiOutlineChevronDown
             aria-hidden="true"

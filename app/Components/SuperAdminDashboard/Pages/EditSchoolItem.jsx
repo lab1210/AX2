@@ -337,7 +337,7 @@ const EditSchoolItem = () => {
                   <input
                     type="text"
                     id="schoolName"
-                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base font-bold focus:outline-accent-foreground text-[#01427A] rounded-sm  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter School Name"
                     value={schoolName}
                     onChange={(e) => setSchoolName(e.target.value)}
@@ -355,7 +355,7 @@ const EditSchoolItem = () => {
                   <input
                     type="text"
                     id="shortName"
-                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-sm  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter School Short Name"
                     value={shortName}
                     onChange={(e) => setShortName(e.target.value)}
@@ -424,7 +424,7 @@ const EditSchoolItem = () => {
                   <input
                     type="tel"
                     id="phoneNumber"
-                    className="text-base font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter Phone Number"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
@@ -442,7 +442,7 @@ const EditSchoolItem = () => {
                   <input
                     type="email"
                     id="email"
-                    className="text-base font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter School Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -540,7 +540,7 @@ const EditSchoolItem = () => {
                     <input
                       type="number"
                       id="amountPerStudent"
-                      className="w-full text-right text-sm text-[#333] rounded-md focus:outline-none border-[1px] border-[#d4d4d4]"
+                      className="w-full focus:outline-black text-right text-sm text-[#333] rounded-md  border-[1px] border-[#d4d4d4]"
                       value={amountPerStudent}
                       onChange={(e) => setAmountPerStudent(e.target.value)}
                       required

@@ -53,7 +53,7 @@ const EditUser = () => {
 
           <input
             type="text"
-            className=" font-bold text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] placeholder:text-[#07508F] "
+            className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
             placeholder="Enter First Name"
           />
         </div>
@@ -64,7 +64,7 @@ const EditUser = () => {
 
           <input
             type="text"
-            className=" font-bold text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] placeholder:text-[#07508F] "
+            className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
             placeholder="Enter Surname"
           />
         </div>

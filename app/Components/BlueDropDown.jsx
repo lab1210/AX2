@@ -4,7 +4,7 @@ const BlueDropdown = ({ label = "Options", items = [] }) => {
   return (
     <Menu as="div" className="text-[#01427A] relative inline-block text-left ">
       <div>
-        <MenuButton className="border-[2px] p-2 font-bold border-[#01427A] inline-flex w-full justify-between rounded-sm bg-white px-3 py-2 sm:text-sm  text-[#01427A]   ">
+        <MenuButton className="border-[2px] focus:outline-accent-foreground p-2 font-bold border-[#01427A] inline-flex w-full justify-between rounded-sm bg-white px-3 py-2 sm:text-sm  text-[#01427A]   ">
           {label}
           <HiOutlineChevronDown
             aria-hidden="true"

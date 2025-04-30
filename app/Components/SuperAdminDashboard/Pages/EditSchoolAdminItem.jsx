@@ -317,7 +317,7 @@ const EditSchoolAdminItem = () => {
                     type="text"
                     id="first_name"
                     name="first_name"
-                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter First Name"
                     value={formData.first_name}
                     onChange={handleInputChange}
@@ -335,7 +335,7 @@ const EditSchoolAdminItem = () => {
 
                   <input
                     type="text"
-                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter Middle Name"
                   />
                 </div>
@@ -351,7 +351,7 @@ const EditSchoolAdminItem = () => {
                     type="text"
                     id="surname"
                     name="surname"
-                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter Last Name"
                     value={formData.surname}
                     onChange={handleInputChange}
@@ -370,7 +370,7 @@ const EditSchoolAdminItem = () => {
                     type="text"
                     id="phone_number"
                     name="phone_number"
-                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter Phone Number"
                     value={formData.phone_number}
                     onChange={handleInputChange}
@@ -389,7 +389,7 @@ const EditSchoolAdminItem = () => {
                     type="email"
                     id="email"
                     name="email"
-                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter Email"
                     value={formData.email}
                     onChange={handleInputChange}
@@ -408,7 +408,7 @@ const EditSchoolAdminItem = () => {
                     type="text"
                     id="designation"
                     name="designation"
-                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter Designation"
                     value={formData.designation}
                     onChange={handleInputChange}
@@ -427,7 +427,7 @@ const EditSchoolAdminItem = () => {
                     type="text"
                     id="user.username"
                     name="user.username"
-                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter Username"
                     value={formData.user.username}
                     onChange={handleInputChange}
@@ -446,7 +446,7 @@ const EditSchoolAdminItem = () => {
                     type="text"
                     id="user.password"
                     name="user.password"
-                    className="text-base font-bold text-[#01427A] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
                     placeholder="Enter Password"
                     onChange={handleInputChange}
                   />
