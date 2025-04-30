@@ -10,9 +10,9 @@ import { useRouter } from "next/navigation";
 import {
   getSchoolAdminById,
   updateSchoolAdmin,
-} from "@/app/Service/schoolAdminService";
-import { getAllRoles } from "@/app/Service/RoleService";
-import { getSchools } from "@/app/Service/schoolService";
+} from "../../../Service/schoolAdminService";
+import { getAllRoles } from "../../../Service/RoleService";
+import { getSchools } from "../../../Service/schoolService";
 
 const EditSchoolAdminItem = () => {
   const searchParams = useSearchParams();

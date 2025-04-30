@@ -11,7 +11,7 @@ import {
   deleteSuperAdmin,
   getSuperAdmins,
   updateSuperAdmin,
-} from "@/app/Service/userService";
+} from "../../../Service/userService";
 
 const ITEMS_PER_PAGE = 7;
 const ManageUserItem = () => {
