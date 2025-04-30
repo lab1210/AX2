@@ -1,5 +1,5 @@
-import { UserProvider } from "../../context/UserProvider";
-import EditSchoolItem from "@/app/Components/SuperAdminDashboard/Pages/EditSchoolItem";
+import { UserProvider } from "../../../context/UserProvider";
+import EditSchoolItem from "../../../Components/SuperAdminDashboard/Pages/EditSchoolItem";
 import React, { Suspense } from "react";
 import styles from "../../css/spinner.module.css";
 

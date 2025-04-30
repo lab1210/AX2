@@ -1,7 +1,7 @@
-import { UserProvider } from "../../context/UserProvider";
+import { UserProvider } from "../../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../css/spinner.module.css";
-import AddSchoolItem from "@/app/Components/SuperAdminDashboard/Pages/AddSchoolItem";
+import AddSchoolItem from "../../../Components/SuperAdminDashboard/Pages/AddSchoolItem";
 
 const AddSchool = () => {
   return (
