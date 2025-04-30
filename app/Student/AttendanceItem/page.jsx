@@ -3,7 +3,7 @@ import { UserProvider } from "../../context/UserProvider";
 
 import React, { Suspense } from "react";
 import styles from "../../css/layout.module.css";
-import Attendance from "@/app/Components/StudentDashBoard/Pages/AttendanceItem";
+import Attendance from "../../Components/StudentDashBoard/Pages/AttendanceItem";
 
 const AttendanceItem = () => {
   return (

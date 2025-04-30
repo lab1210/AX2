@@ -1,8 +1,8 @@
 "use client";
-import { UserProvider } from "../../context/UserProvider";
+import { UserProvider } from "../../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../../css/layout.module.css";
-import HealthRecordItem from "@/app/Components/StudentDashBoard/Pages/HealthRecordItem";
+import HealthRecordItem from "../../Components/StudentDashBoard/Pages/HealthRecordItem";
 
 const HealthRecordForm = () => {
   return (

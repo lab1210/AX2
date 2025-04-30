@@ -10,7 +10,7 @@ import { LiaHeartbeatSolid } from "react-icons/lia";
 import { FaRegUser } from "react-icons/fa6";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { logout } from "../../../Service/AuthService";
+import { logout } from "../../Service/AuthService";
 
 const LeftSidebar = ({ setUser, user }) => {
   const router = useRouter();
