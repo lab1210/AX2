@@ -9,11 +9,11 @@ import {
   MessageCircle,
   ChevronLeft,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { Button } from "../ui/button";
 
 const sidebarItems = [
   {
