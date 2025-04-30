@@ -11,7 +11,7 @@ import styles from "../../Super-Admin/css/spinner.module.css"; // Adjust the imp
 import { useRouter } from "next/navigation";
 import { MdWarning } from "react-icons/md";
 import LeftSidebar from "./LeftSidebar";
-import { getAuthToken } from "@/app/Service/AuthService";
+import { getAuthToken } from "../../Service/AuthService";
 
 // Create a context for Super Admin authentication
 const SuperAdminAuthContext = createContext(null);

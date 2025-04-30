@@ -1,9 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Layout from "../../Studentlayout";
-import { getUserDetails } from "@/app/Service/AuthService";
-import { FaCamera } from "react-icons/fa6";
-import { MdOutlineCamera, MdOutlineCameraAlt } from "react-icons/md";
+import { getUserDetails } from "../../../Service/AuthService";
+import { MdOutlineCameraAlt } from "react-icons/md";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);

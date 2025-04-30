@@ -9,7 +9,7 @@ import { BiChevronRight, BiPieChart } from "react-icons/bi";
 import { LiaHeartbeatSolid } from "react-icons/lia";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { getUserDetails } from "@/app/Service/AuthService";
+import { getUserDetails } from "../../../Service/AuthService";
 
 // Dummy data for events and notifications (replace with API calls)
 const dummyevents = [
@@ -167,7 +167,9 @@ export default function Studentdashboard() {
                     <h4 className="text-md lg:text-md 2xl:text-xl lg:text-base font-bold mb-1 text-white">
                       {item.title}
                     </h4>
-                    <p className="text-xs 2xl:text-md text-white">{item.description}</p>
+                    <p className="text-xs 2xl:text-md text-white">
+                      {item.description}
+                    </p>
                   </div>
                 </Link>
               ))}

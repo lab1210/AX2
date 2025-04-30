@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import SuperAdminLayout from "../SuperAdminLayout";
 import DashboardHeader from "../DashboardHeader";
-import { RiEqualizerLine } from "react-icons/ri";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -10,8 +9,7 @@ import { IoClose } from "react-icons/io5";
 import {
   deleteSchoolAdmin,
   getSchoolAdmin,
-} from "@/app/Service/schoolAdminService"; // Adjust import path if needed
-import styles from "../../../Super-Admin/css/spinner.module.css";
+} from "../../../Service/schoolAdminService"; // Adjust import path if needed
 import { FaUserPlus } from "react-icons/fa6";
 
 const ITEMS_PER_PAGE = 7; // You can adjust this value

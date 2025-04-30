@@ -7,7 +7,7 @@ import dummyterm from "../../../Components/Term";
 import { LuArrowDownUp } from "react-icons/lu";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { getUserDetails } from "@/app/Service/AuthService";
+import { getUserDetails } from "../../../Service/AuthService";
 
 const FeesPaymentItem = () => {
   const [term, setTerm] = useState("");
@@ -348,65 +348,93 @@ const FeesPaymentItem = () => {
               </select>
             </div>
             <div className="overflow-x-auto">
-              <div className="flex flex-row justify-between gap-4 mb-3"> 
-              <div className="flex flex-col mb-3">
-              <p className="text-xs text-gray-400"> 07/09/23</p>
-              <p className="text-md text-black font-semibold"> Admission Acceptance Fee</p>
-              <p className="text-sm text-gray-500"> TD01</p>
+              <div className="flex flex-row justify-between gap-4 mb-3">
+                <div className="flex flex-col mb-3">
+                  <p className="text-xs text-gray-400"> 07/09/23</p>
+                  <p className="text-md text-black font-semibold">
+                    {" "}
+                    Admission Acceptance Fee
+                  </p>
+                  <p className="text-sm text-gray-500"> TD01</p>
+                </div>
+                <div>
+                  <p className="text-green-500 font-semibold text-sm">
+                    52,000.00
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-green-500 font-semibold text-sm">52,000.00</p>
+              <div className="flex flex-row justify-between gap-4 mb-3">
+                <div className="flex flex-col mb-3">
+                  <p className="text-md text-black font-semibold">
+                    {" "}
+                    Semester School Fee
+                  </p>
+                  <p className="text-sm text-gray-500"> TD02</p>
+                </div>
+                <div className="flex flex-col">
+                  <p className="text-gray-500 font-semibold text-sm">
+                    250,000.00
+                  </p>
+                  <p className="text-red-500 font-semibold text-sm">
+                    152,345.00
+                  </p>
+                </div>
               </div>
+              <div className="flex flex-row justify-between gap-4 mb-3">
+                <div className="flex flex-col mb-3">
+                  <p className="text-xs text-gray-400"> 08/09/23</p>
+                  <p className="text-md text-black font-semibold"> PTA Dues</p>
+                  <p className="text-sm text-gray-500"> TD02</p>
+                </div>
+                <div>
+                  <p className="text-green-500 font-semibold text-sm">
+                    2,000.00
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-row justify-between gap-4 mb-3"> 
-              <div className="flex flex-col mb-3">
-              <p className="text-md text-black font-semibold"> Semester School Fee</p>
-              <p className="text-sm text-gray-500"> TD02</p>
+              <div className="flex flex-row justify-between gap-4 mb-3">
+                <div className="flex flex-col mb-3">
+                  <p className="text-xs text-gray-400"> 07/09/23</p>
+                  <p className="text-md text-black font-semibold">
+                    {" "}
+                    Admission Acceptance Fee
+                  </p>
+                  <p className="text-sm text-gray-500"> TD01</p>
+                </div>
+                <div>
+                  <p className="text-green-500 font-semibold text-sm">
+                    52,000.00
+                  </p>
+                </div>
               </div>
-              <div className="flex flex-col">
-                <p className="text-gray-500 font-semibold text-sm">250,000.00</p>
-                <p className="text-red-500 font-semibold text-sm">152,345.00</p>
+              <div className="flex flex-row justify-between gap-4 mb-3">
+                <div className="flex flex-col mb-3">
+                  <p className="text-md text-black font-semibold">
+                    {" "}
+                    Semester School Fee
+                  </p>
+                  <p className="text-sm text-gray-500"> TD02</p>
+                </div>
+                <div className="flex flex-col">
+                  <p className="text-gray-500 font-semibold text-sm">
+                    250,000.00
+                  </p>
+                  <p className="text-red-500 font-semibold text-sm">
+                    152,345.00
+                  </p>
+                </div>
               </div>
-              </div>
-              <div className="flex flex-row justify-between gap-4 mb-3"> 
-              <div className="flex flex-col mb-3">
-              <p className="text-xs text-gray-400"> 08/09/23</p>
-              <p className="text-md text-black font-semibold"> PTA Dues</p>
-              <p className="text-sm text-gray-500"> TD02</p>
-              </div>
-              <div>
-                <p className="text-green-500 font-semibold text-sm">2,000.00</p>
-              </div>
-              </div>
-              <div className="flex flex-row justify-between gap-4 mb-3"> 
-              <div className="flex flex-col mb-3">
-              <p className="text-xs text-gray-400"> 07/09/23</p>
-              <p className="text-md text-black font-semibold"> Admission Acceptance Fee</p>
-              <p className="text-sm text-gray-500"> TD01</p>
-              </div>
-              <div>
-                <p className="text-green-500 font-semibold text-sm">52,000.00</p>
-              </div>
-              </div>
-              <div className="flex flex-row justify-between gap-4 mb-3"> 
-              <div className="flex flex-col mb-3">
-              <p className="text-md text-black font-semibold"> Semester School Fee</p>
-              <p className="text-sm text-gray-500"> TD02</p>
-              </div>
-              <div className="flex flex-col">
-                <p className="text-gray-500 font-semibold text-sm">250,000.00</p>
-                <p className="text-red-500 font-semibold text-sm">152,345.00</p>
-              </div>
-              </div>
-              <div className="flex flex-row justify-between gap-4 mb-3"> 
-              <div className="flex flex-col mb-3">
-              <p className="text-xs text-gray-400"> 08/09/23</p>
-              <p className="text-md text-black font-semibold"> PTA Dues</p>
-              <p className="text-sm text-gray-500"> TD02</p>
-              </div>
-              <div>
-                <p className="text-green-500 font-semibold text-sm">2,000.00</p>
-              </div>
+              <div className="flex flex-row justify-between gap-4 mb-3">
+                <div className="flex flex-col mb-3">
+                  <p className="text-xs text-gray-400"> 08/09/23</p>
+                  <p className="text-md text-black font-semibold"> PTA Dues</p>
+                  <p className="text-sm text-gray-500"> TD02</p>
+                </div>
+                <div>
+                  <p className="text-green-500 font-semibold text-sm">
+                    2,000.00
+                  </p>
+                </div>
               </div>
             </div>
           </div>

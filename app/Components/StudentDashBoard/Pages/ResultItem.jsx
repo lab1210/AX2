@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import dummysession from "../../../Components/session";
 import dummyterm from "../../../Components/Term";
 import Layout from "../../../Components/Studentlayout";
-import { getUserDetails } from "@/app/Service/AuthService";
+import { getUserDetails } from "../../../Service/AuthService";
 
 export default function ResultOverviewPage() {
   const [user, setUser] = useState(null);
