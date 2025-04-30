@@ -56,17 +56,16 @@ const LeftSidebar = () => {
 
   return (
     <div
-      className={cn(
-        "flex flex-col h-screen bg-white shadow-lg border-r border-gray-200 transition-all duration-300 ease-in-out",
-        isCollapsed ? "w-20" : "w-[20%]"
-      )}
+      className={`
+        flex flex-col h-screen bg-white shadow-lg border-r border-gray-200 transition-all duration-300 ease-in-out
+        ${isCollapsed ? "w-20" : "w-[20%]"}`}
     >
       {/* Top section with logo and toggle */}
       <div
-        className={cn(
-          "flex items-center p-4 border-b border-gray-200 transition-all duration-300",
-          isCollapsed ? "justify-center" : "justify-between"
-        )}
+        className={
+          ("flex items-center p-4 border-b border-gray-200 transition-all duration-300",
+          isCollapsed ? "justify-center" : "justify-between")
+        }
       >
         {!isCollapsed && (
           <img src="/logo.png" alt="Foursquare Logo" className="h-8" />
@@ -76,10 +75,10 @@ const LeftSidebar = () => {
           className="text-gray-600 hover:text-blue-500"
         >
           <ChevronLeft
-            className={cn(
-              "w-5 h-5 transition-transform duration-300",
-              isCollapsed ? "rotate-180" : "rotate-0"
-            )}
+            className={
+              ("w-5 h-5 transition-transform duration-300",
+              isCollapsed ? "rotate-180" : "rotate-0")
+            }
           />
         </button>
       </div>
@@ -91,11 +90,11 @@ const LeftSidebar = () => {
             <button
               key={item.label}
               onClick={() => router.push(item.route)}
-              className={cn(
-                "flex items-center gap-2 w-full h-12 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors duration-200 rounded-md font-medium",
+              className={
+                ("flex items-center gap-2 w-full h-12 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors duration-200 rounded-md font-medium",
                 isCollapsed ? "justify-center" : "justify-start",
-                pathname === item.route ? "bg-blue-100 text-blue-700" : ""
-              )}
+                pathname === item.route ? "bg-blue-100 text-blue-700" : "")
+              }
             >
               <span>{item.icon}</span>
               {!isCollapsed && <span>{item.label}</span>}
