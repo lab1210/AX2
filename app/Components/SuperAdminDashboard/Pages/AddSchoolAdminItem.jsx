@@ -5,11 +5,11 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { BiChevronDown } from "react-icons/bi";
 import { Country, State, City } from "country-state-city";
-import { LuUpload } from "react-icons/lu";
 import DashboardHeader from "../DashboardHeader";
 import { createSchoolAdmin } from "../../../Service/schoolAdminService";
 import { getSchools } from "../../../Service/schoolService";
 import { getAllRoles } from "../../../Service/RoleService";
+import Dropdown from "../../../Components/Dropdown";
 
 const AddSchoolAdminItem = () => {
   const searchParams = useSearchParams();
@@ -115,14 +115,13 @@ const AddSchoolAdminItem = () => {
     });
   };
 
-  const handleSchoolChange = (e) => {
-    const selectedSchoolId = e.target.value;
-    setFormData({ ...formData, school: selectedSchoolId });
-    const selectedSchool = schoolsData.find(
-      (school) => school.id === selectedSchoolId
+  const handleSchoolChange = (selectedSchool) => {
+    setFormData({ ...formData, school: selectedSchool?.value });
+    const selectedSchoolData = schoolsData.find(
+      (school) => school.id === selectedSchool?.value
     );
-    if (selectedSchool && selectedSchool.logo) {
-      setSchoolLogo(selectedSchool.logo);
+    if (selectedSchoolData && selectedSchoolData.logo) {
+      setSchoolLogo(selectedSchoolData.logo);
     } else {
       setSchoolLogo("/icons.png");
     }
@@ -136,27 +135,22 @@ const AddSchoolAdminItem = () => {
     ? City.getCitiesOfState(selectedState.countryCode, selectedState.isoCode)
     : [];
 
-  const handleCountryChange = (event) => {
-    const countryCode = event.target.value;
-    const country = countries.find((c) => c.isoCode === countryCode);
-    setSelectedCountry(country);
+  const handleCountryChange = (selected) => {
+    setSelectedCountry(selected);
     setSelectedState(null);
     setSelectedCity(null);
-    setFormData({ ...formData, country: country?.name, state: "", city: "" });
+    setFormData({ ...formData, country: selected?.name, state: "", city: "" });
   };
 
-  const handleStateChange = (event) => {
-    const stateCode = event.target.value;
-    const state = states.find((s) => s.isoCode === stateCode);
-    setSelectedState(state);
+  const handleStateChange = (selected) => {
+    setSelectedState(selected);
     setSelectedCity(null);
-    setFormData({ ...formData, state: state?.name, city: "" });
+    setFormData({ ...formData, state: selected?.name, city: "" });
   };
 
-  const handleCityChange = (event) => {
-    const city = cities.find((c) => c.name === event.target.value);
-    setSelectedCity(city);
-    setFormData({ ...formData, city: city?.name });
+  const handleCityChange = (selected) => {
+    setSelectedCity(selected);
+    setFormData({ ...formData, city: selected?.name });
   };
 
   const handleSubmit = async (e) => {
@@ -275,7 +269,7 @@ const AddSchoolAdminItem = () => {
               <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0 ">
                 <div className="flex flex-col gap-1 mb-2">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="first_name"
                   >
                     First Name
@@ -284,7 +278,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="first_name"
                     name="first_name"
-                    className="text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter First Name"
                     value={formData.first_name}
                     onChange={handleInputChange}
@@ -294,7 +288,7 @@ const AddSchoolAdminItem = () => {
 
                 <div className="flex flex-col gap-1 mb-2 ">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="middle_name"
                   >
                     Middle Name
@@ -303,14 +297,14 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="middle_name"
                     name="middle_name"
-                    className="text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Middle Name"
                     onChange={handleInputChange}
                   />
                 </div>
                 <div className="flex flex-col gap-1 mb-2 ">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="surname"
                   >
                     Last Name
@@ -319,7 +313,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="surname"
                     name="surname"
-                    className="text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Last Name"
                     value={formData.surname}
                     onChange={handleInputChange}
@@ -328,7 +322,7 @@ const AddSchoolAdminItem = () => {
                 </div>
                 <div className="flex flex-col gap-1 mb-2 ">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="phone_number"
                   >
                     Phone Number
@@ -337,7 +331,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="phone_number"
                     name="phone_number"
-                    className="text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Phone Number"
                     value={formData.phone_number}
                     onChange={handleInputChange}
@@ -346,7 +340,7 @@ const AddSchoolAdminItem = () => {
                 </div>
                 <div className="flex flex-col gap-1 mb-2 ">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="email"
                   >
                     Email
@@ -355,7 +349,7 @@ const AddSchoolAdminItem = () => {
                     type="email"
                     id="email"
                     name="email"
-                    className="text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Email"
                     value={formData.email}
                     onChange={handleInputChange}
@@ -364,7 +358,7 @@ const AddSchoolAdminItem = () => {
                 </div>
                 <div className="flex flex-col gap-1 mb-2 ">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="designation"
                   >
                     Designation
@@ -373,7 +367,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="designation"
                     name="designation"
-                    className="text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Designation"
                     value={formData.designation}
                     onChange={handleInputChange}
@@ -382,7 +376,7 @@ const AddSchoolAdminItem = () => {
                 </div>
                 <div className="flex flex-col gap-1 mb-2 ">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="username"
                   >
                     Create Username
@@ -391,7 +385,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="username"
                     name="user.username"
-                    className="text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Username"
                     value={formData.user.username}
                     onChange={handleInputChange}
@@ -400,7 +394,7 @@ const AddSchoolAdminItem = () => {
                 </div>
                 <div className="flex flex-col gap-1 mb-2 ">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="password"
                   >
                     Create Password
@@ -409,7 +403,7 @@ const AddSchoolAdminItem = () => {
                     type="password"
                     id="password"
                     name="user.password"
-                    className="text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Password"
                     value={formData.user.password}
                     onChange={handleInputChange}
@@ -418,35 +412,33 @@ const AddSchoolAdminItem = () => {
                 </div>
                 <div className="flex flex-col gap-1 mb-2">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="school_name"
                   >
                     School Name
                   </label>
                   <div className="grid grid-cols-1 ">
-                    <select
-                      name="school"
-                      id="school_name"
-                      className=" w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] placeholder:text-[#d4d4d4] "
-                      value={formData.school}
-                      onChange={handleSchoolChange}
-                      required
-                    >
-                      <option value="" disabled>
-                        Select School
-                      </option>
-                      {schoolsData.map((school) => (
-                        <option key={school.id} value={school.id}>
-                          {school.school_name}
-                        </option>
-                      ))}
-                    </select>
-                    <BiChevronDown className="text-[#d4d4d4] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+                    <Dropdown
+                      label={
+                        schoolsData.find(
+                          (school) => school.id === formData.school
+                        )?.school_name || "Select School"
+                      }
+                      items={schoolsData.map((school) => ({
+                        label: school.school_name,
+                        value: school.id,
+                        onClick: () =>
+                          handleSchoolChange({
+                            label: school.school_name,
+                            value: school.id,
+                          }),
+                      }))}
+                    />
                   </div>
                 </div>
                 <div className="flex flex-col gap-1 mb-2 ">
                   <label
-                    className="text-[#808080] font-semibold"
+                    className="text-[#808080] font-semibold text-sm "
                     htmlFor="role"
                   >
                     User Role
@@ -457,72 +449,46 @@ const AddSchoolAdminItem = () => {
                     name="role" // Or "display_role" if you prefer
                     value="School Admin" // Directly set the displayed value
                     readOnly
-                    className="text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4] font-bold "
+                    className="text-base text-[#07508F] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#AEAEAE] font-bold "
                   />
                   {/* The actual user_role ID is already in formData.user_role */}
                 </div>
               </div>
-              <div className="pt-4 pl-6 pr-6 pb-0">
-                <label className="text-[#808080] font-semibold" htmlFor="">
+              <div className="pt-4 pl-6 pr-6 pb-10">
+                <label
+                  className="text-[#808080] font-semibold text-sm "
+                  htmlFor=""
+                >
                   Address
                 </label>
                 <div className="grid grid-cols-2 gap-3 mt-1 ">
                   <div className="grid grid-cols-1 mb-2">
-                    <select
-                      className="w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4]"
-                      onChange={handleCountryChange}
-                      value={selectedCountry ? selectedCountry.isoCode : ""}
-                      required
-                    >
-                      <option value="" disabled>
-                        Select Country
-                      </option>
-                      {countries.map((country) => (
-                        <option key={country.isoCode} value={country.isoCode}>
-                          {country.name}
-                        </option>
-                      ))}
-                    </select>
-                    <BiChevronDown className="text-[#d4d4d4] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+                    <Dropdown
+                      label={selectedCountry?.name || "Select Country"}
+                      items={countries.map((country) => ({
+                        label: country.name,
+                        onClick: () => handleCountryChange(country),
+                      }))}
+                    />
                   </div>
                   <div className="grid grid-cols-1 mb-2">
-                    <select
-                      className="w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4]"
-                      onChange={handleStateChange}
-                      value={selectedState ? selectedState.isoCode : ""}
-                      disabled={!selectedCountry}
-                      required
-                    >
-                      <option value="" disabled>
-                        Select State
-                      </option>
-                      {states.map((state) => (
-                        <option key={state.isoCode} value={state.isoCode}>
-                          {state.name}
-                        </option>
-                      ))}
-                    </select>
-                    <BiChevronDown className="text-[#d4d4d4] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+                    <Dropdown
+                      label={selectedState?.name || "Select State"}
+                      items={states.map((state) => ({
+                        label: state.name,
+                        onClick: () => handleStateChange(state),
+                      }))}
+                    />
                   </div>
 
                   <div className="grid grid-cols-1">
-                    <select
-                      className="w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#808080] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#d4d4d4]"
-                      onChange={handleCityChange}
-                      value={selectedCity ? selectedCity.name : ""}
-                      disabled={!selectedState}
-                      required
-                    >
-                      <option value="" disabled>
-                        Select City
-                      </option>
-                      {cities.map((city) => (
-                        <option key={city.name} value={city.name}>
-                          {city.name}
-                        </option>
-                      ))}
-                    </select>
-                    <BiChevronDown className="text-[#d4d4d4] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+                    <Dropdown
+                      label={selectedCity?.name || "Select City"}
+                      items={cities.map((city) => ({
+                        label: city.name,
+                        onClick: () => handleCityChange(city),
+                      }))}
+                    />
                   </div>
                 </div>
               </div>
