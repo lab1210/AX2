@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import SuperAdminLayout from "../SuperAdminLayout";
-import { usePathname } from "next/navigation";
 import { IoIosNotificationsOutline } from "react-icons/io";
 import { MdCoPresent } from "react-icons/md";
 import { RiPresentationFill } from "react-icons/ri";
@@ -21,8 +20,8 @@ import {
 } from "recharts";
 import { FaFemale, FaMale } from "react-icons/fa";
 import DashboardHeader from "../DashboardHeader";
-import { getSuperAdmins } from "@/app/Service/userService";
-import { getSchools } from "@/app/Service/schoolService";
+import { getSuperAdmins } from "../../../Service/userService";
+import { getSchools } from "../../../Service/schoolService";
 
 const SuperAdminDashboardItem = () => {
   //Overview Cards

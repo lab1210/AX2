@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../../Studentlayout";
 import dummysession from "../../session";
-import { getUserDetails } from "@/app/Service/AuthService";
+import { getUserDetails } from "../../../Service/AuthService";
 import { useRouter } from "next/navigation";
 import Receipt from "../../../public/Receipt.png";
 

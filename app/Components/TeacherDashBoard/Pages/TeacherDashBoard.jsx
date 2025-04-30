@@ -10,7 +10,7 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import LeftSidebar from "./LeftSidebar";
+import LeftSidebar from "../LeftSideBar";
 import { Calendar } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
