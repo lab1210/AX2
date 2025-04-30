@@ -4,7 +4,7 @@ import Layout from "../../Studentlayout";
 import { FaRegCreditCard } from "react-icons/fa6";
 import { FaRegFileAlt } from "react-icons/fa";
 import dummysession from "../../session";
-import { useUser } from "../context/UserProvider";
+import { useUser } from "../../../context/UserProvider";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 

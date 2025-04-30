@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Layout from "../../../Components/Studentlayout";
-import { useUser } from "../context/UserProvider";
+import { useUser } from "../../../context/UserProvider";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle, XCircle } from "lucide-react";
@@ -15,7 +15,12 @@ export default function SubjectRegistration() {
     { id: 4, name: "Data Processing", checked: false, category: "Commercial" },
     { id: 5, name: "Commerce", checked: false, category: "Commercial" },
     { id: 6, name: "Government", checked: false, category: "Commercial" },
-    { id: 7, name: "Banking and Finance", checked: false, category: "Commercial" },
+    {
+      id: 7,
+      name: "Banking and Finance",
+      checked: false,
+      category: "Commercial",
+    },
     { id: 8, name: "Biology", checked: false, category: "Science" },
     { id: 9, name: "Mathematics", checked: true, category: "Compulsory" },
     { id: 10, name: "English Language", checked: true, category: "Compulsory" },

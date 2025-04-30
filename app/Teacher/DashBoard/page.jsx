@@ -1,18 +1,21 @@
 "use client";
-import { UserProvider } from "@/app/Components/StudentDashBoard/context/UserProvider";
-import TeacherDashBoard from "@/app/Components/TeacherDashBoard/Pages/TeacherDashBoard";
 import React, { Suspense } from "react";
 import styles from "../../css/layout.module.css";
-
+import { UserProvider } from "../../context/UserProvider";
+import TeacherDashboard from "@/app/Components/TeacherDashBoard/Pages/TeacherDashBoard";
 
 const Dashboard = () => {
   return (
     <UserProvider>
-      <Suspense fallback={<div className={styles.loadingContainer}>
-        {" "}
-        <div className={styles.spinner}></div> {/* New: Spinner element */}
-      </div>}>
-      <TeacherDashBoard />
+      <Suspense
+        fallback={
+          <div className={styles.loadingContainer}>
+            {" "}
+            <div className={styles.spinner}></div> {/* New: Spinner element */}
+          </div>
+        }
+      >
+        <TeacherDashboard />
       </Suspense>
     </UserProvider>
   );

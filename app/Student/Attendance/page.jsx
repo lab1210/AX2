@@ -1,7 +1,7 @@
 "use client";
 import React, { Suspense } from "react";
 import styles from "../../css/layout.module.css";
-import { UserProvider } from "@/app/Components/StudentDashBoard/context/UserProvider";
+import { UserProvider } from "../../context/UserProvider";
 import AttendancePage from "@/app/Components/StudentDashBoard/Pages/AttendanceItem";
 
 const AttendanceItem = () => {
