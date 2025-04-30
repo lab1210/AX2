@@ -2,7 +2,7 @@
 import { UserProvider } from "../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../../css/layout.module.css";
-import SubjectConfirmationItem from "@/app/Components/StudentDashBoard/Pages/SubjectConfirmation";
+import SubjectConfirmationItem from "../../../Components/StudentDashBoard/Pages/SubjectConfirmation";
 
 const SubjectConfirmation = () => {
   return (
