@@ -3,7 +3,6 @@ import React, { useState } from "react";
 import SuperAdminLayout from "../SuperAdminLayout";
 import DashboardHeader from "../DashboardHeader";
 import { IoIosNotificationsOutline, IoMdMore } from "react-icons/io";
-import Image from "next/image";
 import { FaPlus } from "react-icons/fa6";
 import chatList from "../../chat";
 import { RiMore2Fill } from "react-icons/ri";
