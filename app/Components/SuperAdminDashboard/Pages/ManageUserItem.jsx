@@ -11,7 +11,7 @@ import {
   deleteSuperAdmin,
   getSuperAdmins,
   updateSuperAdmin,
-} from "@/app/Service/userService";
+} from "../../../Service/userService";
 
 const ITEMS_PER_PAGE = 7;
 const ManageUserItem = () => {
@@ -323,7 +323,7 @@ const ManageUserItem = () => {
             onClick={closeAddModal}
           ></div>
           <div
-            className="relative md:pl-6 md:pr-6 pt-4 pb-4 sm:pl-3 sm:pr-3  bg-white  rounded-md shadow-lg  lg:max-w-280 md:max-w-180 sm:max-w-150  z-50 transition-transform  duration-600 ease-in-out"
+            className="relative md:pl-6 md:pr-6 pt-4 pb-4 sm:pl-3 sm:pr-3  bg-white  rounded-md shadow-lg xl:w-280 lg:w-240 md:w-180 sm:w-150  z-50 transition-transform  duration-700 ease-in-out"
             style={{ transform: modalTransform, opacity: modalOpacity }}
           >
             <div className="flex justify-end">
@@ -332,7 +332,7 @@ const ManageUserItem = () => {
               </span>
             </div>
             <div className="flex justify-center">
-              <p className="font-bold text-xl">ADD NEW USER</p>
+              <p className="font-bold text-lg">ADD NEW USER</p>
             </div>
             <AddUser onClose={closeAddModal} onUserAdded={fetchAllUsers} />
           </div>
@@ -347,7 +347,7 @@ const ManageUserItem = () => {
             onClick={closeEditModal}
           ></div>
           <div
-            className="relative md:pl-6 md:pr-6 pt-4 pb-4 sm:pl-3 sm:pr-3  bg-white  rounded-md shadow-lg lg:max-w-280 md:max-w-180 sm:max-w-150  z-50 transition-transform  duration-600 ease-in-out"
+            className="relative md:pl-6 md:pr-6 pt-4 pb-4 sm:pl-3 sm:pr-3  bg-white  rounded-md  shadow-lg xl:w-280 lg:w-240 md:w-180 sm:w-150  z-50 transition-transform  duration-700 ease-in-out"
             style={{ transform: modalTransform, opacity: modalOpacity }}
           >
             <div className="flex justify-end">
@@ -356,7 +356,7 @@ const ManageUserItem = () => {
               </span>
             </div>
             <div className="flex justify-center">
-              <p className="font-bold text-xl">EDIT USER</p>
+              <p className="font-bold text-lg ">EDIT USER</p>
             </div>
             <EditUser
               onClose={closeEditModal}

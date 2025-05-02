@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Country, State, City } from "country-state-city";
 import { BiChevronDown } from "react-icons/bi";
+import BlueDropdown from "@/Components/BlueDropDown";
 
 const EditUser = () => {
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -16,24 +17,30 @@ const EditUser = () => {
     ? City.getCitiesOfState(selectedState.countryCode, selectedState.isoCode)
     : [];
 
-  const handleCountryChange = (event) => {
-    const countryCode = event.target.value;
-    const country = countries.find((c) => c.isoCode === countryCode);
-    setSelectedCountry(country);
+  const handleCountryChange = (selected) => {
+    setSelectedCountry(selected);
     setSelectedState(null);
     setSelectedCity(null);
+    setFormData({ ...formData, address: selected?.name || "" });
   };
 
-  const handleStateChange = (event) => {
-    const stateCode = event.target.value;
-    const state = states.find((s) => s.isoCode === stateCode);
-    setSelectedState(state);
+  const handleStateChange = (selected) => {
+    setSelectedState(selected);
     setSelectedCity(null);
+    setFormData({
+      ...formData,
+      address: `${selectedCountry?.name || ""}, ${selected?.name || ""}`,
+    });
   };
 
-  const handleCityChange = (event) => {
-    const city = cities.find((c) => c.name === event.target.value);
-    setSelectedCity(city);
+  const handleCityChange = (selected) => {
+    setSelectedCity(selected);
+    setFormData({
+      ...formData,
+      address: `${selectedCountry?.name || ""}, ${selectedState?.name || ""}, ${
+        selected?.name || ""
+      }`,
+    });
   };
 
   return (
@@ -46,7 +53,7 @@ const EditUser = () => {
 
           <input
             type="text"
-            className=" font-bold text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] placeholder:text-[#07508F] "
+            className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
             placeholder="Enter First Name"
           />
         </div>
@@ -57,7 +64,7 @@ const EditUser = () => {
 
           <input
             type="text"
-            className=" font-bold text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] placeholder:text-[#07508F] "
+            className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
             placeholder="Enter Surname"
           />
         </div>
@@ -116,58 +123,32 @@ const EditUser = () => {
         </label>
         <div className="grid grid-cols-3 gap-3 mt-1 ">
           <div className="grid grid-cols-1 mb-2">
-            <select
-              className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F]"
-              onChange={handleCountryChange}
-              value={selectedCountry ? selectedCountry.isoCode : ""}
-            >
-              <option value="" disabled selected>
-                Select Country
-              </option>
-              {countries.map((country) => (
-                <option key={country.isoCode} value={country.isoCode}>
-                  {country.name}
-                </option>
-              ))}
-            </select>
-            <BiChevronDown className="text-[#07508F] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+            <BlueDropdown
+              label={selectedCountry?.name || "Select Country"}
+              items={countries.map((country) => ({
+                label: country.name,
+                onClick: () => handleCountryChange(country),
+              }))}
+            />
           </div>
           <div className="grid grid-cols-1 mb-2">
-            <select
-              className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F]"
-              onChange={handleStateChange}
-              value={selectedState ? selectedState.isoCode : ""}
-              disabled={!selectedCountry}
-            >
-              <option value="" disabled selected>
-                Select State
-              </option>
-              {states.map((state) => (
-                <option key={state.isoCode} value={state.isoCode}>
-                  {state.name}
-                </option>
-              ))}
-            </select>
-            <BiChevronDown className="text-[#07508F] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+            <BlueDropdown
+              label={selectedState?.name || "Select State"}
+              items={states.map((state) => ({
+                label: state.name,
+                onClick: () => handleStateChange(state),
+              }))}
+            />
           </div>
 
           <div className="grid grid-cols-1 mb-2">
-            <select
-              className="font-bold w-full bg-white col-start-1 row-start-1 appearance-none text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F]"
-              onChange={handleCityChange}
-              value={selectedCity ? selectedCity.name : ""}
-              disabled={!selectedState}
-            >
-              <option value="" disabled selected>
-                Select City
-              </option>
-              {cities.map((city) => (
-                <option key={city.name} value={city.name}>
-                  {city.name}
-                </option>
-              ))}
-            </select>
-            <BiChevronDown className="text-[#07508F] col-start-1 row-start-1 mr-2 size-5 self-center justify-self-end pointer-events-none" />
+            <BlueDropdown
+              label={selectedCity?.name || "Select City"}
+              items={cities.map((city) => ({
+                label: city.name,
+                onClick: () => handleCityChange(city),
+              }))}
+            />
           </div>
         </div>
       </div>

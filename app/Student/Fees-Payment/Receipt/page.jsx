@@ -1,8 +1,7 @@
-import { UserProvider } from "../../context/UserProvider";
-
+import { UserProvider } from "../../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../../css/layout.module.css";
-import ReceiptItem from "@/app/Components/StudentDashBoard/Pages/Receipt";
+import ReceiptItem from "../../../Components/StudentDashBoard/Pages/Receipt";
 
 const Receipt = () => {
   return (

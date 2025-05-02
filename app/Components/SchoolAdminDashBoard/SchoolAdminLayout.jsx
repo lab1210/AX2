@@ -1,26 +1,17 @@
 "use client";
-
-import React, {
-  Suspense,
-  useEffect,
-  useState,
-  useContext,
-  createContext,
-} from "react";
-import styles from "../../Super-Admin/css/spinner.module.css"; // Adjust the import path as needed
+import React, { createContext, Suspense, useEffect, useState } from "react";
+import styles from "../../School-Admin/css/spinner.module.css";
 import { useRouter } from "next/navigation";
 import { MdWarning } from "react-icons/md";
-import LeftSidebar from "./LeftSidebar";
 import { getAuthToken } from "../../Service/AuthService";
+import SchoolAdminLeft from "../SchoolAdminDashBoard/LeftSideBar";
+import DashboardHeader from "../SchoolAdminDashBoard/DashboardHeader";
+const SchoolAdminLayoutContext = createContext(null);
 
-// Create a context for Super Admin authentication
-const SuperAdminAuthContext = createContext(null);
-
-export const useSuperAdminAuth = () => {
-  return useContext(SuperAdminAuthContext);
+export const useSchoolAdminLayout = () => {
+  return useContext(SchoolAdminLayoutContext);
 };
-
-export default function SuperAdminRootLayout({ children }) {
+const SchoolAdminLayout = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -66,7 +57,6 @@ export default function SuperAdminRootLayout({ children }) {
 
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
-
   const authContextValue = {
     isAuthenticated,
     isLoading,
@@ -89,7 +79,7 @@ export default function SuperAdminRootLayout({ children }) {
       <div className="flex flex-col items-center justify-center h-screen text-center px-4">
         <MdWarning className="text-red-600 text-6xl mb-4" />
         <p className="text-lg font-semibold text-red-600">
-          Super Admin access is not available on small screens.
+          School Admin access is not available on small screens.
         </p>
         <p className="text-md text-gray-600">
           Please use a larger screen to continue.
@@ -97,17 +87,21 @@ export default function SuperAdminRootLayout({ children }) {
       </div>
     );
   }
-
   return (
-    <SuperAdminAuthContext.Provider value={authContextValue}>
-      <div className="grid sm:grid-cols-[150px_auto] md:grid-cols-[150px_auto] xl:grid-cols-[200px_auto] overflow-hidden w-screen  h-screen">
-        <div className="bg-[#01427A] h-full ">
+    <SchoolAdminLayoutContext.Provider value={authContextValue}>
+      <div className="grid sm:grid-cols-[150px_auto] md:grid-cols-[180px_auto] xl:grid-cols-[220px_auto] overflow-hidden w-screen h-screen">
+        <div className="bg-[#004080] max-h-screen">
           <Suspense>
-            <LeftSidebar />
+            <SchoolAdminLeft />
           </Suspense>
         </div>
-        <div className="flex flex-col h-screen overflow-hidden">{children}</div>
+        <div className="grid grid-rows-[80px_1fr]">
+          <DashboardHeader />
+          <div className="h-screen overflow-y-auto ">{children}</div>
+        </div>
       </div>
-    </SuperAdminAuthContext.Provider>
+    </SchoolAdminLayoutContext.Provider>
   );
-}
+};
+
+export default SchoolAdminLayout;

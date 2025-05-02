@@ -4,7 +4,7 @@ import Layout from "../../Studentlayout";
 import dummysession from "../../session";
 import { getUserDetails } from "../../../Service/AuthService";
 import { useRouter } from "next/navigation";
-import Receipt from "../../../public/Receipt.png";
+import Receipt from "../../../../public/Receipt.png";
 
 const ReceiptItem = () => {
   const [session, setSession] = useState(dummysession[0]);

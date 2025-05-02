@@ -1,7 +1,7 @@
 import { UserProvider } from "../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../css/spinner.module.css";
-import ManageUserItem from "@/app/Components/SuperAdminDashboard/Pages/ManageUserItem";
+import ManageUserItem from "../../Components/SuperAdminDashboard/Pages/ManageUserItem";
 
 const ManageUsers = () => {
   return (

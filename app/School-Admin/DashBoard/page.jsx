@@ -1,11 +1,9 @@
-"use client";
-import { UserProvider } from "../../context/UserProvider";
-
 import React, { Suspense } from "react";
 import styles from "../../css/layout.module.css";
-import Attendance from "../../Components/StudentDashBoard/Pages/AttendanceItem";
+import { UserProvider } from "@/context/UserProvider";
+import SchoolAdminDashBoard from "@/Components/SchoolAdminDashBoard/Pages/SchoolAdminDashBoard";
 
-const AttendanceItem = () => {
+const SuperAdminDashBoard = () => {
   return (
     <UserProvider>
       <Suspense
@@ -16,10 +14,10 @@ const AttendanceItem = () => {
           </div>
         }
       >
-        <Attendance />
+        <SchoolAdminDashBoard />
       </Suspense>
     </UserProvider>
   );
 };
 
-export default AttendanceItem;
+export default SuperAdminDashBoard;

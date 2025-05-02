@@ -1,8 +1,8 @@
-import { UserProvider } from "../../context/UserProvider";
+import { UserProvider } from "../../../context/UserProvider";
 
 import React, { Suspense } from "react";
 import styles from "../../../css/layout.module.css";
-import MakePaymentItem from "@/app/Components/StudentDashBoard/Pages/MakePayment";
+import MakePaymentItem from "../../../Components/StudentDashBoard/Pages/MakePayment";
 
 const MakePayment = () => {
   return (
