@@ -1,9 +1,8 @@
 "use client";
 import React, { Suspense, useEffect, useState } from "react";
-import LeftSidebar from "./TeacherDashBoard/leftsidebar";
+import LeftSidebar from "../Components/TeacherDashBoard/LeftSideBar";
 import { usePathname, useRouter } from "next/navigation";
-import RightSidebar from "./TeacherDashBoard/RightSideBar";
-import BottomNavBar from "./StudentDashBoard/BottomNavbar";
+import BottomNavBar from "../Components/TeacherDashBoard/BottomNavbar";
 import {
   clearAuthToken,
   getAuthToken,
@@ -81,20 +80,23 @@ const Layout = ({ children }) => {
     );
   }
 
-  const isDashboard = pathName === "/Teacher"; 
+  const isDashboard = pathName === "/Teacher";
 
   return (
     <>
-      <div className="w-full h-screen grid grid-cols-1 xl:grid-cols-[180px_1fr_260px] lg:grid-cols-[160px_1fr_230px] overflow-hidden bg-gray-100">
+      <div className="w-full h-screen flex flex-row bg-gray-100">
+        {/* Left Sidebar */}
         <div className="hidden lg:block">
           <Suspense>
-            <LeftSidebar setUser={setUser} user={user} />
+            <LeftSidebar setUser={setUser} user={user}/>
           </Suspense>
         </div>
 
-        <div className="grid grid-rows-[auto_1fr] overflow-hidden h-full">
+        {/* Main Content */}
+        <div className="w-[80%] grid grid-rows-[auto_1fr] overflow-hidden h-full">
+          {/* Header */}
           <div className="bg-white sticky top-0 z-10 p-3 pb-1.5 flex items-center justify-between lg:rounded-t-lg">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center">
               {!isDashboard && (
                 <button onClick={() => router.back()} className="lg:hidden">
                   <BiChevronLeft size={24} className="text-gray-700" />
@@ -112,31 +114,32 @@ const Layout = ({ children }) => {
             </div>
             {user?.profilePicture ? (
               <div className="rounded-full w-8 h-8 overflow-hidden lg:hidden">
-              <img
-                src={
-                  user.student.profile_picture_path === null
-                    ? "/female.png"
-                    : user.student.profile_picture_path
-                }
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
+                <img
+                  src={
+                    user.student.profile_picture_path === null
+                      ? "/male_teacher.png"
+                      : user.student.profile_picture_path
+                  }
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
               </div>
             ) : (
               <div className="rounded-full bg-gray-300 w-8 h-8 flex items-center justify-center">
-                {user?.firstName?.charAt(0).toUpperCase()}{user?.lastName?.charAt(0).toUpperCase()}
+                {user?.firstName?.charAt(0).toUpperCase()}
+                {user?.lastName?.charAt(0).toUpperCase()}
               </div>
             )}
           </div>
+
+          {/* Content */}
           <div className="bg-white p-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-16 lg:pb-4 lg:rounded-b-lg">
             {children}
           </div>
         </div>
-        <div className="hidden lg:block bg-white  rounded-lg pr-4  overflow-hidden">
-          <RightSidebar user={user} />
-        </div>
       </div>
 
+      {/* Bottom Navbar */}
       <BottomNavBar setUser={setUser} user={user} />
     </>
   );

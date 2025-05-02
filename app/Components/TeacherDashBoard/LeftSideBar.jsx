@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React from "react";
 import {
   LayoutDashboard,
   Calendar,
@@ -7,7 +7,6 @@ import {
   ListChecks,
   TrendingUp,
   MessageCircle,
-  ChevronLeft,
 } from "lucide-react";
 
 import { useRouter, usePathname } from "next/navigation";
@@ -16,104 +15,81 @@ const sidebarItems = [
   {
     label: "Dashboard",
     icon: <LayoutDashboard className="w-4 h-4" />,
-    route: "/Teacher/dashboard",
+    route: "/Teacher/DashBoard",
   },
   {
     label: "Attendance",
     icon: <Calendar className="w-4 h-4" />,
-    route: "/Teacher/attendance",
+    route: "/Teacher/Attendance",
   },
   {
     label: "Academic Record",
     icon: <BookOpen className="w-4 h-4" />,
-    route: "/Teacher/record",
-  },
-  {
-    label: "Timetable",
-    icon: <ListChecks className="w-4 h-4" />,
-    route: "/Teacher/timetable",
+    route: "/Teacher/Record",
   },
   {
     label: "Performance Analysis",
     icon: <TrendingUp className="w-4 h-4" />,
-    route: "/Teacher/analysis",
+    route: "/Teacher/Analysis",
+  },
+  
+  {
+    label: "Timetable",
+    icon: <ListChecks className="w-4 h-4" />,
+    route: "/Teacher/Timetable",
   },
   {
     label: "Message",
     icon: <MessageCircle className="w-4 h-4" />,
-    route: "/Teacher/message",
+    route: "/Teacher/Message",
   },
 ];
 
+const SchoolName = "Foursquare Student Portal";
+
 const LeftSidebar = () => {
-  const [isCollapsed, setIsCollapsed] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  const toggleCollapse = () => {
-    setIsCollapsed(!isCollapsed);
-  };
-
   return (
-    <div
-      className={`
-        flex flex-col h-screen bg-white shadow-lg border-r border-gray-200 transition-all duration-300 ease-in-out
-        ${isCollapsed ? "w-20" : "w-[20%]"}`}
-    >
-      {/* Top section with logo and toggle */}
-      <div
-        className={
-          ("flex items-center p-4 border-b border-gray-200 transition-all duration-300",
-          isCollapsed ? "justify-center" : "justify-between")
-        }
-      >
-        {!isCollapsed && (
-          <img src="/logo.png" alt="Foursquare Logo" className="h-8" />
-        )}
-        <button
-          onClick={toggleCollapse}
-          className="text-gray-600 hover:text-blue-500"
-        >
-          <ChevronLeft
-            className={
-              ("w-5 h-5 transition-transform duration-300",
-              isCollapsed ? "rotate-180" : "rotate-0")
-            }
-          />
-        </button>
+    <div className="flex flex-col h-screen w-[15%] bg-white shadow-lg border-r border-gray-200 overflow-y-hidden">
+      {/* Top section with logo */}
+      <div className="flex items-center justify-center p-5 flex-col text-white">
+        <img src="/logo.svg" alt="Foursquare Logo" className="h-16 w-16" />
+        <h2 className="text-[#004080] text-xl font-semibold text-center p-2">
+          {SchoolName}
+        </h2>
       </div>
 
       {/* Navigation Links */}
-      <div className="flex-1 overflow-y-auto">
+      <div className="flex-1">
         <nav className="flex flex-col space-y-2 p-2">
           {sidebarItems.map((item) => (
             <button
               key={item.label}
               onClick={() => router.push(item.route)}
-              className={
-                ("flex items-center gap-2 w-full h-12 px-4 py-3 text-gray-700 hover:bg-gray-100 hover:text-blue-600 transition-colors duration-200 rounded-md font-medium",
-                isCollapsed ? "justify-center" : "justify-start",
-                pathname === item.route ? "bg-blue-100 text-blue-700" : "")
-              }
+              className={`flex items-center gap-2 w-full h-12 px-4 py-3 transition-colors duration-200 rounded-lg font-medium ${
+                pathname === item.route
+                  ? "bg-[#f6faff] text-[#004080]" 
+                  : "text-[#004080] hover:bg-[#f6faff]"
+              }`}
             >
               <span>{item.icon}</span>
-              {!isCollapsed && <span>{item.label}</span>}
+              <span className="text-left">{item.label}</span>
             </button>
           ))}
         </nav>
       </div>
 
       {/* Bottom Section */}
-      {!isCollapsed && (
-        <div className="p-4 border-t border-gray-200 text-center">
-          <p className="text-xs text-gray-500">Powered by:</p>
-          <img
-            src="/AlgorithmX.png"
-            alt="AlgorithmX Logo"
-            className="h-6 mx-auto mt-1"
-          />
-        </div>
-      )}
+      <div className="p-4 text-center">
+        <p className="text-xs text-gray-500">Powered by:</p>
+        <img
+          src="/AlgorithmX.png"
+          alt="AlgorithmX Logo"
+          className="h-8 mx-auto mt-1"
+        />
+      </div>
     </div>
   );
 };
