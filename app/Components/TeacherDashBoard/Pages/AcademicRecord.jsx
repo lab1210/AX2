@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { PenLine } from "lucide-react";
+import { PenLine, Search } from "lucide-react";
 import Layout from "../../Teacherlayout";
 import RightSidebar from "../RightSideBar";
 
@@ -25,15 +25,17 @@ const AcademicRecord = () => {
                 placeholder="Search student name"
                 className="border border-gray-300 rounded-full px-6 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
-              <span className="absolute right-3 top-2.5 text-gray-400">🔍</span>
+              <span className="absolute right-3 top-3 text-gray-400">
+                <Search className="w-5 h-5" />
+              </span>
             </div>
-            <button className="bg-[#07508F] text-white px-6 py-3 rounded">
+            <button className="bg-[#07508F] text-white px-6 py-3 rounded-md">
               Upload CSV File
             </button>
           </div>
         </div>
 
-        <div className="flex flex-row gap-4">
+        <div className="flex flex-row gap-8">
           {/* Main Content */}
           <div className="flex-1 p-4">
             {/* Tabs Section */}
@@ -71,65 +73,65 @@ const AcademicRecord = () => {
                         Add New Record
                       </h3>
                       <div className="flex justify-end">
-                        <button className="bg-[#07508F] text-white px-6 py-3 rounded cursor-pointer">
+                        <button className="bg-[#07508F] text-white px-6 py-3 rounded-md cursor-pointer">
                           Save
                         </button>
                       </div>
                     </div>
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-                      <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                      <div className="flex flex-row max-w-md items-center space-x-2">
                         <label className="block text-sm font-medium mb-1">
                           Select Year:
                         </label>
-                        <select className="border border-gray-300 rounded px-4 py-3 max-w-md bg-gray-200">
+                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
                           <option>2023</option>
                           <option>2024</option>
                         </select>
                       </div>
-                      <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                      <div className="flex flex-row max-w-md items-center space-x-2">
                         <label className="block text-sm font-medium mb-1">
                           Select Term:
                         </label>
-                        <select className="border border-gray-300 rounded px-4 py-3 max-w-md bg-gray-200">
+                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
                           <option>1st Term</option>
                           <option>2nd Term</option>
                           <option>3rd Term</option>
                         </select>
                       </div>
-                      <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                      <div className="flex flex-row max-w-md items-center space-x-2">
                         <label className="block text-sm font-medium mb-1">
                           Select Class ID:
                         </label>
-                        <select className="border border-gray-300 rounded px-4 py-3 max-w-md bg-gray-200">
+                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
                           <option>JSS1</option>
                           <option>JSS2</option>
                           <option>JSS3</option>
                         </select>
                       </div>
-                      <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                      <div className="flex flex-row max-w-md items-center space-x-2">
                         <label className="block text-sm font-medium mb-1">
                           Select Subject ID:
                         </label>
-                        <select className="border border-gray-300 rounded px-4 py-3 max-w-md bg-gray-200">
+                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
                           <option>Maths</option>
                           <option>English</option>
                           <option>Science</option>
                         </select>
                       </div>
-                      <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                      <div className="flex flex-row max-w-sm items-center space-x-2">
                         <label className="block text-sm font-medium mb-1">
                           Select Category:
                         </label>
-                        <select className="border border-gray-300 rounded px-4 py-3 max-w-md bg-gray-200">
+                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
                           <option>Test</option>
                           <option>Assignment</option>
                         </select>
                       </div>
-                      <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                      <div className="flex flex-row max-w-md items-center space-x-2">
                         <label className="block text-sm font-medium mb-1">
                           Select Instances:
                         </label>
-                        <select className="border border-gray-300 rounded px-4 py-3 max-w-md bg-gray-200">
+                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
                           <option>1-50</option>
                           <option>51-100</option>
                         </select>
@@ -145,16 +147,16 @@ const AcademicRecord = () => {
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="bg-[#6B90B5] text-white">
-                          <th className="border-b border-gray-300 px-4 py-3 text-left">
+                          <th className="border-b border-gray-300 px-4 py-3 text-center">
                             S/N
                           </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-left">
+                          <th className="border-b border-gray-300 px-4 py-3 text-center">
                             Student Name
                           </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-left">
+                          <th className="border-b border-gray-300 px-4 py-3 text-center">
                             Student ID
                           </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-left">
+                          <th className="border-b border-gray-300 px-4 py-3 text-center">
                             Score
                           </th>
                           <th className="border-b border-gray-300 px-4 py-3 text-left">
@@ -165,20 +167,20 @@ const AcademicRecord = () => {
                       <tbody>
                         {students.map((student, index) => (
                           <tr key={index}>
-                            <td className="border-b border-gray-300 px-4 py-3">
+                            <td className="border-b border-gray-300 px-4 py-3 text-center">
                               {index + 1}
                             </td>
-                            <td className="border-b border-gray-300 px-4 py-3">
+                            <td className="border-b border-gray-300 px-4 py-3 text-center">
                               {student.name}
                             </td>
-                            <td className="border-b border-gray-300 px-4 py-3">
+                            <td className="border-b border-gray-300 px-4 py-3 text-center">
                               {student.id}
                             </td>
-                            <td className="border-b border-gray-300 px-4 py-3">
+                            <td className="border-b border-gray-300 px-4 py-3 text-center">
                               {student.score}
                             </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              <PenLine className="text-[#80ADCB]" />
+                            <td className="border-b border-gray-300 px-4 py-3 text-left cursor-pointer">
+                              <PenLine className="text-[#80ADCB] w-5 h-5" />
                             </td>
                           </tr>
                         ))}
@@ -190,58 +192,57 @@ const AcademicRecord = () => {
             )}
 
             {activeTab === "exam" && (
-              <div className="grid grid-rows-3 lg:flex-row gap-6">
+              <div className="h-screen grid grid-rows-3 lg:flex-row gap-6">
                 {/* Left Section */}
                 <div className="flex-1">
-                  {/* Uploaded Exam Record Table */}
                   <div className="bg-white rounded-lg shadow p-4">
                     <div className="bg-white rounded-lg">
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg text[#07508F] font-semibold mb-4">
+                        <h3 className="text-lg text-[#07508F] font-semibold mb-4">
                           Add New Record
                         </h3>
                         <div className="flex justify-end">
-                          <button className="bg-[#07508F] text-white px-6 py-2 rounded">
+                          <button className="bg-[#07508F] text-white px-6 py-2 rounded-md cursor-pointer">
                             Save
                           </button>
                         </div>
                       </div>
                       <div className="flex flex-row justify-between">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
-                          <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                          <div className="flex flex-row max-w-md items-center space-x-2">
                             <label className="block text-sm font-medium mb-1">
                               Select Year:
                             </label>
-                            <select className="border border-gray-300 rounded px-4 py-2 max-w-md bg-gray-200">
+                            <select className="border border-gray-300 rounded-md px-4 py-2 max-w-md bg-gray-200">
                               <option>2023</option>
                               <option>2024</option>
                             </select>
                           </div>
-                          <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                          <div className="flex flex-row max-w-md items-center space-x-2">
                             <label className="block text-sm font-medium mb-1">
                               Select Term:
                             </label>
-                            <select className="border border-gray-300 rounded px-4 py-2 max-w-md bg-gray-200">
+                            <select className="border border-gray-300 rounded-md px-4 py-2 max-w-md bg-gray-200">
                               <option>1st Term</option>
                               <option>2nd Term</option>
                               <option>3rd Term</option>
                             </select>
                           </div>
-                          <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                          <div className="flex flex-row max-w-md items-center space-x-2">
                             <label className="block text-sm font-medium mb-1">
                               Select Class ID:
                             </label>
-                            <select className="border border-gray-300 rounded px-4 py-2 max-w-md bg-gray-200">
+                            <select className="border border-gray-300 rounded-md px-4 py-2 max-w-md bg-gray-200">
                               <option>JSS1</option>
                               <option>JSS2</option>
                               <option>JSS3</option>
                             </select>
                           </div>
-                          <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                          <div className="flex flex-row max-w-md items-center space-x-2">
                             <label className="block text-sm font-medium mb-1">
                               Select Subject ID:
                             </label>
-                            <select className="border border-gray-300 rounded px-4 py-2 max-w-md bg-gray-200">
+                            <select className="border border-gray-300 rounded-md px-4 py-2 max-w-md bg-gray-200">
                               <option>Maths</option>
                               <option>English</option>
                               <option>Science</option>
@@ -253,7 +254,7 @@ const AcademicRecord = () => {
                             Score:
                           </label>
                           <input
-                            type="text"
+                            type="number"
                             placeholder="Enter Score"
                             className="border border-gray-400 rounded-full px-4 py-2 max-w-md"
                           />
@@ -267,19 +268,19 @@ const AcademicRecord = () => {
                       Foursquare International Secondary School <br />
                       Uploaded Exam Record
                     </h3>
-                    <table className="w-full border-collapse">
+                    <table className="w-full border-collapse mx-auto">
                       <thead>
                         <tr className="bg-[#6B90B5] text-white">
-                          <th className="border-b border-gray-300 px-4 py-2 text-left">
+                          <th className="border-b border-gray-300 px-4 py-2 text-center">
                             S/N
                           </th>
-                          <th className="border-b border-gray-300 px-4 py-2 text-left">
+                          <th className="border-b border-gray-300 px-4 py-2 text-center">
                             Student Name
                           </th>
-                          <th className="border-b border-gray-300 px-4 py-2 text-left">
+                          <th className="border-b border-gray-300 px-4 py-2 text-center">
                             Student ID
                           </th>
-                          <th className="border-b border-gray-300 px-4 py-2 text-left">
+                          <th className="border-b border-gray-300 px-4 py-2 text-center">
                             Score
                           </th>
                           <th className="border-b border-gray-300 px-4 py-2 text-left">
@@ -290,20 +291,20 @@ const AcademicRecord = () => {
                       <tbody>
                         {students.map((student, index) => (
                           <tr key={index}>
-                            <td className="border-b border-gray-300 px-4 py-2">
+                            <td className="border-b border-gray-300 px-4 py-2 text-center">
                               {index + 1}
                             </td>
-                            <td className="border-b border-gray-300 px-4 py-2">
+                            <td className="border-b border-gray-300 px-4 py-2 text-center font-semibold">
                               {student.name}
                             </td>
-                            <td className="border-b border-gray-300 px-4 py-2">
+                            <td className="border-b border-gray-300 px-4 py-2 text-center">
                               {student.id}
                             </td>
-                            <td className="border-b border-gray-300 px-4 py-2">
+                            <td className="border-b border-gray-300 px-4 py-2 text-center">
                               {student.score}
                             </td>
-                            <td className="border-b border-gray-300 px-4 py-2 text-center">
-                              <PenLine className="text-[#80ADCB]" />
+                            <td className="border-b border-gray-300 px-4 py-2 text-center mx-auto cursor-pointer">
+                              <PenLine className="text-[#80ADCB] w-5 h-5 text-center" />
                             </td>
                           </tr>
                         ))}

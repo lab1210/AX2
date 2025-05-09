@@ -109,9 +109,7 @@ const AttendancePage = () => {
   return (
     <Layout>
       <div className="flex min-h-screen bg-[#F7F8FA]">
-        {/* Main Content */}
         <div className="flex-1 flex flex-col">
-          {/* Header Section */}
           <div className="flex items-center justify-between bg-white p-4 shadow w-full z-10">
             {renderHeaderContent()}
           </div>
@@ -119,7 +117,6 @@ const AttendancePage = () => {
           {/* Content Section */}
           <div className="flex flex-1 p-6">
             <div className="flex-1 flex flex-col bg-white rounded-lg shadow p-4">
-              {/* Tab Navigation Inside Content */}
               <div className="flex items-center border-b border-gray-200 mb-4 space-x-8">
                 <button
                   className={`px-4 py-1 ${

@@ -23,7 +23,7 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const RightSidebar = () => {
   return (
-    <div className="w-[25%] mt-3 p-3 h-auto">
+    <div className="w-[25%] min-h-screen sticky top-0 p-2">
       <div className="mb-6 bg-white rounded-lg shadow-xl p-5">
         <div className="flex items-center gap-2 text-red-500 font-semibold mb-2">
           <span>Notice</span>
