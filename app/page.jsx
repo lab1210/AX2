@@ -136,14 +136,14 @@ export default function Login() {
                   </button>
                 </div>
               </form>
-              <p className="text-xs text-black/20 font-bold text-center">
+              <p className="text-xs text-black/20 font-bold">
                 Don't have an account?{" "}
-                <Link
-                  href="/Register"
-                  className="text-[#f47458] hover:underline"
+                <span
+                  onClick={() => router.push("/Register")}
+                  className="text-[#F47458] cursor-pointer hover:underline"
                 >
                   Register now
-                </Link>
+                </span>
               </p>
             </div>
           </div>

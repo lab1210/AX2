@@ -28,12 +28,19 @@ const GetToken = ({ token }) => {
             Copy Token to Proceed
           </p>
           <div className="flex justify-between text-base text-[rgba(0,0,0,0.5)]">
-            <p>{token}</p>
-            <LuCopy size={20} onClick={handleCopyToken} className="cursor-pointer" />
+            <p className="truncate max-w-[300px]">{token}</p>
+            <LuCopy
+              size={20}
+              onClick={handleCopyToken}
+              className="cursor-pointer"
+            />
           </div>
         </div>
         <Link href="/Register/Role">
-          <button className="w-full bg-[rgba(27,182,110,1)] rounded border-0 text-white font-bold py-2.5 px-4 mt-10 text-[18px] hover:bg-[rgba(27,182,110,0.8)] hover:text-[rgba(255,255,255,0.9)] hover:scale-105 transition-all duration-300 ease-in-out">
+          <button
+            onClick={() => localStorage.setItem("verificationToken", token)}
+            className="w-full bg-[rgba(27,182,110,1)] rounded border-0 text-white font-bold py-2.5 px-4 mt-10 text-[18px] hover:bg-[rgba(27,182,110,0.8)] hover:text-[rgba(255,255,255,0.9)] hover:scale-105 transition-all duration-300 ease-in-out"
+          >
             Next
           </button>
         </Link>

@@ -4,12 +4,11 @@ import Link from "next/link";
 import { PiEyeLight } from "react-icons/pi";
 import { IoEyeOffOutline, IoChevronBackSharp } from "react-icons/io5";
 import { useRouter } from "next/navigation";
-import dummy from "../Components/dummy";
 import LeftAuth from "../Components/LeftAuth";
 import Modal from "react-modal";
 import useModalStyles from "../Components/testModal";
 import Get_token from "../Components/get-token";
-
+import { verifyOtp } from "../Service/RegisterService";
 Modal.setAppElement(".app");
 const Register = () => {
   const router = useRouter();
@@ -28,77 +27,41 @@ const Register = () => {
     setShowPassword(!showPassword);
   };
 
-  //Handle Form Submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     setSchooliderror("");
     setPinerror("");
 
-    let valid = true;
-    if (!schoolid) {
-      setSchooliderror("School ID is required");
-      valid = false;
-    }
-
-    if (!Pin) {
-      setPinerror("Pin is required");
-      valid = false;
-    }
-
-    if (!valid) {
+    if (!schoolid || !Pin) {
+      if (!schoolid) setSchooliderror("School ID is required");
+      if (!Pin) setPinerror("Pin is required");
       return;
     }
-    // try {
-    //   const response = await fetch("/api/login", {
-    //     method: "POST",
-    //     headers: { "content-type": "application/json" },
-    //     body: JSON.stringify({ schoolid, Pin }),
-    //   });
-    //   if (!response.ok) {
-    //     const errorData = await response.json();
-    //     if (errorData.error === "School ID does not exist") {
-    //       setSchooliderror(errorData.message);
-    //     } else if (errorData.error === "Invalid Pin or used OTP") {
-    //       setPinerror(errorData.message);
-    //     } else {
-    //       throw new Error("Something went wrong");
-    //     }
-    //   } else {
-    //     const data = await response.json();
-    //     // Handle successful registration
-    //     console.log("Registration successful", data);
-    //     // Use Next.js router to navigate
-    //     router.push("/Register/get-token");
-    //   }
-    // } catch (error) {
-    //   setPinerror(error.message);
-    //   setSchooliderror(error.message);
-    // }
 
-    const schoolIdExists = dummy.some(
-      (user) => user.schoolid.toUpperCase() === schoolid.toUpperCase()
-    );
+    try {
+      const result = await verifyOtp(Pin, schoolid);
 
-    if (schoolIdExists) {
-      setSchooliderror("School ID already Registered..");
-      return;
+      // Save user and temp token
+      localStorage.setItem("user", JSON.stringify({ schoolid, pin: Pin }));
+      setToken(result.temp_token); // This opens the modal
+      console.log(token);
+      openModal();
+      setSchoolid("");
+      setPin("");
+    } catch (error) {
+      const errorMsg = error.response?.data?.detail || error.message;
+
+      if (errorMsg.toLowerCase().includes("school")) {
+        setSchooliderror(errorMsg);
+      } else if (
+        errorMsg.toLowerCase().includes("otp") ||
+        errorMsg.toLowerCase().includes("pin")
+      ) {
+        setPinerror(errorMsg);
+      } else {
+        alert("Verification failed: " + errorMsg);
+      }
     }
-    const newUser = {
-      schoolid,
-      Pin,
-    };
-    console.log("Registration data to be sent to server:", newUser); // For demonstration
-    console.log("Registration Successful (Dummy Data):", newUser); // For demonstration
-    localStorage.setItem("user", JSON.stringify(newUser));
-
-    // Generate or fetch the token here (dummy for now)
-    const generatedToken = "6583-0251-4789-3560"; // Replace with your token generation logic
-    setToken(generatedToken); // Set the token in state
-
-    openModal();
-
-    setSchoolid("");
-    setPin("");
   };
 
   return (
@@ -124,7 +87,7 @@ const Register = () => {
             <div className="w-[300px]">
               <div className="text-center mb-8">
                 <h1 className="text-[45px] font-bold mb-2">Register Now</h1>
-                <p className="text-black/50 font-bold">
+                <p className="text-black/50 font-bold text-xs">
                   Kindly provide the requested information to register.
                 </p>
               </div>
@@ -190,11 +153,14 @@ const Register = () => {
                   </button>
                 </div>
               </form>
-              <p className="text-xs text-black/20 font-bold text-center mt-4">
+              <p className="text-xs text-black/20 font-bold  mt-4">
                 Already Registered?{" "}
-                <Link href={"/"} className="text-[#f47458] hover:underline">
+                <span
+                  onClick={() => router.push("/")}
+                  className="text-[#f47458] hover:underline cursor-pointer"
+                >
                   Log In here
-                </Link>
+                </span>
               </p>
             </div>
           </div>
@@ -284,10 +250,10 @@ const Register = () => {
 
           <div className="flex flex-row gap-1">
             <p className="text-left text-xs text-black md:text-sm">
-             Already Registered?{" "}
+              Already Registered?{" "}
             </p>
             <p className="text-[#01427a] text-xs md:text-sm">
-            <Link href={"/"}>Log In here</Link>
+              <Link href={"/"}>Log In here</Link>
             </p>
           </div>
         </form>

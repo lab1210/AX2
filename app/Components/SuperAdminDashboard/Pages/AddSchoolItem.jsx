@@ -11,10 +11,11 @@ import {
   createSchoolSubscription,
 } from "../../../Service/schoolService"; // Ensure this path is correct
 import Dropdown from "../../../Components/Dropdown";
+import { getUserDetails } from "@/Service/AuthService";
 const AddSchoolItem = () => {
   const searchParams = useSearchParams();
   const adminId = searchParams.get("adminId");
-
+  const username = getUserDetails();
   const [schoolName, setSchoolName] = useState("");
   const [shortName, setShortName] = useState("");
   const [schoolType, setSchoolType] = useState("");
@@ -97,6 +98,11 @@ const AddSchoolItem = () => {
     const formData = new FormData();
     formData.append("school_name", schoolName);
     formData.append("short_name", shortName);
+    formData.append("registered_by", {
+      id: username.id,
+      surname: username.super_admin.surname,
+      first_name: username.super_admin.first_name,
+    }); // Use the username from getUserDetails
     formData.append("school_type", schoolType);
     formData.append("education_level", educationLevel);
     formData.append("phone_number", phoneNumber);
@@ -104,6 +110,7 @@ const AddSchoolItem = () => {
     formData.append("country", selectedCountry.name);
     formData.append("state", selectedState.name);
     formData.append("city", selectedCity.name);
+    formData.append("status", "Active");
     formData.append("region", "South West"); // Adjust as needed
     if (schoolLogo) {
       formData.append("logo", schoolLogo); // Logo is correctly appended as File object

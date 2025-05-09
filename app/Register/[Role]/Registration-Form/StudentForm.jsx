@@ -1,0 +1,718 @@
+"use client";
+import RegDropdown from "@/Components/Regdropdown";
+import Link from "next/link";
+import React, { useEffect, useState } from "react";
+import { IoIosCloseCircleOutline } from "react-icons/io";
+import { Country, State, City } from "country-state-city";
+
+const StudentForm = () => {
+  const [token, setToken] = useState("");
+  const [error, setErrors] = useState({});
+  const [expectedToken, setExpectedToken] = useState(null);
+  const [selectedCountry, setSelectedCountry] = useState(null);
+  const [selectedState, setSelectedState] = useState(null);
+  const [selectedCity, setSelectedCity] = useState(null);
+
+  const [formData, setFormData] = useState({
+    admission_number: "",
+    first_name: "",
+    last_name: "",
+    middle_name: "",
+    date_of_birth: "",
+    gender: "",
+    address: "default",
+    city: "",
+    state: "",
+    country: "",
+    region: "SouthWest",
+    admission_date: "",
+    status: "",
+    parent_first_name: "",
+    parent_last_name: "",
+    parent_middle_name: "",
+    parent_occupation: "",
+    parent_contact_info: "",
+    parent_emergency_contact: "",
+    parent_relationship: "",
+    class_year: "",
+    class_arm: "",
+  });
+
+  const [studentData, setStudentData] = useState([]);
+
+  // Retrieve the token from localStorage when the component mounts
+  useEffect(() => {
+    const storedToken = localStorage.getItem("verificationToken");
+    console.log("Stored Token:", storedToken);
+    if (storedToken) {
+      setExpectedToken(storedToken);
+    }
+  }, []);
+
+  const handleTokenChange = (e) => {
+    const enteredToken = e.target.value;
+    setToken(enteredToken);
+    console.log("Entered Token:", enteredToken);
+
+    // Validate the token
+    if (enteredToken.trim() === expectedToken) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        token: "", // Clear any token-related error
+      }));
+    } else {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        token: "Token does not match.", // Set the error if token doesn't match
+      }));
+    }
+  };
+  const genderOptions = [
+    { label: "Male", value: "Male" },
+    { label: "Female", value: "Female" },
+    { label: "Other", value: "Other" },
+  ];
+  const ClassYearOptions = [
+    { label: "2021", value: "2021" },
+    { label: "2022", value: "2022" },
+    { label: "2023", value: "2023" },
+  ];
+  const ClassArmOptions = [
+    { label: "A", value: "A" },
+    { label: "B", value: "B" },
+    { label: "C", value: "C" },
+  ];
+  const RelationshipOptions = [
+    { label: "Father", value: "Father" },
+    { label: "Mother", value: "Mother" },
+    { label: "Guardian", value: "Guardian" },
+  ];
+
+  const countries = Country.getAllCountries();
+  const states = selectedCountry
+    ? State.getStatesOfCountry(selectedCountry.isoCode)
+    : [];
+  const cities = selectedState
+    ? City.getCitiesOfState(selectedState.countryCode, selectedState.isoCode)
+    : [];
+
+  const handleCountryChange = (selected) => {
+    setSelectedCountry(selected);
+    setSelectedState(null);
+    setSelectedCity(null);
+  };
+
+  const handleStateChange = (selected) => {
+    setSelectedState(selected);
+    setSelectedCity(null);
+  };
+
+  const handleCityChange = (selected) => {
+    setSelectedCity(selected);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => {
+      return { ...prevData, [name]: value };
+    });
+  };
+
+  return (
+    <form className="bg-white max-w-full  flex flex-col ">
+      <div className="bg-[#01427a] w-full left-0 fixed top-0 z-[1000] text-white flex justify-between items-center px-8 py-5 font-bold">
+        <h2 className="text-2xl">Student Registration</h2>
+        <Link href={"/Register/Role"}>
+          <IoIosCloseCircleOutline className="size-6 cursor-pointer" />
+        </Link>
+      </div>
+      <div className="w-full mt-15">
+        {/* Token Component */}
+        <div className="hidden lg:block px-8 py-3">
+          <div className="text-[#01427a] text-xl font-bold mb-4 mt-6">
+            <h1>Verified Token</h1>
+          </div>
+          <div className="grid grid-cols-3 gap-4 w-full">
+            <div>
+              <label
+                className="text-gray-500 font-bold text-sm block mb-1"
+                htmlFor="Token"
+              >
+                Token
+              </label>
+              <input
+                className="w-full p-2 rounded border-2 border-neutral-300 bg-white text-gray-500 text-sm placeholder:text-[#0b0a0a33] outline-none"
+                type="text"
+                value={token}
+                placeholder="Enter Copied Token"
+                onChange={handleTokenChange}
+                required
+              />
+              {error.token && (
+                <p className="text-[#f2645c] text-sm mt-1">{error.token}</p>
+              )}
+            </div>
+            <div></div>
+            <div></div>
+          </div>
+        </div>
+
+        {/* ─── Mobile/Tablet-only ─── */}
+        <div className="block lg:hidden px-8 py-3">
+          <div className="text-[#01427a] font-bold text-xl mb-4 mt-6">
+            <h1>Verified Token</h1>
+          </div>
+          <div className="grid grid-cols-1 gap-4 w-full">
+            <div>
+              <label
+                className="text-gray-500 font-bold text-sm block mb-1"
+                htmlFor="Token"
+              >
+                Token
+              </label>
+              <input
+                className="w-full px-5 py-2 rounded border-2 border-neutral-300 bg-white text-gray-500 text-sm placeholder:text-[#0b0a0a33] outline-none"
+                type="text"
+                value={token}
+                placeholder="Enter Copied Token"
+                onChange={handleTokenChange}
+                required
+              />
+              {error.token && (
+                <p className="text-[#f2645c] text-sm mt-1">{error.token}</p>
+              )}
+            </div>
+          </div>
+        </div>
+        <hr className="border-[#0000001a] -mx-8 my-0" />
+
+        {/*Personal Info Component*/}
+        <div className="w-full mb-5 px-8 py-2.5 ]">
+          <div className="font-bold text-blue-900 mb-4 text-xl mt-6 RegFormTitle">
+            <h1>Personal Information</h1>
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div>
+              <label
+                htmlFor={"first_name"}
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                First Name
+              </label>
+              <input
+                name={"first_name"}
+                type="text"
+                value={formData.first_name}
+                placeholder="Enter First Name"
+                required
+                onChange={handleInputChange}
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error.first_name && (
+                <p className="text-[#f2645c] text-sm mt-1">
+                  {error.first_name}
+                </p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor={"middle_name"}
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Middle Name
+              </label>
+              <input
+                name={"middle_name"}
+                type="text"
+                value={formData.middle_name}
+                placeholder="Enter Middle Name"
+                required
+                onChange={handleInputChange}
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error.middle_name && (
+                <p className="text-[#f2645c] text-sm mt-1">
+                  {error.middle_name}
+                </p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor={"last_name"}
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Last Name
+              </label>
+              <input
+                name={"last_name"}
+                type="text"
+                value={formData.last_name}
+                placeholder="Enter Last Name"
+                required
+                onChange={handleInputChange}
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error.last_name && (
+                <p className="text-[#f2645c] text-sm mt-1">{error.last_name}</p>
+              )}
+            </div>
+            <div className="lg:grid lg:grid-cols-2 lg:gap-6 flex flex-col gap-3">
+              <div>
+                <label
+                  htmlFor={"date_of_birth"}
+                  className="font-bold text-gray-500 text-sm block mb-1"
+                >
+                  DOB
+                </label>
+                <input
+                  name={"date_of_birth"}
+                  type="date"
+                  value={formData.date_of_birth}
+                  required
+                  onChange={handleInputChange}
+                  className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+                />
+                {error.date_of_birth && (
+                  <p className="text-[#f2645c] text-sm mt-1">
+                    {error.date_of_birth}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label
+                  htmlFor={"gender"}
+                  className="font-bold text-gray-500 text-sm block mb-1"
+                >
+                  Gender
+                </label>
+
+                <RegDropdown
+                  label={formData.gender || "Select Gender"}
+                  items={genderOptions}
+                  onSelect={(value) =>
+                    setFormData((prev) => ({ ...prev, gender: value }))
+                  }
+                />
+                {error?.gender && (
+                  <p className="text-[#f2645c] text-sm mt-1">{error.gender}</p>
+                )}
+              </div>
+            </div>
+            <div>
+              <label
+                htmlFor="country"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Address
+              </label>
+              <div className="lg:grid lg:grid-cols-2  lg:gap-2 flex flex-col gap-3">
+                <RegDropdown
+                  label={selectedCountry?.name || "Select Country"}
+                  items={countries.map((country) => ({
+                    label: country.name,
+                    value: country,
+                  }))}
+                  onSelect={(value) => handleCountryChange(value)}
+                />
+                <RegDropdown
+                  label={selectedState?.name || "Select State"}
+                  items={states.map((state) => ({
+                    label: state.name,
+                    value: state,
+                  }))}
+                  onSelect={(value) => handleStateChange(value)}
+                />
+                {(error?.country || error?.state) && (
+                  <p className="text-[#f2645c] text-sm mt-1">
+                    {error.country || error.state}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="lg:grid lg:grid-cols-2 gap-2 lg:mt-6">
+              <RegDropdown
+                label={selectedCity?.name || "Select City"}
+                items={cities.map((city) => ({
+                  label: city.name,
+                  value: city,
+                }))}
+                onSelect={(value) => handleCityChange(value)}
+              />
+              <div></div>
+            </div>
+          </div>
+        </div>
+        <hr className="border-[#0000001a] -mx-8 my-0" />
+
+        {/* Admission Info Component */}
+        <div className=" lg:w-full mb-5 px-8 py-2.5 ">
+          <div className="font-bold text-blue-900 mb-4 mt-6 text-xl">
+            <h1>Admission Information</h1>
+          </div>
+          <div className="w-full mb-3 lg:grid lg:grid-cols-2 gap-4 flex flex-col row-gap-10 personalInfoGridadmission">
+            <div>
+              <label
+                htmlFor="admissionNumber"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Admission Number
+              </label>
+              <input
+                type="text"
+                name="admission_number"
+                value={formData.admission_number}
+                placeholder="Enter Admission Number"
+                onChange={handleInputChange}
+                required
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error?.admission_number && (
+                <p className="text-red-500 text-xs mt-1">
+                  {error.admission_number}
+                </p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="admission_date"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Admission Date
+              </label>
+              <input
+                type="date"
+                name="admission_date"
+                value={formData.admission_date}
+                placeholder="Enter Admission date"
+                onChange={handleInputChange}
+                required
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error?.admission_date && (
+                <p className="text-red-500 text-xs mt-1">
+                  {error.admission_date}
+                </p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="classYear"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Class Year
+              </label>
+
+              <RegDropdown
+                label={formData.class_year || "Select Year"}
+                items={ClassYearOptions}
+                onSelect={(value) =>
+                  setFormData((prev) => ({ ...prev, class_year: value }))
+                }
+              />
+              {error?.class_year && (
+                <p className="text-red-500 text-xs mt-1">{error.class_year}</p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="classYear"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Class Arm
+              </label>
+
+              <RegDropdown
+                label={formData.class_arm || "Select Arm"}
+                items={ClassArmOptions}
+                onSelect={(value) =>
+                  setFormData((prev) => ({ ...prev, class_arm: value }))
+                }
+              />
+              {error?.class_arm && (
+                <p className="text-red-500 text-xs mt-1">{error.class_arm}</p>
+              )}
+            </div>
+          </div>
+          <div>
+            <label
+              htmlFor="Status"
+              className="font-bold text-gray-500 text-sm block mb-1"
+            >
+              Status
+            </label>
+
+            <button
+              className={`${
+                formData.status ? "bg-green-500" : "bg-red-500"
+              } px-14 py-2.5 font-bold text-xl text-white border-none outline-none rounded-md mb-2`}
+            >
+              {formData.status ? " Active" : "Deactivated"}
+            </button>
+          </div>
+        </div>
+        <hr className="border-[#0000001a] -mx-8 my-0" />
+
+        <div className="w-full mb-5 px-8 py-2.5 ">
+          <div className="font-bold text-xl text-blue-900 mb-4 mt-6 RegFormTitle">
+            <h1>Parent's Information</h1>
+          </div>
+          <div className="w-full grid grid-cols-1 gap-3 lg:grid lg:grid-cols-3 lg:gap-4 row-gap-10 ">
+            <div className="personalInfoItem">
+              <label
+                htmlFor="ParentfirstName"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Parent's First Name
+              </label>
+              <input
+                type="text"
+                name="parent_first_name"
+                value={formData.parent_first_name}
+                placeholder="Enter First Name"
+                onChange={handleInputChange}
+                required
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error?.parent_first_name && (
+                <p className="text-red-500 text-xs mt-1">
+                  {error.parent_first_name}
+                </p>
+              )}
+            </div>
+            <div className="personalInfoItem">
+              <label
+                htmlFor="ParentmiddleName"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Parent's Middle Name
+              </label>
+              <input
+                type="text"
+                name="parent_middle_name"
+                value={formData.parent_middle_name}
+                placeholder="Enter Middle Name"
+                onChange={handleInputChange}
+                required
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error?.parent_middle_name && (
+                <p className="text-red-500 text-xs mt-1">
+                  {error.parent_middle_name}
+                </p>
+              )}
+            </div>
+            <div className="personalInfoItem">
+              <label
+                htmlFor="ParentlastName"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Parent's Last Name
+              </label>
+              <input
+                type="text"
+                name="parent_last_name"
+                value={formData.parent_last_name}
+                placeholder="Enter Last Name"
+                onChange={handleInputChange}
+                required
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error?.parent_last_name && (
+                <p className="text-red-500 text-xs mt-1">
+                  {error.parent_last_name}
+                </p>
+              )}
+            </div>
+            <div className="personalInfoItem">
+              <label
+                htmlFor="Occupation"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Parent's Occupation
+              </label>
+              <input
+                type="text"
+                name="parent_occupation"
+                value={formData.parent_occupation}
+                placeholder="Enter  Occupation"
+                onChange={handleInputChange}
+                required
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error?.parent_occupation && (
+                <p className="text-red-500 text-xs mt-1">
+                  {error.parent_occupation}
+                </p>
+              )}
+            </div>
+            <div className="personalInfoItem">
+              <label
+                htmlFor="PhoneNumber"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Parent's Phone Number
+              </label>
+              <input
+                type="tel"
+                name="parent_contact_info"
+                value={formData.parent_contact_info}
+                placeholder="Enter Phone No"
+                onChange={handleInputChange}
+                required
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error?.parent_contact_info && (
+                <p className="text-red-500 text-xs mt-1">
+                  {error.parent_contact_info}
+                </p>
+              )}
+            </div>
+
+            <div className="personalInfoItem">
+              <label
+                htmlFor="Email"
+                className="font-bold text-gray-500 text-base block mb-1"
+              >
+                Parent's E-mail
+              </label>
+              <input
+                type="email"
+                name="parent_email"
+                value={formData.parent_email}
+                placeholder="Enter E-mail"
+                onChange={handleInputChange}
+                // required
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error?.parent_email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {error.parent_email}
+                </p>
+              )}
+            </div>
+
+            <div className="personalInfoItem">
+              <label
+                htmlFor="EmergencyContact"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Emergency Contact
+              </label>
+              <input
+                type="tel"
+                name="parent_emergency_contact"
+                value={formData.parent_emergency_contact}
+                placeholder="Enter Emergency Contact"
+                onChange={handleInputChange}
+                required
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error?.parent_emergency_contact && (
+                <p className="text-red-500 text-xs mt-1">
+                  {error.parent_emergency_contact}
+                </p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor="country"
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Address
+              </label>
+              <div className="lg:grid lg:grid-cols-2  lg:gap-2 flex flex-col gap-3">
+                <RegDropdown
+                  label={selectedCountry?.name || "Select Country"}
+                  items={countries.map((country) => ({
+                    label: country.name,
+                    value: country,
+                  }))}
+                  onSelect={(value) => handleCountryChange(value)}
+                />
+                <RegDropdown
+                  label={selectedState?.name || "Select State"}
+                  items={states.map((state) => ({
+                    label: state.name,
+                    value: state,
+                  }))}
+                  onSelect={(value) => handleStateChange(value)}
+                />
+                {(error?.country || error?.state) && (
+                  <p className="text-[#f2645c] text-sm mt-1">
+                    {error.country || error.state}
+                  </p>
+                )}
+              </div>
+            </div>
+            <div className="lg:grid lg:grid-cols-2 gap-2 lg:mt-6">
+              <RegDropdown
+                label={selectedCity?.name || "Select City"}
+                items={cities.map((city) => ({
+                  label: city.name,
+                  value: city,
+                }))}
+                onSelect={(value) => handleCityChange(value)}
+              />
+              <div></div>
+            </div>
+
+            <div>
+              <label
+                htmlFor={"gender"}
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Gender
+              </label>
+
+              <RegDropdown
+                label={formData.gender || "Select Gender"}
+                items={genderOptions}
+                onSelect={(value) =>
+                  setFormData((prev) => ({ ...prev, gender: value }))
+                }
+              />
+              {error?.gender && (
+                <p className="text-[#f2645c] text-sm mt-1">{error.gender}</p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor={"relationship"}
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Relationship
+              </label>
+
+              <RegDropdown
+                label={formData.parent_relationship || "Select Relationship"}
+                items={RelationshipOptions}
+                onSelect={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    parent_relationship: value,
+                  }))
+                }
+              />
+              {error?.parent_relationship && (
+                <p className="text-[#f2645c] text-sm mt-1">
+                  {error.parent_relationship}
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+      <div className="flex justify-end pr-4 pb-3 mt-20">
+        <button
+          type="submit"
+          className="bg-[#01427a] text-white text-base rounded px-8 py-4 cursor-pointer hover:bg-[#01427a]/90 transition-colors"
+        >
+          Next Page
+        </button>
+      </div>
+    </form>
+  );
+};
+
+export default StudentForm;
