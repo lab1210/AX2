@@ -5,7 +5,6 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 const data = [
   { name: "Present", value: 54 },
   { name: "Absent", value: 46 },
-  
 ];
 
 const COLORS = ["#01427A", "#4169E1"];
@@ -24,25 +23,36 @@ const CustomTooltip = ({ active, payload, label }) => {
 
 const RightSidebar = () => {
   return (
-    <div className="w-[20%] mt-3 p-2">
-      <div className="mb-6 bg-white rounded-lg shadow-xl p-4">
+    <div className="w-[25%] mt-3 p-3 h-auto">
+      <div className="mb-6 bg-white rounded-lg shadow-xl p-5">
         <div className="flex items-center gap-2 text-red-500 font-semibold mb-2">
           <span>Notice</span>
         </div>
         <ul className="list-disc list-inside space-y-1 text-sm">
-          <li>Attendance for 06/10/23 has not been uploaded and is past the due date</li>
-          <li>JSS 1A students offering English Language might not be eligible for exams</li>
-          <li>JSS 2B students offering Literature in English might not be eligible for exams</li>
+          <li>
+            Attendance for 06/10/23 has not been uploaded and is past the due
+            date
+          </li>
+          <li>
+            JSS 1A students offering English Language might not be eligible for
+            exams
+          </li>
+          <li>
+            JSS 2B students offering Literature in English might not be eligible
+            for exams
+          </li>
         </ul>
       </div>
 
       {/* Attendance Statistics Section */}
-      <div className="bg-white rounded-lg shadow-lg p-4">
+      <div className="bg-white rounded-lg shadow-lg p-5">
         <div className="p-4">
-        <div className="flex items-center justify-between text-gray-700 font-semibold border-b border-gray-300">
-          <span className="font-semibold">Attendance Statistics</span>
-          <span className="text-xs text-white font-bold bg-[#BDBDBD] rounded-full p-2 ">i</span>
-        </div>
+          <div className="flex items-center justify-between text-gray-700 font-semibold border-b border-gray-300">
+            <span className="font-semibold">Attendance Statistics</span>
+            <span className="text-xs text-white font-bold bg-[#BDBDBD] rounded-full p-2 ">
+              i
+            </span>
+          </div>
         </div>
         <ResponsiveContainer width="100%" height={200}>
           <PieChart>

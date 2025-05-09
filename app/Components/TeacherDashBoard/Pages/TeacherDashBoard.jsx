@@ -10,12 +10,13 @@ import {
   ResponsiveContainer,
   Cell,
 } from "recharts";
-import LeftSidebar from "../LeftSideBar";
+// import LeftSidebar from "../LeftSideBar";
 import { Calendar } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import TeachingProgress from "../TeachingProgress";
 import StatCard from "../StatCard";
 import BottomNavbar from "../BottomNavbar";
+import Layout from "../../Teacherlayout";
 
 export default function TeacherDashboard() {
   const [date, setDate] = useState(new Date());
@@ -61,193 +62,200 @@ export default function TeacherDashboard() {
 
   // Desktop View
   const DesktopView = () => (
-    <div className="flex min-h-screen">
-      <LeftSidebar />
-      <div className="bg-[#F7F8FA] w-full">
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between bg-white px-6 py-4">
-            <h1 className="text-3xl font-bold">Dashboard</h1>
-            <div className="flex items-center">
-              <button className="relative mr-4">
-                <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full" />
-                🔔
-              </button>
-              <div className="flex items-center space-x-2">
-                <img
-                  src="/female2.png"
-                  alt="Avatar"
-                  className="w-8 h-8 rounded-full"
-                />
-                <div>
-                  <p className="font-medium">Joshua Daniel</p>
-                  <p className="text-xs text-gray-500">Teacher</p>
+    <Layout>
+      <div className="flex min-h-screen">
+        <div className="bg-[#F7F8FA] w-full">
+          <div className="flex-1 flex flex-col">
+            {/* Header Section */}
+              <div className="flex items-center justify-between bg-white px-6 py-4">
+                <h1 className="text-3xl font-bold">Dashboard</h1>
+                <div className="flex items-center">
+                  <button className="relative mr-4">
+                    <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full" />
+                    🔔
+                  </button>
+                  <div className="flex items-center space-x-2">
+                    <img
+                      src="/female2.png"
+                      alt="Avatar"
+                      className="w-8 h-8 rounded-full"
+                    />
+                    <div>
+                      <p className="font-medium">Joshua Daniel</p>
+                      <p className="text-xs text-gray-500">Teacher</p>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
 
-          {/* Main Content */}
-          <div className="flex flex-1 p-6 gap-4 overflow-hidden">
-            {/* Left Section */}
-            <div className="flex-1 overflow-hidden">
-              <div className="bg-[#004080] text-white rounded-lg p-4 flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-2xl font-bold">Hi, Mr Joshua</h2>
-                  <p>Welcome to My Schoolight Portal.</p>
+            {/* Main Content */}
+            <div className="flex flex-1 p-6 gap-4 overflow-hidden">
+              {/* Left Section */}
+              <div className="flex-1 overflow-hidden">
+                <div className="bg-[#004080] text-white rounded-lg p-4 flex items-center justify-between mb-6">
+                  <div>
+                    <h2 className="text-2xl font-bold">Hi, Mr Joshua</h2>
+                    <p>Welcome to My Schoolight Portal.</p>
+                  </div>
+                  <img
+                    src="/male_teacher.png"
+                    alt="Teacher illustration"
+                    className="object-cover w-24 h-24"
+                  />
                 </div>
-                <img
-                  src="/male_teacher.png"
-                  alt="Teacher illustration"
-                  className="w-32 h-32"
-                />
-              </div>
 
-              {/* Quick Stats */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <StatCard
-                  label="Total Classes"
-                  value={10}
-                  icon="👥"
-                  percentage={0.5}
-                />
-                <StatCard
-                  label="Total Lessons"
-                  value={15}
-                  icon="💻"
-                  percentage={1.2}
-                />
-                <StatCard
-                  label="Total Assignments"
-                  value={8}
-                  icon="📝"
-                  percentage={0.8}
-                />
-              </div>
+                {/* Quick Stats */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                  <StatCard
+                    label="Total Classes"
+                    value={10}
+                    icon="👥"
+                    percentage={0.5}
+                  />
+                  <StatCard
+                    label="Total Lessons"
+                    value={15}
+                    icon="💻"
+                    percentage={1.2}
+                  />
+                  <StatCard
+                    label="Total Assignments"
+                    value={8}
+                    icon="📝"
+                    percentage={0.8}
+                  />
+                </div>
 
-              <div className="flex justify-between gap-3">
-                {/* Attendance Chart */}
-                <div className="flex flex-col mb-4 w-[70%] bg-white rounded-lg shadow-lg p-4">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-semibold">Attendance</h3>
+                <div className="flex justify-between gap-3">
+                  {/* Attendance Chart */}
+                  <div className="flex flex-col mb-4 w-[70%] bg-white rounded-lg shadow-lg p-4">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold">Attendance</h3>
+                    </div>
+
+                    {/* Bar Chart */}
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={attendanceData}>
+                        <XAxis dataKey="day" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar
+                          dataKey="present"
+                          name="Total Present"
+                          fill="#F16960"
+                        >
+                          {attendanceData.map((entry, index) => (
+                            <Cell key={`cell-present-${index}`} />
+                          ))}
+                        </Bar>
+                        <Bar
+                          dataKey="absent"
+                          name="Total Absent"
+                          fill="#065293"
+                        >
+                          {attendanceData.map((entry, index) => (
+                            <Cell key={`cell-absent-${index}`} />
+                          ))}
+                        </Bar>
+                      </BarChart>
+                    </ResponsiveContainer>
                   </div>
 
-                  {/* Bar Chart */}
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={attendanceData}>
-                      <XAxis dataKey="day" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar
-                        dataKey="present"
-                        name="Total Present"
-                        fill="#F16960"
-                      >
-                        {attendanceData.map((entry, index) => (
-                          <Cell key={`cell-present-${index}`} />
-                        ))}
-                      </Bar>
-                      <Bar dataKey="absent" name="Total Absent" fill="#065293">
-                        {attendanceData.map((entry, index) => (
-                          <Cell key={`cell-absent-${index}`} />
-                        ))}
-                      </Bar>
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-
-                {/* Teaching Progress */}
-                <div className="w-[30%] bg-white rounded-lg">
-                  <TeachingProgress />
+                  {/* Teaching Progress */}
+                  <div className="w-[30%] bg-white rounded-lg">
+                    <TeachingProgress />
+                  </div>
                 </div>
               </div>
-            </div>
 
-            {/* Right Sidebar */}
-            <div className="w-1/4 space-y-3">
-              {/* Calendar */}
-              <div className="bg-white rounded-lg shadow-lg border-none">
-                <Calendar
-                  onChange={setDate}
-                  value={date}
-                  className="rounded-lg w-full font-semibold"
-                />
-              </div>
-              {/* Events */}
-              <div className="bg-white rounded-lg shadow-lg p-4">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold">Events</h3>
-                  <button className="text-sm text-blue-600">View All</button>
+              {/* Right Sidebar */}
+              <div className="w-1/4 space-y-3">
+                {/* Calendar */}
+                <div className="bg-white rounded-lg shadow-lg border-none">
+                  <Calendar
+                    onChange={setDate}
+                    value={date}
+                    className="rounded-lg w-full font-semibold"
+                  />
                 </div>
-                <ul className="space-y-3">
-                  {events.map((e, idx) => {
-                    const bg =
-                      e.status === "due"
-                        ? "border rounded-lg border-[#5E5D5D] shadow-md"
-                        : e.status === "upcoming"
-                        ? "border rounded-lg border-[#5E5D5D] shadow-md"
-                        : "border rounded-lg border-[#5E5D5D] shadow-md";
+                {/* Events */}
+                <div className="bg-white rounded-lg shadow-lg p-4">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="text-lg font-semibold">Events</h3>
+                    <button className="text-sm text-blue-600">View All</button>
+                  </div>
+                  <ul className="space-y-3">
+                    {events.map((e, idx) => {
+                      const bg =
+                        e.status === "due"
+                          ? "border rounded-lg border-[#5E5D5D] shadow-md"
+                          : e.status === "upcoming"
+                          ? "border rounded-lg border-[#5E5D5D] shadow-md"
+                          : "border rounded-lg border-[#5E5D5D] shadow-md";
 
-                    const dateBgColor =
-                      e.status === "due"
-                        ? "bg-[#FF0004] text-white"
-                        : e.status === "today"
-                        ? "bg-[#6191B0] text-white"
-                        : e.status === "upcoming"
-                        ? "bg-[#F8961E] text-white"
-                        : "bg-gray-200 text-black";
-                    return (
-                      <li
-                        key={idx}
-                        className={`flex items-center p-3 rounded-lg ${bg}`}
-                      >
-                        <div
-                          className={`w-9 h-10 flex items-center justify-center font-bold text-lg rounded-md ${dateBgColor}`}
+                      const dateBgColor =
+                        e.status === "due"
+                          ? "bg-[#FF0004] text-white"
+                          : e.status === "today"
+                          ? "bg-[#6191B0] text-white"
+                          : e.status === "upcoming"
+                          ? "bg-[#F8961E] text-white"
+                          : "bg-gray-200 text-black";
+                      return (
+                        <li
+                          key={idx}
+                          className={`flex items-center p-3 rounded-lg ${bg}`}
                         >
-                          {e.date}
-                        </div>
-                        <div className="ml-3 flex-1">
-                          <p className="font-medium">{e.title}</p>
-                          <p className="text-xs text-gray-500">{e.subtitle}</p>
-                          <p className="text-sm text-black font-semibold">
-                            {e.time}
-                          </p>
-                        </div>
-                        {e.status === "due" && (
-                          <div className="flex flex-col items-end">
-                            <span className="w-2 h-2 bg-[#FF0004] rounded-full" />
-                            <p className="text-sm font-semibold text-[#FF0004]">
-                              Due Soon
+                          <div
+                            className={`w-9 h-10 flex items-center justify-center font-bold text-lg rounded-md ${dateBgColor}`}
+                          >
+                            {e.date}
+                          </div>
+                          <div className="ml-3 flex-1">
+                            <p className="font-medium">{e.title}</p>
+                            <p className="text-xs text-gray-500">
+                              {e.subtitle}
+                            </p>
+                            <p className="text-sm text-black font-semibold">
+                              {e.time}
                             </p>
                           </div>
-                        )}
-                        {e.status === "today" && (
-                          <div className="flex flex-col items-end">
-                            <span className="w-2 h-2 bg-[#80ADCB] rounded-full" />
-                            <p className="text-sm font-semibold text-[#80ADCB]">
-                              Today
-                            </p>
-                          </div>
-                        )}
-                        {e.status === "upcoming" && (
-                          <div className="flex flex-col items-end">
-                            <span className="w-2 h-2 bg-[#F8961E] rounded-full" />
-                            <p className="text-sm font-semibold text-[#F8961E]">
-                              Upcoming
-                            </p>
-                          </div>
-                        )}
-                      </li>
-                    );
-                  })}
-                </ul>
+                          {e.status === "due" && (
+                            <div className="flex flex-col items-end">
+                              <span className="w-2 h-2 bg-[#FF0004] rounded-full" />
+                              <p className="text-sm font-semibold text-[#FF0004]">
+                                Due Soon
+                              </p>
+                            </div>
+                          )}
+                          {e.status === "today" && (
+                            <div className="flex flex-col items-end">
+                              <span className="w-2 h-2 bg-[#80ADCB] rounded-full" />
+                              <p className="text-sm font-semibold text-[#80ADCB]">
+                                Today
+                              </p>
+                            </div>
+                          )}
+                          {e.status === "upcoming" && (
+                            <div className="flex flex-col items-end">
+                              <span className="w-2 h-2 bg-[#F8961E] rounded-full" />
+                              <p className="text-sm font-semibold text-[#F8961E]">
+                                Upcoming
+                              </p>
+                            </div>
+                          )}
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </Layout>
   );
 
   // Mobile/Tablet View
@@ -289,14 +297,25 @@ export default function TeacherDashboard() {
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-4 p-3 mb-4">
-        <StatCard label="Total Classes" value={10} icon="👥" percentage={0.5} className="bg-[#F94144] rounded-lg" />
-        <StatCard label="Total Lessons" value={15} icon="💻" percentage={1.2} className="bg-[#004080] rounded-lg" />
+        <StatCard
+          label="Total Classes"
+          value={10}
+          icon="👥"
+          percentage={0.5}
+          className="bg-[#F94144] rounded-lg"
+        />
+        <StatCard
+          label="Total Lessons"
+          value={15}
+          icon="💻"
+          percentage={1.2}
+          className="bg-[#004080] rounded-lg"
+        />
         <StatCard
           label="Total Assignments"
           value={8}
           icon="📝"
           percentage={0.8}
-          
         />
       </div>
 
