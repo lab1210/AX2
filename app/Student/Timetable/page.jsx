@@ -2,7 +2,7 @@
 import { UserProvider } from "../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../css/layout.module.css";
-import TimetableItem from "@/app/Components/StudentDashBoard/Pages/TimetableItem";
+import TimetableItem from "../../Components/StudentDashBoard/Pages/TimetableItem";
 
 const Timetable = () => {
   return (

@@ -1,5 +1,5 @@
-import { UserProvider } from "../../context/UserProvider";
-import ManageCompItem from "@/app/Components/SuperAdminDashboard/Pages/ManageCompItem";
+import { UserProvider } from "../../../context/UserProvider";
+import ManageCompItem from "../../../Components/SuperAdminDashboard/Pages/ManageCompItem";
 import React, { Suspense } from "react";
 import styles from "../../css/spinner.module.css";
 

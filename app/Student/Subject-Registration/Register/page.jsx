@@ -1,8 +1,8 @@
 "use client";
-import { UserProvider } from "../../context/UserProvider";
+import { UserProvider } from "../../../context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../../css/layout.module.css";
-import SubjectRegistration from "@/app/Components/StudentDashBoard/Pages/SubjectRegistrationItem";
+import SubjectRegistration from "../../../Components/StudentDashBoard/Pages/SubjectRegistrationItem";
 
 const SubjectRegistrationItem = () => {
   return (
