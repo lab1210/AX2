@@ -1,4 +1,5 @@
 import axios from "axios";
+import { useRouter } from "next/navigation";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 const token = "authToken";
@@ -101,6 +102,7 @@ export const refreshToken = async () => {
   if (!refreshToken) {
     console.error("No refresh token available");
     clearAuthToken();
+    window.location.href = "/"; // Redirect if in browser
     return null;
   }
 
@@ -108,47 +110,49 @@ export const refreshToken = async () => {
     const response = await axios.post(`${BASE_URL}/login/refresh/`, {
       refresh: refreshToken,
     });
-    const newAccessToken = response.data.access;
-    if (newAccessToken) {
-      localStorage.setItem(token, newAccessToken);
-      return newAccessToken;
-    } else {
-      console.error("Failed to refresh");
-      clearAuthToken();
-      return null;
+
+    if (response.data?.access) {
+      localStorage.setItem(token, response.data.access);
+      return response.data.access;
     }
+    throw new Error("No access token in response");
   } catch (error) {
-    console.error("Error Refreshing", error);
+    console.error("Refresh token error:", error);
     clearAuthToken();
+    window.location.href = "/"; // Redirect if in browser
     return null;
   }
 };
+
 export const logout = async () => {
   const refreshToken = getRefreshToken();
+  console.log("refreshToken", refreshToken);
+  const authToken = getAuthToken();
+  console.log("authToken", authToken);
 
-  if (!refreshToken) {
-    console.warn("No refreshToken available");
+  if (!refreshToken || !authToken) {
+    console.warn("Missing tokens");
     clearAuthToken();
     return;
   }
 
   try {
-    console.log("Logging out with refresh token:", refreshToken);
     await axios.post(
-      `${BASE_URL}/logout/`, // Correct URL for logout
-      { refresh_token: refreshToken }, // Send the refresh token in the body
+      `${BASE_URL}/logout/`,
+      { refresh_token: refreshToken }, // or { refresh: refreshToken } if your backend expects that
       {
         headers: {
           "Content-Type": "application/json",
-          ...createAuthHeaders(), // Add Bearer token in the headers
+          Authorization: `Bearer ${authToken}`, // ✅ Include auth header
         },
       }
     );
+
     clearAuthToken();
-    console.log("Logout Successful");
+    console.log("Logout successful");
   } catch (error) {
-    console.error("Logout error", error);
-    clearAuthToken();
+    console.error("Logout error:", error.response?.data || error.message);
+    clearAuthToken(); // Still clear tokens on error for safety
     throw error;
   }
 };

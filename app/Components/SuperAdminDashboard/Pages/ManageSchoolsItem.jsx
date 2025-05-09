@@ -75,9 +75,10 @@ const ManageSchoolsItem = () => {
       (school) =>
         school.school_name.toLowerCase().includes(lowerCaseSearchTerm) ||
         school.short_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-        school.school_type.toLowerCase().includes(lowerCaseSearchTerm)
-      // (school.reg_date &&
-      //   school.reg_date.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        school.school_type.toLowerCase().includes(lowerCaseSearchTerm) ||
+        (school.registered_by.surname + " " + school.registered_by.first_name)
+          .toLowerCase()
+          .includes(lowerCaseSearchTerm)
       // school.status.toLowerCase().includes(lowerCaseSearchTerm)
     );
   }, [allSchools, searchTerm]);
@@ -260,14 +261,14 @@ const ManageSchoolsItem = () => {
                   {selectedschoolDetail.phone_number}
                 </p>
               </div>
-              {selectedschoolDetail.reg_date && (
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-sm">Reg Date:</p>
-                  <p className="font-bold text-lg">
-                    {selectedschoolDetail.reg_date}
-                  </p>
-                </div>
-              )}
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-sm">Registered By:</p>
+                <p className="font-bold text-lg">
+                  {selectedschoolDetail.registered_by.surname +
+                    " " +
+                    selectedschoolDetail.registered_by.first_name}
+                </p>
+              </div>
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-sm">Address:</p>
                 <p className="font-bold text-lg">
@@ -347,7 +348,7 @@ const ManageSchoolsItem = () => {
                       Short Sch Name
                     </th>
                     <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
-                      Reg. Date
+                      Registered By
                     </th>
                     <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
                       Status
@@ -375,7 +376,9 @@ const ManageSchoolsItem = () => {
                           {item.short_name}
                         </td>
                         <td className="pt-3 pb-3 text-[#333333]">
-                          {item.reg_date || "N/A"}
+                          {item.registered_by.surname +
+                            " " +
+                            item.registered_by.first_name}
                         </td>
                         <td className="pt-3 pb-3 ">
                           <span

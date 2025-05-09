@@ -9,7 +9,9 @@ const Profile = () => {
   const searchParams = useSearchParams();
   const role = searchParams.get("role");
   const registrationFormPath =
-    role === "teacher" ? `/Register/Teacher` : `/Register/Student`;
+    role === "teacher"
+      ? `/Register/teacher/Registration-Form`
+      : `/Register/student/Registration-Form`;
   const router = useRouter();
   const [Username, setUsername] = useState("");
   const [Password, setPassword] = useState("");
@@ -64,13 +66,10 @@ const Profile = () => {
 
   return (
     <>
-      <form
-        className="bg-[#23303c] flex flex-col"
-        onSubmit={handleSubmit}
-      >
+      <form className="bg-[#23303c] flex flex-col" onSubmit={handleSubmit}>
         <div className="bg-[#01427a] text-white flex justify-between items-center px-8 py-5 font-bold">
           <h2 className="text-2xl">Profile Update</h2>
-          <Link href={`${registrationFormPath}/Registration-Form`}>
+          <Link href={`${registrationFormPath}`}>
             <IoIosCloseCircleOutline className="w-6 h-6 cursor-pointer" />
           </Link>
         </div>

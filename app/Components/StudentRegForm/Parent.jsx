@@ -1,4 +1,5 @@
 import React from "react";
+import RegDropdown from "../Regdropdown";
 
 const Parent = ({
   parentInfo,
@@ -10,8 +11,82 @@ const Parent = ({
   countries,
   states,
   cities,
-  RelationshipData,
 }) => {
+  const genderItems = [
+    {
+      label: "Male",
+      onClick: () => setParentInfo({ ...parentInfo, gender: "male" }),
+    },
+    {
+      label: "Female",
+      onClick: () => setParentInfo({ ...parentInfo, gender: "female" }),
+    },
+  ];
+
+  const relationshipItems = [
+    {
+      label: "Father",
+      onClick: () =>
+        setParentInfo({ ...parentInfo, parent_relationship: "Father" }),
+    },
+    {
+      label: "Mother",
+      onClick: () =>
+        setParentInfo({ ...parentInfo, parent_relationship: "Mother" }),
+    },
+    {
+      label: "Guardian",
+      onClick: () =>
+        setParentInfo({ ...parentInfo, parent_relationship: "Guardian" }),
+    },
+  ];
+
+  const countryItems = countries.map((c) => ({
+    label: c.name,
+    onClick: () => {
+      const e = { target: { value: c.isoCode } };
+      setParentInfo({ ...parentInfo, country: c.isoCode });
+      handleCountryChange(e);
+    },
+  }));
+
+  const stateItems = states.map((s) => ({
+    label: s.name,
+    onClick: () => {
+      const e = { target: { value: s.isoCode } };
+      setParentInfo({ ...parentInfo, state: s.isoCode });
+      handleStateChange(e);
+    },
+  }));
+
+  const cityItems = cities.map((c) => ({
+    label: c.name,
+    onClick: () => setParentInfo({ ...parentInfo, city: c.name }),
+  }));
+
+  const currentCountry =
+    countries.find((c) => c.isoCode === parentInfo.country)?.name ||
+    "Select Country";
+  const currentState =
+    states.find((s) => s.isoCode === parentInfo.state)?.name || "Select State";
+  const currentCity = parentInfo.city || "Select City";
+
+  const currentGender =
+    parentInfo.gender === "male"
+      ? "Male"
+      : parentInfo.gender === "female"
+      ? "Female"
+      : "Select Gender";
+
+  const currentRelationship =
+    parentInfo.parent_relationship === "Father"
+      ? "Father"
+      : parentInfo.parent_relationship === "Mother"
+      ? "Mother"
+      : parentInfo.parent_relationship === "Guardian"
+      ? "Guardian"
+      : "Select Relationship";
+
   return (
     <div className="w-full mb-5 px-8 py-2.5 sectionlast">
       <div className="font-bold text-blue-900 mb-4 mt-6 RegFormTitle">
@@ -28,11 +103,11 @@ const Parent = ({
           <input
             type="text"
             name="ParentfirstName"
-            value={parentInfo.ParentfirstName}
+            value={parentInfo.parent_first_name}
             placeholder="Enter First Name"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
-            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+            className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.ParentfirstName && (
             <p className="text-red-500 text-xs mt-1">
@@ -40,6 +115,7 @@ const Parent = ({
             </p>
           )}
         </div>
+
         <div className="personalInfoItem">
           <label
             htmlFor="ParentmiddleName"
@@ -50,11 +126,11 @@ const Parent = ({
           <input
             type="text"
             name="ParentmiddleName"
-            value={parentInfo.ParentmiddleName}
+            value={parentInfo.parent_middle_name}
             placeholder="Enter Middle Name"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
-            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+            className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.ParentmiddleName && (
             <p className="text-red-500 text-xs mt-1">
@@ -72,11 +148,11 @@ const Parent = ({
           <input
             type="text"
             name="ParentlastName"
-            value={parentInfo.ParentlastName}
+            value={parentInfo.parent_last_name}
             placeholder="Enter Last Name"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
-            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+            className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.ParentlastName && (
             <p className="text-red-500 text-xs mt-1">{errors.ParentlastName}</p>
@@ -92,11 +168,11 @@ const Parent = ({
           <input
             type="text"
             name="Occupation"
-            value={parentInfo.Occupation}
+            value={parentInfo.parent_occupation}
             placeholder="Enter  Occupation"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
-            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+            className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.Occupation && (
             <p className="text-red-500 text-xs mt-1">{errors.Occupation}</p>
@@ -112,11 +188,11 @@ const Parent = ({
           <input
             type="text"
             name="PhoneNumber"
-            value={parentInfo.PhoneNumber}
+            value={parentInfo.parent_contact_info}
             placeholder="Enter Phone No"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
-            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+            className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.PhoneNumber && (
             <p className="text-red-500 text-xs mt-1">{errors.PhoneNumber}</p>
@@ -136,7 +212,7 @@ const Parent = ({
             placeholder="Enter E-mail"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
-            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+            className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.Email && (
             <p className="text-red-500 text-xs mt-1">{errors.Email}</p>
@@ -152,11 +228,11 @@ const Parent = ({
           <input
             type="text"
             name="EmergencyContact"
-            value={parentInfo.EmergencyContact}
+            value={parentInfo.parent_emergency_contact}
             placeholder="Enter Emergency Contact"
             onChange={(e) => handleInputChange(e, setParentInfo)}
             required
-            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+            className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
           />
           {errors?.EmergencyContact && (
             <p className="text-red-500 text-xs mt-1">
@@ -173,49 +249,13 @@ const Parent = ({
           </label>
           <div className="grid gap-4 grid-cols-2 grouppersonalInfoItem">
             <div>
-              <select
-                name="country"
-                value={parentInfo.country}
-                onChange={handleCountryChange}
-                required
-                className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
-              >
-                <option value="" disabled>
-                  Select Country
-                </option>
-                {countries.length > 0 &&
-                  countries.map((country) => {
-                    return (
-                      <option key={country.isoCode} value={country.isoCode}>
-                        {country.name}
-                      </option>
-                    );
-                  })}
-              </select>
+              <RegDropdown label={currentCountry} items={countryItems} />
               {errors?.country && (
                 <p className="text-red-500 text-xs mt-1">{errors.country}</p>
               )}
             </div>
             <div>
-              <select
-                name="state"
-                value={parentInfo.state}
-                onChange={handleStateChange}
-                required
-                className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
-              >
-                <option value="" disabled>
-                  Select State
-                </option>
-                {states.length > 0 &&
-                  states.map((state) => {
-                    return (
-                      <option key={state.isoCode} value={state.isoCode}>
-                        {state.name}
-                      </option>
-                    );
-                  })}
-              </select>
+              <RegDropdown label={currentState} items={stateItems} />
               {errors?.state && (
                 <p className="text-red-500 text-xs mt-1">{errors.state}</p>
               )}
@@ -226,25 +266,7 @@ const Parent = ({
           <div></div>
           <div className="grid gap-4 grid-cols-2 grouppersonalInfoItem">
             <div>
-              <select
-                name="city"
-                value={parentInfo.city}
-                onChange={(e) => handleInputChange(e, setParentInfo)}
-                required
-                className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
-              >
-                <option value="" disabled>
-                  Select City
-                </option>
-                {cities.length > 0 &&
-                  cities.map((city) => {
-                    return (
-                      <option key={city.name} value={city.name}>
-                        {city.name}
-                      </option>
-                    );
-                  })}
-              </select>
+              <RegDropdown label={currentCity} items={cityItems} />
               {errors?.city && (
                 <p className="text-red-500 text-xs mt-1">{errors.city}</p>
               )}
@@ -260,22 +282,12 @@ const Parent = ({
             {" "}
             Gender
           </label>
-          <select
-            name="ParentGender"
-            value={parentInfo.ParentGender}
-            onChange={(e) => handleInputChange(e, setParentInfo)}
-            required
-            className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
-          >
-            <option value="" disabled>
-              Select Gender
-            </option>
-            <option value="male">Male</option>
-            <option value="female">Female</option>
-          </select>
-          {errors?.gender && (
-            <p className="text-red-500 text-xs mt-1">{errors.gender}</p>
-          )}
+          <div>
+            <RegDropdown label={currentGender} items={genderItems} />
+            {errors?.ParentGender && (
+              <p className="text-red-500 text-xs mt-1">{errors.ParentGender}</p>
+            )}
+          </div>
         </div>
         <div className="personalInfoItem">
           <label
@@ -285,29 +297,17 @@ const Parent = ({
             Relationship
           </label>
           <div className="Form_input">
-            <select
-              name="Relationship"
-              value={parentInfo.Relationship}
-              onChange={(e) => handleInputChange(e, setParentInfo)}
-              required
-              className="px-5 py-4 rounded-md border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
-            >
-              <option value="" disabled>
-                Select Relationship Shared
-              </option>
-              {RelationshipData.map((item, index) => {
-                return (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                );
-              })}
-            </select>
-            {errors?.Relationship && (
-              <p className="text-red-500 text-xs mt-1">
-                {errors?.parentInfo.Relationship}
-              </p>
-            )}
+            <div>
+              <RegDropdown
+                label={currentRelationship}
+                items={relationshipItems}
+              />
+              {errors?.Relationship && (
+                <p className="text-red-500 text-xs mt-1">
+                  {errors.Relationship}
+                </p>
+              )}
+            </div>
           </div>
         </div>
       </div>

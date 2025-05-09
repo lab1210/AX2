@@ -107,8 +107,6 @@ export const deleteSchool = async (schoolId) => {
   } catch (error) {
     console.error(`Error deleting school with ID ${schoolId}:`, error);
     throw error;
-  } finally {
-    console.error(response.message);
   }
 };
 
