@@ -52,7 +52,7 @@ const LeftSidebar = () => {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col h-screen w-[15%] bg-white shadow-lg border-r border-gray-200 overflow-y-hidden">
+    <div className="flex flex-col h-screen bg-white shadow-lg border-r border-gray-200 overflow-hidden">
       {/* Top section with logo */}
       <div className="flex items-center justify-center p-5 flex-col text-white">
         <img src="/logo.svg" alt="Foursquare Logo" className="h-16 w-16" />
@@ -68,10 +68,10 @@ const LeftSidebar = () => {
             <button
               key={item.label}
               onClick={() => router.push(item.route)}
-              className={`flex items-center gap-2 w-full h-12 px-4 py-3 transition-colors duration-200 rounded-lg font-medium ${
+              className={`flex items-center gap-2 w-full h-12 px-4 py-3 transition-colors duration-200 rounded-lg font-medium cursor-pointer ${
                 pathname === item.route
-                  ? "bg-[#f6faff] text-[#004080]" 
-                  : "text-[#004080] hover:bg-[#f6faff]"
+                  ? "bg-[#e6ecf2] text-[#004080]" 
+                  : "text-[#004080] hover:bg-[#e6ecf2]"
               }`}
             >
               <span>{item.icon}</span>

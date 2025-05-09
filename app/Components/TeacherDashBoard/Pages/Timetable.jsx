@@ -1,6 +1,6 @@
 import React from "react";
 import RightSidebar from "../RightSideBar";
-import LeftSidebar from "../LeftSideBar";
+import Layout from "../../Teacherlayout";
 
 const Timetable = () => {
   const timetableData = [
@@ -78,8 +78,8 @@ const Timetable = () => {
   ];
 
   return (
-    <div className="flex h-screen bg-[#F7F8FA]">
-      <LeftSidebar />
+    <Layout>
+      <div className="flex min-h-screen bg-[#F7F8FA]">
       <div className="flex flex-col">
         <div className="flex items-center justify-between bg-white px-6 py-4 w-full">
           <h1 className="text-3xl font-bold">Timetable</h1>
@@ -178,6 +178,7 @@ const Timetable = () => {
         </div>
       </div>
     </div>
+    </Layout>
   );
 };
 
