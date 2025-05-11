@@ -4,9 +4,20 @@ import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { Country, State, City } from "country-state-city";
+import { usePathname, useRouter } from "next/navigation";
 
 const StudentForm = () => {
+  const pathname = usePathname();
+  const role = pathname.includes("/teacher")
+    ? "teacher"
+    : pathname.includes("/student")
+    ? "student"
+    : null;
+
+  const registrationFormPath = `/Register/${role}/`;
+
   const [token, setToken] = useState("");
+  const router = useRouter();
   const [error, setErrors] = useState({});
   const [expectedToken, setExpectedToken] = useState(null);
   const [selectedCountry, setSelectedCountry] = useState(null);
@@ -14,6 +25,7 @@ const StudentForm = () => {
   const [selectedCity, setSelectedCity] = useState(null);
 
   const [formData, setFormData] = useState({
+    temp_token: "",
     admission_number: "",
     first_name: "",
     last_name: "",
@@ -26,7 +38,7 @@ const StudentForm = () => {
     country: "",
     region: "SouthWest",
     admission_date: "",
-    status: "",
+    // status: "",
     parent_first_name: "",
     parent_last_name: "",
     parent_middle_name: "",
@@ -36,18 +48,8 @@ const StudentForm = () => {
     parent_relationship: "",
     class_year: "",
     class_arm: "",
+    status: true,
   });
-
-  const [studentData, setStudentData] = useState([]);
-
-  // Retrieve the token from localStorage when the component mounts
-  useEffect(() => {
-    const storedToken = localStorage.getItem("verificationToken");
-    console.log("Stored Token:", storedToken);
-    if (storedToken) {
-      setExpectedToken(storedToken);
-    }
-  }, []);
 
   const handleTokenChange = (e) => {
     const enteredToken = e.target.value;
@@ -60,6 +62,7 @@ const StudentForm = () => {
         ...prevErrors,
         token: "", // Clear any token-related error
       }));
+      setFormData((prevData) => ({ ...prevData, temp_token: enteredToken })); // Set the token in formData
     } else {
       setErrors((prevErrors) => ({
         ...prevErrors,
@@ -67,6 +70,15 @@ const StudentForm = () => {
       }));
     }
   };
+  // Retrieve the token from localStorage when the component mounts
+  useEffect(() => {
+    const storedToken = localStorage.getItem("verificationToken");
+    console.log("Stored Token:", storedToken);
+    if (storedToken) {
+      setExpectedToken(storedToken);
+    }
+  }, []);
+
   const genderOptions = [
     { label: "Male", value: "Male" },
     { label: "Female", value: "Female" },
@@ -118,8 +130,29 @@ const StudentForm = () => {
     });
   };
 
+  const handleNext = (e) => {
+    e.preventDefault(); // Prevent the default form submission behavior
+    if (token.trim() !== expectedToken) {
+      setErrors((prevErrors) => ({
+        ...prevErrors,
+        token: "Token does not match.",
+      }));
+      return; // prevent moving forward
+    }
+
+    const studentInfo = {
+      ...formData,
+      country: selectedCountry?.isoCode || "", // Or name, depending on your backend
+      state: selectedState?.isoCode || "", // Or name
+      city: selectedCity?.name || "",
+    };
+    localStorage.setItem("studentInfo", JSON.stringify(studentInfo));
+    console.log("Student Info:", studentInfo);
+    router.push(`${registrationFormPath}Profile`);
+  };
+
   return (
-    <form className="bg-white max-w-full  flex flex-col ">
+    <form onSubmit={handleNext} className="bg-white max-w-full  flex flex-col ">
       <div className="bg-[#01427a] w-full left-0 fixed top-0 z-[1000] text-white flex justify-between items-center px-8 py-5 font-bold">
         <h2 className="text-2xl">Student Registration</h2>
         <Link href={"/Register/Role"}>
@@ -143,6 +176,7 @@ const StudentForm = () => {
               <input
                 className="w-full p-2 rounded border-2 border-neutral-300 bg-white text-gray-500 text-sm placeholder:text-[#0b0a0a33] outline-none"
                 type="text"
+                name="temp_token"
                 value={token}
                 placeholder="Enter Copied Token"
                 onChange={handleTokenChange}
@@ -150,6 +184,11 @@ const StudentForm = () => {
               />
               {error.token && (
                 <p className="text-[#f2645c] text-sm mt-1">{error.token}</p>
+              )}
+              {error.temp_token && (
+                <p className="text-[#f2645c] text-sm mt-1">
+                  {error.temp_token}
+                </p>
               )}
             </div>
             <div></div>
@@ -173,6 +212,7 @@ const StudentForm = () => {
               <input
                 className="w-full px-5 py-2 rounded border-2 border-neutral-300 bg-white text-gray-500 text-sm placeholder:text-[#0b0a0a33] outline-none"
                 type="text"
+                name="temp_token"
                 value={token}
                 placeholder="Enter Copied Token"
                 onChange={handleTokenChange}
@@ -180,6 +220,11 @@ const StudentForm = () => {
               />
               {error.token && (
                 <p className="text-[#f2645c] text-sm mt-1">{error.token}</p>
+              )}
+              {error.temp_token && (
+                <p className="text-[#f2645c] text-sm mt-1">
+                  {error.temp_token}
+                </p>
               )}
             </div>
           </div>
@@ -442,11 +487,12 @@ const StudentForm = () => {
             </label>
 
             <button
+              name="status"
               className={`${
-                formData.status ? "bg-green-500" : "bg-red-500"
+                formData.status ? "bg-[#1BB66E]" : "bg-red-500"
               } px-14 py-2.5 font-bold text-xl text-white border-none outline-none rounded-md mb-2`}
             >
-              {formData.status ? " Active" : "Deactivated"}
+              {formData.status ? "Active" : "Deactivated"}
             </button>
           </div>
         </div>
