@@ -3,7 +3,7 @@
 import axios from "axios";
 import { createAuthHeaders } from "./AuthService";
 
-const BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/compliance-verification/`;
+const BASE_URL = `${process.env.NEXT_PUBLIC_BASE_URL}/schools/compliance-verification/`;
 
 const handleRequestError = (error) => {
   console.error("API Request Error:", error);

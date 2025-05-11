@@ -24,11 +24,7 @@ const ComplianceDocumentUploadItem = () => {
     const file = event.target.files[0];
     if (file) {
       setCertificateFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setCertificateFile(e.target.result);
-      };
-      reader.readAsDataURL(file);
+      setCertificatePreview(URL.createObjectURL(file));
     } else {
       setCertificateFile(null);
       setCertificatePreview("/note.svg");
@@ -39,11 +35,7 @@ const ComplianceDocumentUploadItem = () => {
     const file = event.target.files[0];
     if (file) {
       setProofFile(file);
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setProofFile(e.target.result);
-      };
-      reader.readAsDataURL(file);
+      setProofPreview(URL.createObjectURL(file));
     } else {
       setProofFile(null);
       setProofPreview("/note.svg");
@@ -144,7 +136,7 @@ const ComplianceDocumentUploadItem = () => {
                     onClick={() =>
                       document.getElementById("certificate-upload").click()
                     }
-                    className="text-[#07508F] border-[1.5px] rounded-lg cursor-pointer mt-5  border-dashed  p-2 flex items-center justify-center gap-2"
+                    className="text-[#07508F] border-[1.5px] rounded-lg cursor-pointer mt-5 border-[#07508F]   border-dashed  p-2 flex items-center justify-center gap-2"
                   >
                     Upload Image
                     <span>
@@ -183,7 +175,7 @@ const ComplianceDocumentUploadItem = () => {
                       onClick={() =>
                         document.getElementById("proof-upload2").click()
                       }
-                      className="text-[#07508F] border-[1.5px] rounded-lg cursor-pointer mt-5  border-dashed  p-2 flex items-center justify-center gap-2"
+                      className="text-[#07508F] border-[1.5px] rounded-lg cursor-pointer mt-5  border-[#07508F] border-dashed  p-2 flex items-center justify-center gap-2"
                     >
                       Upload Image
                       <span>
