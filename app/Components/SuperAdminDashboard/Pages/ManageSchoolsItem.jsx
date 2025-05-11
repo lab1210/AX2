@@ -13,7 +13,6 @@ const ITEMS_PER_PAGE = 7; // You can adjust this value
 
 const ManageSchoolsItem = () => {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const adminId = searchParams.get("adminId");
 
   // State for all schools data fetched from the API
@@ -79,7 +78,6 @@ const ManageSchoolsItem = () => {
         (school.registered_by.surname + " " + school.registered_by.first_name)
           .toLowerCase()
           .includes(lowerCaseSearchTerm)
-      // school.status.toLowerCase().includes(lowerCaseSearchTerm)
     );
   }, [allSchools, searchTerm]);
 
@@ -275,20 +273,18 @@ const ManageSchoolsItem = () => {
                   {selectedschoolDetail.school_address}
                 </p>
               </div>
-              {selectedschoolDetail.status && (
-                <div className="flex items-center justify-between">
-                  <p className="font-semibold text-sm">Status:</p>
-                  <p
-                    className={`font-bold text-lg ${
-                      selectedschoolDetail.status === "Active"
-                        ? " text-[#1BB66E] "
-                        : " text-[#F94144] "
-                    }`}
-                  >
-                    {selectedschoolDetail.status}
-                  </p>
-                </div>
-              )}
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-sm">Status:</p>
+                <p
+                  className={`font-bold text-lg ${
+                    selectedschoolDetail.status
+                      ? " text-[#1BB66E] "
+                      : " text-[#F94144] "
+                  }`}
+                >
+                  {selectedschoolDetail.status ? "Active" : "Inactive"}
+                </p>
+              </div>
             </div>
           </div>
         </div>
@@ -383,7 +379,7 @@ const ManageSchoolsItem = () => {
                         <td className="pt-3 pb-3 ">
                           <span
                             className={`${
-                              item.status === "Active"
+                              item.status
                                 ? "bg-[#E8F8F0] text-[#1BB66E]"
                                 : "bg-[#FEECEC] text-[#F94144] "
                             } rounded-2xl py-1 text-sm`}
@@ -393,7 +389,7 @@ const ManageSchoolsItem = () => {
                               textAlign: "center",
                             }}
                           >
-                            {item.status}
+                            {item.status ? "Active" : "Inactive"}
                           </span>
                         </td>
                         <td className="pt-3 pb-3 text-[#333333]">
