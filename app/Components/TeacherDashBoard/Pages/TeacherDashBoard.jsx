@@ -6,17 +6,19 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   ResponsiveContainer,
   Cell,
 } from "recharts";
-// import LeftSidebar from "../LeftSideBar";
-import { Calendar } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 import TeachingProgress from "../TeachingProgress";
 import StatCard from "../StatCard";
 import BottomNavbar from "../BottomNavbar";
 import Layout from "../../Teacherlayout";
+import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
+import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { Bell } from "lucide-react";
 
 export default function TeacherDashboard() {
   const [date, setDate] = useState(new Date());
@@ -67,30 +69,29 @@ export default function TeacherDashboard() {
         <div className="bg-[#F7F8FA] w-full">
           <div className="flex-1 flex flex-col">
             {/* Header Section */}
-              <div className="flex items-center justify-between bg-white px-6 py-4">
-                <h1 className="text-3xl font-bold">Dashboard</h1>
-                <div className="flex items-center">
-                  <button className="relative mr-4">
-                    <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full" />
-                    🔔
-                  </button>
-                  <div className="flex items-center space-x-2">
-                    <img
-                      src="/female2.png"
-                      alt="Avatar"
-                      className="w-8 h-8 rounded-full"
-                    />
-                    <div>
-                      <p className="font-medium">Joshua Daniel</p>
-                      <p className="text-xs text-gray-500">Teacher</p>
-                    </div>
+            <div className="flex items-center justify-between bg-white px-6 py-4">
+              <h1 className="text-3xl font-bold">Dashboard</h1>
+              <div className="flex items-center">
+                <button className="relative mr-4">
+                  <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full" />
+                  <Bell />
+                </button>
+                <div className="flex items-center space-x-2">
+                  <img
+                    src="/female2.png"
+                    alt="Avatar"
+                    className="w-8 h-8 rounded-full"
+                  />
+                  <div>
+                    <p className="font-medium">Joshua Daniel</p>
+                    <p className="text-xs text-gray-500">Teacher</p>
                   </div>
                 </div>
               </div>
+            </div>
 
             {/* Main Content */}
             <div className="flex flex-1 p-6 gap-4 overflow-hidden">
-              {/* Left Section */}
               <div className="flex-1 overflow-hidden">
                 <div className="bg-[#004080] text-white rounded-lg p-4 flex items-center justify-between mb-6">
                   <div>
@@ -109,19 +110,19 @@ export default function TeacherDashboard() {
                   <StatCard
                     label="Total Classes"
                     value={10}
-                    icon="👥"
+                    icon= ""
                     percentage={0.5}
                   />
                   <StatCard
                     label="Total Lessons"
                     value={15}
-                    icon="💻"
+                    icon=""
                     percentage={1.2}
                   />
                   <StatCard
                     label="Total Assignments"
                     value={8}
-                    icon="📝"
+                    icon=""
                     percentage={0.8}
                   />
                 </div>
@@ -131,21 +132,36 @@ export default function TeacherDashboard() {
                   <div className="flex flex-col mb-4 w-[70%] bg-white rounded-lg shadow-lg p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold">Attendance</h3>
+                      <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 rounded-full bg-[#F16960]"></div>
+                          <span className="text-sm text-gray-600">
+                            Total Present
+                          </span>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <div className="w-3 h-3 rounded-full bg-[#065293]"></div>
+                          <span className="text-sm text-gray-600">
+                            Total Absent
+                          </span>
+                        </div>
+                      </div>
                     </div>
 
                     {/* Bar Chart */}
-                    <ResponsiveContainer width="100%" height={300}>
+                    <ResponsiveContainer width="100%" height={400}>
                       <BarChart data={attendanceData}>
                         <XAxis dataKey="day" />
                         <YAxis />
                         <Tooltip />
-                        <Legend />
                         <Bar
                           dataKey="present"
                           name="Total Present"
                           fill="#F16960"
+                          barSize={25}
+                          radius={[10, 10, 0, 0]}
                         >
-                          {attendanceData.map((entry, index) => (
+                          {attendanceData.map((_entry, index) => (
                             <Cell key={`cell-present-${index}`} />
                           ))}
                         </Bar>
@@ -153,8 +169,10 @@ export default function TeacherDashboard() {
                           dataKey="absent"
                           name="Total Absent"
                           fill="#065293"
+                          barSize={25}
+                          radius={[10, 10, 0, 0]}
                         >
-                          {attendanceData.map((entry, index) => (
+                          {attendanceData.map((_entry, index) => (
                             <Cell key={`cell-absent-${index}`} />
                           ))}
                         </Bar>
@@ -170,14 +188,18 @@ export default function TeacherDashboard() {
               </div>
 
               {/* Right Sidebar */}
-              <div className="w-1/4 space-y-3">
+              <div className="w-[27%] space-y-3">
                 {/* Calendar */}
-                <div className="bg-white rounded-lg shadow-lg border-none">
-                  <Calendar
-                    onChange={setDate}
-                    value={date}
-                    className="rounded-lg w-full font-semibold"
-                  />
+                <div className="bg-white rounded-lg shadow-lg">
+                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                    <DemoContainer
+                      components={["DateCalendar", "DateCalendar"]}
+                    >
+                      <DemoItem>
+                        <DateCalendar readOnly />
+                      </DemoItem>
+                    </DemoContainer>
+                  </LocalizationProvider>
                 </div>
                 {/* Events */}
                 <div className="bg-white rounded-lg shadow-lg p-4">
@@ -213,7 +235,7 @@ export default function TeacherDashboard() {
                             {e.date}
                           </div>
                           <div className="ml-3 flex-1">
-                            <p className="font-medium">{e.title}</p>
+                            <p className="font-medium text-sm">{e.title}</p>
                             <p className="text-xs text-gray-500">
                               {e.subtitle}
                             </p>
@@ -347,11 +369,13 @@ export default function TeacherDashboard() {
       <div className="flex-1">
         {activeTab === "calendar" && (
           <div className="p-4 flex justify-center items-center flex-col w-full">
-            <Calendar
-              onChange={setDate}
-              value={date}
-              className="flex flex-col justify-center items-center shadow-xl rounded-lg w-full font-semibold"
-            />
+            <LocalizationProvider dateAdapter={AdapterDayjs}>
+              <DemoContainer components={["DateCalendar", "DateCalendar"]}>
+                <DemoItem>
+                  <DateCalendar readOnly />
+                </DemoItem>
+              </DemoContainer>
+            </LocalizationProvider>
             {/* Teaching Progress */}
             <div className="mt-4 bg-white rounded-lg shadow-lg p-4 w-full">
               <TeachingProgress />
