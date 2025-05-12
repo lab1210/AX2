@@ -26,7 +26,7 @@ const AttendancePage = () => {
           <>
             <h1 className="text-2xl font-bold">
               Attendance /{" "}
-              <span className="text-gray-200">Mark Attendance</span>
+              <span className="text-[#7E7E7E]">Mark Attendance</span>
             </h1>
             <div className="flex items-center space-x-4">
               <label htmlFor="searchDate" className="text-sm font-medium">
@@ -51,7 +51,7 @@ const AttendancePage = () => {
           <>
             <h1 className="text-2xl font-bold">
               Attendance /{" "}
-              <span className="text-gray-200">View Attendance</span>
+              <span className="text-[#7E7E7E]">View Attendance</span>
             </h1>
             <div className="flex items-center space-x-4">
               <label htmlFor="viewDate" className="text-sm font-medium">
@@ -77,7 +77,7 @@ const AttendancePage = () => {
         return (
           <>
             <h1 className="text-2xl font-bold">
-              Attendance / <span className="text-gray-200">Summary</span>
+              Attendance / <span className="text-[#7E7E7E]">Summary</span>
             </h1>
             <div className="flex items-center space-x-4">
               <div className="relative">
@@ -122,7 +122,7 @@ const AttendancePage = () => {
                   className={`px-4 py-1 ${
                     activeTab === "mark"
                       ? "border-b-3 border-[#96B1CB] text-black"
-                      : "text-gray-200"
+                      : "text-[#A8A8A8]"
                   }`}
                   onClick={() => setActiveTab("mark")}
                 >
@@ -132,7 +132,7 @@ const AttendancePage = () => {
                   className={`px-1 py-1 ${
                     activeTab === "view"
                       ? "border-b-3 border-[#96B1CB] text-black"
-                      : "text-gray-200"
+                      : "text-[#A8A8A8]"
                   }`}
                   onClick={() => setActiveTab("view")}
                 >
@@ -142,7 +142,7 @@ const AttendancePage = () => {
                   className={`px-3 py-1 ${
                     activeTab === "summary"
                       ? "border-b-3 border-[#96B1CB] text-black"
-                      : "text-gray-200"
+                      : "text-[#A8A8A8]"
                   }`}
                   onClick={() => setActiveTab("summary")}
                 >

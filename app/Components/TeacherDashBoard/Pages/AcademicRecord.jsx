@@ -35,9 +35,9 @@ const AcademicRecord = () => {
           </div>
         </div>
 
-        <div className="flex flex-row gap-8">
+        <div className="flex flex-row gap-2">
           {/* Main Content */}
-          <div className="flex-1 p-4">
+          <div className="flex-1 p-4 min-w-[70%]">
             {/* Tabs Section */}
             <div className="flex items-center border-b border-gray-200 mb-4 space-x-8">
               <button
