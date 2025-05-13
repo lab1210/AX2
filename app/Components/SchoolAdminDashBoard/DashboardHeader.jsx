@@ -1,52 +1,16 @@
 "use client";
-import {
-  clearAuthToken,
-  getAuthToken,
-  getUserDetails,
-  refreshToken,
-} from "@/Service/AuthService";
+
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { IoNotificationsOutline } from "react-icons/io5";
-
+import { useInitializeUser } from "@/Components/hooks/InitializeUser";
 const DashboardHeader = () => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter();
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
   const pathName = usePathname();
 
-  useEffect(() => {
-    const initializeUser = async () => {
-      const token = getAuthToken();
-      if (!token) {
-        router.push("/");
-        return;
-      }
-      try {
-        const userDetails = getUserDetails();
-        setUser(userDetails);
-        setIsLoading(false);
-      } catch (err) {
-        try {
-          const newToken = await refreshToken(token);
-          if (newToken) {
-            const refreshedUserDetails = getUserDetails();
-            setUser(refreshedUserDetails);
-          } else {
-            clearAuthToken();
-            router.push("/");
-          }
-        } catch (refresherr) {
-          clearAuthToken();
-          router.push("/");
-        } finally {
-          setIsLoading(false);
-        }
-      }
-    };
-    initializeUser();
-  }, [router]);
+  useInitializeUser(setUser, setIsLoading);
 
   const generateTitle = (path) => {
     if (!path) return "Dashboard"; // Default title

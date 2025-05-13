@@ -12,7 +12,7 @@ import { GoPaperclip } from "react-icons/go";
 import { LuSendHorizontal } from "react-icons/lu";
 const ChatItem = () => {
   const [selectedchat, setSelectedChat] = useState(null);
-  // const [newMessage, setNewMessage] = useState("");
+  const [newMessage, setNewMessage] = useState("");
   // const [user, setUser] = useState(null);
 
   // useEffect(() => {
