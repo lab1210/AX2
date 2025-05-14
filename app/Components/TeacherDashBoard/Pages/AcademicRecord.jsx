@@ -38,36 +38,35 @@ const AcademicRecord = () => {
         <div className="flex flex-row gap-2">
           {/* Main Content */}
           <div className="flex-1 p-4 min-w-[70%]">
-            {/* Tabs Section */}
-            <div className="flex items-center border-b border-gray-200 mb-4 space-x-8">
-              <button
-                className={`px-4 py-3 ${
-                  activeTab === "ca"
-                    ? "border-b-4 border-[#07508F] text-black"
-                    : "text-gray-400"
-                }`}
-                onClick={() => setActiveTab("ca")}
-              >
-                C.A
-              </button>
-              <button
-                className={`px-4 py-3 ${
-                  activeTab === "exam"
-                    ? "border-b-4 border-[#07508F] text-black"
-                    : "text-gray-400"
-                }`}
-                onClick={() => setActiveTab("exam")}
-              >
-                Exam Upload
-              </button>
-            </div>
-
             {/* Content Section */}
             {activeTab === "ca" && (
               <div className="flex flex-col lg:flex-row gap-6">
                 <div className="flex-1">
                   {/* Uploaded Test Record Table */}
                   <div className="bg-white rounded-lg shadow p-4">
+                    {/* Tabs Section */}
+                    <div className="flex items-center border-b border-gray-200 mb-4 space-x-8">
+                      <button
+                        className={`px-4 py-3 ${
+                          activeTab === "ca"
+                            ? "border-b-4 border-[#07508F] text-black"
+                            : "text-gray-400"
+                        }`}
+                        onClick={() => setActiveTab("ca")}
+                      >
+                        C.A
+                      </button>
+                      <button
+                        className={`px-4 py-3 ${
+                          activeTab === "exam"
+                            ? "border-b-4 border-[#07508F] text-black"
+                            : "text-gray-400"
+                        }`}
+                        onClick={() => setActiveTab("exam")}
+                      >
+                        Exam Upload
+                      </button>
+                    </div>
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-[#07508F] text-lg font-semibold mb-4">
                         Add New Record
@@ -196,6 +195,29 @@ const AcademicRecord = () => {
                 {/* Left Section */}
                 <div className="flex-1">
                   <div className="bg-white rounded-lg shadow p-4">
+                    {/* Tabs Section */}
+                    <div className="flex items-center border-b border-gray-200 mb-4 space-x-8">
+                      <button
+                        className={`px-4 py-3 ${
+                          activeTab === "ca"
+                            ? "border-b-4 border-[#07508F] text-black"
+                            : "text-gray-400"
+                        }`}
+                        onClick={() => setActiveTab("ca")}
+                      >
+                        C.A
+                      </button>
+                      <button
+                        className={`px-4 py-3 ${
+                          activeTab === "exam"
+                            ? "border-b-4 border-[#07508F] text-black"
+                            : "text-gray-400"
+                        }`}
+                        onClick={() => setActiveTab("exam")}
+                      >
+                        Exam Upload
+                      </button>
+                    </div>
                     <div className="bg-white rounded-lg">
                       <div className="flex items-center justify-between mb-4">
                         <h3 className="text-lg text-[#07508F] font-semibold mb-4">
