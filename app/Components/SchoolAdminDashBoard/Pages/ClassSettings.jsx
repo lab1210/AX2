@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import SchoolAdminLayout from "../SchoolAdminLayout";
 import RightSide from "../RightSide";
 import MainClassSettings from "../MainClassSettings";
+import ClassArm from "../ClassArm";
+import ClassMgt from "../ClassMgt";
+
 const ClassSettings = () => {
   const [activeTab, setActiveTab] = useState("Class Management");
 
@@ -11,7 +14,7 @@ const ClassSettings = () => {
     <SchoolAdminLayout>
       <div className="grid grid-cols-[1fr_270px] bg-[#EEEEEE] h-full pt-3 pl-2 pr-1 overflow-hidden">
         <div className="bg-white h-full mr-2 overflow-y-auto no-scrollbar">
-          <div className="pt-3 text-sm flex gap-5 pl-6">
+          <div className="pt-3 text-sm flex gap-14 pl-6 pr-2">
             {["Class Management", "Class Arm", "Classroom Management"].map(
               (tab) => (
                 <button
@@ -35,6 +38,8 @@ const ClassSettings = () => {
           </div>
           <hr className="mt-1.5" />
           {activeTab === "Class Management" && <MainClassSettings />}
+          {activeTab === "Class Arm" && <ClassArm />}
+          {activeTab === "Classroom Management" && <ClassMgt />}
         </div>
         <div className="h-full overflow-hidden">
           <RightSide />
