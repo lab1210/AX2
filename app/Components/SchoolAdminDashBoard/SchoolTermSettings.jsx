@@ -276,54 +276,68 @@ const SchoolTermSettings = () => {
       <div className="px-0">
         <div className="overflow-y-auto max-h-[200px] no-scrollbar">
           <table className="min-w-full table-auto">
-            <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">
-              <tr>
-                <th className="p-2 pl-6 bg-[#EDF0F3]">Term</th>
-                <th className="p-2 bg-[#EDF0F3]">Academic Session</th>
-                <th className="p-2 bg-[#EDF0F3]">Start Date</th>
-                <th className="p-2 bg-[#EDF0F3]">End Date</th>
-                <th className="p-2 bg-[#EDF0F3]">Status</th>
-                <th className="p-2 bg-[#EDF0F3]">Actions</th>
-              </tr>
-            </thead>
+            {paginatedData.length > 0 && (
+              <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">
+                <tr>
+                  <th className="p-2 pl-6 bg-[#EDF0F3]">Term</th>
+                  <th className="p-2 bg-[#EDF0F3]">Academic Session</th>
+                  <th className="p-2 bg-[#EDF0F3]">Start Date</th>
+                  <th className="p-2 bg-[#EDF0F3]">End Date</th>
+                  <th className="p-2 bg-[#EDF0F3]">Status</th>
+                  <th className="p-2 bg-[#EDF0F3]">Actions</th>
+                </tr>
+              </thead>
+            )}
+
             <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
-              {paginatedData.map((item, index) => (
-                <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                  <td className="p-2 pl-6">{item["Term"]}</td>
-                  <td className="p-2">{item["Academic Session"]}</td>
-                  <td className="p-2">{item["Start Date"]}</td>
-                  <td className="p-2">{item["End Date"]}</td>
-                  <td className="p-2">
-                    <span
-                      className={`${
-                        item.Status === "Active"
-                          ? "bg-[#E8F8F0] text-[#1BB66E]"
-                          : "bg-[#FEECEC] text-[#F94144]"
-                      } rounded-2xl py-1 font-bold`}
-                      style={{
-                        minWidth: "70px",
-                        display: "inline-block",
-                        textAlign: "center",
-                      }}
-                    >
-                      {item.Status}
-                    </span>
-                  </td>
-                  <td className="p-2">
-                    <div className="flex gap-4">
-                      <FiEdit3
-                        onClick={() => handleEdit(item)}
-                        className="text-[#80ADCB] cursor-pointer"
-                        size={15}
-                      />
-                      <FiTrash2
-                        className="text-[#F94144] cursor-pointer"
-                        size={15}
-                      />
-                    </div>
+              {paginatedData.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan="3"
+                    className="p-5  text-center border text-gray-500"
+                  >
+                    No Data Available
                   </td>
                 </tr>
-              ))}
+              ) : (
+                paginatedData.map((item, index) => (
+                  <tr className="border-b-[#D0D0D0] border-b" key={index}>
+                    <td className="p-2 pl-6">{item["Term"]}</td>
+                    <td className="p-2">{item["Academic Session"]}</td>
+                    <td className="p-2">{item["Start Date"]}</td>
+                    <td className="p-2">{item["End Date"]}</td>
+                    <td className="p-2">
+                      <span
+                        className={`${
+                          item.Status === "Active"
+                            ? "bg-[#E8F8F0] text-[#1BB66E]"
+                            : "bg-[#FEECEC] text-[#F94144]"
+                        } rounded-2xl py-1 font-bold`}
+                        style={{
+                          minWidth: "70px",
+                          display: "inline-block",
+                          textAlign: "center",
+                        }}
+                      >
+                        {item.Status}
+                      </span>
+                    </td>
+                    <td className="p-2">
+                      <div className="flex gap-4">
+                        <FiEdit3
+                          onClick={() => handleEdit(item)}
+                          className="text-[#80ADCB] cursor-pointer"
+                          size={15}
+                        />
+                        <FiTrash2
+                          className="text-[#F94144] cursor-pointer"
+                          size={15}
+                        />
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

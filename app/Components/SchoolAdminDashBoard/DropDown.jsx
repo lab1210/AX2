@@ -4,7 +4,7 @@ const Dropdown = ({ label = "Options", items = [] }) => {
   return (
     <Menu as="div" className="relative inline-block text-left ">
       <div>
-        <MenuButton className=" focus:border-[#0071E3]  border-2 p-1.5 border-[#B6B6B6] inline-flex w-full justify-between rounded-sm bg-white sm:text-sm  text-[#808080] text-sm ">
+        <MenuButton className=" focus:border-[#0071E3]  border-2 p-1.5 border-[#B6B6B6] inline-flex w-full justify-between rounded-sm bg-white sm:text-xs lg:text-sm  text-[#808080]  ">
           {label}
           <HiOutlineChevronDown
             aria-hidden="true"
@@ -21,7 +21,7 @@ const Dropdown = ({ label = "Options", items = [] }) => {
                 item.href ? (
                   <a
                     href={item.href}
-                    className={`block px-4 py-2 text-sm cursor-pointer ${
+                    className={`block px-4 py-2 lg:text-sm sm:text-xs cursor-pointer ${
                       active
                         ? "bg-gray-100 font-bold text-[#808080]"
                         : "text-[#808080] font-bold"
@@ -32,7 +32,7 @@ const Dropdown = ({ label = "Options", items = [] }) => {
                 ) : (
                   <button
                     onClick={item.onClick}
-                    className={`block w-full text-left px-4 py-2 text-sm cursor-pointer ${
+                    className={`block w-full text-left px-4 py-2 lg:text-sm sm:text-xs cursor-pointer ${
                       active ? "bg-blue-50 text-[#808080]" : "text-[#808080]"
                     }`}
                   >
