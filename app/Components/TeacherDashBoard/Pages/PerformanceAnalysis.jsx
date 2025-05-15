@@ -645,11 +645,11 @@ const PerformanceAnalysis = () => {
                             <div className="flex flex-col">
                               <div className="flex flex-row justify-between space-x-9">
                                 <h3 className="text-md font-bold text-[#01427A]">
-                                st
-                              </h3>
-                              <button className="text-[#6B90B5] text-sm mt-auto text-right">
-                                View Report
-                              </button>
+                                  st
+                                </h3>
+                                <button className="text-[#6B90B5] text-sm mt-auto text-right">
+                                  View Report
+                                </button>
                               </div>
                               <h3 className="text-md text-[#01427A]">
                                 {" "}
@@ -682,11 +682,11 @@ const PerformanceAnalysis = () => {
                             <div className="flex flex-col">
                               <div className="flex flex-row justify-between space-x-6">
                                 <h3 className="text-md font-bold text-[#01427A]">
-                                nd
-                              </h3>
-                              <button className="text-[#6B90B5] text-sm mt-auto text-right">
-                                View Report
-                              </button>
+                                  nd
+                                </h3>
+                                <button className="text-[#6B90B5] text-sm mt-auto text-right">
+                                  View Report
+                                </button>
                               </div>
                               <h3 className="text-md text-[#01427A]">
                                 {" "}
@@ -719,11 +719,11 @@ const PerformanceAnalysis = () => {
                             <div className="flex flex-col">
                               <div className="flex flex-row justify-between space-x-8">
                                 <h3 className="text-md font-bold text-[#01427A]">
-                                rd
-                              </h3>
-                              <button className="text-[#6B90B5] text-sm mt-auto text-right">
-                                View Report
-                              </button>
+                                  rd
+                                </h3>
+                                <button className="text-[#6B90B5] text-sm mt-auto text-right">
+                                  View Report
+                                </button>
                               </div>
                               <h3 className="text-md text-[#01427A]">
                                 {" "}
