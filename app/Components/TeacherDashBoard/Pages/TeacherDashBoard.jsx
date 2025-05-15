@@ -19,6 +19,9 @@ import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { Bell } from "lucide-react";
+import GroupIcon from "/public/groupOfPeople.png";
+import NotePad from "/public/notePad.png";
+import Board from "/public/boardChart.png";
 
 export default function TeacherDashboard() {
   const [date, setDate] = useState(new Date());
@@ -93,16 +96,20 @@ export default function TeacherDashboard() {
             {/* Main Content */}
             <div className="flex flex-1 p-6 gap-4 overflow-hidden">
               <div className="flex-1 overflow-hidden">
-                <div className="bg-[#004080] text-white rounded-lg p-4 flex items-center justify-between mb-6">
-                  <div>
-                    <h2 className="text-2xl font-bold">Hi, Mr Joshua</h2>
-                    <p>Welcome to My Schoolight Portal.</p>
+                <div className="w-full bg-[#004080] rounded-lg shadow flex flex-row justify-between items-center text-white mb-6">
+                  <div className="p-2">
+                    <h2 className="text-4xl font-bold mb-3">Hi, Mr Joshua</h2>
+                    <p className="text-sm">
+                      Welcome to the official Foursquare student portal.
+                    </p>
                   </div>
-                  <img
-                    src="/male_teacher.png"
-                    alt="Teacher illustration"
-                    className="object-cover w-24 h-24"
-                  />
+                  <div className="max-w-[240px] h-full object-contain">
+                    <img  
+                      src="/male.png"
+                      alt="Teacher illustration"
+                      className="w-full h-full"
+                    />
+                  </div>
                 </div>
 
                 {/* Quick Stats */}
@@ -110,19 +117,19 @@ export default function TeacherDashboard() {
                   <StatCard
                     label="Total Classes"
                     value={10}
-                    icon= ""
+                    icon={GroupIcon}
                     percentage={0.5}
                   />
                   <StatCard
                     label="Total Lessons"
                     value={15}
-                    icon=""
+                    icon={NotePad}
                     percentage={1.2}
                   />
                   <StatCard
                     label="Total Assignments"
                     value={8}
-                    icon=""
+                    icon={Board}
                     percentage={0.8}
                   />
                 </div>
@@ -302,7 +309,6 @@ export default function TeacherDashboard() {
         </button>
       </div>
 
-      {/* Main Content */}
       <div className="p-4">
         <div className="bg-[#004080] text-white rounded-lg flex items-center justify-between p-3">
           <div>
@@ -317,26 +323,42 @@ export default function TeacherDashboard() {
         </div>
       </div>
 
+      <div className="w-full bg-[#004080] rounded-lg shadow  flex flex-row justify-between items-center text-white ">
+        <div className="p-4">
+          <h2 className="text-4xl font-bold mb-3">Hi, Mr Joshua</h2>
+          <p className="text-sm">
+            Welcome to the official Foursquare student portal.
+          </p>
+        </div>
+        <div className="max-w-[240px] h-full object-contain ">
+          <img
+            src="/female_teacher.svg"
+            alt="Teacher illustration"
+            className=" w-full h-full"
+          />
+        </div>
+      </div>
+
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-4 p-3 mb-4">
         <StatCard
           label="Total Classes"
           value={10}
-          icon="👥"
+          icon={GroupIcon}
           percentage={0.5}
           className="bg-[#F94144] rounded-lg"
         />
         <StatCard
           label="Total Lessons"
           value={15}
-          icon="💻"
+          icon={NotePad}
           percentage={1.2}
           className="bg-[#004080] rounded-lg"
         />
         <StatCard
           label="Total Assignments"
           value={8}
-          icon="📝"
+          icon={Board}
           percentage={0.8}
         />
       </div>
