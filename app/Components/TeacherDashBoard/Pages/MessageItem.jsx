@@ -42,7 +42,7 @@ const ChatItem = () => {
   };
   return (
     <Teacherlayout>
-      <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 shadow-md flex justify-between items-center">
+      <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 flex justify-between items-center">
         <DashboardHeader />
         <div className="flex flex-row items-center">
           <div className="w-12 h-12 object-cover">

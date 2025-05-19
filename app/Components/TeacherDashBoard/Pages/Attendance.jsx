@@ -71,7 +71,7 @@ const AttendancePage = () => {
               <input
                 type="date"
                 id="searchDate"
-                className="border border-gray-200 bg-gray-200 rounded px-2 py-1"
+                className="border border-gray-100 bg-gray-200 rounded px-2 py-1"
               />
               <button
                 className="bg-[#07508F] text-white px-4 py-3 rounded"
@@ -96,7 +96,7 @@ const AttendancePage = () => {
               <input
                 type="date"
                 id="viewDate"
-                className="border border-gray-200 bg-gray-200 rounded px-2 py-1"
+                className="border border-gray-100 bg-gray-200 rounded px-2 py-1"
               />
               <div className="relative">
                 <button className="bg-[#07508F] text-white px-6 py-3 rounded flex items-center space-x-2">
@@ -170,14 +170,14 @@ const AttendancePage = () => {
     <Layout>
       <div className="flex min-h-screen bg-[#F7F8FA]">
         <div className="flex-1 flex flex-col">
-          <div className="flex items-center justify-between bg-white p-4 shadow w-full z-10">
+          <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 w-[83%]">
             {renderHeaderContent()}
           </div>
 
           {/* Content Section */}
-          <div className="flex flex-1 p-6">
-            <div className="flex-1 flex flex-col bg-white rounded-lg shadow p-4">
-              <div className="flex items-center border-b border-gray-200 mb-4 space-x-8">
+          <div className="flex flex-1 p-6 w-full pt-24">
+            <div className="flex-1 flex flex-col bg-white rounded-lg shadow p-4 w-[85%] mx-auto">
+              <div className="flex items-center border-b border-gray-100 mb-4 space-x-8">
                 <button
                   className={`px-4 py-1 ${
                     activeTab === "mark"
@@ -225,7 +225,7 @@ const AttendancePage = () => {
                     </div>
                     <input
                       type="date"
-                      className="border border-gray-200 rounded px-2 py-1"
+                      className="border border-gray-100 rounded px-2 py-1"
                     />
                     <button className="bg-[#07508F] text-white px-4 py-3 rounded">
                       Save
@@ -235,13 +235,13 @@ const AttendancePage = () => {
                   <table className="w-full border-collapse">
                     <thead>
                       <tr className="bg-[#6B90B5] text-white">
-                        <th className="border-b border-gray-200 px-4 py-3 text-left">
+                        <th className="border-b border-gray-100 px-4 py-3 text-left">
                           Action
                         </th>
-                        <th className="border-b border-gray-200 px-4 py-3 text-center mx-auto">
+                        <th className="border-b border-gray-100 px-4 py-3 text-center mx-auto">
                           Students Name
                         </th>
-                        <th className="border-b border-gray-200 px-4 py-3 text-right">
+                        <th className="border-b border-gray-100 px-4 py-3 text-right">
                           Status
                         </th>
                       </tr>
@@ -249,14 +249,14 @@ const AttendancePage = () => {
                     <tbody>
                       {students.map((student) => (
                         <tr key={student.id}>
-                          <td className="border-b border-gray-200 px-4 py-3 text-left">
+                          <td className="border-b border-gray-100 px-4 py-3 text-left">
                             <input type="checkbox" className="text-green-500" />
                           </td>
-                          <td className="border-b border-gray-200 px-4 py-3 text-center font-semibold">
+                          <td className="border-b border-gray-100 px-4 py-3 text-center font-semibold">
                             {student.name}
                           </td>
                           <td
-                            className={`border-b border-gray-200 px-4 py-3 text-right font-semibold ${
+                            className={`border-b border-gray-100 px-4 py-3 text-right font-semibold ${
                               student.status === "Present"
                                 ? "text-green-500"
                                 : "text-red-500"
@@ -277,16 +277,16 @@ const AttendancePage = () => {
                   <table className="w-full border-collapse mx-auto">
                     <thead>
                       <tr className="bg-[#6B90B5] text-white">
-                        <th className="border-b border-gray-200 px-4 py-3 text-left">
+                        <th className="border-b border-gray-100 px-4 py-3 text-left">
                           S/N
                         </th>
-                        <th className="border-b border-gray-200 px-4 py-3 text-left">
+                        <th className="border-b border-gray-100 px-4 py-3 text-left">
                           Students Name
                         </th>
-                        <th className="border-b border-gray-200 px-4 py-3 text-center mx-auto">
+                        <th className="border-b border-gray-100 px-4 py-3 text-center mx-auto">
                           Attendance Mark
                         </th>
-                        <th className="border-b border-gray-200 px-4 py-3 text-right">
+                        <th className="border-b border-gray-100 px-4 py-3 text-right">
                           Status
                         </th>
                       </tr>
@@ -294,17 +294,17 @@ const AttendancePage = () => {
                     <tbody>
                       {students.map((student, index) => (
                         <tr key={student.id}>
-                          <td className="border-b border-gray-200 px-4 py-3">
+                          <td className="border-b border-gray-100 px-4 py-3">
                             {index + 1}
                           </td>
-                          <td className="border-b border-gray-200 px-4 py-3">
+                          <td className="border-b border-gray-100 px-4 py-3">
                             {student.name}
                           </td>
-                          <td className="border-b border-gray-200 px-4 py-3 text-center mx-auto">
+                          <td className="border-b border-gray-100 px-4 py-3 text-center mx-auto">
                             {student.status === "Present" ? 1 : 0}
                           </td>
                           <td
-                            className={`border-b border-gray-200 px-4 py-3 text-right font-semibold ${
+                            className={`border-b border-gray-100 px-4 py-3 text-right font-semibold ${
                               student.status === "Present"
                                 ? "text-green-500"
                                 : "text-red-500"
@@ -325,19 +325,19 @@ const AttendancePage = () => {
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="bg-[#6B90B5] text-white">
-                          <th className="border-b border-gray-200 px-4 py-3 text-left">
+                          <th className="border-b border-gray-100 px-4 py-3 text-left">
                             Student Name
                           </th>
-                          <th className="border-b border-gray-200 px-4 py-3 text-center">
+                          <th className="border-b border-gray-100 px-4 py-3 text-center">
                             No. of Time Present
                           </th>
-                          <th className="border-b border-gray-200 px-4 py-3 text-center">
+                          <th className="border-b border-gray-100 px-4 py-3 text-center">
                             % Present
                           </th>
-                          <th className="border-b border-gray-200 px-4 py-3 text-center">
+                          <th className="border-b border-gray-100 px-4 py-3 text-center">
                             No. of Time Absent
                           </th>
-                          <th className="border-b border-gray-200 px-4 py-3 text-center">
+                          <th className="border-b border-gray-100 px-4 py-3 text-center">
                             % Absent
                           </th>
                         </tr>
@@ -345,19 +345,19 @@ const AttendancePage = () => {
                       <tbody>
                         {students.map((student, index) => (
                           <tr key={index}>
-                            <td className="border-b border-gray-200 px-4 py-3">
+                            <td className="border-b border-gray-100 px-4 py-3">
                               {student.name}
                             </td>
-                            <td className="border-b border-gray-200 px-4 py-3 text-center">
+                            <td className="border-b border-gray-100 px-4 py-3 text-center">
                               100
                             </td>
-                            <td className="border-b border-gray-200 px-4 py-3 text-center">
+                            <td className="border-b border-gray-100 px-4 py-3 text-center">
                               80%
                             </td>
-                            <td className="border-b border-gray-200 px-4 py-3 text-center">
+                            <td className="border-b border-gray-100 px-4 py-3 text-center">
                               20
                             </td>
-                            <td className="border-b border-gray-200 px-4 py-3 text-center">
+                            <td className="border-b border-gray-100 px-4 py-3 text-center">
                               20%
                             </td>
                           </tr>
@@ -370,7 +370,9 @@ const AttendancePage = () => {
             </div>
 
             {/* Right Sidebar */}
-            <RightSidebar />
+            <div className="hidden lg:block w-[25%] mx-auto">
+              <RightSidebar />
+            </div>
           </div>
         </div>
       </div>
@@ -378,7 +380,9 @@ const AttendancePage = () => {
       {isModalOpen && (
         <div className="bg-black/70 fixed inset-0 z-40">
           <div
-            className={`fixed inset-y-0 left-0 z-50 bg-white rounded-lg shadow-lg  inset-0 w-[90%] h-[80%] mx-auto mt-15 transform transition-transform duration-500 ease-in-out ${isAnimating ? "translate-x-0" : "-translate-x-full"}`}
+            className={`fixed inset-y-0 left-0 z-50 bg-white rounded-lg shadow-lg  inset-0 w-[90%] h-[80%] mx-auto mt-15 transform transition-transform duration-500 ease-in-out ${
+              isAnimating ? "translate-x-0" : "-translate-x-full"
+            }`}
           >
             <div className="w-full h-full p-20">
               <div className="flex items-center justify-between mb-4">
@@ -409,7 +413,7 @@ const AttendancePage = () => {
                 <input
                   type="date"
                   id="uploadDate"
-                  className="border-2 border-gray-200 rounded p-2 max-w-sm bg-gray-200"
+                  className="border-2 border-gray-100 rounded p-2 max-w-sm bg-gray-200"
                 />
               </div>
 
