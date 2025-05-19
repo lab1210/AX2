@@ -92,9 +92,9 @@ const AcademicRecord = () => {
 
   return (
     <Layout>
-      <div className="w-full flex flex-col bg-[#F7F8FA]">
+      <div className="w-full flex flex-col bg-[#F7F8FA] min-h-screen">
         {/* Header Section */}
-        <div className="flex items-center justify-between bg-white p-4 shadow rounded-lg mb-6">
+        <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 mb-6 w-[83%]">
           <h1 className="text-2xl font-bold">Academic Record</h1>
           <div className="flex items-center space-x-4">
             <div className="relative">
@@ -116,9 +116,9 @@ const AcademicRecord = () => {
           </div>
         </div>
 
-        <div className="flex flex-row gap-2">
+        <div className="flex flex-row gap-2 pt-22 w-full min-h-screen">
           {/* Main Content */}
-          <div className="flex-1 p-4 min-w-[70%]">
+          <div className="flex-1 p-4 w-[85%]">
             {/* Content Section */}
             {activeTab === "ca" && (
               <div className="flex flex-col lg:flex-row gap-6">
@@ -464,7 +464,10 @@ const AcademicRecord = () => {
               </div>
             )}
           </div>
-          <RightSidebar />
+          {/* Right Sidebar */}
+          <div className="hidden lg:block w-[25%] mx-auto">
+            <RightSidebar />
+          </div>
         </div>
       </div>
 

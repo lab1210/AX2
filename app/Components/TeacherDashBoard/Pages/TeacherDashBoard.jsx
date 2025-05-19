@@ -104,7 +104,7 @@ export default function TeacherDashboard() {
                     </p>
                   </div>
                   <div className="max-w-[240px] h-full object-contain">
-                    <img  
+                    <img
                       src="/male.png"
                       alt="Teacher illustration"
                       className="w-full h-full"
@@ -195,7 +195,7 @@ export default function TeacherDashboard() {
               </div>
 
               {/* Right Sidebar */}
-              <div className="w-[27%] space-y-3">
+              <div className="w-[27%] space-y-3 sticky top-6 overflow-y-auto">
                 {/* Calendar */}
                 <div className="bg-white rounded-lg shadow-lg">
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
@@ -310,32 +310,20 @@ export default function TeacherDashboard() {
       </div>
 
       <div className="p-4">
-        <div className="bg-[#004080] text-white rounded-lg flex items-center justify-between p-3">
-          <div>
-            <h2 className="text-xl font-bold">Hi, Mr Joshua</h2>
-            <p>Welcome to the official Foursquare Portal.</p>
+        <div className="w-full bg-[#004080] rounded-lg flex flex-row justify-between items-center text-white ">
+          <div className="p-4">
+            <h2 className="text-4xl font-bold mb-3">Hi, Mr Joshua</h2>
+            <p className="text-sm">
+              Welcome to the official Foursquare student portal.
+            </p>
           </div>
-          <img
-            src="/male_teacher.png"
-            alt="Teacher illustration"
-            className="w-24 h-24"
-          />
-        </div>
-      </div>
-
-      <div className="w-full bg-[#004080] rounded-lg shadow  flex flex-row justify-between items-center text-white ">
-        <div className="p-4">
-          <h2 className="text-4xl font-bold mb-3">Hi, Mr Joshua</h2>
-          <p className="text-sm">
-            Welcome to the official Foursquare student portal.
-          </p>
-        </div>
-        <div className="max-w-[240px] h-full object-contain ">
-          <img
-            src="/female_teacher.svg"
-            alt="Teacher illustration"
-            className=" w-full h-full"
-          />
+          <div className="max-w-[240px] h-full object-contain ">
+            <img
+              src="/male.png"
+              alt="Teacher illustration"
+              className=" w-full h-full"
+            />
+          </div>
         </div>
       </div>
 
@@ -346,14 +334,12 @@ export default function TeacherDashboard() {
           value={10}
           icon={GroupIcon}
           percentage={0.5}
-          className="bg-[#F94144] rounded-lg"
         />
         <StatCard
           label="Total Lessons"
           value={15}
           icon={NotePad}
           percentage={1.2}
-          className="bg-[#004080] rounded-lg"
         />
         <StatCard
           label="Total Assignments"
