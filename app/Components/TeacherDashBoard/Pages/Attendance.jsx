@@ -11,6 +11,7 @@ const AttendancePage = () => {
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
+  const [selectedStudents, setSelectedStudents] = useState([]);
 
   useEffect(() => {
     if (isModalOpen) {
@@ -166,6 +167,20 @@ const AttendancePage = () => {
     </div>
   );
 
+  const handleSelectAll = (e) => {
+    if (e.target.checked) {
+      setSelectedStudents(students.map((s) => s.id));
+    } else {
+      setSelectedStudents([]);
+    }
+  };
+
+  const handleStudentSelect = (id) => {
+    setSelectedStudents((prev) =>
+      prev.includes(id) ? prev.filter((sid) => sid !== id) : [...prev, id]
+    );
+  };
+
   return (
     <Layout>
       <div className="flex min-h-screen bg-[#F7F8FA]">
@@ -215,7 +230,13 @@ const AttendancePage = () => {
                   {/* Mark Attendance Content */}
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center space-x-2">
-                      <input type="checkbox" id="selectAll" />
+                      <input
+                        type="checkbox"
+                        id="selectAll"
+                        checked={selectedStudents.length === students.length}
+                        onChange={handleSelectAll}
+                        className="accent-green-600 w-5 h-5"
+                      />
                       <label
                         htmlFor="selectAll"
                         className="text-sm font-medium"
@@ -250,7 +271,12 @@ const AttendancePage = () => {
                       {students.map((student) => (
                         <tr key={student.id}>
                           <td className="border-b border-gray-100 px-4 py-3 text-left">
-                            <input type="checkbox" className="text-green-500" />
+                            <input
+                              type="checkbox"
+                              className="text-green-500 accent-green-600 w-5 h-5"
+                              checked={selectedStudents.includes(student.id)}
+                              onChange={() => handleStudentSelect(student.id)}
+                            />
                           </td>
                           <td className="border-b border-gray-100 px-4 py-3 text-center font-semibold">
                             {student.name}
