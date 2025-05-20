@@ -90,14 +90,16 @@ const SchoolAdminLayout = ({ children }) => {
   return (
     <SchoolAdminLayoutContext.Provider value={authContextValue}>
       <div className="grid sm:grid-cols-[150px_auto] md:grid-cols-[200px_auto] xl:grid-cols-[220px_auto] overflow-hidden w-screen h-screen">
-        <div className="bg-[#004080] max-h-screen">
+        <div className="bg-[#004080] max-h-screen ">
           <Suspense>
             <SchoolAdminLeft />
           </Suspense>
         </div>
-        <div className="grid grid-rows-[68px_1fr] h-full">
+        <div className="grid grid-rows-[68px_1fr] lg:h-full sm:min-h-screen">
           <DashboardHeader />
-          <div className="h-full overflow-hidden">{children}</div>
+          <div className="h-full  lg:overflow-hidden overflow-y-auto">
+            {children}
+          </div>
         </div>
       </div>
     </SchoolAdminLayoutContext.Provider>

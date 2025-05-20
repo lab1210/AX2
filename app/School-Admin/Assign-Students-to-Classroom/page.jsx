@@ -1,9 +1,9 @@
 import { UserProvider } from "@/context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../css/layout.module.css";
-import SubjectAssignment from "../../Components/SchoolAdminDashBoard/Pages/SubjectAssignment";
+import StudentAssignment from "@/Components/SchoolAdminDashBoard/Pages/StudentAssignment";
 
-const SubjectAssignmentPage = () => {
+const AssignStudents = () => {
   return (
     <UserProvider>
       <Suspense
@@ -14,10 +14,10 @@ const SubjectAssignmentPage = () => {
           </div>
         }
       >
-        <SubjectAssignment />
+        <StudentAssignment />
       </Suspense>
     </UserProvider>
   );
 };
 
-export default SubjectAssignmentPage;
+export default AssignStudents;
