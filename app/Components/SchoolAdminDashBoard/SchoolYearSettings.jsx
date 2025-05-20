@@ -246,7 +246,7 @@ const SchoolYearSettings = () => {
       <div className="px-0">
         <div className="overflow-y-auto max-h-[200px] no-scrollbar">
           <table className="min-w-full table-auto">
-            {paginatedData.length === 0 && (
+            {paginatedData.length > 0 && (
               <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">
                 <tr>
                   <th className="p-2 pl-6 bg-[#EDF0F3]">Academic Session</th>
@@ -261,10 +261,10 @@ const SchoolYearSettings = () => {
               {paginatedData.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="3"
+                    colSpan="5"
                     className="p-5  text-center border text-gray-500"
                   >
-                    No Classes Available
+                    No Data Available
                   </td>
                 </tr>
               ) : (

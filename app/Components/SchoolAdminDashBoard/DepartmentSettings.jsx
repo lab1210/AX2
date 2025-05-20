@@ -1,46 +1,41 @@
 "use client";
-
 import React, { useState } from "react";
-import Dropdown from "./DropDown";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
-const MainClassSettings = () => {
-  const [classList, setClassList] = useState([
+const DepartmentSettings = () => {
+  const [departmentList, setDepartmentList] = useState([
     {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "JSS1",
+      Name: "Science Department ",
     },
     {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "JSS2",
+      Name: "Mathematics Department",
     },
     {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "JSS3",
+      Name: "English Department",
     },
     {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "SS1",
+      Name: "History Department",
     },
   ]);
 
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
-  const [selectedClass, setSelectedClass] = useState(null);
-  const [editClassVisible, setEditClassVisible] = useState(false);
+
+  const [selectedDepartment, setSelectedDepartment] = useState(null);
+  const [editDepartmentVisible, setEditDepartmentVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+
   const [formData, setFormData] = useState({
-    Class: "",
-    "Academic Session": "",
+    Name: "",
   });
 
-  const paginatedData = classList.slice(
+  const paginatedData = departmentList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const totalPages = Math.ceil(classList.length / itemsPerPage);
+  const totalPages = Math.ceil(departmentList.length / itemsPerPage);
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
@@ -52,32 +47,31 @@ const MainClassSettings = () => {
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    const existingClass = classList.find(
-      (item) => item.Class === formData.Class
+    const existingSession = departmentList.find(
+      (item) => item.Name === formData.Name
     );
 
-    if (!editClassVisible && existingClass) {
-      setMessage("Class already exists.");
+    if (!editDepartmentVisible && existingSession) {
+      setMessage("Department already exists.");
       setMessageType("error");
       return;
     }
 
-    if (editClassVisible && selectedClass) {
-      const updatedList = classList.map((item) =>
-        item.Class === selectedClass.Class ? selectedClass : item
+    if (editDepartmentVisible && selectedDepartment) {
+      const updatedList = departmentList.map((item) =>
+        item.Name === selectedDepartment.Name ? selectedDepartment : item
       );
-      setClassList(updatedList);
-      setMessage("Class updated successfully.");
+      setDepartmentList(updatedList);
+      setMessage("Department updated successfully.");
       setMessageType("success");
-      setEditClassVisible(false);
-      setSelectedClass(null);
+      setEditDepartmentVisible(false);
+      setSelectedDepartment(null);
     } else {
-      setClassList((prev) => [...prev, formData]);
-      setMessage("Class added successfully.");
+      setDepartmentList((prev) => [...prev, formData]);
+      setMessage("Department added successfully.");
       setMessageType("success");
       setFormData({
-        Class: "",
-        "Academic Session": "",
+        Name: "",
       });
     }
 
@@ -88,9 +82,9 @@ const MainClassSettings = () => {
     }, 3000);
   };
 
-  const handleEdit = (Class) => {
-    setEditClassVisible(true);
-    setSelectedClass({ ...Class });
+  const handleEdit = (term) => {
+    setEditDepartmentVisible(true);
+    setSelectedDepartment({ ...term });
   };
 
   return (
@@ -109,91 +103,50 @@ const MainClassSettings = () => {
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
         <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
           <p className="font-bold text-[#07508F]">
-            {editClassVisible
-              ? "Edit Class Management"
-              : "Set Class Management"}
+            {editDepartmentVisible
+              ? "Edit Department"
+              : "Register New Department"}
           </p>
           <button
             type="submit"
             className="bg-[#07508F] text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
           >
-            {editClassVisible ? "Save" : "Set"}
+            {editDepartmentVisible ? "Save" : "Set"}
           </button>
         </div>
         <div className="pl-6 pr-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex flex-col gap-2 mb-2">
-              <label className="text-[0.88rem] text-[#5E6A72]">Class:</label>
-              <input
-                type="text"
-                placeholder="Enter Class"
-                value={
-                  editClassVisible ? selectedClass.Class : formData.Class || ""
-                }
-                onChange={(e) => {
-                  const value = e.target.value;
-                  editClassVisible
-                    ? setSelectedClass((prev) => ({
-                        ...prev,
-                        Class: value,
-                      }))
-                    : setFormData((prev) => ({
-                        ...prev,
-                        Class: value,
-                      }));
-                }}
-                className="focus:outline-[#0071E3] sm:placeholder:text-xs sm:text-xs lg:placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 lg:text-sm rounded-sm border-[#B6B6B6]"
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Academic Session:
-              </label>
-              <Dropdown
-                label={
-                  editClassVisible
-                    ? selectedClass["Academic Session"]
-                    : formData["Academic Session"] || "Select Academic Session"
-                }
-                items={[
-                  {
-                    label: "2021/2022 Academic Year",
-                    onClick: () =>
-                      editClassVisible
-                        ? setSelectedClass((prev) => ({
-                            ...prev,
-                            "Academic Session": "2021/2022 Academic Year",
-                          }))
-                        : setFormData((prev) => ({
-                            ...prev,
-                            "Academic Session": "2021/2022 Academic Year",
-                          })) || "",
-                  },
-
-                  {
-                    label: "2022/2023 Academic Year",
-                    onClick: () =>
-                      editClassVisible
-                        ? setSelectedClass((prev) => ({
-                            ...prev,
-                            "Academic Session": "2022/2023 Academic Year",
-                          }))
-                        : setFormData((prev) => ({
-                            ...prev,
-                            "Academic Session": "2022/2023 Academic Year",
-                          })) || "",
-                  },
-                ]}
-              />
-            </div>
+          <div className="flex flex-col gap-2 ">
+            <label className="text-[0.88rem] text-[#5E6A72]">Department:</label>
+            <input
+              type="text"
+              placeholder="Enter Department"
+              value={
+                editDepartmentVisible
+                  ? selectedDepartment.Name
+                  : formData.Name || ""
+              }
+              onChange={(e) => {
+                const value = e.target.value;
+                editDepartmentVisible
+                  ? setSelectedDepartment((prev) => ({
+                      ...prev,
+                      Name: value,
+                    }))
+                  : setFormData((prev) => ({
+                      ...prev,
+                      Name: value,
+                    }));
+              }}
+              className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+              required
+            />
           </div>
         </div>
       </form>
-      <hr />
+      <hr className="mt-8" />
       <div className="flex-shrink-0">
         <p className="font-semibold flex justify-center p-3 text-[#333333]">
-          Existing Classes
+          Existing Department
         </p>
       </div>
       <div className="px-0">
@@ -202,8 +155,7 @@ const MainClassSettings = () => {
             {paginatedData.length > 0 && (
               <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">
                 <tr>
-                  <th className="p-2 pl-12 bg-[#EDF0F3]">Class</th>
-                  <th className="p-2 bg-[#EDF0F3]">Academic Session</th>
+                  <th className="p-2 pl-20 bg-[#EDF0F3]">Departments</th>
                   <th className="p-2 bg-[#EDF0F3]">Actions</th>
                 </tr>
               </thead>
@@ -215,14 +167,13 @@ const MainClassSettings = () => {
                     colSpan="3"
                     className="p-5  text-center border text-gray-500"
                   >
-                    No Classes Available
+                    No Data Available
                   </td>
                 </tr>
               ) : (
                 paginatedData.map((item, index) => (
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-12">{item.Class}</td>
-                    <td className="p-2">{item["Academic Session"]}</td>
+                    <td className="p-2 pl-20">{item.Name}</td>
                     <td className="p-2">
                       <div className="flex gap-4">
                         <FiEdit3
@@ -287,4 +238,4 @@ const MainClassSettings = () => {
   );
 };
 
-export default MainClassSettings;
+export default DepartmentSettings;

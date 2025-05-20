@@ -14,7 +14,8 @@ const SchoolAdminLeft = () => {
   const pathname = usePathname();
 
   useInitializeUser(setUser, setIsLoading);
-  const [settingsClicked, setSettingsClicked] = useState(false);
+
+  const [activePopup, setActivePopup] = useState(null);
 
   const DashboardLinks = [
     {
@@ -27,14 +28,13 @@ const SchoolAdminLeft = () => {
       icon: <MdOutlineDashboard size={20} />,
     },
     {
-      Name: "Manage User",
+      Name: "Registration",
       icon: <MdOutlineDashboard size={20} />,
-      Link: "#",
+      Link: "/School-Admin/Registration",
     },
     {
       Name: "Assignment",
       icon: <MdOutlineDashboard size={20} />,
-      Link: "/School-Admin/Subject-Assignment",
     },
     {
       Name: "Result Management",
@@ -53,58 +53,61 @@ const SchoolAdminLeft = () => {
     },
   ];
 
+  const isSpecialRouteActive = (name) => {
+    if (name === "School Settings") {
+      return pathname.includes("Configure");
+    }
+    if (name === "Assignment") {
+      return pathname.includes("Assign");
+    }
+    return false;
+  };
+
   return (
     <div className="h-full w-full grid grid-rows-[100px_1fr_auto] pt-8">
       <div className="flex flex-col items-center gap-2 w-full">
         <div className="object-contain max-w-[50px] max-h-[50px]">
           <img className="w-full h-full" src={"/logo.svg"} alt="logo" />
         </div>
-        <div className="text-white ">
+        <div className="text-white">
           <p className="font-bold">{user?.school_admin?.school_name}</p>
           <p className="font-bold">Student Portal</p>
         </div>
       </div>
+
       <ul className="pt-6 text-white pl-4 pr-4 flex flex-col gap-2">
         {DashboardLinks.map((item, index) => {
-          const isSchoolSettings = item.Name === "School Settings";
+          const isSpecial =
+            item.Name === "School Settings" || item.Name === "Assignment";
+          const isActive = isSpecial
+            ? isSpecialRouteActive(item.Name)
+            : pathname.includes(item.Link);
+
           return (
             <li
-              className={`${
-                !isSchoolSettings && "hover:bg-[#ABBED2]  hover:text-[#01427A]"
-              } relative max-w-50 cursor-pointer rounded-sm p-1 ${
-                !isSchoolSettings && pathname.includes(item.Link)
-                  ? "bg-[#f5f5f5] text-[#01427A]"
-                  : ""
-              }
-              `}
               key={index}
-              onClick={
-                isSchoolSettings ? () => setSettingsClicked(true) : undefined
-              }
+              className={`relative max-w-50 cursor-pointer rounded-sm p-1 ${
+                isActive
+                  ? "bg-[#f5f5f5] text-[#01427A] "
+                  : "hover:bg-[#ABBED2] hover:text-[#01427A]"
+              }`}
+              onClick={isSpecial ? () => setActivePopup(item.Name) : undefined}
             >
-              {/* Items without Link */}
-              {isSchoolSettings && (
+              {isSpecial ? (
                 <>
                   <div
-                    className={`flex items-center gap-4 sm:text-[0.94rem] xl:text-base hover:bg-[#ABBED2]  hover:text-[#01427A] rounded-sm p-1 ${
-                      pathname.includes("Configure")
-                        ? "bg-[#f5f5f5] text-[#01427A]"
-                        : ""
-                    }`}
+                    className={`flex items-center gap-4 sm:text-[0.94rem] xl:text-base p-1 `}
                   >
                     <span>{item.icon}</span>
                     {item.Name}
                   </div>
                   <SchoolAdminSettingsPopup
-                    settingsClicked={settingsClicked}
-                    setSettingsClicked={setSettingsClicked}
+                    Name={item.Name}
+                    settingsClicked={activePopup === item.Name}
+                    setSettingsClicked={() => setActivePopup(null)}
                   />
                 </>
-              )}
-
-              {/* Items with Link */}
-
-              {item.Link && (
+              ) : (
                 <Link
                   className="flex items-center gap-4 sm:text-[0.94rem] xl:text-base"
                   href={`${item.Link}${
@@ -121,8 +124,8 @@ const SchoolAdminLeft = () => {
       </ul>
 
       <div className="flex justify-center">
-        <div className="object-contain  max-w-[100px] max-h-[65px] pb-2">
-          <img src="/whitelogo.png" alt="" className="w-full h-full" />
+        <div className="object-contain max-w-[100px] max-h-[65px] pb-2">
+          <img src="/whitelogo.png" alt="logo" className="w-full h-full" />
         </div>
       </div>
     </div>

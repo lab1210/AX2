@@ -1,4 +1,4 @@
-import SubjectSettings from "@/Components/SchoolAdminDashBoard/Pages/SubjectSettings";
+import SubjectSettings from "../../Components/SchoolAdminDashBoard/Pages/SubjectDepartment";
 import { UserProvider } from "@/context/UserProvider";
 import React, { Suspense } from "react";
 import styles from "../../css/layout.module.css";

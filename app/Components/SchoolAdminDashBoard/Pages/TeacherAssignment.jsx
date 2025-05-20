@@ -1,21 +1,19 @@
 "use client";
-
 import React, { useState } from "react";
 import SchoolAdminLayout from "../SchoolAdminLayout";
+import ClassTeacherAssign from "../ClassTeacherAssign";
+import SubjectTeacherAssign from "../SubjectTeacherAssign";
 import RightSide from "../RightSide";
-import MainClassSettings from "../MainClassSettings";
-import ClassArm from "../ClassArm";
-import ClassMgt from "../ClassMgt";
 
-const ClassSettings = () => {
-  const [activeTab, setActiveTab] = useState("Class Management");
+const TeacherAssignment = () => {
+  const [activeTab, setActiveTab] = useState("Class Teachers Assignment");
 
   return (
     <SchoolAdminLayout>
       <div className="lg:grid lg:grid-cols-[1fr_270px] flex flex-col sm:gap-6 lg:gap-0 bg-[#EEEEEE] lg:h-full  pt-3 pl-2 pr-1 lg:pb-0 pb-3 overflow-y-auto">
         <div className="bg-white sm:pb-3 lg:pb-0 h-full mr-2 overflow-y-auto no-scrollbar">
           <div className="pt-3 text-sm flex gap-14 pl-6 pr-2">
-            {["Class Management", "Class Arm", "Classroom Management"].map(
+            {["Class Teachers Assignment", "Subject Teacher Assignment"].map(
               (tab) => (
                 <button
                   key={tab}
@@ -37,9 +35,10 @@ const ClassSettings = () => {
             )}
           </div>
           <hr className="mt-1.5" />
-          {activeTab === "Class Management" && <MainClassSettings />}
-          {activeTab === "Class Arm" && <ClassArm />}
-          {activeTab === "Classroom Management" && <ClassMgt />}
+          {activeTab === "Class Teachers Assignment" && <ClassTeacherAssign />}
+          {activeTab === "Subject Teacher Assignment" && (
+            <SubjectTeacherAssign />
+          )}
         </div>
         <div className="h-full overflow-hidden">
           <RightSide />
@@ -49,4 +48,4 @@ const ClassSettings = () => {
   );
 };
 
-export default ClassSettings;
+export default TeacherAssignment;
