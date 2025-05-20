@@ -1,26 +1,23 @@
 "use client";
-
 import React, { useState } from "react";
 import Dropdown from "./DropDown";
+import MultiDropdown from "./MultiDropDown";
+
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
-const MainClassSettings = () => {
+const SubjecttoDept = () => {
   const [classList, setClassList] = useState([
     {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "JSS1",
+      Department: "Department 1",
+      Subject: ["Mathematics", "Science"],
     },
     {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "JSS2",
+      Department: "Department 2",
+      Subject: ["English", "History"],
     },
     {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "JSS3",
-    },
-    {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "SS1",
+      Department: "Department 3",
+      Subject: ["Science", "Art"],
     },
   ]);
 
@@ -29,11 +26,13 @@ const MainClassSettings = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [editClassVisible, setEditClassVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
-  const [formData, setFormData] = useState({
-    Class: "",
-    "Academic Session": "",
-  });
+  const itemsPerPage = 2;
+  const [formData, setFormData] = useState([
+    {
+      Department: "",
+      Subject: [],
+    },
+  ]);
 
   const paginatedData = classList.slice(
     (currentPage - 1) * itemsPerPage,
@@ -53,31 +52,30 @@ const MainClassSettings = () => {
     e.preventDefault();
 
     const existingClass = classList.find(
-      (item) => item.Class === formData.Class
+      (item) => item.Teacher === formData.Teacher
     );
 
     if (!editClassVisible && existingClass) {
-      setMessage("Class already exists.");
+      setMessage("Department Assignment already exists.");
       setMessageType("error");
       return;
     }
 
     if (editClassVisible && selectedClass) {
       const updatedList = classList.map((item) =>
-        item.Class === selectedClass.Class ? selectedClass : item
+        item.Class === selectedClass.Teacher ? selectedClass : item
       );
-      setClassList(updatedList);
-      setMessage("Class updated successfully.");
+      setMessage("Department Assignment updated successfully.");
       setMessageType("success");
       setEditClassVisible(false);
       setSelectedClass(null);
     } else {
       setClassList((prev) => [...prev, formData]);
-      setMessage("Class added successfully.");
+      setMessage("Department Assignment added successfully.");
       setMessageType("success");
       setFormData({
-        Class: "",
-        "Academic Session": "",
+        Department: "",
+        Subject: [],
       });
     }
 
@@ -88,9 +86,9 @@ const MainClassSettings = () => {
     }, 3000);
   };
 
-  const handleEdit = (Class) => {
+  const handleEdit = (Teacher) => {
     setEditClassVisible(true);
-    setSelectedClass({ ...Class });
+    setSelectedClass({ ...Teacher });
   };
 
   return (
@@ -106,82 +104,87 @@ const MainClassSettings = () => {
           {message}
         </div>
       )}
+
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
         <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
           <p className="font-bold text-[#07508F]">
-            {editClassVisible
-              ? "Edit Class Management"
-              : "Set Class Management"}
+            Assign Subject to Department
           </p>
           <button
             type="submit"
             className="bg-[#07508F] text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
           >
-            {editClassVisible ? "Save" : "Set"}
+            {editClassVisible ? "Save" : "Assign"}
           </button>
         </div>
         <div className="pl-6 pr-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex flex-col gap-2 mb-2">
-              <label className="text-[0.88rem] text-[#5E6A72]">Class:</label>
-              <input
-                type="text"
-                placeholder="Enter Class"
-                value={
-                  editClassVisible ? selectedClass.Class : formData.Class || ""
+          <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-x-2 ">
+              <label className="text-[0.88rem] text-[#5E6A72]">Subject:</label>
+              <MultiDropdown
+                label="Select Subject (s)"
+                selectedItems={
+                  editClassVisible
+                    ? selectedClass.Subject || []
+                    : formData.Subject
                 }
-                onChange={(e) => {
-                  const value = e.target.value;
+                onSelect={(selected) =>
                   editClassVisible
                     ? setSelectedClass((prev) => ({
                         ...prev,
-                        Class: value,
+                        Subject: selected,
                       }))
                     : setFormData((prev) => ({
                         ...prev,
-                        Class: value,
-                      }));
-                }}
-                className="focus:outline-[#0071E3] sm:placeholder:text-xs sm:text-xs lg:placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 lg:text-sm rounded-sm border-[#B6B6B6]"
-                required
+                        Subject: selected,
+                      }))
+                }
+                items={[
+                  { label: "Mathematics" },
+                  { label: "English" },
+                  { label: "Science" },
+                  { label: "Art" },
+                  { label: "History" },
+                ]}
               />
             </div>
-            <div className="flex flex-col gap-2">
+
+            <div className="flex flex-col gap-x-2">
               <label className="text-[0.88rem] text-[#5E6A72]">
-                Academic Session:
+                Department:
               </label>
               <Dropdown
                 label={
                   editClassVisible
-                    ? selectedClass["Academic Session"]
-                    : formData["Academic Session"] || "Select Academic Session"
+                    ? selectedClass.Department
+                    : formData.Department || "Select Department"
                 }
                 items={[
                   {
-                    label: "2021/2022 Academic Year",
+                    label: "Department 1",
                     onClick: () =>
                       editClassVisible
                         ? setSelectedClass((prev) => ({
                             ...prev,
-                            "Academic Session": "2021/2022 Academic Year",
+                            Department: "Department 1",
                           }))
                         : setFormData((prev) => ({
                             ...prev,
-                            "Academic Session": "2021/2022 Academic Year",
+                            Department: "Department 1",
                           })) || "",
                   },
 
                   {
-                    label: "2022/2023 Academic Year",
+                    label: "Department 2",
                     onClick: () =>
                       editClassVisible
                         ? setSelectedClass((prev) => ({
                             ...prev,
-                            "Academic Session": "2022/2023 Academic Year",
+                            Department: "Department 2",
                           }))
                         : setFormData((prev) => ({
                             ...prev,
-                            "Academic Session": "2022/2023 Academic Year",
+                            Department: "Department 2",
                           })) || "",
                   },
                 ]}
@@ -193,7 +196,7 @@ const MainClassSettings = () => {
       <hr />
       <div className="flex-shrink-0">
         <p className="font-semibold flex justify-center p-3 text-[#333333]">
-          Existing Classes
+          Existing Assigned Subject (s) to Department.
         </p>
       </div>
       <div className="px-0">
@@ -202,8 +205,8 @@ const MainClassSettings = () => {
             {paginatedData.length > 0 && (
               <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">
                 <tr>
-                  <th className="p-2 pl-12 bg-[#EDF0F3]">Class</th>
-                  <th className="p-2 bg-[#EDF0F3]">Academic Session</th>
+                  <th className="p-2 pl-16 bg-[#EDF0F3]">Subject (s)</th>
+                  <th className="p-2 bg-[#EDF0F3]">Department</th>
                   <th className="p-2 bg-[#EDF0F3]">Actions</th>
                 </tr>
               </thead>
@@ -215,14 +218,14 @@ const MainClassSettings = () => {
                     colSpan="3"
                     className="p-5  text-center border text-gray-500"
                   >
-                    No Classes Available
+                    No Data Available
                   </td>
                 </tr>
               ) : (
                 paginatedData.map((item, index) => (
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-12">{item.Class}</td>
-                    <td className="p-2">{item["Academic Session"]}</td>
+                    <td className="p-2 pl-16">{item.Subject?.join(",")}</td>
+                    <td>{item.Department}</td>
                     <td className="p-2">
                       <div className="flex gap-4">
                         <FiEdit3
@@ -287,4 +290,4 @@ const MainClassSettings = () => {
   );
 };
 
-export default MainClassSettings;
+export default SubjecttoDept;

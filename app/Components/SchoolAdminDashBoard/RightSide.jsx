@@ -3,8 +3,8 @@ import { IoInformationCircle } from "react-icons/io5";
 import BasicPie from "./Piechart";
 const RightSide = () => {
   return (
-    <div className="flex flex-col h-full gap-2">
-      <div className="flex-1 bg-white rounded-lg shadow shadow-gray-500 w-full p-3 pt-7">
+    <div className="flex lg:flex-col h-full gap-2">
+      <div className="flex-1  bg-white rounded-lg shadow shadow-gray-500 w-full p-3 pt-7">
         <p className="font-bold text-[#F94144] text-lg ">Notice</p>
         <ul className="list-disc pl-4 ">
           <li className="marker:text-[#F94144] marker:text-lg text-sm xl:text-[0.8rem]">
@@ -21,7 +21,7 @@ const RightSide = () => {
           </li>
         </ul>
       </div>
-      <div className="flex-1 bg-white rounded-lg pt-5   shadow shadow-gray-500 w-full mb-2 text-center p-3">
+      <div className="flex-1 bg-white rounded-lg pt-5  shadow shadow-gray-500 w-full mb-2 text-center p-3">
         <p className=" font-bold flex items-center justify-center gap-3">
           Attendance Statistics{" "}
           <span className="text-[#BDBDBD]">

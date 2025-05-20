@@ -2,17 +2,18 @@
 import React, { useState } from "react";
 import SchoolAdminLayout from "../SchoolAdminLayout";
 import RightSide from "../RightSide";
-import SchoolYearSettings from "../SchoolYearSettings";
-import SchoolTermSettings from "../SchoolTermSettings";
-const SchoolSettings = () => {
-  const [activeTab, setActiveTab] = useState("School Year Management");
+import DepartmentSettings from "../DepartmentSettings";
+import SubjectSettings from "../SubjectSettings";
+
+const SubjectDepartment = () => {
+  const [activeTab, setActiveTab] = useState("Department");
 
   return (
     <SchoolAdminLayout>
-      <div className="lg:grid lg:grid-cols-[1fr_270px] flex flex-col sm:gap-6 lg:gap-0 bg-[#EEEEEE] lg:h-full  pt-3 pl-2 pr-1 lg:pb-0 pb-3 overflow-y-auto">
-        <div className="bg-white h-full mr-2 lg:overflow-y-auto no-scrollbar sm:pb-3 lg:pb-0">
-          <div className="pt-3 text-sm flex gap-5 pl-6">
-            {["School Year Management", "School Term Management"].map((tab) => (
+      <div className="lg:grid lg:grid-cols-[1fr_270px] flex flex-col sm:gap-6 lg:gap-0 bg-[#EEEEEE] lg:h-full pt-3 pl-2 pr-1 lg:pb-0 pb-3 overflow-y-auto">
+        <div className="bg-white h-full mr-2 overflow-y-auto no-scrollbar sm:pb-3 lg:pb-0 ">
+          <div className="pt-3 text-sm flex items-center gap-28 pl-20 ">
+            {["Department", "Subject"].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -32,10 +33,10 @@ const SchoolSettings = () => {
             ))}
           </div>
           <hr className="mt-1.5" />
-          {activeTab === "School Year Management" && <SchoolYearSettings />}
-          {activeTab === "School Term Management" && <SchoolTermSettings />}
+          {activeTab === "Department" && <DepartmentSettings />}
+          {activeTab === "Subject" && <SubjectSettings />}
         </div>
-        <div className="h-full lg:overflow-hidden">
+        <div className="h-full overflow-hidden">
           <RightSide />
         </div>
       </div>
@@ -43,4 +44,4 @@ const SchoolSettings = () => {
   );
 };
 
-export default SchoolSettings;
+export default SubjectDepartment;
