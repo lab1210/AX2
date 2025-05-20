@@ -30,7 +30,7 @@ const SchoolAdminLeft = () => {
     {
       Name: "Registration",
       icon: <MdOutlineDashboard size={20} />,
-      Link: "#",
+      Link: "/School-Admin/Registration",
     },
     {
       Name: "Assignment",

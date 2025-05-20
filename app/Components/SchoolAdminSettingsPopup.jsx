@@ -28,15 +28,15 @@ const SchoolAdminSettingsPopup = ({
   const AssignmentSettingsPopup = [
     {
       Name: "Teacher Assignment",
-      Link: "/School-Admin/Configure-School",
+      Link: "/School-Admin/Teacher-Assignment",
     },
     {
       Name: "Subject to Department Assignment",
-      Link: "/School-Admin/Configure-Class",
+      Link: "/School-Admin/Subject-Assignment",
     },
     {
       Name: "Student Assignment",
-      Link: "/School-Admin/Configure-Subject-&-Department",
+      Link: "/School-Admin/Assign-Students-to-Classroom",
     },
   ];
   useEffect(() => {
@@ -62,7 +62,7 @@ const SchoolAdminSettingsPopup = ({
       ref={popupRef}
       className={`bg-[#4169E133] backdrop-blur-xs  ${
         settingsClicked ? "block" : "hidden"
-      } z-50 absolute left-40 ml-2 top-0 ${
+      } z-[1000] absolute left-40 ml-2 top-0 ${
         Name === "School Settings" ? "w-[280px]" : "w-[300px]"
       } pt-4 pb-4 pr-4 pl-4 rounded-lg shadow-xl bg-[url('/noise.png')] bg-cover flex flex-col gap-2`}
     >
@@ -71,18 +71,16 @@ const SchoolAdminSettingsPopup = ({
         : AssignmentSettingsPopup
       ).map((item, index) => {
         return (
-          <li
-            className="hover:backdrop-opacity-90 hover:bg-white/90 hover:bg-[url('/noise.png')] text-[#333333]  text-sm rounded-lg p-4 pt-2 pb-2"
+          <Link
+            href={`${item.Link}${
+              schooladminId ? `?schooladminId=${schooladminId}` : ""
+            }`}
             key={index}
           >
-            <Link
-              href={`${item.Link}${
-                schooladminId ? `?schooladminId=${schooladminId}` : ""
-              }`}
-            >
+            <li className="hover:backdrop-opacity-90  hover:bg-white/90 hover:bg-[url('/noise.png')] text-[#333333]  text-sm rounded-lg p-4 pt-2 pb-2">
               {item.Name}
-            </Link>
-          </li>
+            </li>
+          </Link>
         );
       })}
     </ul>
