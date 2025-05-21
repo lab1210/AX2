@@ -38,6 +38,10 @@ const SchoolAdminSettingsPopup = ({
       Name: "Student Assignment",
       Link: "/School-Admin/Assign-Students-to-Classroom",
     },
+    {
+      Name: "Student Subject Reg Control",
+      Link: "/School-Admin/Student-Subject-Registration",
+    },
   ];
   useEffect(() => {
     const handleClickOutside = (event) => {

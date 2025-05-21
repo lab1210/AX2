@@ -14,3 +14,17 @@ export const RegisterStudent = async (studentData) => {
     throw error.response?.data || error;
   }
 };
+
+export const SchoolAdminRegisterStudent = async (studentData) => {
+  try {
+    const url = `${BASE_URL}/students/create/`;
+    const response = await axios.post(url, studentData);
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error registering student:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};

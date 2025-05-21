@@ -12,6 +12,11 @@ const TeacherReg = () => {
   const [cities, setCities] = useState([]);
 
   const [formData, setFormData] = useState({
+    user: {
+      username: "",
+      email: "",
+      password: "",
+    },
     firstName: "",
     lastName: "",
     middleName: "",
@@ -126,6 +131,66 @@ const TeacherReg = () => {
                   setFormData((prev) => ({
                     ...prev,
                     lastName: value,
+                  }));
+                }}
+                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-x-1">
+              <label className="text-[0.88rem] text-[#5E6A72]">Username:</label>
+              <input
+                type="text"
+                placeholder="Enter Username"
+                value={formData.user.username || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    user: {
+                      ...prev.user,
+                      username: value,
+                    },
+                  }));
+                }}
+                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-x-1">
+              <label className="text-[0.88rem] text-[#5E6A72]">Email:</label>
+              <input
+                type="email"
+                placeholder="Enter Email"
+                value={formData.user.email || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    user: {
+                      ...prev.user,
+                      email: value,
+                    },
+                  }));
+                }}
+                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-x-1">
+              <label className="text-[0.88rem] text-[#5E6A72]">Password:</label>
+              <input
+                type="password"
+                placeholder="Create Password"
+                value={formData.user.password || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    user: {
+                      ...prev.user,
+                      password: value,
+                    },
                   }));
                 }}
                 className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
