@@ -6,6 +6,8 @@ import { MdWarning } from "react-icons/md";
 import { getAuthToken } from "../../Service/AuthService";
 import SchoolAdminLeft from "../SchoolAdminDashBoard/LeftSideBar";
 import DashboardHeader from "../SchoolAdminDashBoard/DashboardHeader";
+import { Toaster } from "react-hot-toast";
+
 const SchoolAdminLayoutContext = createContext(null);
 
 export const useSchoolAdminLayout = () => {
@@ -97,6 +99,7 @@ const SchoolAdminLayout = ({ children }) => {
         </div>
         <div className="grid grid-rows-[68px_1fr] lg:h-full sm:min-h-screen">
           <DashboardHeader />
+          <Toaster />
           <div className="h-full  lg:overflow-hidden overflow-y-auto">
             {children}
           </div>
