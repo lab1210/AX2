@@ -60,7 +60,7 @@ const PerformanceAnalysis = () => {
     { class: "SS3", passed: 80, failed: 20 },
   ];
 
-  const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042"];
+  const COLORS = ["#2F62D2", "#8BB1F9", "#A7BFEB", "#D6E1EB"];
 
   return (
     <Layout>
@@ -102,23 +102,57 @@ const PerformanceAnalysis = () => {
             </div>
           </div>
         </div>
+        <div className="flex flex-row space-x-3 mb-6 w-full">
+          {/* Subject Statistics */}
+          <div className="grid grid-cols-3 gap-6 rounded-lg p-4 w-[60%]">
+            <div className="bg-white rounded-lg shadow p-4">
+              <p className="text-sm text-gray-500">Average Score</p>
+              <h2 className="text-2xl font-bold">60%</h2>
+              <button className="text-blue-600 text-sm mt-2">
+                View Report
+              </button>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4">
+              <p className="text-sm text-gray-500">Highest Score</p>
+              <h2 className="text-2xl font-bold">80%</h2>
+              <button className="text-blue-600 text-sm mt-2">
+                View Report
+              </button>
+            </div>
+            <div className="bg-white rounded-lg shadow p-4">
+              <p className="text-sm text-gray-500">Lowest Score</p>
+              <h2 className="text-2xl font-bold">40%</h2>
+              <button className="text-blue-600 text-sm mt-2">
+                View Report
+              </button>
+            </div>
+          </div>
 
-        {/* Subject Statistics */}
-        <div className="grid grid-cols-3 gap-6 mb-6 p-4">
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-gray-500">Average Score</p>
-            <h2 className="text-2xl font-bold">60%</h2>
-            <button className="text-blue-600 text-sm mt-2">View Report</button>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-gray-500">Highest Score</p>
-            <h2 className="text-2xl font-bold">80%</h2>
-            <button className="text-blue-600 text-sm mt-2">View Report</button>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4">
-            <p className="text-sm text-gray-500">Lowest Score</p>
-            <h2 className="text-2xl font-bold">40%</h2>
-            <button className="text-blue-600 text-sm mt-2">View Report</button>
+          {/* Score Distribution */}
+          <div className="bg-white rounded-lg shadow p-6">
+            <h3 className="text-lg font-semibold mb-4">Score Distribution</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={scoreDistribution}
+                  dataKey="value"
+                  nameKey="range"
+                  cx="50%"
+                  cy="50%"
+                  innerRadius={40}
+                  outerRadius={80}
+                  // fill="#8884d8"
+                >
+                  {scoreDistribution.map((entry, index) => (
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
+                  ))}
+                </Pie>
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
@@ -164,33 +198,6 @@ const PerformanceAnalysis = () => {
 
           {/* Right Column */}
           <div className="space-y-6">
-            {/* Score Distribution */}
-            <div className="bg-white rounded-lg shadow p-4">
-              <h3 className="text-lg font-semibold mb-4">Score Distribution</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <PieChart>
-                  <Pie
-                    data={scoreDistribution}
-                    dataKey="value"
-                    nameKey="range"
-                    cx="50%"
-                    cy="50%"
-                    outerRadius={80}
-                    fill="#8884d8"
-                    label
-                  >
-                    {scoreDistribution.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={COLORS[index % COLORS.length]}
-                      />
-                    ))}
-                  </Pie>
-                  <Legend />
-                </PieChart>
-              </ResponsiveContainer>
-            </div>
-
             {/* Gender Performance Distribution */}
             <div className="bg-white rounded-lg shadow p-4">
               <h3 className="text-lg font-semibold mb-4">
@@ -207,7 +214,6 @@ const PerformanceAnalysis = () => {
                     innerRadius={40}
                     outerRadius={80}
                     fill="#82ca9d"
-                    label
                   >
                     {genderPerformance.map((entry, index) => (
                       <Cell
