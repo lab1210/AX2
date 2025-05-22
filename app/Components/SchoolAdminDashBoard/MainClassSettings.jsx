@@ -1,38 +1,31 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Dropdown from "./DropDown";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
+import {
+  createClass,
+  deleteClass,
+  getAcademicYears,
+  getClass,
+  UpdateClass,
+} from "@/Service/schoolConfig";
 
 const MainClassSettings = () => {
-  const [classList, setClassList] = useState([
-    {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "JSS1",
-    },
-    {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "JSS2",
-    },
-    {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "JSS3",
-    },
-    {
-      "Academic Session": "2023/2024  Academic Year",
-      Class: "SS1",
-    },
-  ]);
-
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [selectedClass, setSelectedClass] = useState(null);
   const [editClassVisible, setEditClassVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [years, setYears] = useState([]);
+  const [classList, setClassList] = useState([]);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedClassDelete, setSelectedClassDelete] = useState(null);
+
   const [formData, setFormData] = useState({
-    Class: "",
-    "Academic Session": "",
+    year: "",
+    class_name: "",
   });
 
   const paginatedData = classList.slice(
@@ -49,11 +42,45 @@ const MainClassSettings = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const handleSubmit = (e) => {
+  useEffect(() => {
+    const fetchClass = async () => {
+      const { data, error } = await getClass();
+      if (data) setClassList(data);
+      else setMessage(error || "Failed to load classes");
+    };
+    fetchClass();
+    fetchYears();
+  }, []);
+
+  const fetchYears = async () => {
+    const { data, error } = await getAcademicYears();
+    if (data) {
+      setYears(data);
+    } else {
+      setMessage(error || "Failed to load academic years");
+    }
+  };
+
+  const getYearName = (yearid) => {
+    const year = years.find((item) => item.year_id === yearid);
+    return year?.name;
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const trimmedName = editClassVisible
+      ? selectedClass?.class_name?.trim()
+      : formData.class_name?.trim();
+
+    if (!trimmedName) {
+      setMessage("Class name is required.");
+      setMessageType("error");
+      return;
+    }
+
     const existingClass = classList.find(
-      (item) => item.Class === formData.Class
+      (item) => item.class_name?.toLowerCase() === trimmedName.toLowerCase()
     );
 
     if (!editClassVisible && existingClass) {
@@ -63,25 +90,60 @@ const MainClassSettings = () => {
     }
 
     if (editClassVisible && selectedClass) {
-      const updatedList = classList.map((item) =>
-        item.Class === selectedClass.Class ? selectedClass : item
-      );
-      setClassList(updatedList);
-      setMessage("Class updated successfully.");
-      setMessageType("success");
-      setEditClassVisible(false);
-      setSelectedClass(null);
+      try {
+        const updatedClass = {
+          ...selectedClass,
+          year: selectedClass.year,
+          class_name: selectedClass.class_name,
+        };
+        const { data, error } = await UpdateClass(
+          selectedClass.class_year_id,
+          updatedClass
+        );
+        if (error) {
+          setMessage(error || "Failed to update class.");
+          setMessageType("error");
+          return;
+        }
+        const updatedList = classList.map((item) =>
+          item.class_year_id === selectedClass.class_year_id ? data : item
+        );
+        setClassList(updatedList);
+        setMessage("Class updated successfully.");
+        setMessageType("success");
+        setEditClassVisible(false);
+        setSelectedClass(null);
+      } catch (error) {
+        setMessage("An error occurred while updating.");
+        setMessageType("error");
+      }
     } else {
-      setClassList((prev) => [...prev, formData]);
-      setMessage("Class added successfully.");
-      setMessageType("success");
-      setFormData({
-        Class: "",
-        "Academic Session": "",
-      });
-    }
+      try {
+        const createPayload = {
+          year: formData.year,
+          class_name: formData.class_name,
+        };
 
-    // Clear message after 3 seconds
+        const { data, error } = await createClass(createPayload);
+
+        if (error) {
+          setMessage(error || "Failed to add class.");
+          setMessageType("error");
+        } else {
+          setClassList((prev) => [...prev, data]);
+          setMessage("Class added successfully.");
+          setMessageType("success");
+        }
+      } catch (err) {
+        setMessage("An error occurred while adding.");
+        setMessageType("error");
+      }
+    }
+    setFormData({
+      year: "",
+      class_name: "",
+    });
+
     setTimeout(() => {
       setMessage("");
       setMessageType("");
@@ -91,6 +153,36 @@ const MainClassSettings = () => {
   const handleEdit = (Class) => {
     setEditClassVisible(true);
     setSelectedClass({ ...Class });
+  };
+  const openDeleteModal = (term) => {
+    setSelectedClassDelete(term);
+    setDeleteModalVisible(true);
+  };
+
+  // Function to close delete modal
+  const closeDeleteModal = () => {
+    setSelectedClassDelete(null);
+    setDeleteModalVisible(false);
+  };
+
+  const handleDelete = async () => {
+    if (selectedClassDelete?.class_year_id) {
+      try {
+        const response = await deleteClass(selectedClassDelete.class_year_id);
+        if (response?.status === 204) {
+          setMessage("Class deleted successfully.");
+          setMessageType("success");
+          closeDeleteModal();
+        } else {
+          setMessage("Failed to delete Class.");
+          setMessageType("error");
+          closeDeleteModal();
+        }
+      } catch (error) {
+        setMessageType("error");
+        setMessage("Failed to delete Class.");
+      }
+    }
   };
 
   return (
@@ -104,6 +196,43 @@ const MainClassSettings = () => {
           }`}
         >
           {message}
+        </div>
+      )}
+
+      {deleteModalVisible && selectedClassDelete && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
+            <p className="font-bold text-center text-lg">Delete Class</p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure want to delete the class
+              </p>
+              <p className="text-base text-[#858383]">
+                <span className="font-bold">
+                  {selectedClassDelete?.class_name}
+                </span>
+                ?
+              </p>
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+              <button
+                onClick={handleDelete}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
@@ -128,18 +257,20 @@ const MainClassSettings = () => {
                 type="text"
                 placeholder="Enter Class"
                 value={
-                  editClassVisible ? selectedClass.Class : formData.Class || ""
+                  editClassVisible
+                    ? selectedClass.class_name
+                    : formData.class_name || ""
                 }
                 onChange={(e) => {
                   const value = e.target.value;
                   editClassVisible
                     ? setSelectedClass((prev) => ({
                         ...prev,
-                        Class: value,
+                        class_name: value,
                       }))
                     : setFormData((prev) => ({
                         ...prev,
-                        Class: value,
+                        class_name: value,
                       }));
                 }}
                 className="focus:outline-[#0071E3] sm:placeholder:text-xs sm:text-xs lg:placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 lg:text-sm rounded-sm border-[#B6B6B6]"
@@ -152,39 +283,23 @@ const MainClassSettings = () => {
               </label>
               <Dropdown
                 label={
-                  editClassVisible
-                    ? selectedClass["Academic Session"]
-                    : formData["Academic Session"] || "Select Academic Session"
+                  (editClassVisible
+                    ? getYearName(selectedClass.year)
+                    : getYearName(formData.year)) || "Select Academic Session"
                 }
-                items={[
-                  {
-                    label: "2021/2022 Academic Year",
-                    onClick: () =>
-                      editClassVisible
-                        ? setSelectedClass((prev) => ({
-                            ...prev,
-                            "Academic Session": "2021/2022 Academic Year",
-                          }))
-                        : setFormData((prev) => ({
-                            ...prev,
-                            "Academic Session": "2021/2022 Academic Year",
-                          })) || "",
-                  },
-
-                  {
-                    label: "2022/2023 Academic Year",
-                    onClick: () =>
-                      editClassVisible
-                        ? setSelectedClass((prev) => ({
-                            ...prev,
-                            "Academic Session": "2022/2023 Academic Year",
-                          }))
-                        : setFormData((prev) => ({
-                            ...prev,
-                            "Academic Session": "2022/2023 Academic Year",
-                          })) || "",
-                  },
-                ]}
+                items={years.map((year) => ({
+                  label: year.name,
+                  onClick: () =>
+                    editClassVisible
+                      ? setSelectedClass((prev) => ({
+                          ...prev,
+                          year: year.year_id,
+                        }))
+                      : setFormData({
+                          ...formData,
+                          year: year.year_id,
+                        }),
+                }))}
               />
             </div>
           </div>
@@ -221,8 +336,8 @@ const MainClassSettings = () => {
               ) : (
                 paginatedData.map((item, index) => (
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-12">{item.Class}</td>
-                    <td className="p-2">{item["Academic Session"]}</td>
+                    <td className="p-2 pl-12">{item.class_name}</td>
+                    <td className="p-2">{getYearName(item.year)}</td>
                     <td className="p-2">
                       <div className="flex gap-4">
                         <FiEdit3
@@ -231,6 +346,7 @@ const MainClassSettings = () => {
                           size={15}
                         />
                         <FiTrash2
+                          onClick={() => openDeleteModal(item)}
                           className="text-[#F94144] cursor-pointer"
                           size={15}
                         />

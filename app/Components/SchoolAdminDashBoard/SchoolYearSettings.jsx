@@ -1,49 +1,49 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import Dropdown from "./DropDown";
+import {
+  createAcademicYear,
+  deleteAcademicYear,
+  getAcademicYears,
+  updateAcademicYear,
+} from "../../Service/schoolConfig";
 const SchoolYearSettings = () => {
-  const [schoolYearList, setSchoolYearList] = useState([
-    {
-      "Academic Session": "2023/2024 Academic Year",
-      "Start Date": "2023-01-01",
-      "End Date": "2023-12-31",
-      Status: "Active",
-    },
-    {
-      "Academic Session": "2022/2023 Academic Year",
-      "Start Date": "2022-01-01",
-      "End Date": "2022-12-31",
-      Status: "Inactive",
-    },
-    {
-      "Academic Session": "2021/2022 Academic Year",
-      "Start Date": "2021-01-01",
-      "End Date": "2021-12-31",
-      Status: "Inactive",
-    },
-  ]);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
-
+  const [academicYears, setAcademicYears] = useState([]);
   const [selectedYear, setSelectedYear] = useState(null);
   const [editYearVisible, setEditYearVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 2;
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedYearDelete, setSelectedYearDelete] = useState(null);
 
   const [formData, setFormData] = useState({
-    "Academic Session": "",
-    "Start Date": "",
-    "End Date": "",
-    Status: "",
+    name: "",
+    start_date: "",
+    end_date: "",
   });
 
-  const paginatedData = schoolYearList.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  //GET LIST
+  useEffect(() => {
+    const fetchYears = async () => {
+      const { data, error } = await getAcademicYears();
+      if (data) setAcademicYears(data);
+      else setMessage(error || "Failed to load academic years");
+    };
+    fetchYears();
+  }, []);
 
-  const totalPages = Math.ceil(schoolYearList.length / itemsPerPage);
+  //PAGINATION
+  const paginatedData = Array.isArray(academicYears)
+    ? academicYears.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    : [];
+
+  const totalPages = Math.ceil(academicYears.length / itemsPerPage);
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
@@ -52,11 +52,21 @@ const SchoolYearSettings = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const existingSession = schoolYearList.find(
-      (item) => item["Academic Session"] === formData["Academic Session"]
+    const trimmedName = editYearVisible
+      ? selectedYear?.name?.trim()
+      : formData.name?.trim();
+
+    if (!trimmedName) {
+      setMessage("Academic session name is required.");
+      setMessageType("error");
+      return;
+    }
+
+    const existingSession = academicYears.find(
+      (item) => item.name?.toLowerCase() === trimmedName.toLowerCase()
     );
 
     if (!editYearVisible && existingSession) {
@@ -66,29 +76,63 @@ const SchoolYearSettings = () => {
     }
 
     if (editYearVisible && selectedYear) {
-      const updatedList = schoolYearList.map((item) =>
-        item["Academic Session"] === selectedYear["Academic Session"]
-          ? selectedYear
-          : item
-      );
-      setSchoolYearList(updatedList);
-      setMessage("Academic year updated successfully.");
-      setMessageType("success");
-      setEditYearVisible(false);
-      setSelectedYear(null);
+      try {
+        const updatedData = {
+          ...selectedYear,
+          name: selectedYear.name,
+          start_date: selectedYear.start_date,
+          end_date: selectedYear.end_date,
+          status: selectedYear.status, // Only during edit
+        };
+
+        const { data, error } = await updateAcademicYear(
+          selectedYear.year_id,
+          updatedData
+        );
+
+        if (error) {
+          setMessage(error || "Failed to update academic year.");
+          setMessageType("error");
+          return;
+        }
+
+        const updatedList = academicYears.map((item) =>
+          item.year_id === selectedYear.year_id ? data : item
+        );
+        setAcademicYears(updatedList);
+        setMessage("Academic year updated successfully.");
+        setMessageType("success");
+        setEditYearVisible(false);
+        setSelectedYear(null);
+      } catch (err) {
+        setMessage("An error occurred while updating.");
+        setMessageType("error");
+      }
     } else {
-      setSchoolYearList((prev) => [...prev, formData]);
-      setMessage("Academic year added successfully.");
-      setMessageType("success");
-      setFormData({
-        "Academic Session": "",
-        "Start Date": "",
-        "End Date": "",
-        Status: "",
-      });
+      try {
+        const { status, ...createPayload } = formData; // Exclude status
+        const { data, error } = await createAcademicYear(createPayload);
+
+        if (error) {
+          setMessage(error || "Failed to add academic year.");
+          setMessageType("error");
+        } else {
+          setAcademicYears((prev) => [...prev, data]);
+          setMessage("Academic year added successfully.");
+          setMessageType("success");
+        }
+      } catch (err) {
+        setMessage("An error occurred while adding.");
+        setMessageType("error");
+      }
     }
 
-    // Clear message after 3 seconds
+    setFormData({
+      name: "",
+      start_date: "",
+      end_date: "",
+    });
+
     setTimeout(() => {
       setMessage("");
       setMessageType("");
@@ -98,6 +142,37 @@ const SchoolYearSettings = () => {
   const handleEdit = (year) => {
     setEditYearVisible(true);
     setSelectedYear({ ...year });
+  };
+
+  const openDeleteModal = (school) => {
+    setSelectedYearDelete(school);
+    setDeleteModalVisible(true);
+  };
+
+  // Function to close delete modal
+  const closeDeleteModal = () => {
+    setSelectedYearDelete(null);
+    setDeleteModalVisible(false);
+  };
+
+  const handleDelete = async () => {
+    if (selectedYearDelete?.year_id) {
+      try {
+        const response = await deleteAcademicYear(selectedYearDelete.year_id);
+        if (response?.status === 204) {
+          setMessage("Academic year deleted successfully.");
+          setMessageType("success");
+          closeDeleteModal();
+        } else {
+          setMessage("Failed to delete academic year.");
+          setMessageType("error");
+          closeDeleteModal();
+        }
+      } catch (error) {
+        setMessageType("error");
+        setMessage("Failed to delete academic year.");
+      }
+    }
   };
 
   return (
@@ -113,7 +188,41 @@ const SchoolYearSettings = () => {
           {message}
         </div>
       )}
-
+      {deleteModalVisible && selectedYearDelete && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
+            <p className="font-bold text-center text-lg">
+              Delete Academic Year
+            </p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure want to delete the year
+              </p>
+              <p className="text-base text-[#858383]">
+                <span className="font-bold">{selectedYearDelete.name}</span>?
+              </p>
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+              <button
+                onClick={handleDelete}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
         <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
           <p className="font-bold text-[#07508F]">
@@ -134,50 +243,53 @@ const SchoolYearSettings = () => {
               </label>
               <input
                 type="text"
+                name="name"
                 placeholder="Enter Academic Session"
-                value={
-                  editYearVisible
-                    ? selectedYear["Academic Session"]
-                    : formData["Academic Session"] || ""
-                }
+                value={editYearVisible ? selectedYear.name : formData.name}
                 onChange={(e) => {
                   const value = e.target.value;
                   editYearVisible
                     ? setSelectedYear((prev) => ({
                         ...prev,
-                        "Academic Session": value,
+                        name: value,
                       }))
                     : setFormData((prev) => ({
                         ...prev,
-                        "Academic Session": value,
+                        name: value,
                       }));
                 }}
                 className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
                 required
               />
             </div>
-            {editYearVisible && (
+            {editYearVisible && selectedYear && (
               <div className="flex flex-col gap-2">
                 <label className="text-[0.88rem] text-[#5E6A72]">Status:</label>
                 <Dropdown
-                  label={selectedYear.Status}
+                  label={
+                    selectedYear.status
+                      ? "Active"
+                      : "In-Active" || "Select Status"
+                  }
                   items={[
                     {
                       label: "Active",
-                      onClick: () =>
-                        setSelectedYear(
-                          { ...selectedYear, Status: "Active" } || ""
-                        ),
+                      onClick: () => {
+                        const updated = { ...selectedYear, status: true };
+                        setSelectedYear(updated);
+                        setFormData((prev) => ({ ...prev, status: true }));
+                      },
                     },
                     {
                       label: "Inactive",
-                      onClick: () =>
-                        setSelectedYear(
-                          {
-                            ...selectedYear,
-                            Status: "Inactive",
-                          } || ""
-                        ),
+                      onClick: () => {
+                        const updated = { ...selectedYear, status: false };
+                        setSelectedYear(updated);
+                        setFormData((prev) => ({
+                          ...prev,
+                          status: false,
+                        }));
+                      },
                     },
                   ]}
                 />
@@ -192,20 +304,21 @@ const SchoolYearSettings = () => {
               </label>
               <input
                 type="date"
+                name="start_date"
                 placeholder="Start Date"
                 value={
                   editYearVisible
-                    ? selectedYear["Start Date"]
-                    : formData["Start Date"] || ""
+                    ? selectedYear.start_date
+                    : formData.start_date
                 }
                 onChange={(e) => {
                   const value = e.target.value;
                   editYearVisible
                     ? setSelectedYear((prev) => ({
                         ...prev,
-                        "Start Date": value,
+                        start_date: value,
                       }))
-                    : setFormData((prev) => ({ ...prev, "Start Date": value }));
+                    : setFormData((prev) => ({ ...prev, start_date: value }));
                 }}
                 className="text-sm text-[#B6B6B6] border-2 p-1.5 rounded-sm border-[#B6B6B6] focus:outline-[#0071E3]"
                 required
@@ -217,18 +330,16 @@ const SchoolYearSettings = () => {
                 type="date"
                 placeholder="End Date"
                 value={
-                  editYearVisible
-                    ? selectedYear["End Date"]
-                    : formData["End Date"] || ""
+                  editYearVisible ? selectedYear.end_date : formData.end_date
                 }
                 onChange={(e) => {
                   const value = e.target.value;
                   editYearVisible
                     ? setSelectedYear((prev) => ({
                         ...prev,
-                        "End Date": value,
+                        end_date: value,
                       }))
-                    : setFormData((prev) => ({ ...prev, "End Date": value }));
+                    : setFormData((prev) => ({ ...prev, end_date: value }));
                 }}
                 className="text-sm text-[#B6B6B6] border-2 p-1.5 rounded-sm border-[#B6B6B6] focus:outline-[#0071E3]"
                 required
@@ -270,13 +381,13 @@ const SchoolYearSettings = () => {
               ) : (
                 paginatedData.map((item, index) => (
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-6">{item["Academic Session"]}</td>
-                    <td className="p-2">{item["Start Date"]}</td>
-                    <td className="p-2">{item["End Date"]}</td>
+                    <td className="p-2 pl-6">{item.name}</td>
+                    <td className="p-2">{item.start_date}</td>
+                    <td className="p-2">{item.end_date}</td>
                     <td className="p-2">
                       <span
                         className={`${
-                          item.Status === "Active"
+                          item.status
                             ? "bg-[#E8F8F0] text-[#1BB66E]"
                             : "bg-[#FEECEC] text-[#F94144]"
                         } rounded-2xl py-1 font-bold`}
@@ -286,7 +397,7 @@ const SchoolYearSettings = () => {
                           textAlign: "center",
                         }}
                       >
-                        {item.Status}
+                        {item.status ? "Active" : "In-Active"}
                       </span>
                     </td>
                     <td className="p-2">
@@ -297,6 +408,7 @@ const SchoolYearSettings = () => {
                           size={15}
                         />
                         <FiTrash2
+                          onClick={() => openDeleteModal(item)}
                           className="text-[#F94144] cursor-pointer"
                           size={15}
                         />

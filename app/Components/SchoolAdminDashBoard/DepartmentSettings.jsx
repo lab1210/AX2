@@ -1,34 +1,36 @@
 "use client";
-import React, { useState } from "react";
+import {
+  createDepartment,
+  getDepartment,
+  UpdateDepartment,
+} from "@/Service/schoolConfig";
+import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
 const DepartmentSettings = () => {
-  const [departmentList, setDepartmentList] = useState([
-    {
-      Name: "Science Department ",
-    },
-    {
-      Name: "Mathematics Department",
-    },
-    {
-      Name: "English Department",
-    },
-    {
-      Name: "History Department",
-    },
-  ]);
-
+  const [departmentList, setDepartmentList] = useState([]);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
-
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [editDepartmentVisible, setEditDepartmentVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 4;
+  const [selectedDepartmentDelete, setSelectedDepartmentDelete] =
+    useState(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const [formData, setFormData] = useState({
-    Name: "",
+    name: "",
   });
+
+  useEffect(() => {
+    const fetchDepartments = async () => {
+      const { data, error } = await getDepartment();
+      if (data) setDepartmentList(data);
+      else setMessage(error || "Failed to load departments");
+    };
+    fetchDepartments();
+  }, []);
 
   const paginatedData = departmentList.slice(
     (currentPage - 1) * itemsPerPage,
@@ -44,38 +46,81 @@ const DepartmentSettings = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const existingSession = departmentList.find(
-      (item) => item.Name === formData.Name
+    const trimmedName = editDepartmentVisible
+      ? selectedDepartment?.name?.trim()
+      : formData.name?.trim();
+
+    if (!trimmedName) {
+      setMessage("Department Name is required.");
+      setMessageType("error");
+      return;
+    }
+
+    const existingdepartment = departmentList.find(
+      (item) => item.name?.toLowerCase() === trimmedName.toLowerCase()
     );
 
-    if (!editDepartmentVisible && existingSession) {
+    if (!editDepartmentVisible && existingdepartment) {
       setMessage("Department already exists.");
       setMessageType("error");
       return;
     }
 
-    if (editDepartmentVisible && selectedDepartment) {
-      const updatedList = departmentList.map((item) =>
-        item.Name === selectedDepartment.Name ? selectedDepartment : item
-      );
-      setDepartmentList(updatedList);
-      setMessage("Department updated successfully.");
-      setMessageType("success");
-      setEditDepartmentVisible(false);
-      setSelectedDepartment(null);
+    if (editDepartmentVisible && selectedClass) {
+      try {
+        const updatedClass = {
+          ...selectedDepartment,
+          name: selectedDepartment.name,
+        };
+        const { data, error } = await UpdateDepartment(
+          selectedDepartment.department_id,
+          updatedClass
+        );
+        if (error) {
+          setMessage(error || "Failed to update department.");
+          setMessageType("error");
+          return;
+        }
+        const updatedList = departmentList.map((item) =>
+          item.department_id === selectedDepartment.department_id ? data : item
+        );
+        setDepartmentList(updatedList);
+        setMessage("Department updated successfully.");
+        setMessageType("success");
+        setEditDepartmentVisible(false);
+        setSelectedDepartment(null);
+      } catch (error) {
+        setMessage("An error occurred while updating.");
+        setMessageType("error");
+      }
     } else {
-      setDepartmentList((prev) => [...prev, formData]);
-      setMessage("Department added successfully.");
-      setMessageType("success");
-      setFormData({
-        Name: "",
-      });
-    }
+      try {
+        const createPayload = {
+          name: formData.name,
+        };
 
-    // Clear message after 3 seconds
+        const { data, error } = await createDepartment(createPayload);
+
+        if (error) {
+          setMessage(error || "Failed to add department.");
+          setMessageType("error");
+        } else {
+          setDepartmentList((prev) => [...prev, data]);
+          setMessage("Department added successfully.");
+          setMessageType("success");
+        }
+      } catch (err) {
+        setMessage("An error occurred while adding.");
+        setMessageType("error");
+      }
+    }
+    setFormData({
+      name: "",
+    });
+
     setTimeout(() => {
       setMessage("");
       setMessageType("");
@@ -87,6 +132,38 @@ const DepartmentSettings = () => {
     setSelectedDepartment({ ...term });
   };
 
+  const openDeleteModal = (term) => {
+    setSelectedDepartmentDelete(term);
+    setDeleteModalVisible(true);
+  };
+
+  // Function to close delete modal
+  const closeDeleteModal = () => {
+    setSelectedDepartmentDelete(null);
+    setDeleteModalVisible(false);
+  };
+
+  const handleDelete = async () => {
+    if (selectedDepartmentDelete?.department_id) {
+      try {
+        const response = await deleteClassArm(
+          selectedDepartmentDelete.department_id
+        );
+        if (response?.status === 204) {
+          setMessage("Department deleted successfully.");
+          setMessageType("success");
+          closeDeleteModal();
+        } else {
+          setMessage("Failed to delete Department.");
+          setMessageType("error");
+          closeDeleteModal();
+        }
+      } catch (error) {
+        setMessageType("error");
+        setMessage("Failed to delete Department.");
+      }
+    }
+  };
   return (
     <div>
       {message && (
@@ -98,6 +175,43 @@ const DepartmentSettings = () => {
           }`}
         >
           {message}
+        </div>
+      )}
+
+      {deleteModalVisible && selectedDepartmentDelete && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
+            <p className="font-bold text-center text-lg">Delete Department</p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure want to delete the department
+              </p>
+              <p className="text-base text-[#858383]">
+                <span className="font-bold">
+                  {selectedDepartmentDelete?.name}
+                </span>
+                ?
+              </p>
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+              <button
+                onClick={handleDelete}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
@@ -122,19 +236,19 @@ const DepartmentSettings = () => {
               placeholder="Enter Department"
               value={
                 editDepartmentVisible
-                  ? selectedDepartment.Name
-                  : formData.Name || ""
+                  ? selectedDepartment.name
+                  : formData.name || ""
               }
               onChange={(e) => {
                 const value = e.target.value;
                 editDepartmentVisible
                   ? setSelectedDepartment((prev) => ({
                       ...prev,
-                      Name: value,
+                      name: value,
                     }))
                   : setFormData((prev) => ({
                       ...prev,
-                      Name: value,
+                      name: value,
                     }));
               }}
               className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
@@ -173,7 +287,7 @@ const DepartmentSettings = () => {
               ) : (
                 paginatedData.map((item, index) => (
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-20">{item.Name}</td>
+                    <td className="p-2 pl-20">{item.name}</td>
                     <td className="p-2">
                       <div className="flex gap-4">
                         <FiEdit3
@@ -182,6 +296,7 @@ const DepartmentSettings = () => {
                           size={15}
                         />
                         <FiTrash2
+                          onClick={() => openDeleteModal(item)}
                           className="text-[#F94144] cursor-pointer"
                           size={15}
                         />

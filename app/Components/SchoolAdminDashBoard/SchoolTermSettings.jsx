@@ -1,54 +1,64 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import Dropdown from "./DropDown";
-const SchoolTermSettings = () => {
-  const [schoolTermList, setSchoolTermList] = useState([
-    {
-      "Academic Session": "2023/2024  Academic Year",
-      Term: "1st Term",
-      "Start Date": "2023-01-01",
-      "End Date": "2023-12-31",
-      Status: "Active",
-    },
-    {
-      "Academic Session": "2023/2024  Academic Year",
-      Term: "1st Term",
-      "Start Date": "2023-01-01",
-      "End Date": "2023-12-31",
-      Status: "Active",
-    },
-    {
-      "Academic Session": "2023/2024  Academic Year",
-      Term: "1st Term",
-      "Start Date": "2023-01-01",
-      "End Date": "2023-12-31",
-      Status: "Active",
-    },
-  ]);
+import {
+  createTerm,
+  deleteTerm,
+  getAcademicYears,
+  getTerms,
+  UpdateTerm,
+} from "@/Service/schoolConfig";
 
+const SchoolTermSettings = () => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
-
+  const [term, setTerm] = useState([]);
+  const [years, setYears] = useState([]);
   const [selectedTerm, setSelectedTerm] = useState(null);
   const [editTermVisible, setEditTermVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 2;
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedTermDelete, setSelectedTermDelete] = useState(null);
 
   const [formData, setFormData] = useState({
-    "Academic Session": "",
-    "Start Date": "",
-    "End Date": "",
-    Term: "",
-    Status: "",
+    name: "",
+    start_date: "",
+    end_date: "",
+    year: "",
+    status: true,
   });
 
-  const paginatedData = schoolTermList.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  useEffect(() => {
+    const fetchTerms = async () => {
+      const { data, error } = await getTerms();
+      if (data) setTerm(data);
+      else setMessage(error || "Failed to load terms");
+    };
+    fetchTerms();
+    fetchYears();
+  }, []);
 
-  const totalPages = Math.ceil(schoolTermList.length / itemsPerPage);
+  const fetchYears = async () => {
+    const { data, error } = await getAcademicYears();
+    if (data) {
+      setYears(data);
+    } else {
+      setMessage(error || "Failed to load academic years");
+    }
+  };
+
+  const getYearName = (yearid) => {
+    const year = years.find((item) => item.year_id === yearid);
+    return year?.name;
+  };
+
+  const paginatedData = Array.isArray(term)
+    ? term.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+    : [];
+
+  const totalPages = Math.ceil(term.length / itemsPerPage);
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
@@ -57,11 +67,19 @@ const SchoolTermSettings = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    const trimmedName = editTermVisible
+      ? selectedTerm?.name?.trim()
+      : formData.name?.trim();
 
-    const existingSession = schoolTermList.find(
-      (item) => item.Term === formData.Term
+    if (!trimmedName) {
+      setMessage("Term name is required.");
+      setMessageType("error");
+      return;
+    }
+    const existingSession = term.find(
+      (item) => item.name?.toLowerCase() === trimmedName.toLowerCase()
     );
 
     if (!editTermVisible && existingSession) {
@@ -71,28 +89,69 @@ const SchoolTermSettings = () => {
     }
 
     if (editTermVisible && selectedTerm) {
-      const updatedList = schoolTermList.map((item) =>
-        item.Term === selectedTerm.Term ? selectedTerm : item
-      );
-      setSchoolTermList(updatedList);
-      setMessage("Term updated successfully.");
-      setMessageType("success");
-      setEditTermVisible(false);
-      setSelectedTerm(null);
+      try {
+        const updatedTerm = {
+          ...selectedTerm,
+          name: selectedTerm.name,
+          start_date: selectedTerm.start_date,
+          end_date: selectedTerm.end_date,
+          year: selectedTerm.year,
+          status: selectedTerm.status,
+        };
+        const { data, error } = await UpdateTerm(
+          selectedTerm.term_id,
+          updatedTerm
+        );
+        if (error) {
+          setMessage(error || "Failed to update term.");
+          setMessageType("error");
+          return;
+        }
+        const updatedList = term.map((item) =>
+          item.term_id === selectedTerm.term_id ? data : item
+        );
+        setTerm(updatedList);
+        setMessage("Term updated successfully.");
+        setMessageType("success");
+        setEditTermVisible(false);
+        setSelectedTerm(null);
+      } catch (error) {
+        setMessage("An error occurred while updating.");
+        setMessageType("error");
+      }
     } else {
-      setSchoolTermList((prev) => [...prev, formData]);
-      setMessage("Term added successfully.");
-      setMessageType("success");
-      setFormData({
-        "Academic Session": "",
-        "Start Date": "",
-        "End Date": "",
-        Term: "",
-        Status: "",
-      });
-    }
+      try {
+        const createPayload = {
+          name: formData.name,
+          start_date: formData.start_date,
+          end_date: formData.end_date,
+          year: formData.year,
+          status: formData.status,
+        };
 
-    // Clear message after 3 seconds
+        const { data, error } = await createTerm(createPayload);
+
+        if (error) {
+          setMessage(error || "Failed to add term.");
+          setMessageType("error");
+        } else {
+          setTerm((prev) => [...prev, data]);
+          setMessage("Term added successfully.");
+          setMessageType("success");
+        }
+      } catch (err) {
+        setMessage("An error occurred while adding.");
+        setMessageType("error");
+      }
+    }
+    setFormData({
+      name: "",
+      start_date: "",
+      end_date: "",
+      year: "",
+      status: true,
+    });
+
     setTimeout(() => {
       setMessage("");
       setMessageType("");
@@ -102,6 +161,37 @@ const SchoolTermSettings = () => {
   const handleEdit = (term) => {
     setEditTermVisible(true);
     setSelectedTerm({ ...term });
+  };
+
+  const openDeleteModal = (term) => {
+    setSelectedTermDelete(term);
+    setDeleteModalVisible(true);
+  };
+
+  // Function to close delete modal
+  const closeDeleteModal = () => {
+    setSelectedTermDelete(null);
+    setDeleteModalVisible(false);
+  };
+
+  const handleDelete = async () => {
+    if (selectedTermDelete?.term_id) {
+      try {
+        const response = await deleteTerm(selectedTermDelete.term_id);
+        if (response?.status === 204) {
+          setMessage("Term deleted successfully.");
+          setMessageType("success");
+          closeDeleteModal();
+        } else {
+          setMessage("Failed to delete Term.");
+          setMessageType("error");
+          closeDeleteModal();
+        }
+      } catch (error) {
+        setMessageType("error");
+        setMessage("Failed to delete term.");
+      }
+    }
   };
 
   return (
@@ -115,6 +205,39 @@ const SchoolTermSettings = () => {
           }`}
         >
           {message}
+        </div>
+      )}
+      {deleteModalVisible && selectedTermDelete && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
+            <p className="font-bold text-center text-lg">Delete Term</p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure want to delete the term
+              </p>
+              <p className="text-base text-[#858383]">
+                <span className="font-bold">{selectedTermDelete.name}</span>?
+              </p>
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+              <button
+                onClick={handleDelete}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
@@ -138,18 +261,18 @@ const SchoolTermSettings = () => {
                 type="text"
                 placeholder="Enter Term"
                 value={
-                  editTermVisible ? selectedTerm.Term : formData.Term || ""
+                  editTermVisible ? selectedTerm.name : formData.name || ""
                 }
                 onChange={(e) => {
                   const value = e.target.value;
                   editTermVisible
                     ? setSelectedTerm((prev) => ({
                         ...prev,
-                        Term: value,
+                        name: value,
                       }))
                     : setFormData((prev) => ({
                         ...prev,
-                        Term: value,
+                        name: value,
                       }));
                 }}
                 className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
@@ -162,13 +285,13 @@ const SchoolTermSettings = () => {
               </label>
               {editTermVisible ? (
                 <Dropdown
-                  label={selectedTerm.Status}
+                  label={selectedTerm.status ? "Active" : "Inactive"}
                   items={[
                     {
                       label: "Active",
                       onClick: () =>
                         setSelectedTerm(
-                          { ...selectedTerm, Status: "Active" } || ""
+                          { ...selectedTerm, status: true } || ""
                         ),
                     },
                     {
@@ -177,7 +300,7 @@ const SchoolTermSettings = () => {
                         setSelectedTerm(
                           {
                             ...selectedTerm,
-                            Status: "Inactive",
+                            status: false,
                           } || ""
                         ),
                     },
@@ -186,30 +309,16 @@ const SchoolTermSettings = () => {
               ) : (
                 <Dropdown
                   label={
-                    formData["Academic Session"] || "Select Academic Session"
+                    getYearName(formData.year) || "Select Academic Session"
                   }
-                  items={[
-                    {
-                      label: "2021/2022 Academic Year",
-                      onClick: () =>
-                        setFormData(
-                          {
-                            ...formData,
-                            "Academic Session": "2021/2022 Academic Year",
-                          } || ""
-                        ),
-                    },
-                    {
-                      label: "2022/2023 Academic Year",
-                      onClick: () =>
-                        setFormData(
-                          {
-                            ...formData,
-                            "Academic Session": "2022/2023 Academic Year",
-                          } || ""
-                        ),
-                    },
-                  ]}
+                  items={years.map((year) => ({
+                    label: year.name,
+                    onClick: () =>
+                      setFormData({
+                        ...formData,
+                        year: year.year_id,
+                      }),
+                  }))}
                 />
               )}
             </div>
@@ -225,17 +334,17 @@ const SchoolTermSettings = () => {
                 placeholder="Start Date"
                 value={
                   editTermVisible
-                    ? selectedTerm["Start Date"]
-                    : formData["Start Date"] || ""
+                    ? selectedTerm.start_date
+                    : formData.start_date || ""
                 }
                 onChange={(e) => {
                   const value = e.target.value;
                   editTermVisible
                     ? setSelectedTerm((prev) => ({
                         ...prev,
-                        "Start Date": value,
+                        start_date: value,
                       }))
-                    : setFormData((prev) => ({ ...prev, "Start Date": value }));
+                    : setFormData((prev) => ({ ...prev, start_date: value }));
                 }}
                 className="text-sm text-[#B6B6B6] border-2 p-1.5 rounded-sm border-[#B6B6B6] focus:outline-[#0071E3]"
                 required
@@ -248,17 +357,17 @@ const SchoolTermSettings = () => {
                 placeholder="End Date"
                 value={
                   editTermVisible
-                    ? selectedTerm["End Date"]
-                    : formData["End Date"] || ""
+                    ? selectedTerm.end_date
+                    : formData.end_date || ""
                 }
                 onChange={(e) => {
                   const value = e.target.value;
                   editTermVisible
                     ? setSelectedTerm((prev) => ({
                         ...prev,
-                        "End Date": value,
+                        end_date: value,
                       }))
-                    : setFormData((prev) => ({ ...prev, "End Date": value }));
+                    : setFormData((prev) => ({ ...prev, end_date: value }));
                 }}
                 className="text-sm text-[#B6B6B6] border-2 p-1.5 rounded-sm border-[#B6B6B6] focus:outline-[#0071E3]"
                 required
@@ -302,14 +411,14 @@ const SchoolTermSettings = () => {
               ) : (
                 paginatedData.map((item, index) => (
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-6">{item["Term"]}</td>
-                    <td className="p-2">{item["Academic Session"]}</td>
-                    <td className="p-2">{item["Start Date"]}</td>
-                    <td className="p-2">{item["End Date"]}</td>
+                    <td className="p-2 pl-6">{item.name}</td>
+                    <td className="p-2">{getYearName(item.year)}</td>
+                    <td className="p-2">{item.start_date}</td>
+                    <td className="p-2">{item.end_date}</td>
                     <td className="p-2">
                       <span
                         className={`${
-                          item.Status === "Active"
+                          item.status
                             ? "bg-[#E8F8F0] text-[#1BB66E]"
                             : "bg-[#FEECEC] text-[#F94144]"
                         } rounded-2xl py-1 font-bold`}
@@ -319,7 +428,7 @@ const SchoolTermSettings = () => {
                           textAlign: "center",
                         }}
                       >
-                        {item.Status}
+                        {item.status ? "Active" : "Inactive"}
                       </span>
                     </td>
                     <td className="p-2">
@@ -330,6 +439,7 @@ const SchoolTermSettings = () => {
                           size={15}
                         />
                         <FiTrash2
+                          onClick={() => openDeleteModal(item)}
                           className="text-[#F94144] cursor-pointer"
                           size={15}
                         />
