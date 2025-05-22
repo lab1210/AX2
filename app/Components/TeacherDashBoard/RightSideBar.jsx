@@ -1,7 +1,6 @@
 import React from "react";
 import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer } from "recharts";
 
-// Sample data for the pie chart
 const data = [
   { name: "Present", value: 54 },
   { name: "Absent", value: 46 },
@@ -17,13 +16,25 @@ const CustomTooltip = ({ active, payload, label }) => {
       </div>
     );
   }
-
   return null;
 };
 
+const SIDEBAR_WIDTH = 330; // px, adjust as needed
+
 const RightSidebar = () => {
   return (
-    <div className="w-[25%] min-h-screen sticky top-0 p-2 right-0">
+    <div
+      style={{
+        position: "fixed",
+        top: "100px",
+        right: 0,
+        width: `${SIDEBAR_WIDTH}px`,
+        // height: "100vh",
+        // zIndex: 50,
+        // overflowY: "auto",
+      }}
+      className="hidden lg:block p-4"
+    >
       <div className="mb-6 bg-white rounded-lg shadow-xl p-5">
         <div className="flex items-center gap-2 text-red-500 font-semibold mb-2">
           <span>Notice</span>
