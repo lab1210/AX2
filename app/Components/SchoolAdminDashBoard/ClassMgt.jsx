@@ -1,46 +1,45 @@
-import React, { useState } from "react";
+import {
+  createClassroom,
+  deleteClassroom,
+  getClassroom,
+  UpdateClassroom,
+} from "@/Service/schoolConfig";
+import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
 const ClassMgt = () => {
-  const [classList, setClassList] = useState([
-    {
-      blockName: "A",
-      roomNumber: "101",
-      capacity: "20",
-    },
-    {
-      blockName: "B",
-      roomNumber: "102",
-      capacity: "20",
-    },
-    {
-      blockName: "C",
-      roomNumber: "103",
-      capacity: "20",
-    },
-    {
-      blockName: "D",
-      roomNumber: "104",
-      capacity: "20",
-    },
-  ]);
-
+  const [classList, setClassList] = useState([]);
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [selectedClass, setSelectedClass] = useState(null);
   const [editClassVisible, setEditClassVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedClassroomDelete, setSelectedClassroomDelete] = useState(null);
+
   const itemsPerPage = 2;
   const [formData, setFormData] = useState({
-    blockName: "",
-    roomNumber: "",
+    block_name: "",
+    room_number: "",
     capacity: "",
   });
 
-  const paginatedData = classList.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  //GET LIST
+  useEffect(() => {
+    const fetchClassRooms = async () => {
+      const { data, error } = await getClassroom();
+      if (data) setClassList(data);
+      else setMessage(error || "Failed to load Classrooms.");
+    };
+    fetchClassRooms();
+  }, []);
+
+  const paginatedData = Array.isArray(classList)
+    ? classList.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+      )
+    : [];
 
   const totalPages = Math.ceil(classList.length / itemsPerPage);
   const handlePrevious = () => {
@@ -51,40 +50,89 @@ const ClassMgt = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const trimmedName = editClassVisible
+      ? selectedClass?.room_number?.trim()
+      : formData.room_number?.trim();
+
+    if (!trimmedName) {
+      setMessage("Room Number is required.");
+      setMessageType("error");
+      return;
+    }
+
     const existingClass = classList.find(
-      (item) => item.blockName === formData.blockName
+      (item) => item.room_number?.toLowerCase() === trimmedName.toLowerCase()
     );
 
     if (!editClassVisible && existingClass) {
-      setMessage("Block Name already exists.");
+      setMessage("Room number already exists.");
       setMessageType("error");
       return;
     }
 
     if (editClassVisible && selectedClass) {
-      const updatedList = classList.map((item) =>
-        item.Class === selectedClass.Class ? selectedClass : item
-      );
-      setClassList(updatedList);
-      setMessage("Classroom updated successfully.");
-      setMessageType("success");
-      setEditClassVisible(false);
-      setSelectedClass(null);
-    } else {
-      setClassList((prev) => [...prev, formData]);
-      setMessage("Classroom added successfully.");
-      setMessageType("success");
-      setFormData({
-        blockName: "",
-        roomNumber: "",
-        capacity: "",
-      });
-    }
+      try {
+        const updatedData = {
+          ...selectedClass,
+          block_name: selectedClass.block_name,
+          room_number: selectedClass.room_number,
+          capacity: selectedClass.capacity,
+        };
 
-    // Clear message after 3 seconds
+        const { data, error } = await UpdateClassroom(
+          selectedClass.classroom_id,
+          updatedData
+        );
+
+        if (error) {
+          setMessage(error || "Failed to update classroom.");
+          setMessageType("error");
+          return;
+        }
+
+        const updatedList = classList.map((item) =>
+          item.classroom_id === selectedClass.classroom_id ? data : item
+        );
+        setClassList(updatedList);
+        setMessage("Classroom updated successfully.");
+        setMessageType("success");
+        setEditClassVisible(false);
+        setSelectedClass(null);
+      } catch (err) {
+        setMessage("An error occurred while updating.");
+        setMessageType("error");
+      }
+    } else {
+      try {
+        const createPayload = {
+          block_name: formData.block_name,
+          room_number: formData.room_number,
+          capacity: formData.capacity,
+        };
+        const { data, error } = await createClassroom(createPayload);
+
+        if (error) {
+          setMessage(error || "Failed to add classroom.");
+          setMessageType("error");
+        } else {
+          setClassList((prev) => [...prev, data]);
+          setMessage("Classroom added successfully.");
+          setMessageType("success");
+        }
+      } catch (err) {
+        setMessage("An error occurred while adding.");
+        setMessageType("error");
+      }
+    }
+    setFormData({
+      block_name: "",
+      room_number: "",
+      capacity: "",
+    });
+
     setTimeout(() => {
       setMessage("");
       setMessageType("");
@@ -94,6 +142,39 @@ const ClassMgt = () => {
   const handleEdit = (Class) => {
     setEditClassVisible(true);
     setSelectedClass({ ...Class });
+  };
+
+  const openDeleteModal = (term) => {
+    setSelectedClassroomDelete(term);
+    setDeleteModalVisible(true);
+  };
+
+  // Function to close delete modal
+  const closeDeleteModal = () => {
+    setSelectedClassroomDelete(null);
+    setDeleteModalVisible(false);
+  };
+
+  const handleDelete = async () => {
+    if (setSelectedClassroomDelete?.classroom_id) {
+      try {
+        const response = await deleteClassroom(
+          setSelectedClassroomDelete.classroom_id
+        );
+        if (response?.status === 204) {
+          setMessage("Classroom deleted successfully.");
+          setMessageType("success");
+          closeDeleteModal();
+        } else {
+          setMessage("Failed to delete Classroom.");
+          setMessageType("error");
+          closeDeleteModal();
+        }
+      } catch (error) {
+        setMessageType("error");
+        setMessage("Failed to delete Classroom.");
+      }
+    }
   };
 
   return (
@@ -107,6 +188,43 @@ const ClassMgt = () => {
           }`}
         >
           {message}
+        </div>
+      )}
+
+      {deleteModalVisible && setSelectedClassroomDelete && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
+            <p className="font-bold text-center text-lg">Delete Classroom</p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure want to delete the classroom
+              </p>
+              <p className="text-base text-[#858383]">
+                <span className="font-bold">
+                  {setSelectedClassroomDelete?.room_number}
+                </span>
+                ?
+              </p>
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+              <button
+                onClick={handleDelete}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
@@ -132,19 +250,19 @@ const ClassMgt = () => {
                 placeholder="Enter Block Name"
                 value={
                   editClassVisible
-                    ? selectedClass.blockName
-                    : formData.blockName || ""
+                    ? selectedClass.block_name
+                    : formData.block_name || ""
                 }
                 onChange={(e) => {
                   const value = e.target.value;
                   editClassVisible
                     ? setSelectedClass((prev) => ({
                         ...prev,
-                        blockName: value,
+                        block_name: value,
                       }))
                     : setFormData((prev) => ({
                         ...prev,
-                        blockName: value,
+                        block_name: value,
                       }));
                 }}
                 className="focus:outline-[#0071E3] sm:placeholder:text-xs sm:text-xs lg:placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 lg:text-sm rounded-sm border-[#B6B6B6]"
@@ -159,19 +277,19 @@ const ClassMgt = () => {
                 placeholder="Enter Room No "
                 value={
                   editClassVisible
-                    ? selectedClass.roomNumber
-                    : formData.roomNumber || ""
+                    ? selectedClass.room_number
+                    : formData.room_number || ""
                 }
                 onChange={(e) => {
                   const value = e.target.value;
                   editClassVisible
                     ? setSelectedClass((prev) => ({
                         ...prev,
-                        roomNumber: value,
+                        room_number: value,
                       }))
                     : setFormData((prev) => ({
                         ...prev,
-                        roomNumber: value,
+                        room_number: value,
                       }));
                 }}
                 className="focus:outline-[#0071E3] sm:placeholder:text-xs sm:text-xs lg:placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 lg:text-sm rounded-sm border-[#B6B6B6]"
@@ -239,8 +357,8 @@ const ClassMgt = () => {
               ) : (
                 paginatedData.map((item, index) => (
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-12">{item.blockName}</td>
-                    <td className="p-2">{item.roomNumber}</td>
+                    <td className="p-2 pl-12">{item.block_name}</td>
+                    <td className="p-2">{item.room_number}</td>
                     <td className="p-2">{item.capacity}</td>
                     <td className="p-2">
                       <div className="flex gap-4">
@@ -250,6 +368,7 @@ const ClassMgt = () => {
                           size={15}
                         />
                         <FiTrash2
+                          onClick={() => openDeleteModal(item)}
                           className="text-[#F94144] cursor-pointer"
                           size={15}
                         />

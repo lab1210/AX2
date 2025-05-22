@@ -66,7 +66,7 @@ const SchoolAdminSettingsPopup = ({
       ref={popupRef}
       className={`bg-[#4169E133] backdrop-blur-xs  ${
         settingsClicked ? "block" : "hidden"
-      } z-[1000] absolute left-40 ml-2 top-0 ${
+      } z-[3000] absolute left-40 ml-2 top-0 ${
         Name === "School Settings" ? "w-[280px]" : "w-[300px]"
       } pt-4 pb-4 pr-4 pl-4 rounded-lg shadow-xl bg-[url('/noise.png')] bg-cover flex flex-col gap-2`}
     >
