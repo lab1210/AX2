@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useCallback, useEffect } from "react";
-import Layout from "../../Teacherlayout";
+import Layout from "../Teacherlayout";
 import RightSidebar from "../RightSideBar";
 import { Search, Download, CloudUpload } from "lucide-react";
 import { useDropzone } from "react-dropzone";
@@ -54,6 +54,12 @@ const AttendancePage = () => {
     { id: 6, name: "Babalola Ife Adeshewa", status: "Present" },
     { id: 7, name: "Babalola Ife Adeshewa", status: "Present" },
     { id: 8, name: "Babalola Ife Adeshewa", status: "Absent" },
+    { id: 9, name: "Babalola Ife Adeshewa", status: "Present" },
+    { id: 10, name: "Babalola Ife Adeshewa", status: "Absent" },
+    { id: 11, name: "Babalola Ife Adeshewa", status: "Absent" },
+    { id: 12, name: "Babalola Ife Adeshewa", status: "Absent" },
+    { id: 13, name: "Babalola Ife Adeshewa", status: "Present" },
+    { id: 14, name: "Babalola Ife Adeshewa", status: "Present" },
   ];
 
   const renderHeaderContent = () => {
@@ -185,185 +191,184 @@ const AttendancePage = () => {
     <Layout>
       <div className="flex min-h-screen bg-[#F7F8FA]">
         <div className="flex-1 flex flex-col">
-          <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 w-[83%]">
+          <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 w-[85%]">
             {renderHeaderContent()}
           </div>
 
           {/* Content Section */}
           <div className="flex flex-1 p-6 w-full pt-24">
-            <div className="flex-1 flex flex-col bg-white rounded-lg shadow p-4 w-[85%] mx-auto">
-              <div className="flex items-center border-b border-gray-100 mb-4 space-x-8">
-                <button
-                  className={`px-4 py-1 ${
-                    activeTab === "mark"
-                      ? "border-b-3 border-[#96B1CB] text-black"
-                      : "text-[#A8A8A8]"
-                  }`}
-                  onClick={() => setActiveTab("mark")}
-                >
-                  Mark Attendance
-                </button>
-                <button
-                  className={`px-1 py-1 ${
-                    activeTab === "view"
-                      ? "border-b-3 border-[#96B1CB] text-black"
-                      : "text-[#A8A8A8]"
-                  }`}
-                  onClick={() => setActiveTab("view")}
-                >
-                  View Attendance
-                </button>
-                <button
-                  className={`px-3 py-1 ${
-                    activeTab === "summary"
-                      ? "border-b-3 border-[#96B1CB] text-black"
-                      : "text-[#A8A8A8]"
-                  }`}
-                  onClick={() => setActiveTab("summary")}
-                >
-                  Summary Attendance
-                </button>
+            <div className="flex-1 flex flex-col bg-white rounded-lg shadow p-4 mx-auto">
+              {/* Fixed Tabs Section */}
+              <div className="border-b border-gray-200 mb-4">
+                <div className="flex items-center space-x-8">
+                  <button
+                    className={`px-4 py-3 ${
+                      activeTab === "mark"
+                        ? "border-b-4 border-[#07508F] text-black"
+                        : "text-gray-400"
+                    }`}
+                    onClick={() => setActiveTab("mark")}
+                  >
+                    Mark Attendance
+                  </button>
+                  <button
+                    className={`px-4 py-3 ${
+                      activeTab === "view"
+                        ? "border-b-4 border-[#07508F] text-black"
+                        : "text-gray-400"
+                    }`}
+                    onClick={() => setActiveTab("view")}
+                  >
+                    View Attendance
+                  </button>
+                  <button
+                    className={`px-4 py-3 ${
+                      activeTab === "summary"
+                        ? "border-b-4 border-[#07508F] text-black"
+                        : "text-gray-400"
+                    }`}
+                    onClick={() => setActiveTab("summary")}
+                  >
+                    Summary Attendance
+                  </button>
+                </div>
               </div>
 
-              {activeTab === "mark" && (
-                <div>
-                  {/* Mark Attendance Content */}
-                  <div className="flex items-center justify-between mb-4">
-                    <div className="flex items-center space-x-2">
+              {/* Scrollable Content for all tabs */}
+              <div className="overflow-y-auto max-h-[calc(100vh-220px)] no-scrollbar">
+                {activeTab === "mark" && (
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="checkbox"
+                          id="selectAll"
+                          checked={selectedStudents.length === students.length}
+                          onChange={handleSelectAll}
+                          className="accent-green-600 w-5 h-5"
+                        />
+                        <label htmlFor="selectAll" className="text-sm font-medium">
+                          Select All
+                        </label>
+                      </div>
                       <input
-                        type="checkbox"
-                        id="selectAll"
-                        checked={selectedStudents.length === students.length}
-                        onChange={handleSelectAll}
-                        className="accent-green-600 w-5 h-5"
+                        type="date"
+                        className="border border-gray-100 rounded px-2 py-1"
                       />
-                      <label
-                        htmlFor="selectAll"
-                        className="text-sm font-medium"
-                      >
-                        Select All
-                      </label>
+                      <button className="bg-[#07508F] text-white px-4 py-3 rounded">
+                        Save
+                      </button>
                     </div>
-                    <input
-                      type="date"
-                      className="border border-gray-100 rounded px-2 py-1"
-                    />
-                    <button className="bg-[#07508F] text-white px-4 py-3 rounded">
-                      Save
-                    </button>
-                  </div>
 
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-[#6B90B5] text-white">
-                        <th className="border-b border-gray-100 px-4 py-3 text-left">
-                          Action
-                        </th>
-                        <th className="border-b border-gray-100 px-4 py-3 text-center mx-auto">
-                          Students Name
-                        </th>
-                        <th className="border-b border-gray-100 px-4 py-3 text-right">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {students.map((student) => (
-                        <tr key={student.id}>
-                          <td className="border-b border-gray-100 px-4 py-3 text-left">
-                            <input
-                              type="checkbox"
-                              className="text-green-500 accent-green-600 w-5 h-5"
-                              checked={selectedStudents.includes(student.id)}
-                              onChange={() => handleStudentSelect(student.id)}
-                            />
-                          </td>
-                          <td className="border-b border-gray-100 px-4 py-3 text-center font-semibold">
-                            {student.name}
-                          </td>
-                          <td
-                            className={`border-b border-gray-100 px-4 py-3 text-right font-semibold ${
-                              student.status === "Present"
-                                ? "text-green-500"
-                                : "text-red-500"
-                            }`}
-                          >
-                            {student.status}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {activeTab === "view" && (
-                <div>
-                  {/* View Attendance Content */}
-                  <table className="w-full border-collapse mx-auto">
-                    <thead>
-                      <tr className="bg-[#6B90B5] text-white">
-                        <th className="border-b border-gray-100 px-4 py-3 text-left">
-                          S/N
-                        </th>
-                        <th className="border-b border-gray-100 px-4 py-3 text-left">
-                          Students Name
-                        </th>
-                        <th className="border-b border-gray-100 px-4 py-3 text-center mx-auto">
-                          Attendance Mark
-                        </th>
-                        <th className="border-b border-gray-100 px-4 py-3 text-right">
-                          Status
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {students.map((student, index) => (
-                        <tr key={student.id}>
-                          <td className="border-b border-gray-100 px-4 py-3">
-                            {index + 1}
-                          </td>
-                          <td className="border-b border-gray-100 px-4 py-3">
-                            {student.name}
-                          </td>
-                          <td className="border-b border-gray-100 px-4 py-3 text-center mx-auto">
-                            {student.status === "Present" ? 1 : 0}
-                          </td>
-                          <td
-                            className={`border-b border-gray-100 px-4 py-3 text-right font-semibold ${
-                              student.status === "Present"
-                                ? "text-green-500"
-                                : "text-red-500"
-                            }`}
-                          >
-                            {student.status}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {activeTab === "summary" && (
-                <div className="flex flex-col">
-                  <div className="flex-1">
                     <table className="w-full border-collapse">
                       <thead>
                         <tr className="bg-[#6B90B5] text-white">
-                          <th className="border-b border-gray-100 px-4 py-3 text-left">
+                          <th className="border-b border-gray-300 px-4 py-3 text-left">
+                            Action
+                          </th>
+                          <th className="border-b border-gray-300 px-4 py-3 text-center">
+                            Students Name
+                          </th>
+                          <th className="border-b border-gray-300 px-4 py-3 text-right">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {students.map((student) => (
+                          <tr key={student.id}>
+                            <td className="border-b border-gray-300 px-4 py-3 text-left">
+                              <input
+                                type="checkbox"
+                                className="accent-green-600 w-5 h-5"
+                                checked={selectedStudents.includes(student.id)}
+                                onChange={() => handleStudentSelect(student.id)}
+                              />
+                            </td>
+                            <td className="border-b border-gray-300 px-4 py-3 text-center font-semibold">
+                              {student.name}
+                            </td>
+                            <td
+                              className={`border-b border-gray-300 px-4 py-3 text-right font-semibold ${
+                                student.status === "Present"
+                                  ? "text-green-500"
+                                  : "text-red-500"
+                              }`}
+                            >
+                              {student.status}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {activeTab === "view" && (
+                  <div>
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-[#6B90B5] text-white">
+                          <th className="border-b border-gray-300 px-4 py-3 text-left">
+                            S/N
+                          </th>
+                          <th className="border-b border-gray-300 px-4 py-3 text-left">
+                            Students Name
+                          </th>
+                          <th className="border-b border-gray-300 px-4 py-3 text-center">
+                            Attendance Mark
+                          </th>
+                          <th className="border-b border-gray-300 px-4 py-3 text-right">
+                            Status
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {students.map((student, index) => (
+                          <tr key={student.id}>
+                            <td className="border-b border-gray-300 px-4 py-3">
+                              {index + 1}
+                            </td>
+                            <td className="border-b border-gray-300 px-4 py-3">
+                              {student.name}
+                            </td>
+                            <td className="border-b border-gray-300 px-4 py-3 text-center">
+                              {student.status === "Present" ? 1 : 0}
+                            </td>
+                            <td
+                              className={`border-b border-gray-300 px-4 py-3 text-right font-semibold ${
+                                student.status === "Present"
+                                  ? "text-green-500"
+                                  : "text-red-500"
+                              }`}
+                            >
+                              {student.status}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+
+                {activeTab === "summary" && (
+                  <div>
+                    <table className="w-full border-collapse">
+                      <thead>
+                        <tr className="bg-[#6B90B5] text-white">
+                          <th className="border-b border-gray-300 px-4 py-3 text-left">
                             Student Name
                           </th>
-                          <th className="border-b border-gray-100 px-4 py-3 text-center">
+                          <th className="border-b border-gray-300 px-4 py-3 text-center">
                             No. of Time Present
                           </th>
-                          <th className="border-b border-gray-100 px-4 py-3 text-center">
+                          <th className="border-b border-gray-300 px-4 py-3 text-center">
                             % Present
                           </th>
-                          <th className="border-b border-gray-100 px-4 py-3 text-center">
+                          <th className="border-b border-gray-300 px-4 py-3 text-center">
                             No. of Time Absent
                           </th>
-                          <th className="border-b border-gray-100 px-4 py-3 text-center">
+                          <th className="border-b border-gray-300 px-4 py-3 text-center">
                             % Absent
                           </th>
                         </tr>
@@ -371,19 +376,19 @@ const AttendancePage = () => {
                       <tbody>
                         {students.map((student, index) => (
                           <tr key={index}>
-                            <td className="border-b border-gray-100 px-4 py-3">
+                            <td className="border-b border-gray-300 px-4 py-3">
                               {student.name}
                             </td>
-                            <td className="border-b border-gray-100 px-4 py-3 text-center">
+                            <td className="border-b border-gray-300 px-4 py-3 text-center">
                               100
                             </td>
-                            <td className="border-b border-gray-100 px-4 py-3 text-center">
+                            <td className="border-b border-gray-300 px-4 py-3 text-center">
                               80%
                             </td>
-                            <td className="border-b border-gray-100 px-4 py-3 text-center">
+                            <td className="border-b border-gray-300 px-4 py-3 text-center">
                               20
                             </td>
-                            <td className="border-b border-gray-100 px-4 py-3 text-center">
+                            <td className="border-b border-gray-300 px-4 py-3 text-center">
                               20%
                             </td>
                           </tr>
@@ -391,13 +396,8 @@ const AttendancePage = () => {
                       </tbody>
                     </table>
                   </div>
-                </div>
-              )}
-            </div>
-
-            {/* Right Sidebar */}
-            <div className="hidden lg:block w-[25%] mx-auto">
-              <RightSidebar />
+                )}
+              </div>
             </div>
           </div>
         </div>

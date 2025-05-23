@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect, useCallback } from "react";
 import { PenLine, Search, Check } from "lucide-react";
-import Layout from "../../Teacherlayout";
+import Layout from "../Teacherlayout";
 import RightSidebar from "../RightSideBar";
 import { useDropzone } from "react-dropzone";
 import { CloudUpload, Download } from "lucide-react";
@@ -94,7 +94,7 @@ const AcademicRecord = () => {
     <Layout>
       <div className="w-full flex flex-col bg-[#F7F8FA] min-h-screen">
         {/* Header Section */}
-        <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 mb-6 w-[83%]">
+        <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 mb-6 w-[85%]">
           <h1 className="text-2xl font-bold">Academic Record</h1>
           <div className="flex items-center space-x-4">
             <div className="relative">
@@ -117,229 +117,238 @@ const AcademicRecord = () => {
         </div>
 
         <div className="flex flex-row gap-2 pt-22 w-full min-h-screen">
-          {/* Main Content */}
-          <div className="flex-1 p-4 w-[85%]">
-            {/* Content Section */}
+          <div className="flex-1 p-4 w-full mx-auto">
             {activeTab === "ca" && (
               <div className="flex flex-col lg:flex-row gap-6">
                 <div className="flex-1">
-                  {/* Uploaded Test Record Table */}
                   <div className="bg-white rounded-lg shadow p-4">
-                    {/* Tabs Section */}
-                    <div className="flex items-center border-b border-gray-200 mb-4 space-x-8">
-                      <button
-                        className={`px-4 py-3 ${
-                          activeTab === "ca"
-                            ? "border-b-4 border-[#07508F] text-black"
-                            : "text-gray-400"
-                        }`}
-                        onClick={() => setActiveTab("ca")}
-                      >
-                        C.A
-                      </button>
-                      <button
-                        className={`px-4 py-3 ${
-                          activeTab === "exam"
-                            ? "border-b-4 border-[#07508F] text-black"
-                            : "text-gray-400"
-                        }`}
-                        onClick={() => setActiveTab("exam")}
-                      >
-                        Exam Upload
-                      </button>
-                    </div>
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-[#07508F] text-lg font-semibold mb-4">
-                        Add New Record
-                      </h3>
-                      <div className="flex justify-end">
-                        <button className="bg-[#07508F] text-white px-6 py-3 rounded-md cursor-pointer">
-                          Save
+                    {/* Tabs - Fixed */}
+                    <div className="border-b border-gray-200 mb-4">
+                      <div className="flex items-center space-x-8">
+                        <button
+                          className={`px-4 py-3 ${
+                            activeTab === "ca"
+                              ? "border-b-4 border-[#07508F] text-black"
+                              : "text-gray-400"
+                          }`}
+                          onClick={() => setActiveTab("ca")}
+                        >
+                          C.A
+                        </button>
+                        <button
+                          className={`px-4 py-3 ${
+                            activeTab === "exam"
+                              ? "border-b-4 border-[#07508F] text-black"
+                              : "text-gray-400"
+                          }`}
+                          onClick={() => setActiveTab("exam")}
+                        >
+                          Exam Upload
                         </button>
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
-                      <div className="flex flex-row max-w-md items-center space-x-2">
-                        <label className="block text-sm font-medium mb-1">
-                          Select Year:
-                        </label>
-                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
-                          <option>2023</option>
-                          <option>2024</option>
-                        </select>
-                      </div>
-                      <div className="flex flex-row max-w-md items-center space-x-2">
-                        <label className="block text-sm font-medium mb-1">
-                          Select Term:
-                        </label>
-                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
-                          <option>1st Term</option>
-                          <option>2nd Term</option>
-                          <option>3rd Term</option>
-                        </select>
-                      </div>
-                      <div className="flex flex-row max-w-md items-center space-x-2">
-                        <label className="block text-sm font-medium mb-1">
-                          Select Class ID:
-                        </label>
-                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
-                          <option>JSS1</option>
-                          <option>JSS2</option>
-                          <option>JSS3</option>
-                        </select>
-                      </div>
-                      <div className="flex flex-row max-w-md items-center space-x-2">
-                        <label className="block text-sm font-medium mb-1">
-                          Select Subject ID:
-                        </label>
-                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
-                          <option>Maths</option>
-                          <option>English</option>
-                          <option>Science</option>
-                        </select>
-                      </div>
-                      <div className="flex flex-row max-w-sm items-center space-x-2">
-                        <label className="block text-sm font-medium mb-1">
-                          Select Category:
-                        </label>
-                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
-                          <option>Test</option>
-                          <option>Assignment</option>
-                        </select>
-                      </div>
-                      <div className="flex flex-row max-w-md items-center space-x-2">
-                        <label className="block text-sm font-medium mb-1">
-                          Select Instances:
-                        </label>
-                        <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
-                          <option>1-50</option>
-                          <option>51-100</option>
-                        </select>
-                      </div>
-                    </div>
 
-                    <div className="border-b border-gray-200 p-8 mb-4"></div>
+                    {/* Scrollable Content */}
+                    <div className="overflow-y-auto max-h-[calc(100vh-220px)] no-scrollbar">
+                      {/* New Record Section */}
+                      <div className="flex items-center justify-between mb-4">
+                        <h3 className="text-[#07508F] text-lg font-semibold mb-4">
+                          Add New Record
+                        </h3>
+                        <div className="flex justify-end">
+                          <button className="bg-[#07508F] text-white px-6 py-3 rounded-md cursor-pointer">
+                            Save
+                          </button>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+                        <div className="flex flex-row max-w-md items-center space-x-2">
+                          <label className="block text-sm font-medium mb-1">
+                            Select Year:
+                          </label>
+                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                            <option>2023</option>
+                            <option>2024</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-row max-w-md items-center space-x-2">
+                          <label className="block text-sm font-medium mb-1">
+                            Select Term:
+                          </label>
+                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                            <option>1st Term</option>
+                            <option>2nd Term</option>
+                            <option>3rd Term</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-row max-w-md items-center space-x-2">
+                          <label className="block text-sm font-medium mb-1">
+                            Select Class ID:
+                          </label>
+                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                            <option>JSS1</option>
+                            <option>JSS2</option>
+                            <option>JSS3</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-row max-w-md items-center space-x-2">
+                          <label className="block text-sm font-medium mb-1">
+                            Select Subject ID:
+                          </label>
+                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                            <option>Maths</option>
+                            <option>English</option>
+                            <option>Science</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-row max-w-sm items-center space-x-2">
+                          <label className="block text-sm font-medium mb-1">
+                            Select Category:
+                          </label>
+                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                            <option>Test</option>
+                            <option>Assignment</option>
+                          </select>
+                        </div>
+                        <div className="flex flex-row max-w-md items-center space-x-2">
+                          <label className="block text-sm font-medium mb-1">
+                            Select Instances:
+                          </label>
+                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                            <option>1-50</option>
+                            <option>51-100</option>
+                          </select>
+                        </div>
+                      </div>
 
-                    <h3 className="text-lg font-semibold text-center mb-4">
-                      Foursquare International Secondary School <br />
-                      Uploaded Test Record
-                    </h3>
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="bg-[#6B90B5] text-white">
-                          <th className="border-b border-gray-300 px-4 py-3 text-center">
-                            S/N
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-center">
-                            Student Name
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-center">
-                            Student ID
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-center">
-                            Score
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-left">
-                            Edit
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {students.map((student, index) => (
-                          <tr key={index}>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              {index + 1}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              {student.name}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              {student.id}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              {editableRow === index ? (
-                                <input
-                                  type="number"
-                                  value={editedScore}
-                                  onChange={(e) =>
-                                    setEditedScore(e.target.value)
-                                  }
-                                  className="border-b border-gray-300 rounded px-2 py-1 w-16 text-center"
-                                />
-                              ) : (
-                                student.score
-                              )}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center cursor-pointer">
-                              {editableRow === index ? (
-                                <Check
-                                  className="text-green-500 w-5 h-5"
-                                  onClick={() => handleSaveClick(index)}
-                                />
-                              ) : (
-                                <PenLine
-                                  className="text-[#80ADCB] w-5 h-5"
-                                  onClick={() =>
-                                    handleEditClick(index, student.score)
-                                  }
-                                />
-                              )}
-                            </td>
+                      <div className="border-b border-gray-200 p-8 mb-4"></div>
+
+                      <h3 className="text-lg font-semibold text-center mb-4">
+                        Foursquare International Secondary School <br />
+                        Uploaded Test Record
+                      </h3>
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-[#6B90B5] text-white">
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              S/N
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              Student Name
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              Student ID
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              Score
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-left">
+                              Edit
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {students.map((student, index) => (
+                            <tr key={index}>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                {index + 1}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                {student.name}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                {student.id}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                {editableRow === index ? (
+                                  <input
+                                    type="number"
+                                    value={editedScore}
+                                    onChange={(e) =>
+                                      setEditedScore(e.target.value)
+                                    }
+                                    className="border-b border-gray-300 rounded px-2 py-1 w-16 text-center"
+                                  />
+                                ) : (
+                                  student.score
+                                )}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center cursor-pointer">
+                                {editableRow === index ? (
+                                  <Check
+                                    className="text-green-500 w-5 h-5"
+                                    onClick={() => handleSaveClick(index)}
+                                  />
+                                ) : (
+                                  <PenLine
+                                    className="text-[#80ADCB] w-5 h-5"
+                                    onClick={() =>
+                                      handleEditClick(index, student.score)
+                                    }
+                                  />
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
 
             {activeTab === "exam" && (
-              <div className="h-screen grid grid-rows-3 lg:flex-row gap-6">
-                {/* Left Section */}
+              <div className="flex flex-col lg:flex-row gap-6">
                 <div className="flex-1">
                   <div className="bg-white rounded-lg shadow p-4">
-                    {/* Tabs Section */}
-                    <div className="flex items-center border-b border-gray-200 mb-4 space-x-8">
-                      <button
-                        className={`px-4 py-3 ${
-                          activeTab === "ca"
-                            ? "border-b-4 border-[#07508F] text-black"
-                            : "text-gray-400"
-                        }`}
-                        onClick={() => setActiveTab("ca")}
-                      >
-                        C.A
-                      </button>
-                      <button
-                        className={`px-4 py-3 ${
-                          activeTab === "exam"
-                            ? "border-b-4 border-[#07508F] text-black"
-                            : "text-gray-400"
-                        }`}
-                        onClick={() => setActiveTab("exam")}
-                      >
-                        Exam Upload
-                      </button>
+                    {/* Tabs - Fixed */}
+                    <div className="border-b border-gray-200 mb-4">
+                      <div className="flex items-center space-x-8">
+                        <button
+                          className={`px-4 py-3 ${
+                            activeTab === "ca"
+                              ? "border-b-4 border-[#07508F] text-black"
+                              : "text-gray-400"
+                          }`}
+                          onClick={() => setActiveTab("ca")}
+                        >
+                          C.A
+                        </button>
+                        <button
+                          className={`px-4 py-3 ${
+                            activeTab === "exam"
+                              ? "border-b-4 border-[#07508F] text-black"
+                              : "text-gray-400"
+                          }`}
+                          onClick={() => setActiveTab("exam")}
+                        >
+                          Exam Upload
+                        </button>
+                      </div>
                     </div>
-                    <div className="bg-white rounded-lg">
+
+                    {/* Scrollable Content */}
+                    <div className="overflow-y-auto max-h-[calc(100vh-220px)] no-scrollbar">
+                      {/* New Record Section */}
                       <div className="flex items-center justify-between mb-4">
-                        <h3 className="text-lg text-[#07508F] font-semibold mb-4">
+                        <h3 className="text-[#07508F] text-lg font-semibold mb-4">
                           Add New Record
                         </h3>
                         <div className="flex justify-end">
-                          <button className="bg-[#07508F] text-white px-6 py-2 rounded-md cursor-pointer">
+                          <button className="bg-[#07508F] text-white px-6 py-3 rounded-md cursor-pointer">
                             Save
                           </button>
                         </div>
                       </div>
+
                       <div className="flex flex-row justify-between">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                           <div className="flex flex-row max-w-md items-center space-x-2">
                             <label className="block text-sm font-medium mb-1">
                               Select Year:
                             </label>
-                            <select className="border border-gray-300 rounded-md px-4 py-2 max-w-md bg-gray-200">
+                            <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
                               <option>2023</option>
                               <option>2024</option>
                             </select>
@@ -348,7 +357,7 @@ const AcademicRecord = () => {
                             <label className="block text-sm font-medium mb-1">
                               Select Term:
                             </label>
-                            <select className="border border-gray-300 rounded-md px-4 py-2 max-w-md bg-gray-200">
+                            <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
                               <option>1st Term</option>
                               <option>2nd Term</option>
                               <option>3rd Term</option>
@@ -358,7 +367,7 @@ const AcademicRecord = () => {
                             <label className="block text-sm font-medium mb-1">
                               Select Class ID:
                             </label>
-                            <select className="border border-gray-300 rounded-md px-4 py-2 max-w-md bg-gray-200">
+                            <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
                               <option>JSS1</option>
                               <option>JSS2</option>
                               <option>JSS3</option>
@@ -368,7 +377,7 @@ const AcademicRecord = () => {
                             <label className="block text-sm font-medium mb-1">
                               Select Subject ID:
                             </label>
-                            <select className="border border-gray-300 rounded-md px-4 py-2 max-w-md bg-gray-200">
+                            <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
                               <option>Maths</option>
                               <option>English</option>
                               <option>Science</option>
@@ -386,88 +395,86 @@ const AcademicRecord = () => {
                           />
                         </div>
                       </div>
-                    </div>
 
-                    <div className="border-b border-gray-200 p-8 mb-4"></div>
+                      <div className="border-b border-gray-200 p-8 mb-4"></div>
 
-                    <h3 className="text-lg font-semibold text-center mb-4">
-                      Foursquare International Secondary School <br />
-                      Uploaded Exam Record
-                    </h3>
-                    <table className="w-full border-collapse mx-auto">
-                      <thead>
-                        <tr className="bg-[#6B90B5] text-white">
-                          <th className="border-b border-gray-300 px-4 py-2 text-center">
-                            S/N
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-2 text-center">
-                            Student Name
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-2 text-center">
-                            Student ID
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-2 text-center">
-                            Score
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-2 text-left">
-                            Edit
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {students.map((student, index) => (
-                          <tr key={index}>
-                            <td className="border-b border-gray-300 px-4 py-2 text-center">
-                              {index + 1}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-2 text-center font-semibold">
-                              {student.name}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-2 text-center">
-                              {student.id}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              {editableRow === index ? (
-                                <input
-                                  type="number"
-                                  value={editedScore}
-                                  onChange={(e) =>
-                                    setEditedScore(e.target.value)
-                                  }
-                                  className="border-b border-gray-300 rounded px-2 py-1 w-16 text-center"
-                                />
-                              ) : (
-                                student.score
-                              )}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center cursor-pointer">
-                              {editableRow === index ? (
-                                <Check
-                                  className="text-green-500 w-5 h-5"
-                                  onClick={() => handleSaveClick(index)}
-                                />
-                              ) : (
-                                <PenLine
-                                  className="text-[#80ADCB] w-5 h-5"
-                                  onClick={() =>
-                                    handleEditClick(index, student.score)
-                                  }
-                                />
-                              )}
-                            </td>
+                      {/* Table Section */}
+                      <h3 className="text-lg font-semibold text-center mb-4">
+                        Foursquare International Secondary School <br />
+                        Uploaded Exam Record
+                      </h3>
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-[#6B90B5] text-white">
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              S/N
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              Student Name
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              Student ID
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              Score
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-left">
+                              Edit
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                        </thead>
+                        <tbody>
+                          {students.map((student, index) => (
+                            <tr key={index}>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                {index + 1}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                {student.name}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                {student.id}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                {editableRow === index ? (
+                                  <input
+                                    type="number"
+                                    value={editedScore}
+                                    onChange={(e) =>
+                                      setEditedScore(e.target.value)
+                                    }
+                                    className="border-b border-gray-300 rounded px-2 py-1 w-16 text-center"
+                                  />
+                                ) : (
+                                  student.score
+                                )}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center cursor-pointer">
+                                {editableRow === index ? (
+                                  <Check
+                                    className="text-green-500 w-5 h-5"
+                                    onClick={() => handleSaveClick(index)}
+                                  />
+                                ) : (
+                                  <PenLine
+                                    className="text-[#80ADCB] w-5 h-5"
+                                    onClick={() =>
+                                      handleEditClick(index, student.score)
+                                    }
+                                  />
+                                )}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
                   </div>
                 </div>
               </div>
             )}
           </div>
-          {/* Right Sidebar */}
-          <div className="hidden lg:block w-[25%] mx-auto">
-            <RightSidebar />
-          </div>
+  
         </div>
       </div>
 

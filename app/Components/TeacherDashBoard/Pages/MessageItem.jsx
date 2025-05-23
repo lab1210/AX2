@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Teacherlayout from "../../Teacherlayout";
+import Teacherlayout from "../TeacherWrapper";
 import DashboardHeader from "../DashboardHeader";
 import { IoIosNotificationsOutline, IoMdMore } from "react-icons/io";
 import { FaPlus } from "react-icons/fa6";

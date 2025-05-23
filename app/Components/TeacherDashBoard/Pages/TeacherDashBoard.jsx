@@ -13,7 +13,7 @@ import "react-calendar/dist/Calendar.css";
 import TeachingProgress from "../TeachingProgress";
 import StatCard from "../StatCard";
 import BottomNavbar from "../BottomNavbar";
-import Layout from "../../Teacherlayout";
+import Layout from "../TeacherWrapper";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -68,10 +68,9 @@ export default function TeacherDashboard() {
   // Desktop View
   const DesktopView = () => (
     <Layout>
-      <div className="flex min-h-screen">
+      <div className="flex h-screen overflow-hidden">
         <div className="bg-[#F7F8FA] w-full">
-          <div className="flex-1 flex flex-col">
-            {/* Header Section */}
+          <div className="flex-1 flex flex-col h-screen">
             <div className="flex items-center justify-between bg-white px-6 py-4">
               <h1 className="text-3xl font-bold">Dashboard</h1>
               <div className="flex items-center">
@@ -156,7 +155,7 @@ export default function TeacherDashboard() {
                     </div>
 
                     {/* Bar Chart */}
-                    <ResponsiveContainer width="100%" height={400}>
+                    <ResponsiveContainer width="100%" height={240}>
                       <BarChart data={attendanceData}>
                         <XAxis dataKey="day" />
                         <YAxis />
@@ -188,16 +187,16 @@ export default function TeacherDashboard() {
                   </div>
 
                   {/* Teaching Progress */}
-                  <div className="w-[30%] bg-white rounded-lg">
+                  <div className="w-[30%]">
                     <TeachingProgress />
                   </div>
                 </div>
               </div>
 
               {/* Right Sidebar */}
-              <div className="w-[27%] space-y-3 sticky top-6 overflow-y-auto">
+              <div className="w-[27%] space-y-3 sticky top-6 overflow-y-auto h-screen no-scrollbar">
                 {/* Calendar */}
-                <div className="bg-white rounded-lg shadow-lg">
+                <div className="bg-white rounded-lg shadow-lg h-[40vh]">
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DemoContainer
                       components={["DateCalendar", "DateCalendar"]}
@@ -209,7 +208,7 @@ export default function TeacherDashboard() {
                   </LocalizationProvider>
                 </div>
                 {/* Events */}
-                <div className="bg-white rounded-lg shadow-lg p-4">
+                <div className="bg-white rounded-lg shadow-lg p-4 h-[43vh] overflow-y-auto no-scrollbar">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Events</h3>
                     <button className="text-sm text-blue-600">View All</button>

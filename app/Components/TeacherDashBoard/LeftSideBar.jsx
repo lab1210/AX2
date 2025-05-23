@@ -7,6 +7,7 @@ import {
   ListChecks,
   TrendingUp,
   MessageCircle,
+  MessageCircleMore,
 } from "lucide-react";
 
 import { useRouter, usePathname } from "next/navigation";
@@ -42,6 +43,11 @@ const sidebarItems = [
     label: "Message",
     icon: <MessageCircle className="w-4 h-4" />,
     route: "/Teacher/Message",
+  },
+  {
+    label: "Teacher's Comment",
+    icon: <MessageCircleMore className="w-4 h-4" />,
+    route: "/Teacher/Comments",
   },
 ];
 
