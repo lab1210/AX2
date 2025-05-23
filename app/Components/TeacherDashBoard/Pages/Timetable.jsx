@@ -1,6 +1,6 @@
 import React from "react";
 import RightSidebar from "../RightSideBar";
-import Layout from "../../Teacherlayout";
+import Layout from "../Teacherlayout";
 import { Bell } from "lucide-react";
 
 const Timetable = () => {
@@ -82,7 +82,7 @@ const Timetable = () => {
     <Layout>
       <div className="flex min-h-screen bg-[#F7F8FA] w-full">
         <div className="flex flex-col w-full">
-          <div className="fixed top-0 z-30 flex items-center justify-between bg-white px-6 py-4 w-[83%]">
+          <div className="fixed top-0 z-30 flex items-center justify-between bg-white px-6 py-4 w-[85%]">
             <h1 className="text-3xl font-bold">Timetable</h1>
             <div className="flex items-center">
               <button className="relative mr-4">
@@ -105,7 +105,7 @@ const Timetable = () => {
 
           {/* Main content */}
           <div className="flex flex-row pt-21 w-full">
-            <div className="w-3/4 flex flex-col p-6 mx-auto">
+            <div className="w-full flex flex-col p-6 mx-auto">
               <div className="bg-white rounded-lg shadow p-12 overflow-x-auto">
                 <table className="w-full border-collapse">
                   <thead>
@@ -176,11 +176,6 @@ const Timetable = () => {
                   </tbody>
                 </table>
               </div>
-            </div>
-
-            {/* Right Sidebar */}
-            <div className="w-1/4 hidden lg:block">
-              <RightSidebar />
             </div>
           </div>
         </div>
