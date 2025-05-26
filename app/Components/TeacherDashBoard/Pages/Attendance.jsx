@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useCallback, useEffect } from "react";
 import Layout from "../Teacherlayout";
-import RightSidebar from "../RightSideBar";
 import { Search, Download, CloudUpload } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 
@@ -189,14 +188,14 @@ const AttendancePage = () => {
 
   return (
     <Layout>
-      <div className="flex min-h-screen bg-[#F7F8FA]">
+      <div className="flex bg-[#F7F8FA] overflow-hidden">
         <div className="flex-1 flex flex-col">
           <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 w-[85%]">
             {renderHeaderContent()}
           </div>
 
           {/* Content Section */}
-          <div className="flex flex-1 p-6 w-full pt-24">
+          <div className="flex flex-1 p-6 w-full mt-17 h-[87vh]">
             <div className="flex-1 flex flex-col bg-white rounded-lg shadow p-4 mx-auto">
               {/* Fixed Tabs Section */}
               <div className="border-b border-gray-200 mb-4">

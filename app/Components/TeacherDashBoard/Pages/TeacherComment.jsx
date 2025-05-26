@@ -25,30 +25,46 @@ const TeacherComments = () => {
     e.preventDefault();
     if (isEditing && editingComment) {
       // Update existing comment
-      setComments(comments.map(c => 
-        c.id === editingComment.id 
-          ? {
-              ...c,
-              student: commentType === "individual" ? students.find(s => s.id === parseInt(selectedStudent))?.name : "General",
-              class: commentType === "individual" ? students.find(s => s.id === parseInt(selectedStudent))?.class : "All Classes",
-              comment,
-              type: commentType,
-            }
-          : c
-      ));
+      setComments(
+        comments.map((c) =>
+          c.id === editingComment.id
+            ? {
+                ...c,
+                student:
+                  commentType === "individual"
+                    ? students.find((s) => s.id === parseInt(selectedStudent))
+                        ?.name
+                    : "General",
+                class:
+                  commentType === "individual"
+                    ? students.find((s) => s.id === parseInt(selectedStudent))
+                        ?.class
+                    : "All Classes",
+                comment,
+                type: commentType,
+              }
+            : c
+        )
+      );
     } else {
       // Add new comment
       const newComment = {
         id: Date.now(), // Using timestamp as unique ID
-        student: commentType === "individual" ? students.find(s => s.id === parseInt(selectedStudent))?.name : "General",
-        class: commentType === "individual" ? students.find(s => s.id === parseInt(selectedStudent))?.class : "All Classes",
+        student:
+          commentType === "individual"
+            ? students.find((s) => s.id === parseInt(selectedStudent))?.name
+            : "General",
+        class:
+          commentType === "individual"
+            ? students.find((s) => s.id === parseInt(selectedStudent))?.class
+            : "All Classes",
         comment,
         type: commentType,
-        date: new Date().toISOString().split('T')[0]
+        date: new Date().toISOString().split("T")[0],
       };
       setComments([...comments, newComment]);
     }
-    
+
     // Reset form
     setComment("");
     setSelectedStudent("");
@@ -63,21 +79,23 @@ const TeacherComments = () => {
     setCommentType(commentToEdit.type);
     setComment(commentToEdit.comment);
     if (commentToEdit.type === "individual") {
-      const student = students.find(s => s.name === commentToEdit.student);
+      const student = students.find((s) => s.name === commentToEdit.student);
       setSelectedStudent(student ? student.id.toString() : "");
     }
     setIsModalOpen(true);
   };
 
   const handleDelete = (id) => {
-    setComments(comments.filter(comment => comment.id !== id));
+    setComments(comments.filter((comment) => comment.id !== id));
   };
 
   return (
     <Layout>
       <div className="bg-[#F7F8FA] min-h-screen">
         <div className="fixed top-0 z-30 flex items-center justify-between bg-white px-6 py-4 w-[85%]">
-          <h1 className="text-2xl font-bold text-[#01427A]">Teacher's Comments</h1>
+          <h1 className="text-2xl font-bold text-[#01427A]">
+            Teacher's Comments
+          </h1>
           <button
             onClick={() => setIsModalOpen(true)}
             className="bg-[#01427A] text-white px-4 py-2 rounded-lg hover:bg-[#013567]"
@@ -96,31 +114,56 @@ const TeacherComments = () => {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-[#6B90B5] text-white">
-                    <th className="border-b border-gray-300 px-4 py-2 text-left">Date</th>
-                    <th className="border-b border-gray-300 px-4 py-2 text-left">Student</th>
-                    <th className="border-b border-gray-300 px-4 py-2 text-left">Class</th>
-                    <th className="border-b border-gray-300 px-4 py-2 text-left">Comment</th>
-                    <th className="border-b border-gray-300 px-4 py-2 text-left">Type</th>
-                    <th className="border-b border-gray-300 px-4 py-2 text-left">Actions</th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-left">
+                      Date
+                    </th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-left">
+                      Student
+                    </th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-left">
+                      Class
+                    </th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-left">
+                      Comment
+                    </th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-left">
+                      Type
+                    </th>
+                    <th className="border-b border-gray-300 px-4 py-2 text-left">
+                      Actions
+                    </th>
                   </tr>
                 </thead>
                 <tbody>
                   {comments.map((comment, index) => (
-                    <tr key={comment.id} className={index % 2 === 0 ? 'bg-gray-50' : 'bg-white'}>
-                      <td className="border-b border-gray-300 px-4 py-3">{comment.date}</td>
-                      <td className="border-b border-gray-300 px-4 py-3">{comment.student}</td>
-                      <td className="border-b border-gray-300 px-4 py-3">{comment.class}</td>
-                      <td className="border-b border-gray-300 px-4 py-3">{comment.comment}</td>
-                      <td className="border-b border-gray-300 px-4 py-3">{comment.type}</td>
+                    <tr
+                      key={comment.id}
+                      className={index % 2 === 0 ? "bg-gray-50" : "bg-white"}
+                    >
+                      <td className="border-b border-gray-300 px-4 py-3">
+                        {comment.date}
+                      </td>
+                      <td className="border-b border-gray-300 px-4 py-3">
+                        {comment.student}
+                      </td>
+                      <td className="border-b border-gray-300 px-4 py-3">
+                        {comment.class}
+                      </td>
+                      <td className="border-b border-gray-300 px-4 py-3">
+                        {comment.comment}
+                      </td>
+                      <td className="border-b border-gray-300 px-4 py-3">
+                        {comment.type}
+                      </td>
                       <td className="border-b border-gray-300 px-4 py-3">
                         <div className="flex gap-4">
-                          <FiEdit3 
-                            className="text-[#80ADCB] cursor-pointer" 
+                          <FiEdit3
+                            className="text-[#80ADCB] cursor-pointer"
                             size={15}
                             onClick={() => handleEdit(comment)}
                           />
-                          <FiTrash2 
-                            className="text-[#F94144] cursor-pointer" 
+                          <FiTrash2
+                            className="text-[#F94144] cursor-pointer"
                             size={15}
                             onClick={() => handleDelete(comment.id)}
                           />
@@ -150,7 +193,7 @@ const TeacherComments = () => {
               >
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl font-bold text-[#01427A]">
-                    {isEditing ? 'Edit Comment' : 'Add Comment'}
+                    {isEditing ? "Edit Comment" : "Add Comment"}
                   </h2>
                   <button
                     onClick={() => setIsModalOpen(false)}
