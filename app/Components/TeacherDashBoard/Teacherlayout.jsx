@@ -85,27 +85,33 @@ const TeacherLayout = ({ children, dynamicContent }) => {
 
   return (
     <>
-      <div className="w-full h-screen grid grid-cols-[15%_65%_20%] overflow-hidden">
+      {/* Desktop Layout */}
+      <div className="hidden lg:grid w-full h-screen grid-cols-[15%_65%_20%] overflow-hidden">
         {/* Left Sidebar */}
-        <div className="hidden md:block">
+        <div>
           <Suspense>
             <LeftSidebar setUser={setUser} user={user} />
           </Suspense>
         </div>
-
         {/* Main Content */}
         <div className="w-full h-screen overflow-y-scroll no-scrollbar">
           <div className="pb-16 lg:pb-4 lg:rounded-b-lg">
             {children}
           </div>
         </div>
-        
-        <div className="hidden lg:block bg-[#F7F8FA]">
+        {/* Right Sidebar */}
+        <div className="bg-[#F7F8FA]">
           <RightSidebar />
         </div>
       </div>
 
-      <BottomNavBar setUser={setUser} user={user} />
+      {/* Mobile/Tablet Layout */}
+      <div className="block lg:hidden w-full min-h-screen bg-[#F7F8FA]">
+        <div className="w-full min-h-screen">
+          {children}
+        </div>
+        <BottomNavBar setUser={setUser} user={user} />
+      </div>
     </>
   );
 };

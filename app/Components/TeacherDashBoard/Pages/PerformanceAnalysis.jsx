@@ -164,50 +164,59 @@ const PerformanceAnalysis = () => {
     };
 
     return (
-      <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
-        <div className="bg-white p-6 w-[750px] h-[600px]">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold text-center">SCORE DISTRIBUTION</h2>
-            <button
-              onClick={onClose}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <span className="text-2xl">×</span>
-            </button>
-          </div>
-          <div className="w-full">
-            <table className="w-full">
-              <tbody className="text-center">
-                {[...Array(10)].map((_, index) => (
-                  <tr key={index}>
-                    <td className="p-3 flex items-center space-x-2 text-left">
-                      <span>George Elijah</span>
-                    </td>
-                    <td className="p-3 text-center">70/100</td>
-                    <td className="p-3 text-right">
-                      <button 
-                        className="text-[#07508F] cursor-pointer hover:text-[#01427A]"
-                        onClick={() => handleViewResult({
-                          name: 'George Elijah',
-                          score: '70/100'
-                        })}
-                      >
-                        View Full Result
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      <>
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
+          <div className="bg-white p-6 w-[750px] h-[600px]">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold text-center">SCORE DISTRIBUTION</h2>
+              <button
+                onClick={onClose}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                <span className="text-2xl">×</span>
+              </button>
+            </div>
+            <div className="w-full">
+              <table className="w-full">
+                <tbody className="text-center">
+                  {[...Array(10)].map((_, index) => (
+                    <tr key={index}>
+                      <td className="p-3 flex items-center space-x-2 text-left">
+                        <span>George Elijah</span>
+                      </td>
+                      <td className="p-3 text-center">70/100</td>
+                      <td className="p-3 text-right">
+                        <button 
+                          className="text-[#07508F] cursor-pointer hover:text-[#01427A]"
+                          onClick={() => handleViewResult({
+                            name: 'George Elijah',
+                            score: '70/100'
+                          })}
+                        >
+                          View Full Result
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
         </div>
-
-        <ResultSheet
-          isOpen={isResultModalOpen}
-          onClose={() => setIsResultModalOpen(false)}
-          studentData={selectedStudent}
-        />
-      </div>
+        {isResultModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
+            <div className="relative bg-white rounded-lg shadow-lg max-w-4xl w-full p-6">
+              <button
+                onClick={() => setIsResultModalOpen(false)}
+                className="absolute top-2 right-2 text-2xl text-gray-500 hover:text-gray-700"
+              >
+                &times;
+              </button>
+              <ResultSheet studentData={selectedStudent} />
+            </div>
+          </div>
+        )}
+      </>
     );
   };
 
