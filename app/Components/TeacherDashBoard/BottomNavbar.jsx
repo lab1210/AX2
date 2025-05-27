@@ -4,17 +4,17 @@ import React from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { AiOutlineHome, AiFillHome } from "react-icons/ai";
-import { IoMdNotificationsOutline, IoMdNotifications } from "react-icons/io";
-import { MdOutlineCalendarMonth, MdCalendarMonth } from "react-icons/md";
-import { FaRegUser, FaUser } from "react-icons/fa6";
+import { Table, Sheet } from 'lucide-react';
+import { FaRegCommentDots, FaCommentDots } from "react-icons/fa6";
+import { IoCalendarOutline, IoCalendarSharp } from "react-icons/io5";
 
 const BottomNavBar = ({ setUser, user }) => {
   const pathname = usePathname();
 
   const dashboardRoute = "/Teacher/DashBoard";
-  const profileRoute = "/Teacher/Profile";
+  const commentRoute = "/Teacher/Comments";
   const timetableRoute = "/Teacher/Timetable";
-  const notificationRoute = "";
+  const attendanceRoute = "/Teacher/Attendance";
 
   const navItems = [
     {
@@ -24,18 +24,18 @@ const BottomNavBar = ({ setUser, user }) => {
       activeIcon: AiFillHome,
     },
     {
-      id: "notifications",
-      href: notificationRoute,
-      icon: IoMdNotificationsOutline,
-      activeIcon: IoMdNotifications,
+      id: "attendance",
+      href: attendanceRoute,
+      icon: IoCalendarOutline,
+      activeIcon: IoCalendarSharp,
     },
     {
       id: "timetable",
       href: timetableRoute,
-      icon: MdOutlineCalendarMonth,
-      activeIcon: MdCalendarMonth,
+      icon: Table,
+      activeIcon: Sheet,
     },
-    { id: "profile", href: profileRoute, icon: FaRegUser, activeIcon: FaUser },
+    { id: "comment", href: commentRoute, icon: FaRegCommentDots, activeIcon: FaCommentDots },
   ];
 
   const buildHref = (baseHref) => {
@@ -44,7 +44,7 @@ const BottomNavBar = ({ setUser, user }) => {
 
   const isActive = (itemHref) => pathname === itemHref;
 
-  const isSpecialActive = !isActive(dashboardRoute) && !isActive(profileRoute);
+  const isSpecialActive = !isActive(dashboardRoute) && !isActive(commentRoute);
 
   return (
     <div className="block lg:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-gray-200 shadow-md z-50">
@@ -55,9 +55,9 @@ const BottomNavBar = ({ setUser, user }) => {
 
           if (item.id === "dashboard") {
             itemIsActive = isActive(item.href);
-          } else if (item.id === "profile") {
+          } else if (item.id === "attendance") {
             itemIsActive = isActive(item.href);
-          } else if (item.id === "notifications" || item.id === "timetable") {
+          } else if (item.id === "comment" || item.id === "timetable") {
             itemIsActive = isSpecialActive && isActive(item.href);
           }
 

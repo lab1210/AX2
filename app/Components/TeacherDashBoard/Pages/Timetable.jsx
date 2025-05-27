@@ -1,9 +1,11 @@
 import React from "react";
-import RightSidebar from "../RightSideBar";
 import Layout from "../Teacherlayout";
-import { Bell } from "lucide-react";
+import { Bell, ChevronLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
+
 
 const Timetable = () => {
+  const router = useRouter();
   const timetableData = [
     {
       time: "9:00am",
@@ -82,10 +84,20 @@ const Timetable = () => {
     <Layout>
       <div className="flex min-h-screen bg-[#F7F8FA] w-full">
         <div className="flex flex-col w-full">
-          <div className="fixed top-0 z-30 flex items-center justify-between bg-white px-6 py-4 w-[85%]">
-            <h1 className="text-3xl font-bold">Timetable</h1>
+          <div className="fixed top-0 z-30 flex items-center justify-between bg-white px-6 py-4 w-full lg:w-[85%]">
+            <div className="flex flex-row items-center justify-center">
+            <button
+              onClick={() => {
+                router.back();
+              }}
+              className="text-xl flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
+            >
+              <ChevronLeft />
+            </button>
+            <h1 className="text-2xl lg:text-3xl font-bold">Timetable</h1>
+            </div>
             <div className="flex items-center">
-              <button className="relative mr-4">
+              <button className="hidden lg:block relative mr-4">
                 <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full" />
                 <Bell />
               </button>
@@ -104,9 +116,9 @@ const Timetable = () => {
           </div>
 
           {/* Main content */}
-          <div className="flex flex-row pt-21 w-full">
-            <div className="w-full flex flex-col p-6 mx-auto">
-              <div className="bg-white rounded-lg shadow p-12 overflow-x-auto">
+          <div className="flex flex-row pt-19 lg:pt-21 w-full">
+            <div className="w-full flex flex-col p-3 lg:p-6 mx-auto">
+              <div className="bg-white rounded-lg shadow p-6 lg:p-12 overflow-x-auto no-scrollbar">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-[#f6faff]">

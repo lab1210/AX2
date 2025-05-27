@@ -1,39 +1,48 @@
 "use client";
-import React from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import PropTypes from "prop-types";
+import React, { useRef } from "react";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import { useRouter } from "next/navigation";
 
-const ResultSheet = ({
-  studentData,
-  assessmentData,
-  cognitiveData,
-  affectiveData,
-  psychomotorData,
-  onClose,
-  isOpen,
-}) => {
-  // Dummy fallback data
-  const dummyStudent = {
-    name: "George Elijah David",
-    classYear: "JSS 1",
-    classArm: "A",
-    term: "1st Term",
-    academicYear: "2024/2025",
-    teacherName: "Mr. Joshua Daniel",
-    teacherComment: "An excellent performance. Keep it up!",
-    principalComment: "Outstanding result. Well done!",
+const ResultSheetImageDesign = ({ onClose }) => {
+  const sheetRef = useRef(null);
+  const router = useRouter();
+
+  const handleDownload = async () => {
+    const input = sheetRef.current;
+    if (!input) return;
+    input.style.background = "#fff";
+    const canvas = await html2canvas(input, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+    const pdf = new jsPDF({
+      orientation: "portrait",
+      unit: "mm",
+      format: "a4",
+    });
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgProps = pdf.getImageProperties(imgData);
+    const pdfWidth = pageWidth;
+    const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+    let position = 0;
+    if (pdfHeight < pageHeight) {
+      position = (pageHeight - pdfHeight) / 2;
+    }
+    pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight);
+    pdf.save("result-sheet.pdf");
+    input.style.background = "";
   };
 
-  const subjects = assessmentData || [
+  const subjects = [
     {
       subject: "English",
       classwork: 15,
       assignment: 15,
       project: 12,
       test: 18,
-      totalCA: 54,
+      totalCA: 14,
       exam: 56,
-      total: 70,
+      mark: 70,
       grade: "A",
       remark: "Excellent",
     },
@@ -41,11 +50,11 @@ const ResultSheet = ({
       subject: "Mathematics",
       classwork: 20,
       assignment: 20,
-      project: 17,
+      project: 17.2,
       test: 15,
       totalCA: 35,
       exam: 45,
-      total: 80,
+      mark: 80,
       grade: "A",
       remark: "Excellent",
     },
@@ -55,21 +64,21 @@ const ResultSheet = ({
       assignment: 23,
       project: 21,
       test: 3,
-      totalCA: 30,
+      totalCA: 10,
       exam: 50,
-      total: 60,
+      mark: 60,
       grade: "B",
       remark: "V.Good",
     },
     {
       subject: "Physics",
       classwork: 20,
-      assignment: 23,
-      project: 21,
-      test: 3,
-      totalCA: 30,
-      exam: 65,
-      total: 95,
+      assignment: 20,
+      project: 17.2,
+      test: 15,
+      totalCA: 35,
+      exam: 60,
+      mark: 95,
       grade: "A",
       remark: "Excellent",
     },
@@ -79,404 +88,456 @@ const ResultSheet = ({
       assignment: 23,
       project: 21,
       test: 3,
-      totalCA: 30,
-      exam: 55,
-      total: 85,
+      totalCA: 35,
+      exam: 45,
+      mark: 94,
       grade: "A",
       remark: "Excellent",
     },
     {
       subject: "Economics",
       classwork: 20,
-      assignment: 23,
-      project: 21,
+      assignment: 20,
+      project: 17.2,
       test: 3,
       totalCA: 30,
       exam: 64,
-      total: 94,
+      mark: 72,
       grade: "A",
       remark: "Excellent",
     },
     {
       subject: "Zoology",
       classwork: 20,
-      assignment: 23,
-      project: 21,
-      test: 3,
-      totalCA: 30,
-      exam: 72,
-      total: 102,
+      assignment: 20,
+      project: 17.2,
+      test: 15,
+      totalCA: 35,
+      exam: 45,
+      mark: 93,
       grade: "A",
       remark: "Excellent",
     },
     {
       subject: "Computer",
       classwork: 20,
-      assignment: 23,
-      project: 21,
-      test: 3,
-      totalCA: 30,
-      exam: 93,
-      total: 123,
-      grade: "A",
-      remark: "Excellent",
-    },
-    {
-      subject: "Health Edu.",
-      classwork: 20,
-      assignment: 23,
-      project: 21,
-      test: 3,
-      totalCA: 30,
-      exam: 53,
-      total: 83,
+      assignment: 20,
+      project: 17.2,
+      test: 15,
+      totalCA: 35,
+      exam: 45,
+      mark: 53,
       grade: "C",
       remark: "Good",
     },
     {
+      subject: "Health Edu.",
+      classwork: 20,
+      assignment: 20,
+      project: 17.2,
+      test: 15,
+      totalCA: 35,
+      exam: 45,
+      mark: 80,
+      grade: "A",
+      remark: "Excellent",
+    },
+    {
       subject: "P.H.E",
       classwork: 20,
-      assignment: 23,
-      project: 21,
-      test: 3,
-      totalCA: 30,
-      exam: 72,
-      total: 102,
+      assignment: 20,
+      project: 17.2,
+      test: 15,
+      totalCA: 35,
+      exam: 45,
+      mark: 80,
       grade: "A",
       remark: "Excellent",
     },
     {
       subject: "Anatomy",
       classwork: 20,
-      assignment: 23,
-      project: 21,
-      test: 3,
-      totalCA: 30,
-      exam: 69,
-      total: 99,
+      assignment: 20,
+      project: 17.2,
+      test: 15,
+      totalCA: 35,
+      exam: 45,
+      mark: 69,
       grade: "B",
       remark: "V.Good",
     },
     {
       subject: "Agric Science",
       classwork: 20,
-      assignment: 23,
-      project: 21,
+      assignment: 20,
+      project: 17.2,
       test: 3,
-      totalCA: 30,
-      exam: 40,
-      total: 70,
+      totalCA: 20,
+      exam: 20,
+      mark: 40,
       grade: "E",
       remark: "Fair",
     },
     {
       subject: "Biotechnology",
       classwork: 20,
-      assignment: 23,
-      project: 21,
-      test: 3,
-      totalCA: 30,
+      assignment: 20,
+      project: 17.2,
+      test: 15,
+      totalCA: 35,
       exam: 45,
-      total: 75,
+      mark: 45,
       grade: "D",
       remark: "Pass",
     },
     {
       subject: "Civic Edu.",
       classwork: 20,
-      assignment: 23,
-      project: 21,
-      test: 3,
-      totalCA: 30,
-      exam: 50,
-      total: 80,
+      assignment: 20,
+      project: 17.2,
+      test: 15,
+      totalCA: 35,
+      exam: 45,
+      mark: 50,
       grade: "D",
       remark: "Pass",
     },
     {
       subject: "Yoruba",
       classwork: 20,
-      assignment: 23,
-      project: 21,
-      test: 3,
-      totalCA: 30,
-      exam: 74,
-      total: 104,
+      assignment: 20,
+      project: 17.2,
+      test: 15,
+      totalCA: 35,
+      exam: 45,
+      mark: 74,
       grade: "A",
       remark: "Excellent",
     },
   ];
 
-  const cog = cognitiveData || {
-    "Problem Solving": 5,
-    Creativity: 4,
-    "Time Management": 3,
-    Leadership: 4,
-    Communication: 5,
-  };
+  const cognitiveSkills = [
+    { skill: "Problem Solving", grade: 2 },
+    { skill: "Communication", grade: 5 },
+    { skill: "Leadership", grade: 5 },
+    { skill: "Time Management", grade: 2 },
+  ];
 
-  const aff = affectiveData || {
-    Empathy: 4,
-    Teamwork: 5,
-    Responsibility: 4,
-    Honesty: 5,
-  };
+  const affectiveSkills = [
+    { skill: "Empathy", grade: 3 },
+    { skill: "Teamwork", grade: 5 },
+    { skill: "Responsibility", grade: 5 },
+    { skill: "Honesty", grade: 3 },
+  ];
 
-  const psy = psychomotorData || {
-    Handwriting: 4,
-    "Physical Fitness": 5,
-    Coordination: 4,
-    Endurance: 5,
-  };
+  const psychomotorSkills = [
+    { skill: "Handwriting", grade: 3 },
+    { skill: "Physical Fitness", grade: 4 },
+    { skill: "Coordination", grade: 5 },
+    { skill: "Endurance", grade: 3 },
+  ];
 
-  const student = studentData || dummyStudent;
+  const handleClose = () => {
+    if (onClose) onClose();
+    router.back();
+  };
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 z-50 flex justify-center items-start p-6 overflow-auto"
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10">
+      <div className="bg-white p-6 border-2 border-dashed border-[#01427a]">
+        {/* Close Button */}
+        <button
+          onClick={handleClose}
+          className="absolute top-0 right-0 bg-white text-gray-700 rounded-full w-10 h-10 flex items-center justify-center text-2xl font-bold shadow hover:bg-gray-300 z-100 cursor-pointer"
+          aria-label="Close"
         >
-          <motion.div
-            initial={{ y: "-10%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "-10%" }}
-            transition={{ duration: 0.3 }}
-            className="bg-white max-w-4xl w-full rounded-lg shadow-lg overflow-hidden"
-          >
+          &times;
+        </button>
+        <div className=" bg-white border-2 border-dashed border-[#01427a] max-h-[95vh] w-full max-w-5xl overflow-y-auto shadow-lg p-2 no-scrollbar">
+          <div ref={sheetRef} className="p-2">
             {/* Header */}
-            <div className="sticky top-0 bg-white flex justify-between items-center px-6 py-4 border-b">
-              <h2 className="text-2xl font-bold">Student Result Sheet</h2>
-              <button onClick={onClose} className="text-3xl leading-none">
-                &times;
-              </button>
+            <div className="flex items-center justify-between mb-2 border border-black">
+              <img src="/logo.svg" alt="School Logo" className="w-20 h-20" />
+              <div className="flex-1 text-center">
+                <h1 className="font-bold text-lg text-[#01427a] uppercase">
+                  Foursquare Int'l Secondary School
+                </h1>
+                <p className="font-semibold text-[#01427a]">
+                  ASERO, ABEOKUTA OGUN STATE NIGERIA
+                </p>
+                <p className="font-medium text-[#01427a]">
+                  Academic Year: 2024/2025
+                </p>
+              </div>
+              <div className="w-20 h-20" />
             </div>
 
-            <div className="p-6">
-              {/* School Header */}
-              <div className="flex items-center justify-between mb-8">
-                <img
-                  src="/logo.svg"
-                  alt="School Logo"
-                  className="w-24 h-24"
-                />
-                <div className="text-center">
-                  <h1 className="text-lg font-bold text-[#01427A] uppercase">
-                    Foursquare Int'l Secondary School
-                  </h1>
-                  <p className="text-sm">Asero, Abeokuta Ogun State, Nigeria</p>
-                  <p className="text-sm font-medium">
-                    Academic Year: {student.academicYear}
-                  </p>
+            {/* Student Info */}
+            <div className="flex flex-row justify-between gap-4 mb-2 text-sm">
+              <div>
+                <div className="mb-2">
+                  <span className="font-semibold">Student's Name:</span>{" "}
+                  <span className="border-b border-gray-400 min-w-[120px] inline-block">
+                    Toluwani Somade
+                  </span>
                 </div>
-                <div className="w-24 h-24" />
-              </div>
-
-              {/* Student Info */}
-              <div className="grid grid-cols-2 gap-4 mb-8 text-sm">
-                <div className="space-y-1">
-                  <p>
-                    <span className="font-semibold">Student’s Name:</span>{" "}
-                    {student.name}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Class Arm:</span>{" "}
-                    {student.classArm}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p>
-                    <span className="font-semibold">Class Year:</span>{" "}
-                    {student.classYear}
-                  </p>
-                  <p>
-                    <span className="font-semibold">Term:</span> {student.term}
-                  </p>
+                <div>
+                  <span className="font-semibold">Class Year:</span>{" "}
+                  <span className="border-b border-gray-400 min-w-[80px] inline-block">
+                    SSS3
+                  </span>
                 </div>
               </div>
+              <div>
+                <div className="mb-2">
+                  <span className="font-semibold">Class Arm:</span>{" "}
+                  <span className="border-b border-gray-400 min-w-[80px] inline-block">
+                    Science
+                  </span>
+                </div>
+                <div>
+                  <span className="font-semibold">Term:</span>{" "}
+                  <span className="border-b border-gray-400 min-w-[80px] inline-block">
+                    2nd Term
+                  </span>
+                </div>
+              </div>
+            </div>
 
-              {/* Assessment Table */}
-              <div className="overflow-x-auto mb-8">
-                <table className="w-full text-sm border-collapse">
+            {/* Assessment Table */}
+            <div className="border border-gray-400 rounded mt-2 mb-4 overflow-x-auto">
+              <div className="text-center font-bold py-1">
+                ASSESSMENT CATEGORY
+              </div>
+              <table className="w-full text-sm border-collapse">
+                <thead>
+                  <tr className="text-black text-md">
+                    <th className="border p-1">SUBJECTS</th>
+                    <th className="border p-1">Classwork (30)</th>
+                    <th className="border p-1">Assignment (30)</th>
+                    <th className="border p-1">Project (30)</th>
+                    <th className="border p-1">Test (30)</th>
+                    <th className="border p-1">Total C.A (30)</th>
+                    <th className="border p-1">Exam (70)</th>
+                    <th className="border p-1">Mark Obtained (100)</th>
+                    <th className="border p-1">Grade</th>
+                    <th className="border p-1">Remark</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {subjects.map((row, i) => (
+                    <tr key={i} className={i % 2 ? "bg-gray-50" : ""}>
+                      <td className="border p-1">{row.subject}</td>
+                      <td className="border p-1 text-center">
+                        {row.classwork}
+                      </td>
+                      <td className="border p-1 text-center">
+                        {row.assignment}
+                      </td>
+                      <td className="border p-1 text-center">{row.project}</td>
+                      <td className="border p-1 text-center">{row.test}</td>
+                      <td className="border p-1 text-center">{row.totalCA}</td>
+                      <td className="border p-1 text-center">{row.exam}</td>
+                      <td className="border p-1 text-center">{row.mark}</td>
+                      <td className="border p-1 text-center">{row.grade}</td>
+                      <td className="border p-1 text-center">{row.remark}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Skills Section */}
+            <div className="grid grid-cols-3 gap-2 mb-4 text-xs">
+              {/* Cognitive */}
+              <div>
+                <table className="w-full border-collapse">
                   <thead>
-                    <tr className="bg-[#01427A] text-white text-center">
-                      <th className="border p-2">Subject</th>
-                      <th className="border p-2">
-                        CW
-                        <br />
-                        (20)
-                      </th>
-                      <th className="border p-2">
-                        AS
-                        <br />
-                        (30)
-                      </th>
-                      <th className="border p-2">
-                        PT
-                        <br />
-                        (30)
-                      </th>
-                      <th className="border p-2">
-                        TS
-                        <br />
-                        (20)
-                      </th>
-                      <th className="border p-2">
-                        Total CA
-                        <br />
-                        (30)
-                      </th>
-                      <th className="border p-2">
-                        Exam
-                        <br />
-                        (70)
-                      </th>
-                      <th className="border p-2">
-                        Mark
-                        <br />
-                        (100)
-                      </th>
-                      <th className="border p-2">Grade</th>
-                      <th className="border p-2">Remark</th>
+                    <tr>
+                      <th className="border p-1">COGNITIVE SKILLS</th>
+                      <th className="border p-1">5</th>
+                      <th className="border p-1">4</th>
+                      <th className="border p-1">3</th>
+                      <th className="border p-1">2</th>
+                      <th className="border p-1">1</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {subjects.map((subj, i) => (
-                      <tr
-                        key={i}
-                        className={i % 2 === 0 ? "bg-gray-50" : "bg-white"}
-                      >
-                        <td className="border p-2">{subj.subject}</td>
-                        <td className="border p-2 text-center">
-                          {subj.classwork}
-                        </td>
-                        <td className="border p-2 text-center">
-                          {subj.assignment}
-                        </td>
-                        <td className="border p-2 text-center">
-                          {subj.project}
-                        </td>
-                        <td className="border p-2 text-center">{subj.test}</td>
-                        <td className="border p-2 text-center">
-                          {subj.totalCA}
-                        </td>
-                        <td className="border p-2 text-center">{subj.exam}</td>
-                        <td className="border p-2 text-center">{subj.total}</td>
-                        <td className="border p-2 text-center">{subj.grade}</td>
-                        <td className="border p-2">{subj.remark}</td>
+                    {cognitiveSkills.map((item, idx) => (
+                      <tr key={idx}>
+                        <td className="border p-1">{item.skill}</td>
+                        {[5, 4, 3, 2, 1].map((g) => (
+                          <td className="border p-1 text-center" key={g}>
+                            {item.grade === g ? "✓" : ""}
+                          </td>
+                        ))}
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
+              {/* Affective */}
+              <div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="border p-1">AFFECTIVE SKILLS</th>
+                      <th className="border p-1">5</th>
+                      <th className="border p-1">4</th>
+                      <th className="border p-1">3</th>
+                      <th className="border p-1">2</th>
+                      <th className="border p-1">1</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {affectiveSkills.map((item, idx) => (
+                      <tr key={idx}>
+                        <td className="border p-1">{item.skill}</td>
+                        {[5, 4, 3, 2, 1].map((g) => (
+                          <td className="border p-1 text-center" key={g}>
+                            {item.grade === g ? "✓" : ""}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              {/* Psychomotor */}
+              <div>
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr>
+                      <th className="border p-1">PSYCHOMOTOR SKILLS</th>
+                      <th className="border p-1">5</th>
+                      <th className="border p-1">4</th>
+                      <th className="border p-1">3</th>
+                      <th className="border p-1">2</th>
+                      <th className="border p-1">1</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {psychomotorSkills.map((item, idx) => (
+                      <tr key={idx}>
+                        <td className="border p-1">{item.skill}</td>
+                        {[5, 4, 3, 2, 1].map((g) => (
+                          <td className="border p-1 text-center" key={g}>
+                            {item.grade === g ? "✓" : ""}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
 
-              {/* Skills Grids */}
-              <div className="grid grid-cols-3 gap-6 mb-8 text-sm">
-                {[
-                  { title: "Cognitive Skills", data: cog },
-                  { title: "Affective Skills", data: aff },
-                  { title: "Psychomotor Skills", data: psy },
-                ].map((section, idx) => (
-                  <div key={idx}>
-                    <h3 className="font-semibold mb-2">{section.title}</h3>
-                    <table className="w-full border-collapse">
-                      <tbody>
-                        {Object.entries(section.data).map(
-                          ([skill, grade], j) => (
-                            <tr key={j} className={j % 2 ? "bg-gray-50" : ""}>
-                              <td className="border p-2">{skill}</td>
-                              <td className="border p-2 text-center">
-                                {grade}
-                              </td>
-                            </tr>
-                          )
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                ))}
+            <div className="flex flex-row justify-between items-start w-full mt-8 gap-8">
+              <div className="flex-1 text-sm w-[55%]">
+                <div className="mb-4 flex items-center">
+                  <span className="font-semibold min-w-[150px]">
+                    Teacher's Name:
+                  </span>
+                  <span className="border-b border-gray-400 flex-1 ml-2">
+                    {" "}
+                    Miss Opeyemi
+                  </span>
+                </div>
+                <div className="mb-4 flex items-center">
+                  <span className="font-semibold min-w-[150px]">
+                    Teacher's Comment:
+                  </span>
+                  <span className="border-b border-gray-400 flex-1 ml-2">
+                    Wonderful performance, keep it up.
+                  </span>
+                </div>
+                <div className="mb-4 flex items-center space-x-2">
+                  <span className="font-semibold min-w-[150px]">
+                    Teacher's Signature:
+                  </span>
+                  <span className="border-b border-gray-400 min-w-[80px] ml-2">
+                    {" "}
+                    Opeyemi
+                  </span>
+                  <span className="font-semibold ml-6">Date:</span>
+                  <span className="border-b border-gray-400 min-w-[80px] ml-2">
+                    {" "}
+                    26th May, 2025
+                  </span>
+                </div>
+                <div className="mb-4 flex items-center space-x-2">
+                  <span className="font-semibold min-w-[150px]">
+                    Principal's Signature:
+                  </span>
+                  <span className="border-b border-gray-400 min-w-[80px] ml-2">
+                    Ibidapo Dada
+                  </span>
+                  <span className="font-semibold ml-6">Date:</span>
+                  <span className="border-b border-gray-400 min-w-[80px] ml-2">
+                    26th May, 2025
+                  </span>
+                </div>
               </div>
 
-              {/* Comments */}
-              <div className="space-y-4 mb-8 text-sm">
-                <p>
-                  <span className="font-semibold">Teacher’s Name:</span>{" "}
-                  {student.teacherName}
-                </p>
-                <p>
-                  <span className="font-semibold">Teacher’s Comment:</span>{" "}
-                  {student.teacherComment}
-                </p>
-                <p>
-                  <span className="font-semibold">Principal’s Comment:</span>{" "}
-                  {student.principalComment}
-                </p>
-              </div>
-
-              {/* Grading System */}
-              <div className="text-sm">
-                <h3 className="font-semibold mb-2">Grading System</h3>
-                <div className="grid grid-cols-6 gap-4 text-center">
-                  <div>
-                    <span className="font-medium">A</span>
-                    <br />
-                    70–100
-                  </div>
-                  <div>
-                    <span className="font-medium">B</span>
-                    <br />
-                    60–69
-                  </div>
-                  <div>
-                    <span className="font-medium">C</span>
-                    <br />
-                    50–59
-                  </div>
-                  <div>
-                    <span className="font-medium">D</span>
-                    <br />
-                    45–49
-                  </div>
-                  <div>
-                    <span className="font-medium">E</span>
-                    <br />
-                    40–44
-                  </div>
-                  <div>
-                    <span className="font-medium">F</span>
-                    <br />
-                    0–39
-                  </div>
+              {/* Right: Grading System Table */}
+              <div className="w-[45%] no-scrollbar">
+                <h2 className="text-lg font-semibold text-center mb-2">
+                  Grading System
+                </h2>
+                <div className="overflow-x-auto">
+                  <table className="min-w-full border border-black">
+                    <thead>
+                      <tr>
+                        <th className="bg-[#0071c1] text-white border border-black font-semibold px-1 py-1">
+                          Grade
+                        </th>
+                        <th className="border border-black font-semibold px-1 py-1 w-16">
+                          A
+                        </th>
+                        <th className="border border-black font-semibold px-1 py-1 w-16">
+                          B
+                        </th>
+                        <th className="border border-black font-semibold px-1 py-1 w-16">
+                          C
+                        </th>
+                        <th className="border border-black font-semibold px-1 py-1 w-16">
+                          D
+                        </th>
+                        <th className="border border-black font-semibold px-1 py-1 w-16">
+                          E
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="bg-[#0071c1] text-white text-sm border border-black font-semibold px-1 py-1">
+                          Mark Range
+                        </td>
+                        <td className="border border-black px-1 py-1">
+                          70-100
+                        </td>
+                        <td className="border border-black px-1 py-1">69-61</td>
+                        <td className="border border-black px-1 py-1">60-51</td>
+                        <td className="border border-black px-1 py-1">50-41</td>
+                        <td className="border border-black px-1 py-1">40-0</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
-          </motion.div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+          </div>
+        </div>
+      </div>
+      {/* Download Button */}
+      <button
+        onClick={handleDownload}
+        className="absolute bottom-5 right-4 bg-blue-700 text-white px-4 py-2 rounded shadow hover:bg-blue-800 z-50 cursor-pointer"
+      >
+        Download PDF
+      </button>
+    </div>
   );
 };
 
-ResultSheet.propTypes = {
-  studentData: PropTypes.shape({
-    name: PropTypes.string,
-    classYear: PropTypes.string,
-    classArm: PropTypes.string,
-    term: PropTypes.string,
-    academicYear: PropTypes.string,
-    teacherName: PropTypes.string,
-    principalComment: PropTypes.string,
-    teacherComment: PropTypes.string,
-  }),
-  assessmentData: PropTypes.arrayOf(PropTypes.object),
-  cognitiveData: PropTypes.object,
-  affectiveData: PropTypes.object,
-  psychomotorData: PropTypes.object,
-  onClose: PropTypes.func.isRequired,
-  isOpen: PropTypes.bool.isRequired,
-};
-
-export default ResultSheet;
+export default ResultSheetImageDesign;

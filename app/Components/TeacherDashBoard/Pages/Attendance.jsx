@@ -3,6 +3,8 @@ import React, { useState, useCallback, useEffect } from "react";
 import Layout from "../Teacherlayout";
 import { Search, Download, CloudUpload } from "lucide-react";
 import { useDropzone } from "react-dropzone";
+import { ChevronLeft, Upload } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 const AttendancePage = () => {
   const [activeTab, setActiveTab] = useState("mark");
@@ -11,6 +13,7 @@ const AttendancePage = () => {
   const [error, setError] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const router = useRouter();
 
   useEffect(() => {
     if (isModalOpen) {
@@ -187,279 +190,365 @@ const AttendancePage = () => {
   };
 
   return (
-    <Layout>
-      <div className="flex bg-[#F7F8FA] overflow-hidden">
-        <div className="flex-1 flex flex-col">
-          <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 w-[85%]">
-            {renderHeaderContent()}
-          </div>
+    <>
+      <Layout>
+        {/* Desktop View */}
+        <div className="hidden bg-[#F7F8FA] overflow-hidden lg:flex">
+          <div className="flex-1 flex flex-col">
+            <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 w-[85%]">
+              {renderHeaderContent()}
+            </div>
 
-          {/* Content Section */}
-          <div className="flex flex-1 p-6 w-full mt-17 h-[87vh]">
-            <div className="flex-1 flex flex-col bg-white rounded-lg shadow p-4 mx-auto">
-              {/* Fixed Tabs Section */}
-              <div className="border-b border-gray-200 mb-4">
-                <div className="flex items-center space-x-8">
-                  <button
-                    className={`px-4 py-3 ${
-                      activeTab === "mark"
-                        ? "border-b-4 border-[#07508F] text-black"
-                        : "text-gray-400"
-                    }`}
-                    onClick={() => setActiveTab("mark")}
-                  >
-                    Mark Attendance
-                  </button>
-                  <button
-                    className={`px-4 py-3 ${
-                      activeTab === "view"
-                        ? "border-b-4 border-[#07508F] text-black"
-                        : "text-gray-400"
-                    }`}
-                    onClick={() => setActiveTab("view")}
-                  >
-                    View Attendance
-                  </button>
-                  <button
-                    className={`px-4 py-3 ${
-                      activeTab === "summary"
-                        ? "border-b-4 border-[#07508F] text-black"
-                        : "text-gray-400"
-                    }`}
-                    onClick={() => setActiveTab("summary")}
-                  >
-                    Summary Attendance
-                  </button>
+            {/* Content Section */}
+            <div className="flex flex-1 p-6 w-full mt-17 h-[87vh]">
+              <div className="flex-1 flex flex-col bg-white rounded-lg shadow p-4 mx-auto">
+                {/* Fixed Tabs Section */}
+                <div className="border-b border-gray-200 mb-4">
+                  <div className="flex items-center space-x-8">
+                    <button
+                      className={`px-4 py-3 ${
+                        activeTab === "mark"
+                          ? "border-b-4 border-[#07508F] text-black"
+                          : "text-gray-400"
+                      }`}
+                      onClick={() => setActiveTab("mark")}
+                    >
+                      Mark Attendance
+                    </button>
+                    <button
+                      className={`px-4 py-3 ${
+                        activeTab === "view"
+                          ? "border-b-4 border-[#07508F] text-black"
+                          : "text-gray-400"
+                      }`}
+                      onClick={() => setActiveTab("view")}
+                    >
+                      View Attendance
+                    </button>
+                    <button
+                      className={`px-4 py-3 ${
+                        activeTab === "summary"
+                          ? "border-b-4 border-[#07508F] text-black"
+                          : "text-gray-400"
+                      }`}
+                      onClick={() => setActiveTab("summary")}
+                    >
+                      Summary Attendance
+                    </button>
+                  </div>
                 </div>
-              </div>
 
-              {/* Scrollable Content for all tabs */}
-              <div className="overflow-y-auto max-h-[calc(100vh-220px)] no-scrollbar">
-                {activeTab === "mark" && (
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-2">
+                {/* Scrollable Content for all tabs */}
+                <div className="overflow-y-auto max-h-[calc(100vh-220px)] no-scrollbar">
+                  {activeTab === "mark" && (
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="checkbox"
+                            id="selectAll"
+                            checked={
+                              selectedStudents.length === students.length
+                            }
+                            onChange={handleSelectAll}
+                            className="accent-green-600 w-5 h-5"
+                          />
+                          <label
+                            htmlFor="selectAll"
+                            className="text-sm font-medium"
+                          >
+                            Select All
+                          </label>
+                        </div>
                         <input
-                          type="checkbox"
-                          id="selectAll"
-                          checked={selectedStudents.length === students.length}
-                          onChange={handleSelectAll}
-                          className="accent-green-600 w-5 h-5"
+                          type="date"
+                          className="border border-gray-100 rounded px-2 py-1"
                         />
-                        <label htmlFor="selectAll" className="text-sm font-medium">
-                          Select All
-                        </label>
+                        <button className="bg-[#07508F] text-white px-4 py-3 rounded">
+                          Save
+                        </button>
                       </div>
-                      <input
-                        type="date"
-                        className="border border-gray-100 rounded px-2 py-1"
-                      />
-                      <button className="bg-[#07508F] text-white px-4 py-3 rounded">
-                        Save
-                      </button>
+
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-[#6B90B5] text-white">
+                            <th className="border-b border-gray-300 px-4 py-3 text-left">
+                              Action
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              Students Name
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-right">
+                              Status
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {students.map((student) => (
+                            <tr key={student.id}>
+                              <td className="border-b border-gray-300 px-4 py-3 text-left">
+                                <input
+                                  type="checkbox"
+                                  className="accent-green-600 w-5 h-5"
+                                  checked={selectedStudents.includes(
+                                    student.id
+                                  )}
+                                  onChange={() =>
+                                    handleStudentSelect(student.id)
+                                  }
+                                />
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center font-semibold">
+                                {student.name}
+                              </td>
+                              <td
+                                className={`border-b border-gray-300 px-4 py-3 text-right font-semibold ${
+                                  student.status === "Present"
+                                    ? "text-green-500"
+                                    : "text-red-500"
+                                }`}
+                              >
+                                {student.status}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
+                  )}
 
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="bg-[#6B90B5] text-white">
-                          <th className="border-b border-gray-300 px-4 py-3 text-left">
-                            Action
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-center">
-                            Students Name
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-right">
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {students.map((student) => (
-                          <tr key={student.id}>
-                            <td className="border-b border-gray-300 px-4 py-3 text-left">
-                              <input
-                                type="checkbox"
-                                className="accent-green-600 w-5 h-5"
-                                checked={selectedStudents.includes(student.id)}
-                                onChange={() => handleStudentSelect(student.id)}
-                              />
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center font-semibold">
-                              {student.name}
-                            </td>
-                            <td
-                              className={`border-b border-gray-300 px-4 py-3 text-right font-semibold ${
-                                student.status === "Present"
-                                  ? "text-green-500"
-                                  : "text-red-500"
-                              }`}
-                            >
-                              {student.status}
-                            </td>
+                  {activeTab === "view" && (
+                    <div>
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-[#6B90B5] text-white">
+                            <th className="border-b border-gray-300 px-4 py-3 text-left">
+                              S/N
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-left">
+                              Students Name
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              Attendance Mark
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-right">
+                              Status
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                        </thead>
+                        <tbody>
+                          {students.map((student, index) => (
+                            <tr key={student.id}>
+                              <td className="border-b border-gray-300 px-4 py-3">
+                                {index + 1}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3">
+                                {student.name}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                {student.status === "Present" ? 1 : 0}
+                              </td>
+                              <td
+                                className={`border-b border-gray-300 px-4 py-3 text-right font-semibold ${
+                                  student.status === "Present"
+                                    ? "text-green-500"
+                                    : "text-red-500"
+                                }`}
+                              >
+                                {student.status}
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
 
-                {activeTab === "view" && (
-                  <div>
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="bg-[#6B90B5] text-white">
-                          <th className="border-b border-gray-300 px-4 py-3 text-left">
-                            S/N
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-left">
-                            Students Name
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-center">
-                            Attendance Mark
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-right">
-                            Status
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {students.map((student, index) => (
-                          <tr key={student.id}>
-                            <td className="border-b border-gray-300 px-4 py-3">
-                              {index + 1}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3">
-                              {student.name}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              {student.status === "Present" ? 1 : 0}
-                            </td>
-                            <td
-                              className={`border-b border-gray-300 px-4 py-3 text-right font-semibold ${
-                                student.status === "Present"
-                                  ? "text-green-500"
-                                  : "text-red-500"
-                              }`}
-                            >
-                              {student.status}
-                            </td>
+                  {activeTab === "summary" && (
+                    <div>
+                      <table className="w-full border-collapse">
+                        <thead>
+                          <tr className="bg-[#6B90B5] text-white">
+                            <th className="border-b border-gray-300 px-4 py-3 text-left">
+                              Student Name
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              No. of Time Present
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              % Present
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              No. of Time Absent
+                            </th>
+                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                              % Absent
+                            </th>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-
-                {activeTab === "summary" && (
-                  <div>
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="bg-[#6B90B5] text-white">
-                          <th className="border-b border-gray-300 px-4 py-3 text-left">
-                            Student Name
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-center">
-                            No. of Time Present
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-center">
-                            % Present
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-center">
-                            No. of Time Absent
-                          </th>
-                          <th className="border-b border-gray-300 px-4 py-3 text-center">
-                            % Absent
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {students.map((student, index) => (
-                          <tr key={index}>
-                            <td className="border-b border-gray-300 px-4 py-3">
-                              {student.name}
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              100
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              80%
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              20
-                            </td>
-                            <td className="border-b border-gray-300 px-4 py-3 text-center">
-                              20%
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
+                        </thead>
+                        <tbody>
+                          {students.map((student, index) => (
+                            <tr key={index}>
+                              <td className="border-b border-gray-300 px-4 py-3">
+                                {student.name}
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                100
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                80%
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                20
+                              </td>
+                              <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                20%
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {isModalOpen && (
-        <div className="bg-black/70 fixed inset-0 z-40">
-          <div
-            className={`fixed inset-y-0 left-0 z-50 bg-white rounded-lg shadow-lg  inset-0 w-[90%] h-[80%] mx-auto mt-15 transform transition-transform duration-500 ease-in-out ${
-              isAnimating ? "translate-x-0" : "-translate-x-full"
-            }`}
-          >
-            <div className="w-full h-full p-20">
-              <div className="flex items-center justify-between mb-4">
-                <div className="mx-auto">
-                  <h2 className="text-3xl font-bold text-center">
-                    Upload Exam
-                  </h2>
+        {/* Mobile/Tablet view */}
+        <div className="block lg:hidden w-full min-h-screen bg-[#F7F8FA]">
+          <div className="sticky top-0 z-20 bg-white border-b flex items-center justify-between px-4 py-3">
+            <button className="text-xl">
+              <ChevronLeft onClick={() => router.back()}/>
+            </button>
+            <span className="font-semibold text-base">Mark Attendance</span>
+            <button className="bg-[#07508F] rounded-full p-2">
+              <Upload className="text-white w-5 h-5"  onClick={() => setIsModalOpen(true)}/>
+            </button>
+          </div>
+
+          {/* Controls */}
+          <div className="grid grid-cols-3 items-center space-x-5 px-4 py-2 bg-white border-b">
+            <label className="flex flex-row items-center gap-1 text-xs">
+              <input
+                type="checkbox"
+                checked={selectedStudents.length === students.length}
+                onChange={handleSelectAll}
+                className="accent-green-600 w-5 h-5"
+              />
+              Select All
+            </label>
+            <div className="flex flex-row items-center gap-2">
+            <span className="text-xs">Select Date:</span>
+            <select className="border rounded px-2 py-1 text-xs">
+              <option>2023/2024</option>
+              <option>2024/2025</option>
+              <option>2025/2026</option>
+            </select>
+            </div>
+            <button className="bg-[#07508F] text-white px-3 py-2 rounded text-xs ml-auto">
+              Save
+            </button>
+          </div>
+
+          {/* Table */}
+          <div className="overflow-x-auto px-2 pb-20">
+            <table className="min-w-full text-xs">
+              <thead>
+                <tr className="bg-[#6B90B5] text-white">
+                  <th className="px-2 py-2 text-left">Action</th>
+                  <th className="px-2 py-2 text-center">Students Name</th>
+                  <th className="px-2 py-2 text-right">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {students.map((student) => (
+                  <tr key={student.id} className="border-b">
+                    <td className="px-2 py-2">
+                      <input
+                        type="checkbox"
+                        className="accent-green-600 w-5 h-5"
+                        checked={selectedStudents.includes(student.id)}
+                        onChange={() => handleStudentSelect(student.id)}
+                      />
+                    </td>
+                    <td className="px-2 py-2 text-center">{student.name}</td>
+                    <td
+                      className={`px-2 py-2 font-semibold text-right ${
+                        student.status === "Present"
+                          ? "text-green-600"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {student.status}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {isModalOpen && (
+          <div className="bg-black/70 fixed inset-0 z-40">
+            <div
+              className={`fixed inset-y-0 left-0 z-50 bg-white rounded-lg shadow-lg  inset-0 h-[65vh] w-[90%] lg:w-[90%] lg:h-[85vh] mx-auto mt-15 transform transition-transform duration-500 ease-in-out flex items-center ${
+                isAnimating ? "translate-x-0" : "-translate-x-full"
+              }`}
+            >
+              <div className="w-full p-10 lg:p-15">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="mx-auto">
+                    <h2 className="text-xl lg:text-3xl font-bold text-center">
+                      Upload Attendance
+                    </h2>
+                  </div>
+                  <div className="float-right">
+                    <button
+                      className="text-gray-500 hover:text-gray-700 text-2xl"
+                      onClick={() => {
+                        setIsAnimating(false);
+                        setTimeout(() => setIsModalOpen(false), 300);
+                      }}
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
-                <div className="float-right">
-                  <button
-                    className="text-gray-500 hover:text-gray-700 text-2xl"
-                    onClick={() => {
-                      setIsAnimating(false);
-                      setTimeout(() => setIsModalOpen(false), 300);
-                    }}
+                <div className="mb-4 flex space-x-3 items-center">
+                  <label
+                    htmlFor="uploadDate"
+                    className="block text-sm font-medium mb-2"
                   >
-                    ✕
-                  </button>
+                    Select Date:
+                  </label>
+                  <input
+                    type="date"
+                    id="uploadDate"
+                    className="border-2 border-gray-100 rounded p-2 max-w-sm bg-gray-200"
+                  />
                 </div>
-              </div>
-              <div className="mb-4 flex space-x-3 items-center">
-                <label
-                  htmlFor="uploadDate"
-                  className="block text-sm font-medium mb-2"
-                >
-                  Select Date:
-                </label>
-                <input
-                  type="date"
-                  id="uploadDate"
-                  className="border-2 border-gray-100 rounded p-2 max-w-sm bg-gray-200"
-                />
-              </div>
 
-              {renderDropzone()}
+                {renderDropzone()}
 
-              <div className="mt-4 text-sm text-red-500 flex flex-row space-x-1 items-center font-semibold">
-                <a href="#" className="underline">
-                  Download Sample here
-                </a>
-                <p>
-                  <Download className="w-4 h-4" />
-                </p>
+                <div className="mt-4 text-sm text-red-500 flex flex-row space-x-1 items-center font-semibold">
+                  <a href="#" className="underline">
+                    Download Sample here
+                  </a>
+                  <p>
+                    <Download className="w-4 h-4" />
+                  </p>
+                </div>
+                <button className="bg-[#07508F] text-white px-6 py-3 rounded-md w-full mt-4 cursor-pointer font-semibold">
+                  Save
+                </button>
               </div>
-              <button className="bg-[#07508F] text-white px-6 py-3 rounded-md w-full mt-4 cursor-pointer font-semibold">
-                Save
-              </button>
             </div>
           </div>
-        </div>
-      )}
-    </Layout>
+        )}
+      </Layout>
+    </>
   );
 };
 
