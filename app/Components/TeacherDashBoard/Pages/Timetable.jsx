@@ -90,7 +90,7 @@ const Timetable = () => {
               onClick={() => {
                 router.back();
               }}
-              className="text-xl flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
+              className="lg:hidden text-xl flex items-center justify-center w-10 h-10 rounded-full hover:bg-gray-100"
             >
               <ChevronLeft />
             </button>
@@ -116,7 +116,7 @@ const Timetable = () => {
           </div>
 
           {/* Main content */}
-          <div className="flex flex-row pt-19 lg:pt-21 w-full">
+          <div className="flex flex-row pt-19 lg:pt-17 w-full lg:fixed lg:w-[64%] overflow-y-auto no-scrollbar">
             <div className="w-full flex flex-col p-3 lg:p-6 mx-auto">
               <div className="bg-white rounded-lg shadow p-6 lg:p-12 overflow-x-auto no-scrollbar">
                 <table className="w-full border-collapse">

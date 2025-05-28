@@ -2,7 +2,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { PenLine, Search, Check } from "lucide-react";
 import Layout from "../Teacherlayout";
-import RightSidebar from "../RightSideBar";
 import { useDropzone } from "react-dropzone";
 import { CloudUpload, Download } from "lucide-react";
 
@@ -116,7 +115,7 @@ const AcademicRecord = () => {
           </div>
         </div>
 
-        <div className="flex flex-row gap-2 pt-22 w-full min-h-screen">
+        <div className="flex flex-row gap-2 pt-19 w-[65%] h-screen fixed bg-[#F7F8FA]">
           <div className="flex-1 p-4 w-full mx-auto">
             {activeTab === "ca" && (
               <div className="flex flex-col lg:flex-row gap-6">

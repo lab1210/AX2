@@ -71,7 +71,7 @@ export default function TeacherDashboard() {
       <div className="flex h-screen overflow-hidden">
         <div className="bg-[#F7F8FA] w-full">
           <div className="flex-1 flex flex-col h-screen">
-            <div className="flex items-center justify-between bg-white px-6 py-4">
+            <div className="flex items-center justify-between bg-white px-6 py-4 fixed w-[85%]">
               <h1 className="text-3xl font-bold">Dashboard</h1>
               <div className="flex items-center">
                 <button className="relative mr-4">
@@ -93,7 +93,7 @@ export default function TeacherDashboard() {
             </div>
 
             {/* Main Content */}
-            <div className="flex flex-1 p-6 gap-4 overflow-hidden">
+            <div className="flex flex-1 p-6 gap-4 overflow-hidden mt-17 fixed w-[85%]">
               <div className="flex-1 overflow-hidden">
                 <div className="w-full bg-[#004080] rounded-lg shadow flex flex-row justify-between items-center text-white mb-6">
                   <div className="p-2">
@@ -155,7 +155,7 @@ export default function TeacherDashboard() {
                     </div>
 
                     {/* Bar Chart */}
-                    <ResponsiveContainer width="100%" height={240}>
+                    <ResponsiveContainer width="100%" height={280}>
                       <BarChart data={attendanceData}>
                         <XAxis dataKey="day" />
                         <YAxis />
