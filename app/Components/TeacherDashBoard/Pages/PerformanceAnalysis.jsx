@@ -168,7 +168,9 @@ const PerformanceAnalysis = () => {
         <div className="fixed inset-0 bg-black/70 z-50 flex items-center justify-center">
           <div className="bg-white p-6 w-[750px] h-[600px]">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold text-center">SCORE DISTRIBUTION</h2>
+              <h2 className="text-xl font-semibold text-center">
+                SCORE DISTRIBUTION
+              </h2>
               <button
                 onClick={onClose}
                 className="text-gray-500 hover:text-gray-700"
@@ -186,12 +188,14 @@ const PerformanceAnalysis = () => {
                       </td>
                       <td className="p-3 text-center">70/100</td>
                       <td className="p-3 text-right">
-                        <button 
+                        <button
                           className="text-[#07508F] cursor-pointer hover:text-[#01427A]"
-                          onClick={() => handleViewResult({
-                            name: 'George Elijah',
-                            score: '70/100'
-                          })}
+                          onClick={() =>
+                            handleViewResult({
+                              name: "George Elijah",
+                              score: "70/100",
+                            })
+                          }
                         >
                           View Full Result
                         </button>
@@ -204,16 +208,16 @@ const PerformanceAnalysis = () => {
           </div>
         </div>
         {isResultModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
-            <div className="relative bg-white rounded-lg shadow-lg max-w-4xl w-full p-6">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30">
+            {/* <div className="relative bg-white rounded-lg shadow-lg max-w-4xl w-full p-6">
               <button
                 onClick={() => setIsResultModalOpen(false)}
                 className="absolute top-2 right-2 text-2xl text-gray-500 hover:text-gray-700"
               >
                 &times;
-              </button>
+              </button> */}
               <ResultSheet studentData={selectedStudent} />
-            </div>
+            {/* </div> */}
           </div>
         )}
       </>
@@ -358,11 +362,15 @@ const PerformanceAnalysis = () => {
                             backgroundColor: COLORS[index % COLORS.length],
                           }}
                         ></div>
-                        <div className="flex flex-row space-x-6">
-                          <p className="text-sm text-black">{entry.range}</p>
-                          <p className="text-center text-sm text-black font-semibold justify-center">
-                            {entry.value}%
-                          </p>
+                        <div className="flex flex-row justify-between space-x-4">
+                          <div>
+                            <p className="text-sm text-black">{entry.range}</p>
+                          </div>
+                          <div className="flex flex-col">
+                            <p className="text-right text-sm text-black font-semibold">
+                              {entry.value}%
+                            </p>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -425,7 +433,7 @@ const PerformanceAnalysis = () => {
                         <h3 className="text-lg font-semibold mb-4">
                           Grade Distribution
                         </h3>
-                        <ResponsiveContainer width="100%" height={150}>
+                        <ResponsiveContainer width="100%" height={180}>
                           <ComposedChart data={gradeDistribution}>
                             <CartesianGrid strokeDasharray="3 3" />
                             <XAxis
@@ -474,11 +482,11 @@ const PerformanceAnalysis = () => {
                       </div>
                       {/* Gender Performance Distribution */}
                       <div className="bg-white rounded-md flex flex-col w-[45%] shadow-lg">
-                        <p className="font-bold text-lg text-center">
+                        <p className="font-bold text-lg text-center mt-3">
                           Gender Performance Distribution
                         </p>
                         <div className="text-center">
-                          <ResponsiveContainer width="100%" height={150}>
+                          <ResponsiveContainer width="100%" height={170}>
                             <PieChart>
                               {/* Outer Donut (Female) */}
                               <Pie
@@ -644,7 +652,7 @@ const PerformanceAnalysis = () => {
                     </div>
                   </div>
 
-                  <ResponsiveContainer width="100%" height={400}>
+                  <ResponsiveContainer width="100%" height={440}>
                     <BarChart
                       data={overallPerformance}
                       barCategoryGap="20%"

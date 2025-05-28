@@ -58,7 +58,7 @@ const ChatItem = () => {
           </div>
         </div>
       </div>
-      <div className="bg-[#D4D4D4] h-screen p-2">
+      <div className="bg-[#F7F8FA] w-[85%] h-[92vh] fixed p-2">
         <div className=" h-screen sm:gap-2 grid lg:grid-cols-[2fr_4.5fr] sm:grid-cols-[2fr_3fr]">
           <div
             className="bg-[#ffffff] flex flex-col overflow-auto sm:resize-x sm:overflow-auto md:resize-x md:overflow-auto min-h-screen"

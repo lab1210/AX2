@@ -216,26 +216,26 @@ const ResultSheetImageDesign = ({ onClose }) => {
     },
   ];
 
-  const cognitiveSkills = [
-    { skill: "Problem Solving", grade: 2 },
-    { skill: "Communication", grade: 5 },
-    { skill: "Leadership", grade: 5 },
-    { skill: "Time Management", grade: 2 },
-  ];
+  // const cognitiveSkills = [
+  //   { skill: "Problem Solving", grade: 2 },
+  //   { skill: "Communication", grade: 5 },
+  //   { skill: "Leadership", grade: 5 },
+  //   { skill: "Time Management", grade: 2 },
+  // ];
 
-  const affectiveSkills = [
-    { skill: "Empathy", grade: 3 },
-    { skill: "Teamwork", grade: 5 },
-    { skill: "Responsibility", grade: 5 },
-    { skill: "Honesty", grade: 3 },
-  ];
+  // const affectiveSkills = [
+  //   { skill: "Empathy", grade: 3 },
+  //   { skill: "Teamwork", grade: 5 },
+  //   { skill: "Responsibility", grade: 5 },
+  //   { skill: "Honesty", grade: 3 },
+  // ];
 
-  const psychomotorSkills = [
-    { skill: "Handwriting", grade: 3 },
-    { skill: "Physical Fitness", grade: 4 },
-    { skill: "Coordination", grade: 5 },
-    { skill: "Endurance", grade: 3 },
-  ];
+  // const psychomotorSkills = [
+  //   { skill: "Handwriting", grade: 3 },
+  //   { skill: "Physical Fitness", grade: 4 },
+  //   { skill: "Coordination", grade: 5 },
+  //   { skill: "Endurance", grade: 3 },
+  // ];
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -253,7 +253,7 @@ const ResultSheetImageDesign = ({ onClose }) => {
         >
           &times;
         </button>
-        <div className=" bg-white border-2 border-dashed border-[#01427a] max-h-[95vh] w-full max-w-5xl overflow-y-auto shadow-lg p-2 no-scrollbar">
+        <div className=" bg-white border-2 border-dashed border-[#01427a] max-h-[95vh] w-full max-w-3xl overflow-y-auto shadow-lg p-2 no-scrollbar">
           <div ref={sheetRef} className="p-2">
             {/* Header */}
             <div className="flex items-center justify-between mb-2 border border-black">
@@ -313,13 +313,13 @@ const ResultSheetImageDesign = ({ onClose }) => {
                 <thead>
                   <tr className="text-black text-md">
                     <th className="border p-1">SUBJECTS</th>
-                    <th className="border p-1">Classwork (30)</th>
-                    <th className="border p-1">Assignment (30)</th>
-                    <th className="border p-1">Project (30)</th>
-                    <th className="border p-1">Test (30)</th>
-                    <th className="border p-1">Total C.A (30)</th>
-                    <th className="border p-1">Exam (70)</th>
-                    <th className="border p-1">Mark Obtained (100)</th>
+                    <th className="border p-1">Classwork <br /> (30)</th>
+                    <th className="border p-1">Assignment <br /> (30)</th>
+                    <th className="border p-1">Project <br /> (30)</th>
+                    <th className="border p-1">Test <br /> (30)</th>
+                    <th className="border p-1">Total C.A <br /> (30)</th>
+                    <th className="border p-1">Exam <br /> (70)</th>
+                    <th className="border p-1">Mark Obtained <br /> (100)</th>
                     <th className="border p-1">Grade</th>
                     <th className="border p-1">Remark</th>
                   </tr>
@@ -348,8 +348,7 @@ const ResultSheetImageDesign = ({ onClose }) => {
             </div>
 
             {/* Skills Section */}
-            <div className="grid grid-cols-3 gap-2 mb-4 text-xs">
-              {/* Cognitive */}
+            {/* <div className="grid grid-cols-3 gap-2 mb-4 text-xs">
               <div>
                 <table className="w-full border-collapse">
                   <thead>
@@ -376,7 +375,6 @@ const ResultSheetImageDesign = ({ onClose }) => {
                   </tbody>
                 </table>
               </div>
-              {/* Affective */}
               <div>
                 <table className="w-full border-collapse">
                   <thead>
@@ -403,7 +401,6 @@ const ResultSheetImageDesign = ({ onClose }) => {
                   </tbody>
                 </table>
               </div>
-              {/* Psychomotor */}
               <div>
                 <table className="w-full border-collapse">
                   <thead>
@@ -430,7 +427,7 @@ const ResultSheetImageDesign = ({ onClose }) => {
                   </tbody>
                 </table>
               </div>
-            </div>
+            </div> */}
 
             <div className="flex flex-row justify-between items-start w-full mt-8 gap-8">
               <div className="flex-1 text-sm w-[55%]">
@@ -463,6 +460,23 @@ const ResultSheetImageDesign = ({ onClose }) => {
                   <span className="border-b border-gray-400 min-w-[80px] ml-2">
                     {" "}
                     26th May, 2025
+                  </span>
+                </div>
+                <div className="mb-4 flex items-center">
+                  <span className="font-semibold min-w-[150px]">
+                    Principal's Name:
+                  </span>
+                  <span className="border-b border-gray-400 flex-1 ml-2">
+                    {" "}
+                    Mr Ibidapo Dada
+                  </span>
+                </div>
+                <div className="mb-4 flex items-center">
+                  <span className="font-semibold min-w-[150px]">
+                    Principal's Comment:
+                  </span>
+                  <span className="border-b border-gray-400 flex-1 ml-2">
+                    Wonderful performance, keep it up.
                   </span>
                 </div>
                 <div className="mb-4 flex items-center space-x-2">

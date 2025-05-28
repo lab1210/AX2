@@ -96,9 +96,9 @@ const TeacherComments = () => {
             Add New Comment
           </button>
         </div>
-        <div className="pt-22 p-6">
+        <div className="pt-22 p-2">
           <div
-            className="bg-white rounded-lg shadow p-4 fixed w-[62%]"
+            className="bg-white rounded-lg shadow p-4 fixed w-[64%]"
             style={{ height: "90vh", display: "flex", flexDirection: "column" }}
           >
             {comments.length === 0 ? (
@@ -108,7 +108,7 @@ const TeacherComments = () => {
             ) : (
               <>
                 <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-                  <div className="overflow-y-auto no-scrollbar" style={{ flex: 1, minHeight: 0 }}>
+                  <div className="overflow-y-auto no-scrollbar fixed w-[62%]" style={{ flex: 1, minHeight: 0 }}>
                     <table className="w-full border-collapse">
                       <thead className="sticky top-0 bg-white z-10">
                         <tr className="bg-[#6B90B5] text-white">
