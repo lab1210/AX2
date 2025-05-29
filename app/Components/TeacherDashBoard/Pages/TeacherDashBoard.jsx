@@ -63,6 +63,13 @@ export default function TeacherDashboard() {
       time: "10:00 A.M",
       status: "upcoming",
     },
+    {
+      date: 31,
+      title: "Have a meeting with the Parents",
+      subtitle: "Regarding their wards",
+      time: "2:00 P.M",
+      status: "due",
+    },
   ];
 
   // Desktop View
@@ -384,13 +391,13 @@ export default function TeacherDashboard() {
               </DemoContainer>
             </LocalizationProvider>
             {/* Teaching Progress */}
-            <div className="mt-4 bg-white rounded-lg shadow-lg p-4 w-full">
+            <div className="mt-4 bg-white rounded-lg shadow-lg p-4 w-full mb-15">
               <TeachingProgress />
             </div>
           </div>
         )}
         {activeTab === "events" && (
-          <div className="bg-white rounded-lg shadow-lg p-4">
+          <div className="bg-white rounded-lg shadow-lg p-4 mb-15">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold">Events</h3>
               <button className="text-sm text-black">View All</button>
