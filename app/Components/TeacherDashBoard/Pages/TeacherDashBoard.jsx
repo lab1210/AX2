@@ -155,7 +155,7 @@ export default function TeacherDashboard() {
                     </div>
 
                     {/* Bar Chart */}
-                    <ResponsiveContainer width="100%" height={280}>
+                    <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={attendanceData}>
                         <XAxis dataKey="day" />
                         <YAxis />
@@ -208,7 +208,7 @@ export default function TeacherDashboard() {
                   </LocalizationProvider>
                 </div>
                 {/* Events */}
-                <div className="bg-white rounded-lg shadow-lg p-4 h-[43vh] overflow-y-auto no-scrollbar">
+                <div className="bg-white rounded-lg shadow-lg p-4 h-[46vh] overflow-y-auto no-scrollbar">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Events</h3>
                     <button className="text-sm text-blue-600">View All</button>

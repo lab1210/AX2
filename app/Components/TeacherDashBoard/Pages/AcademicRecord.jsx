@@ -12,7 +12,7 @@ const AcademicRecord = () => {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState("ca");
   const [students, setStudents] = useState(
-    Array.from({ length: 10 }, (_, index) => ({
+    Array.from({ length: 20 }, (_, index) => ({
       name: `Babalola Ife Adeshewa`,
       id: index + 1,
       score: Math.floor(Math.random() * 100),
@@ -20,6 +20,8 @@ const AcademicRecord = () => {
   );
   const [editableRow, setEditableRow] = useState(null);
   const [editedScore, setEditedScore] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
 
   const handleEditClick = (index, currentScore) => {
     setEditableRow(index);
@@ -38,6 +40,10 @@ const AcademicRecord = () => {
       setIsAnimating(true);
     }
   }, [isModalOpen]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab]);
 
   const onDrop = useCallback(
     (acceptedFiles, rejectedFiles) => {
@@ -88,6 +94,15 @@ const AcademicRecord = () => {
       </div>
     </div>
   );
+
+  const totalPages = Math.ceil(students.length / itemsPerPage);
+  const paginatedStudents = students.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const handlePrevious = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+  const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const handlePageChange = (page) => setCurrentPage(page);
 
   return (
     <Layout>
@@ -155,7 +170,7 @@ const AcademicRecord = () => {
                           Add New Record
                         </h3>
                         <div className="flex justify-end">
-                          <button className="bg-[#07508F] text-white px-6 py-3 rounded-md cursor-pointer">
+                          <button className="bg-[#07508F] text-white px-5 py-1 rounded-md cursor-pointer font-medium">
                             Save
                           </button>
                         </div>
@@ -247,50 +262,86 @@ const AcademicRecord = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {students.map((student, index) => (
-                            <tr key={index}>
-                              <td className="border-b border-gray-300 px-4 py-3 text-center">
-                                {index + 1}
-                              </td>
-                              <td className="border-b border-gray-300 px-4 py-3 text-center">
-                                {student.name}
-                              </td>
-                              <td className="border-b border-gray-300 px-4 py-3 text-center">
-                                {student.id}
-                              </td>
-                              <td className="border-b border-gray-300 px-4 py-3 text-center">
-                                {editableRow === index ? (
-                                  <input
-                                    type="number"
-                                    value={editedScore}
-                                    onChange={(e) =>
-                                      setEditedScore(e.target.value)
-                                    }
-                                    className="border-b border-gray-300 rounded px-2 py-1 w-16 text-center"
-                                  />
-                                ) : (
-                                  student.score
-                                )}
-                              </td>
-                              <td className="border-b border-gray-300 px-4 py-3 text-center cursor-pointer">
-                                {editableRow === index ? (
-                                  <Check
-                                    className="text-green-500 w-5 h-5"
-                                    onClick={() => handleSaveClick(index)}
-                                  />
-                                ) : (
-                                  <PenLine
-                                    className="text-[#80ADCB] w-5 h-5"
-                                    onClick={() =>
-                                      handleEditClick(index, student.score)
-                                    }
-                                  />
-                                )}
-                              </td>
-                            </tr>
-                          ))}
+                          {paginatedStudents.map((student, idx) => {
+                            const index = (currentPage - 1) * itemsPerPage + idx;
+                            return (
+                              <tr key={index}>
+                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                  {index + 1}
+                                </td>
+                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                  {student.name}
+                                </td>
+                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                  {student.id}
+                                </td>
+                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                  {editableRow === index ? (
+                                    <input
+                                      type="number"
+                                      value={editedScore}
+                                      onChange={(e) =>
+                                        setEditedScore(e.target.value)
+                                      }
+                                      className="border-b border-gray-300 rounded px-2 py-1 w-16 text-center"
+                                    />
+                                  ) : (
+                                    student.score
+                                  )}
+                                </td>
+                                <td className="border-b border-gray-300 px-4 py-3 text-center cursor-pointer">
+                                  {editableRow === index ? (
+                                    <Check
+                                      className="text-green-500 w-5 h-5"
+                                      onClick={() => handleSaveClick(index)}
+                                    />
+                                  ) : (
+                                    <PenLine
+                                      className="text-[#80ADCB] w-5 h-5"
+                                      onClick={() =>
+                                        handleEditClick(index, student.score)
+                                      }
+                                    />
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
+
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex justify-end items-center gap-2 mt-4">
+                          <button
+                            onClick={handlePrevious}
+                            disabled={currentPage === 1}
+                            className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                          >
+                            &lt;
+                          </button>
+                          {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => handlePageChange(i + 1)}
+                              className={`px-3 py-1 rounded ${
+                                currentPage === i + 1
+                                  ? "bg-[#07508F] text-white"
+                                  : "bg-[#FAFAFA] hover:bg-[#EDF0F3]"
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                          <button
+                            onClick={handleNext}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                          >
+                            &gt;
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -335,7 +386,7 @@ const AcademicRecord = () => {
                           Add New Record
                         </h3>
                         <div className="flex justify-end">
-                          <button className="bg-[#07508F] text-white px-6 py-3 rounded-md cursor-pointer">
+                          <button className="bg-[#07508F] text-white px-5 py-1 font-medium rounded-md cursor-pointer">
                             Save
                           </button>
                         </div>
@@ -423,50 +474,86 @@ const AcademicRecord = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {students.map((student, index) => (
-                            <tr key={index}>
-                              <td className="border-b border-gray-300 px-4 py-3 text-center">
-                                {index + 1}
-                              </td>
-                              <td className="border-b border-gray-300 px-4 py-3 text-center">
-                                {student.name}
-                              </td>
-                              <td className="border-b border-gray-300 px-4 py-3 text-center">
-                                {student.id}
-                              </td>
-                              <td className="border-b border-gray-300 px-4 py-3 text-center">
-                                {editableRow === index ? (
-                                  <input
-                                    type="number"
-                                    value={editedScore}
-                                    onChange={(e) =>
-                                      setEditedScore(e.target.value)
-                                    }
-                                    className="border-b border-gray-300 rounded px-2 py-1 w-16 text-center"
-                                  />
-                                ) : (
-                                  student.score
-                                )}
-                              </td>
-                              <td className="border-b border-gray-300 px-4 py-3 text-center cursor-pointer">
-                                {editableRow === index ? (
-                                  <Check
-                                    className="text-green-500 w-5 h-5"
-                                    onClick={() => handleSaveClick(index)}
-                                  />
-                                ) : (
-                                  <PenLine
-                                    className="text-[#80ADCB] w-5 h-5"
-                                    onClick={() =>
-                                      handleEditClick(index, student.score)
-                                    }
-                                  />
-                                )}
-                              </td>
-                            </tr>
-                          ))}
+                          {paginatedStudents.map((student, idx) => {
+                            const index = (currentPage - 1) * itemsPerPage + idx;
+                            return (
+                              <tr key={index}>
+                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                  {index + 1}
+                                </td>
+                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                  {student.name}
+                                </td>
+                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                  {student.id}
+                                </td>
+                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                  {editableRow === index ? (
+                                    <input
+                                      type="number"
+                                      value={editedScore}
+                                      onChange={(e) =>
+                                        setEditedScore(e.target.value)
+                                      }
+                                      className="border-b border-gray-300 rounded px-2 py-1 w-16 text-center"
+                                    />
+                                  ) : (
+                                    student.score
+                                  )}
+                                </td>
+                                <td className="border-b border-gray-300 px-4 py-3 text-center cursor-pointer">
+                                  {editableRow === index ? (
+                                    <Check
+                                      className="text-green-500 w-5 h-5"
+                                      onClick={() => handleSaveClick(index)}
+                                    />
+                                  ) : (
+                                    <PenLine
+                                      className="text-[#80ADCB] w-5 h-5"
+                                      onClick={() =>
+                                        handleEditClick(index, student.score)
+                                      }
+                                    />
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
+
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex justify-end items-center gap-2 mt-4">
+                          <button
+                            onClick={handlePrevious}
+                            disabled={currentPage === 1}
+                            className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                          >
+                            &lt;
+                          </button>
+                          {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => handlePageChange(i + 1)}
+                              className={`px-3 py-1 rounded ${
+                                currentPage === i + 1
+                                  ? "bg-[#07508F] text-white"
+                                  : "bg-[#FAFAFA] hover:bg-[#EDF0F3]"
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                          <button
+                            onClick={handleNext}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                          >
+                            &gt;
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>

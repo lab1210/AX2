@@ -13,6 +13,8 @@ const AttendancePage = () => {
   const [error, setError] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 15;
   const router = useRouter();
 
   useEffect(() => {
@@ -62,6 +64,12 @@ const AttendancePage = () => {
     { id: 12, name: "Babalola Ife Adeshewa", status: "Absent" },
     { id: 13, name: "Babalola Ife Adeshewa", status: "Present" },
     { id: 14, name: "Babalola Ife Adeshewa", status: "Present" },
+    { id: 15, name: "Babalola Ife Adeshewa", status: "Present" },
+    { id: 16, name: "Babalola Ife Adeshewa", status: "Absent" },
+    { id: 17, name: "Babalola Ife Adeshewa", status: "Absent" },
+    { id: 18, name: "Babalola Ife Adeshewa", status: "Absent" },
+    { id: 19, name: "Babalola Ife Adeshewa", status: "Present" },
+    { id: 20, name: "Babalola Ife Adeshewa", status: "Present" },
   ];
 
   const renderHeaderContent = () => {
@@ -189,6 +197,15 @@ const AttendancePage = () => {
     );
   };
 
+  const totalPages = Math.ceil(students.length / itemsPerPage);
+  const paginatedStudents = students.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const handlePrevious = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+  const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const handlePageChange = (page) => setCurrentPage(page);
+
   return (
     <>
       <Layout>
@@ -264,7 +281,7 @@ const AttendancePage = () => {
                           type="date"
                           className="border border-gray-100 rounded px-2 py-1"
                         />
-                        <button className="bg-[#07508F] text-white px-4 py-3 rounded">
+                        <button className="bg-[#07508F] text-white px-4 py-1 rounded font-medium">
                           Save
                         </button>
                       </div>
@@ -284,7 +301,7 @@ const AttendancePage = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {students.map((student) => (
+                          {paginatedStudents.map((student) => (
                             <tr key={student.id}>
                               <td className="border-b border-gray-300 px-4 py-3 text-left">
                                 <input
@@ -314,6 +331,38 @@ const AttendancePage = () => {
                           ))}
                         </tbody>
                       </table>
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex justify-end items-center gap-2 mt-4">
+                          <button
+                            onClick={handlePrevious}
+                            disabled={currentPage === 1}
+                            className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                          >
+                            &lt;
+                          </button>
+                          {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => handlePageChange(i + 1)}
+                              className={`px-3 py-1 rounded ${
+                                currentPage === i + 1
+                                  ? "bg-[#07508F] text-white"
+                                  : "bg-[#FAFAFA] hover:bg-[#EDF0F3]"
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                          <button
+                            onClick={handleNext}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                          >
+                            &gt;
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -337,10 +386,10 @@ const AttendancePage = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {students.map((student, index) => (
+                          {paginatedStudents.map((student, index) => (
                             <tr key={student.id}>
                               <td className="border-b border-gray-300 px-4 py-3">
-                                {index + 1}
+                                {(currentPage - 1) * itemsPerPage + index + 1}
                               </td>
                               <td className="border-b border-gray-300 px-4 py-3">
                                 {student.name}
@@ -361,6 +410,38 @@ const AttendancePage = () => {
                           ))}
                         </tbody>
                       </table>
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex justify-end items-center gap-2 mt-4">
+                          <button
+                            onClick={handlePrevious}
+                            disabled={currentPage === 1}
+                            className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                          >
+                            &lt;
+                          </button>
+                          {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => handlePageChange(i + 1)}
+                              className={`px-3 py-1 rounded ${
+                                currentPage === i + 1
+                                  ? "bg-[#07508F] text-white"
+                                  : "bg-[#FAFAFA] hover:bg-[#EDF0F3]"
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                          <button
+                            onClick={handleNext}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                          >
+                            &gt;
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -387,7 +468,7 @@ const AttendancePage = () => {
                           </tr>
                         </thead>
                         <tbody>
-                          {students.map((student, index) => (
+                          {paginatedStudents.map((student, index) => (
                             <tr key={index}>
                               <td className="border-b border-gray-300 px-4 py-3">
                                 {student.name}
@@ -408,6 +489,38 @@ const AttendancePage = () => {
                           ))}
                         </tbody>
                       </table>
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex justify-end items-center gap-2 mt-4">
+                          <button
+                            onClick={handlePrevious}
+                            disabled={currentPage === 1}
+                            className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                          >
+                            &lt;
+                          </button>
+                          {Array.from({ length: totalPages }, (_, i) => (
+                            <button
+                              key={i}
+                              onClick={() => handlePageChange(i + 1)}
+                              className={`px-3 py-1 rounded ${
+                                currentPage === i + 1
+                                  ? "bg-[#07508F] text-white"
+                                  : "bg-[#FAFAFA] hover:bg-[#EDF0F3]"
+                              }`}
+                            >
+                              {i + 1}
+                            </button>
+                          ))}
+                          <button
+                            onClick={handleNext}
+                            disabled={currentPage === totalPages}
+                            className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                          >
+                            &gt;
+                          </button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -463,7 +576,7 @@ const AttendancePage = () => {
                 </tr>
               </thead>
               <tbody>
-                {students.map((student) => (
+                {paginatedStudents.map((student) => (
                   <tr key={student.id} className="border-b">
                     <td className="px-2 py-2">
                       <input
@@ -487,6 +600,38 @@ const AttendancePage = () => {
                 ))}
               </tbody>
             </table>
+            {/* Pagination Controls */}
+            {totalPages > 1 && (
+              <div className="flex justify-end items-center gap-2 mt-4">
+                <button
+                  onClick={handlePrevious}
+                  disabled={currentPage === 1}
+                  className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                >
+                  &lt;
+                </button>
+                {Array.from({ length: totalPages }, (_, i) => (
+                  <button
+                    key={i}
+                    onClick={() => handlePageChange(i + 1)}
+                    className={`px-3 py-1 rounded ${
+                      currentPage === i + 1
+                        ? "bg-[#07508F] text-white"
+                        : "bg-[#FAFAFA] hover:bg-[#EDF0F3]"
+                    }`}
+                  >
+                    {i + 1}
+                  </button>
+                ))}
+                <button
+                  onClick={handleNext}
+                  disabled={currentPage === totalPages}
+                  className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+                >
+                  &gt;
+                </button>
+              </div>
+            )}
           </div>
         </div>
 

@@ -64,7 +64,7 @@ const TeachingProgress = () => {
   const progress = teachingProgressData[selectedSubject];
 
   return (
-    <div className="w-full bg-white rounded-lg shadow p-2 overflow-hidden scrollbar-hidden h-[45vh]">
+    <div className="w-full bg-white rounded-lg shadow p-2 overflow-hidden scrollbar-hidden h-[48vh]">
       <div className="flex flex-col mb-4">
         <h3 className="text-lg font-semibold">Teaching Progress in</h3>
         <select
