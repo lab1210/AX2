@@ -267,7 +267,7 @@ const ResultSheetImageDesign = ({ onClose }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 print:p-6">
-      <div className="bg-white p-6 border-2 border-dashed border-[#01427a]">
+      <div>
         <div className="bg-white p-6 border-2 border-dashed border-[#01427a] print:p-6">
           {/* Close Button */}
           <button
@@ -277,7 +277,7 @@ const ResultSheetImageDesign = ({ onClose }) => {
           >
             &times;
           </button>
-          <div className="bg-white border-2 border-dashed border-[#01427a] max-h-[95vh] w-full max-w-5xl overflow-y-auto shadow-lg p-2 no-scrollbar print:border-0 print:shadow-none print:max-h-none print:p-0">
+          <div className="bg-white border-2 border-dashed border-[#01427a] max-h-[95vh] w-full max-w-3xl overflow-y-auto shadow-lg p-2 no-scrollbar print:border-2 print:shadow-none print:max-h-[95vh] print:p-2">
             <div ref={sheetRef} className="p-2 print:p-2">
               {/* Header */}
               <div className="flex items-center justify-between mb-2 border border-black p-2">
@@ -504,15 +504,6 @@ const ResultSheetImageDesign = ({ onClose }) => {
                     <span className="border-b border-gray-400 min-w-[80px] ml-2">
                       {" "}
                       26th May, 2025
-                    </span>
-                  </div>
-                  <div className="mb-4 flex items-center">
-                    <span className="font-semibold min-w-[150px]">
-                      Principal's Name:
-                    </span>
-                    <span className="border-b border-gray-400 flex-1 ml-2">
-                      {" "}
-                      Mr Ibidapo Dada
                     </span>
                   </div>
                   <div className="mb-4 flex items-center">

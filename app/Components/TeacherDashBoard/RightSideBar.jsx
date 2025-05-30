@@ -3,7 +3,7 @@ import { IoInformationCircle } from "react-icons/io5";
 import BasicPie from "./Piechart";
 const RightSide = () => {
   return (
-    <div className="mt-8 fixed top-12 right-0 w-[20%] h-[90vh] overflow-y-auto flex flex-col gap-2">
+    <div className="mt-8 fixed top-14 right-0 w-[20%] h-[88.5vh] overflow-y-auto flex flex-col gap-2">
       <div className="flex-1 bg-white rounded-lg shadow shadow-gray-500 w-full p-3 pt-7">
         <p className="font-bold text-[#F94144] text-lg ">Notice</p>
         <ul className="list-disc pl-4 ">
