@@ -111,19 +111,19 @@ const Layout = ({ children }) => {
               )}
             </div>
             {user?.profilePicture ? (
-              <div className="rounded-full w-8 h-8 overflow-hidden lg:hidden">
-              <img
-                src={
-                  user.student.profile_picture_path === null
-                    ? "/female.png"
-                    : user.student.profile_picture_path
-                }
-                alt="Profile"
-                className="w-full h-full object-cover"
-              />
+              <div className="rounded-full w-8 h-8 overflow-hidden block lg:hidden">
+                <img
+                  src={
+                    user?.student?.profile_picture_path
+                      ? user.student.profile_picture_path
+                      : "/female.png"
+                  }
+                  alt="Profile"
+                  className="w-full h-full object-cover"
+                />
               </div>
             ) : (
-              <div className="rounded-full bg-gray-300 w-8 h-8 flex items-center justify-center">
+              <div className="lg:hidden rounded-full bg-gray-300 w-8 h-8 flex items-center justify-center">
                 {user?.firstName?.charAt(0).toUpperCase()}{user?.lastName?.charAt(0).toUpperCase()}
               </div>
             )}

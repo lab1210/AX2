@@ -7,6 +7,8 @@ import dummysession from "../../session";
 import { useUser } from "../../../context/UserProvider";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
+import { Wallet, ChevronLeft, Check } from "lucide-react";
+import ConfirmPaymentModal from "../ConfirmPaymentModal";
 
 const MakePaymentItem = () => {
   const [card, setCard] = useState(false);
@@ -27,6 +29,11 @@ const MakePaymentItem = () => {
   const schoolId = searchParams.get("schoolid");
   const userId = searchParams.get("userid");
   const router = useRouter();
+
+  const [mobileStep, setMobileStep] = useState(1); // 1: method, 2: form
+  const [mobileMethod, setMobileMethod] = useState(null); // 'card' or 'bankPin'
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [mobileAmount, setMobileAmount] = useState("");
 
   if (isLoading) {
     return (
@@ -113,609 +120,856 @@ const MakePaymentItem = () => {
 
   return (
     <Layout>
-      <div
-        className={`
-          grid
-          md:[grid-template-rows:110px_100px_1fr_1fr]
-          xl:[grid-template-rows:150px_100px_1fr] bg-[#f0f0f0] p-5
-        `}
-      >
-        {/* Payment Steps */}
-        <div
-          className={`
-            grid grid-cols-[200px_110px_120px_110px] rounded-[10px] mb-[30px] bg-white
-            md:py-[15px] md:px-[60px] mt-4
-          `}
-        >
-          {/* Step 1: Choose payment method */}
-          <div className="flex flex-col items-center gap-[5px]">
-            <div className="flex items-center gap-[3px]">
-              <span
-                className={`
-                  w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                  ${
-                    card || bankPin
-                      ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
-                      : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
-                  }
-                `}
-              >
-                &#10004;
-              </span>
-              <div
-                className={`
-                  border-t-2 min-w-[80px]
-                  ${card || bankPin ? "border-black" : "border-[#c9c9c9]"}
-                `}
-              ></div>
+      {/* MOBILE/TABLET PAYMENT FLOW */}
+      <div className="lg:hidden min-h-screen bg-white p-2">
+        {/* Step 1: Choose payment method */}
+        {mobileStep === 1 && (
+          <div>
+            <div className="flex flex-col items-center mb-6">
+              <div className="flex items-center justify-center mb-2">
+                <Wallet className="w-13 h-13 text-[#004080]" />
+              </div>
             </div>
-            <div className="text-center mr-[80px] min-w-[50px]">
-              <p>Choose payment method</p>
+            <div className="mb-2 text-gray-700 font-semibold">
+              Choose a payment method
             </div>
-          </div>
-          {/* Step 2: Fill details */}
-          <div className="flex flex-col items-center gap-[5px]">
-            <div className="flex items-center gap-[3px]">
-              <span
-                className={`
-                  w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                  ${
-                    details
-                      ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
-                      : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
-                  }
-                `}
-              >
-                &#10004;
-              </span>
-              <div
-                className={`
-                  border-t-2 min-w-[80px]
-                  ${details ? "border-black" : "border-[#c9c9c9]"}
-                `}
-              ></div>
-            </div>
-            <div className="text-center mr-[80px] min-w-[100px]">
-              <p>Fill details</p>
-            </div>
-          </div>
-          {/* Step 3: Make Payment */}
-          <div className="flex flex-col items-center gap-[5px]">
-            <div className="flex items-center gap-[3px]">
-              <span
-                className={`
-                  w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                  ${
-                    payment
-                      ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
-                      : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
-                  }
-                `}
-              >
-                &#10004;
-              </span>
-              <div
-                className={`
-                  border-t-2 min-w-[80px]
-                  ${payment ? "border-black" : "border-[#c9c9c9]"}
-                `}
-              ></div>
-            </div>
-            <div className="text-center mr-[80px] min-w-[100px]">
-              <p>Make Payment</p>
-            </div>
-          </div>
-          {/* Step 4: Confirm */}
-          <div className="flex flex-col gap-[3px] mr-[68px]">
-            <span
-              className={`
-                w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                ${
-                  confirm
-                    ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
-                    : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
-                }
-              `}
-            >
-              &#10004;
-            </span>
-            <p>Confirm</p>
-          </div>
-        </div>
-        {/* Payment Options Header */}
-        <div className="rounded-[10px] mb-[20px] flex items-center px-[30px] bg-white font-medium text-md 2xl:text-lg">
-          <h2>Payment Options</h2>
-        </div>
-        {/* Payment Options / Details Container */}
-        <div
-          className={`
-            ${card || bankPin ? "block" : "hidden"}
-            md:hidden
-          `}
-        >
-          {/* For smaller screens, you might hide the payment details */}
-        </div>
-        <div
-          className={`
-            ${card || bankPin ? "grid" : "hidden"}
-            mb-[20px]
-            xl:grid xl:grid-cols-[3fr_auto] xl:gap-[10px]
-          `}
-        >
-          <div className="flex flex-col bg-white p-5">
-            <div className="flex flex-col bg-white pt-[10px] px-[8px] rounded-[10px]">
-              {/* Credit/Debit Card Option */}
-              <div
-                className="border rounded-[5px] border-[#cfcfcf] p-[15px] mb-[15px] shadow cursor-pointer"
+            <div className="flex flex-col gap-3">
+              <button
+                className={`flex items-center justify-between border rounded-xl px-4 py-3 ${
+                  mobileMethod === "card"
+                    ? "border-[#1bb66e] bg-[#f6fff9]"
+                    : "border-gray-300 bg-white"
+                }`}
                 onClick={() => {
-                  bankPin
-                    ? (setBankpin(false), setCard((prev) => !prev))
-                    : setCard((prev) => !prev);
+                  setMobileMethod("card");
+                  setMobileStep(2);
                 }}
               >
-                <div className="flex justify-between mb-[10px]">
-                  <div className="flex items-center gap-[10px]">
-                    <span
-                      className={`
-                        w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                        ${
-                          card
-                            ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
-                            : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
-                        }
-                      `}
-                      onClick={() => {
-                        bankPin
-                          ? (setBankpin(false), setCard((prev) => !prev))
-                          : setCard((prev) => !prev);
-                      }}
-                    >
-                      &#10004;
-                    </span>
-                    <h3>Credit/Debit Card</h3>
+                <span className="flex items-center gap-2">
+                  <span
+                    className={`w-5 h-5 rounded-full border flex items-center justify-center mr-2 ${
+                      mobileMethod === "card"
+                        ? "bg-[#1bb66e] border-[#1bb66e]"
+                        : "border-gray-300 bg-white"
+                    }`}
+                  >
+                    {mobileMethod === "card" && (
+                      <span className="text-white">
+                        <Check />
+                      </span>
+                    )}
+                  </span>
+                  Credit/Debit Card
+                </span>
+                <img
+                  src="/CardLogo.png"
+                  alt="cards"
+                  className="w-12 h-6 object-contain"
+                />
+              </button>
+              <button
+                className={`flex items-center justify-between border rounded-xl px-4 py-3 ${
+                  mobileMethod === "bankPin"
+                    ? "border-[#1bb66e] bg-[#f6fff9]"
+                    : "border-gray-300 bg-white"
+                }`}
+                onClick={() => {
+                  setMobileMethod("bankPin");
+                  setMobileStep(2);
+                }}
+              >
+                <span className="flex items-center gap-2">
+                  <span
+                    className={`w-5 h-5 rounded-full border flex items-center justify-center mr-2 ${
+                      mobileMethod === "bankPin"
+                        ? "bg-[#1bb66e] border-[#1bb66e]"
+                        : "border-gray-300 bg-white"
+                    }`}
+                  >
+                    {mobileMethod === "bankPin" && (
+                      <span className="text-white">&#10003;</span>
+                    )}
+                  </span>
+                  Bank Pin
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
+        {/* Step 2: Card/Bank Pin Form */}
+        {mobileStep === 2 && (
+          <div>
+            <div className="flex items-center gap-2 mb-4">
+              <button onClick={() => setMobileStep(1)} className="text-xl mr-2">
+                <ChevronLeft />
+              </button>
+              <span className="w-5 h-5 rounded-full border flex items-center justify-center mr-2 bg-[#1bb66e] border-[#1bb66e] text-white">
+                <Check />
+              </span>
+              <span className="font-semibold">
+                {mobileMethod === "card" ? "Credit/Debit Card" : "Bank Pin"}
+              </span>
+              {mobileMethod === "card" && (
+                <img
+                  src="/CardLogo.png"
+                  alt="cards"
+                  className="w-12 h-6 object-contain ml-2"
+                />
+              )}
+            </div>
+            {/* Card/Bank Pin Form */}
+            {mobileMethod === "card" && (
+              <form className="flex flex-col gap-4" onSubmit={e => { e.preventDefault(); setShowConfirmModal(true); }}>
+                <div className="border border-gray-200 p-3 rounded-xl space-y-3">
+                  <div>
+                    <div className="flex flex-col space-y-2">
+                      <label className="block text-sm font-semibold">
+                        Card number
+                      </label>
+                      <span className="text-xs text-gray-400">
+                        Enter the 16-digits number on the card
+                      </span>
+                    </div>
+                    <input
+                      type="text"
+                      className="w-full bg-[#D9D9D9] rounded-lg p-3 mt-1"
+                      placeholder=""
+                      maxLength={16}
+                    />
                   </div>
-                  <div className="max-w-[60px]">
-                    <img
-                      src="/CardLogo.png"
-                      alt=""
-                      className="w-full object-cover"
+                  <div className="grid grid-cols-[60%_40%] items-center gap-2">
+                    <div className="flex-1">
+                      <div className="flex flex-col space-y-1">
+                        <label className="block text-sm font-semibold">
+                          Expiry Date
+                        </label>
+                        <span className="text-xs text-gray-400">
+                          Enter the expiration date of the card
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 mt-1">
+                        <input
+                          type="text"
+                          className="w-20 bg-[#D9D9D9] rounded-lg p-2 text-center"
+                          placeholder="01"
+                          maxLength={2}
+                        />
+                        <span className="text-lg font-bold text-gray-500">/</span>
+                        <input
+                          type="text"
+                          className="w-20 bg-[#D9D9D9] rounded-lg p-2 text-center"
+                          placeholder="25"
+                          maxLength={2}
+                        />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="flex flex-col space-y-1">
+                        <label className="block text-sm font-semibold">
+                          CVV Number
+                        </label>
+                        <span className="text-xs text-gray-400">
+                          Security code
+                        </span>
+                      </div>
+                      <input
+                        type="text"
+                        className="w-full bg-[#D9D9D9] rounded-lg p-3 mt-1"
+                        placeholder="012"
+                        maxLength={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="rememberMobile"
+                    className="w-4 h-4 rounded border-gray-300"
+                  />
+                  <label htmlFor="rememberMobile" className="text-sm">
+                    Remember this card
+                  </label>
+                </div>
+                <div className="border border-gray-200 p-3 rounded-xl">
+                  <div>
+                    <label className="block text-sm font-semibold">
+                      Enter Amount
+                    </label>
+                    <input
+                      type="number"
+                      className="w-full bg-[#D9D9D9] rounded-lg p-3 mt-1"
+                      placeholder="Amount"
+                      value={mobileAmount}
+                      onChange={e => setMobileAmount(e.target.value)}
                     />
                   </div>
                 </div>
-                {card && (
-                  <div className="grid grid-rows-[1fr_1fr_1fr] gap-[20px]">
-                    {/* Card Number Input */}
-                    <div className="grid grid-cols-[4fr_1fr_1fr] items-center">
-                      <div
-                        className={`
-                          flex flex-col text-[12px]
-                          ${
-                            cardNumber.length > 0 && cardNumber.length < 25
-                              ? "text-[#dd1b10]"
-                              : "text-gray-700"
-                          }
-                        `}
-                      >
-                        <label className="font-bold" htmlFor="cardNumber">
-                          Card number
-                        </label>
-                        <p className="text-[#5e5e5e]">
-                          Enter the 16-digit card number on the card
-                        </p>
-                      </div>
-                      <div className="relative">
-                        <span className="absolute left-[10px] top-1/2 -translate-y-1/2">
-                          <FaRegCreditCard size={20} />
-                        </span>
-                        <input
-                          type="text"
-                          name="cardNumber"
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => {
-                            formatCardNumber(e.target.value);
-                            checkFields();
-                          }}
-                          value={cardNumber}
-                          maxLength="25"
-                          className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-medium text-[12px] rounded-[5px] pl-[35px]"
-                          style={
-                            cardNumber.length > 0 && cardNumber.length < 25
-                              ? { border: "2px solid red" }
-                              : {}
-                          }
-                        />
-                      </div>
-                      <div>
-                        {cardNumber.length === 25 ? (
-                          <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] text-white bg-[#1bb66e] border-2 border-[#1bb66e]">
-                            &#10004;
-                          </span>
-                        ) : cardNumber.length > 0 && cardNumber.length < 25 ? (
-                          <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] border-2 border-[#dd1b10] text-white bg-[#dd1b10] font-bold">
-                            &#x2715;
-                          </span>
-                        ) : (
-                          <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] border-2 border-[#c9c9c9] text-[#c9c9c9]">
-                            &#10004;
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    {/* Card Owner Input */}
-                    <div className="grid grid-cols-[4fr_1fr_1fr] items-center">
-                      <div className="flex flex-col text-[12px]">
-                        <label className="font-bold" htmlFor="cardOwner">
-                          Card Owner
-                        </label>
-                        <p className="text-[#5e5e5e]">
-                          Enter the name on the card
-                        </p>
-                      </div>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          name="cardOwner"
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => {
-                            setCardOwner(e.target.value);
-                            checkFields();
-                          }}
-                          value={cardOwner}
-                          className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-medium text-[12px] rounded-[5px]"
-                        />
-                      </div>
-                      <div></div>
-                    </div>
-                    {/* Expiry and CVV Inputs */}
-                    <div className="grid grid-cols-2 justify-between">
-                      <div className="flex flex-col text-[12px]">
-                        <label className="font-bold" htmlFor="cardExpiryMonth">
-                          Expiry Date
-                        </label>
-                        <p className="text-[#5e5e5e]">
-                          Enter the expiration date of the card
-                        </p>
-                      </div>
-                      <div className="flex min-w-[50px]">
-                        <div className="flex items-center gap-[5px] mr-[10px] ml-10">
-                          <input
-                            type="text"
-                            name="cardExpiryMonth"
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                              setCardExpiryMonth(e.target.value);
-                              checkFields();
-                            }}
-                            value={cardExpiryMonth}
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-medium text-[12px] rounded-[5px] p-2"
-                          />
-                          <h3>/</h3>
-                          <input
-                            type="text"
-                            name="cardExpiryYear"
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                              setCardExpiryYear(e.target.value);
-                              checkFields();
-                            }}
-                            value={cardExpiryYear}
-                            placeholder="23"
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-medium text-[12px] rounded-[5px] p-2"
-                          />
-                        </div>
-                        <div className="flex items-center gap-[10px]">
-                          <div className="flex flex-col text-[12px]">
-                            <label className="font-bold" htmlFor="cardCvv">
-                              CVV Number
-                            </label>
-                            <p className="text-[#5e5e5e]">Security code</p>
-                          </div>
-                          <input
-                            type="text"
-                            name="cardCvv"
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                              setCardCvv(e.target.value);
-                              checkFields();
-                            }}
-                            value={cardCvv}
-                            placeholder="012"
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-10 outline-none font-medium text-[12px] rounded-[5px] p-2"
-                          />
-                        </div>
-                      </div>
-                      <div></div>
-                    </div>
-                    {/* Remember Card Checkbox */}
-                    <div className="flex items-center gap-[10px] justify-end">
-                      <input
-                        type="checkbox"
-                        id="remember"
-                        checked={remember}
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={(e) => setRemember(e.target.checked)}
-                        className="appearance-none bg-[#fafafa] border-2 border-[#d9d9d9] rounded-[5px] w-[24px] h-[24px] cursor-pointer relative p-[4px] box-border outline-none checked:bg-[#fafafa] checked:border-[#1ed760]"
-                      />
-                      <label
-                        htmlFor="remember"
-                        className={`${
-                          remember
-                            ? "text-[#1ed760] font-bold text-[14px]"
-                            : "text-[14px] font-bold"
-                        }`}
-                      >
-                        Remember this card
-                      </label>
-                    </div>
-                  </div>
-                )}
-              </div>
-              {/* Bank Pin Option */}
-              <div
-                className="border rounded-[5px] border-[#cfcfcf] p-[15px] mb-[15px] shadow cursor-pointer"
-                onClick={() => {
-                  card
-                    ? (setCard(false), setBankpin((prev) => !prev))
-                    : setBankpin((prev) => !prev);
-                }}
-              >
-                <div className="flex justify-between mb-[10px]">
-                  <div className="flex items-center gap-[10px]">
-                    <span
-                      className={`
-                        w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
-                        ${
-                          bankPin
-                            ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
-                            : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
-                        }
-                      `}
-                      onClick={() => {
-                        card
-                          ? (setCard(false), setBankpin((prev) => !prev))
-                          : setBankpin((prev) => !prev);
-                      }}
-                    >
-                      &#10004;
-                    </span>
-                    <h3>Bank Pin</h3>
-                  </div>
-                  <div className="max-w-[60px]">
-                    <img
-                      src="/CardLogo.png"
-                      alt=""
-                      className="w-full object-cover"
-                    />
-                  </div>
-                </div>
-                {bankPin && (
-                  <div className="grid grid-rows-[1fr_1fr_1fr] gap-[20px]">
-                    {/* Bank Pin fields replicate the Credit/Debit card fields */}
-                    <div className="grid grid-cols-[4fr_1fr_1fr] items-center">
-                      <div
-                        className={`
-                          flex flex-col text-[12px]
-                          ${
-                            cardNumber.length > 0 && cardNumber.length < 25
-                              ? "text-[#dd1b10]"
-                              : "text-gray-700"
-                          }
-                        `}
-                      >
-                        <label className="font-bold" htmlFor="cardNumber">
-                          Card number
-                        </label>
-                        <p className="text-[#5e5e5e]">
-                          Enter the 16-digit card number on the card
-                        </p>
-                      </div>
-                      <div className="relative">
-                        <span className="absolute left-[10px] top-1/2 -translate-y-1/2">
-                          <FaRegCreditCard size={20} />
-                        </span>
-                        <input
-                          type="text"
-                          name="cardNumber"
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => {
-                            formatCardNumber(e.target.value);
-                            checkFields();
-                          }}
-                          value={cardNumber}
-                          maxLength="25"
-                          className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-medium text-[12px] rounded-[5px] pl-[35px]"
-                          style={
-                            cardNumber.length > 0 && cardNumber.length < 25
-                              ? { border: "2px solid red" }
-                              : {}
-                          }
-                        />
-                      </div>
-                      <div>
-                        {cardNumber.length === 25 ? (
-                          <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] text-white bg-[#1bb66e] border-2 border-[#1bb66e]">
-                            &#10004;
-                          </span>
-                        ) : cardNumber.length > 0 && cardNumber.length < 25 ? (
-                          <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] border-2 border-[#dd1b10] text-white bg-[#dd1b10] font-bold">
-                            &#x2715;
-                          </span>
-                        ) : (
-                          <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] border-2 border-[#c9c9c9] text-[#c9c9c9]">
-                            &#10004;
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-[4fr_1fr_1fr] items-center">
-                      <div className="flex flex-col text-[12px]">
-                        <label className="font-bold" htmlFor="cardOwner">
-                          Card Owner
-                        </label>
-                        <p className="text-[#5e5e5e]">
-                          Enter the name on the card
-                        </p>
-                      </div>
-                      <div className="relative">
-                        <input
-                          type="text"
-                          name="cardOwner"
-                          onClick={(e) => e.stopPropagation()}
-                          onChange={(e) => {
-                            setCardOwner(e.target.value);
-                            checkFields();
-                          }}
-                          value={cardOwner}
-                          className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-medium text-[12px] rounded-[5px]"
-                        />
-                      </div>
-                      <div></div>
-                    </div>
-                    <div className="grid grid-cols-2 justify-between">
-                      <div className="flex flex-col text-[12px]">
-                        <label className="font-bold" htmlFor="cardExpiryMonth">
-                          Expiry Date
-                        </label>
-                        <p className="text-[#5e5e5e]">
-                          Enter the expiration date of the card
-                        </p>
-                      </div>
-                      <div className="flex min-w-[50px]">
-                        <div className="flex items-center gap-[5px] mr-[10px] ml-10">
-                          <input
-                            type="text"
-                            name="cardExpiryMonth"
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                              setCardExpiryMonth(e.target.value);
-                              checkFields();
-                            }}
-                            value={cardExpiryMonth}
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-medium text-[12px] rounded-[5px] p-2"
-                          />
-                          <h3>/</h3>
-                          <input
-                            type="text"
-                            name="cardExpiryYear"
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                              setCardExpiryYear(e.target.value);
-                              checkFields();
-                            }}
-                            value={cardExpiryYear}
-                            placeholder="23"
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-medium text-[12px] rounded-[5px] p-2"
-                          />
-                        </div>
-                        <div className="flex items-center gap-[10px]">
-                          <div className="flex flex-col text-[12px]">
-                            <label className="font-bold" htmlFor="cardCvv">
-                              CVV Number
-                            </label>
-                            <p className="text-[#5e5e5e]">Security code</p>
-                          </div>
-                          <input
-                            type="text"
-                            name="cardCvv"
-                            onClick={(e) => e.stopPropagation()}
-                            onChange={(e) => {
-                              setCardCvv(e.target.value);
-                              checkFields();
-                            }}
-                            value={cardCvv}
-                            placeholder="012"
-                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-10 p-2 outline-none font-medium text-[12px] rounded-[5px]"
-                          />
-                        </div>
-                      </div>
-                      <div></div>
-                    </div>
-                    <div className="flex items-center gap-[10px] justify-end">
-                      <input
-                        type="checkbox"
-                        id="remember"
-                        checked={remember}
-                        onClick={(e) => e.stopPropagation()}
-                        onChange={(e) => setRemember(e.target.checked)}
-                        className="appearance-none bg-[#fafafa] border-2 border-[#d9d9d9] rounded-[5px] w-[24px] h-[24px] cursor-pointer relative p-[4px] box-border outline-none checked:bg-[#fafafa] checked:border-[#1ed760]"
-                      />
-                      <label
-                        htmlFor="remember"
-                        className={`${
-                          remember
-                            ? "text-[#1ed760] font-bold text-[14px]"
-                            : "text-[14px] font-bold"
-                        }`}
-                      >
-                        Remember this card
-                      </label>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-          {/* Payment Details Section (visible on xl and above) */}
-          <div className="hidden md:block xl:flex xl:flex-col xl:items-center xl:justify-center bg-white rounded-[15px] xl:p-[15px]">
-            <div className="flex gap-[10px] mb-[10px]">
-              <FaRegFileAlt size={20} />
-              <h3>Payment Details</h3>
-            </div>
-            <div className="mb-[15px]">
-              <select
-                name="session"
-                value={session}
-                onChange={(e) => setSession(e.target.value)}
-                required
-                className="bg-[#cfcfcf66] border-0 rounded-[10px] text-[14px] outline-none"
-              >
-                {dummysession.map((item, index) => (
-                  <option key={index} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="border-t-2 border-b-2 border-[#cfcfcf66] pt-[15px]">
-              {adjustedFees.map((item, index) => (
-                <div
-                  key={index}
-                  className="grid mb-[5px] text-[12px] font-bold gap-[10px] [grid-template-columns:1fr_auto]"
+                <button
+                  type="submit"
+                  className="w-full bg-[#004080] text-white font-bold py-3 rounded-lg mt-2"
                 >
-                  <p>{item.purpose}</p>
-                  <p>
-                    {item.AmountBilled.toLocaleString("en-NG", {
+                  Proceed
+                </button>
+              </form>
+            )}
+            {mobileMethod === "bankPin" && (
+              <form className="flex flex-col gap-4" onSubmit={e => { e.preventDefault(); setShowConfirmModal(true); }}>
+                <div>
+                  <label className="block text-sm font-semibold">
+                    Bank Pin
+                  </label>
+                  <input
+                    type="password"
+                    className="w-full bg-[#D9D9D9] rounded-lg p-3 mt-1"
+                    placeholder="Enter your bank pin"
+                    maxLength={6}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold">
+                    Enter Amount
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full bg-[#D9D9D9] rounded-lg p-3 mt-1"
+                    placeholder="Amount"
+                    value={mobileAmount}
+                    onChange={e => setMobileAmount(e.target.value)}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="w-full bg-[#004080] text-white font-bold py-3 rounded-lg mt-2"
+                >
+                  Proceed
+                </button>
+              </form>
+            )}
+          </div>
+        )}
+      </div>
+      {/* DESKTOP PAYMENT FLOW (existing) */}
+      <div className="hidden lg:block">
+        <div
+          className={`
+            grid
+            md:[grid-template-rows:110px_100px_1fr_1fr]
+            xl:[grid-template-rows:150px_100px_1fr] bg-[#D9D9D9] p-5
+          `}
+        >
+          {/* Payment Steps */}
+          <div
+            className={`
+              grid grid-cols-[200px_110px_120px_110px] rounded-[10px] mb-[30px] bg-white
+              md:py-[15px] md:px-[60px] mt-4
+            `}
+          >
+            {/* Step 1: Choose payment method */}
+            <div className="flex flex-col items-center gap-[5px]">
+              <div className="flex items-center gap-[3px]">
+                <span
+                  className={`
+                    w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
+                    ${
+                      card || bankPin
+                        ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                        : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                    }
+                  `}
+                >
+                  &#10004;
+                </span>
+                <div
+                  className={`
+                    border-t-2 min-w-[80px]
+                    ${card || bankPin ? "border-black" : "border-[#c9c9c9]"}
+                  `}
+                ></div>
+              </div>
+              <div className="text-center mr-[80px] min-w-[50px]">
+                <p>Choose payment method</p>
+              </div>
+            </div>
+            {/* Step 2: Fill details */}
+            <div className="flex flex-col items-center gap-[5px]">
+              <div className="flex items-center gap-[3px]">
+                <span
+                  className={`
+                    w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
+                    ${
+                      details
+                        ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                        : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                    }
+                  `}
+                >
+                  &#10004;
+                </span>
+                <div
+                  className={`
+                    border-t-2 min-w-[80px]
+                    ${details ? "border-black" : "border-[#c9c9c9]"}
+                  `}
+                ></div>
+              </div>
+              <div className="text-center mr-[80px] min-w-[100px]">
+                <p>Fill details</p>
+              </div>
+            </div>
+            {/* Step 3: Make Payment */}
+            <div className="flex flex-col items-center gap-[5px]">
+              <div className="flex items-center gap-[3px]">
+                <span
+                  className={`
+                    w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
+                    ${
+                      payment
+                        ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                        : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                    }
+                  `}
+                >
+                  &#10004;
+                </span>
+                <div
+                  className={`
+                    border-t-2 min-w-[80px]
+                    ${payment ? "border-black" : "border-[#c9c9c9]"}
+                  `}
+                ></div>
+              </div>
+              <div className="text-center mr-[80px] min-w-[100px]">
+                <p>Make Payment</p>
+              </div>
+            </div>
+            {/* Step 4: Confirm */}
+            <div className="flex flex-col gap-[3px] mr-[68px]">
+              <span
+                className={`
+                  w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
+                  ${
+                    confirm
+                      ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                      : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                  }
+                `}
+              >
+                &#10004;
+              </span>
+              <p>Confirm</p>
+            </div>
+          </div>
+          {/* Payment Options Header */}
+          <div className="rounded-[10px] mb-[20px] flex items-center px-[30px] bg-white font-semibold text-md 2xl:text-lg">
+            <h2>Payment Options</h2>
+          </div>
+          {/* Payment Options / Details Container */}
+          <div
+            className={`
+              ${card || bankPin ? "block" : "hidden"}
+              md:hidden
+            `}
+          >
+            {/* For smaller screens, you might hide the payment details */}
+          </div>
+          <div
+            className={`
+              ${card || bankPin ? "grid" : "hidden"}
+              mb-[20px]
+              xl:grid xl:grid-cols-[3fr_auto] xl:gap-[10px]
+            `}
+          >
+            <div className="flex flex-col bg-white p-5">
+              <div className="flex flex-col bg-white pt-[10px] px-[8px] rounded-[10px]">
+                {/* Credit/Debit Card Option */}
+                <div
+                  className="border rounded-[5px] border-[#cfcfcf] p-[15px] mb-[15px] shadow cursor-pointer"
+                  onClick={() => {
+                    bankPin
+                      ? (setBankpin(false), setCard((prev) => !prev))
+                      : setCard((prev) => !prev);
+                  }}
+                >
+                  <div className="flex justify-between mb-[10px]">
+                    <div className="flex items-center gap-[10px]">
+                      <span
+                        className={`
+                          w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
+                          ${
+                            card
+                              ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                              : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                          }
+                        `}
+                        onClick={() => {
+                          bankPin
+                            ? (setBankpin(false), setCard((prev) => !prev))
+                            : setCard((prev) => !prev);
+                        }}
+                      >
+                        &#10004;
+                      </span>
+                      <h3>Credit/Debit Card</h3>
+                    </div>
+                    <div className="max-w-[60px]">
+                      <img
+                        src="/CardLogo.png"
+                        alt=""
+                        className="w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  {card && (
+                    <div className="grid grid-rows-[1fr_1fr_1fr] gap-[20px]">
+                      {/* Card Number Input */}
+                      <div className="grid grid-cols-[4fr_1fr_1fr] items-center">
+                        <div
+                          className={`
+                            flex flex-col text-[12px]
+                            ${
+                              cardNumber.length > 0 && cardNumber.length < 25
+                                ? "text-[#dd1b10]"
+                                : "text-gray-700"
+                            }
+                          `}
+                        >
+                          <label className="font-bold" htmlFor="cardNumber">
+                            Card number
+                          </label>
+                          <p className="text-[#5e5e5e]">
+                            Enter the 16-digit card number on the card
+                          </p>
+                        </div>
+                        <div className="relative">
+                          <span className="absolute left-[10px] top-1/2 -translate-y-1/2">
+                            <FaRegCreditCard size={20} />
+                          </span>
+                          <input
+                            type="text"
+                            name="cardNumber"
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                              formatCardNumber(e.target.value);
+                              checkFields();
+                            }}
+                            value={cardNumber}
+                            maxLength="25"
+                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-semibold text-[12px] rounded-[5px] pl-[35px]"
+                            style={
+                              cardNumber.length > 0 && cardNumber.length < 25
+                                ? { border: "2px solid red" }
+                                : {}
+                            }
+                          />
+                        </div>
+                        <div>
+                          {cardNumber.length === 25 ? (
+                            <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] text-white bg-[#1bb66e] border-2 border-[#1bb66e]">
+                              &#10004;
+                            </span>
+                          ) : cardNumber.length > 0 &&
+                            cardNumber.length < 25 ? (
+                            <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] border-2 border-[#dd1b10] text-white bg-[#dd1b10] font-bold">
+                              &#x2715;
+                            </span>
+                          ) : (
+                            <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] border-2 border-[#c9c9c9] text-[#c9c9c9]">
+                              &#10004;
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      {/* Card Owner Input */}
+                      <div className="grid grid-cols-[4fr_1fr_1fr] items-center">
+                        <div className="flex flex-col text-[12px]">
+                          <label className="font-bold" htmlFor="cardOwner">
+                            Card Owner
+                          </label>
+                          <p className="text-[#5e5e5e]">
+                            Enter the name on the card
+                          </p>
+                        </div>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            name="cardOwner"
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                              setCardOwner(e.target.value);
+                              checkFields();
+                            }}
+                            value={cardOwner}
+                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-semibold text-[12px] rounded-[5px]"
+                          />
+                        </div>
+                        <div></div>
+                      </div>
+                      {/* Expiry and CVV Inputs */}
+                      <div className="grid grid-cols-2 justify-between">
+                        <div className="flex flex-col text-[12px]">
+                          <label
+                            className="font-bold"
+                            htmlFor="cardExpiryMonth"
+                          >
+                            Expiry Date
+                          </label>
+                          <p className="text-[#5e5e5e]">
+                            Enter the expiration date of the card
+                          </p>
+                        </div>
+                        <div className="flex min-w-[50px]">
+                          <div className="flex items-center gap-[5px] mr-[10px] ml-10">
+                            <input
+                              type="text"
+                              name="cardExpiryMonth"
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                setCardExpiryMonth(e.target.value);
+                                checkFields();
+                              }}
+                              value={cardExpiryMonth}
+                              className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-semibold text-[12px] rounded-[5px] p-2"
+                            />
+                            <h3>/</h3>
+                            <input
+                              type="text"
+                              name="cardExpiryYear"
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                setCardExpiryYear(e.target.value);
+                                checkFields();
+                              }}
+                              value={cardExpiryYear}
+                              placeholder="23"
+                              className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-semibold text-[12px] rounded-[5px] p-2"
+                            />
+                          </div>
+                          <div className="flex items-center gap-[10px]">
+                            <div className="flex flex-col text-[12px]">
+                              <label className="font-bold" htmlFor="cardCvv">
+                                CVV Number
+                              </label>
+                              <p className="text-[#5e5e5e]">Security code</p>
+                            </div>
+                            <input
+                              type="text"
+                              name="cardCvv"
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                setCardCvv(e.target.value);
+                                checkFields();
+                              }}
+                              value={cardCvv}
+                              placeholder="012"
+                              className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-10 outline-none font-semibold text-[12px] rounded-[5px] p-2"
+                            />
+                          </div>
+                        </div>
+                        <div></div>
+                      </div>
+                      {/* Remember Card Checkbox */}
+                      <div className="flex items-center gap-[10px] justify-end">
+                        <input
+                          type="checkbox"
+                          id="remember"
+                          checked={remember}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => setRemember(e.target.checked)}
+                          className="appearance-none bg-[#fafafa] border-2 border-[#d9d9d9] rounded-[5px] w-[24px] h-[24px] cursor-pointer relative p-[4px] box-border outline-none checked:bg-[#fafafa] checked:border-[#1ed760]"
+                        />
+                        <label
+                          htmlFor="remember"
+                          className={`${
+                            remember
+                              ? "text-[#1ed760] font-bold text-[14px]"
+                              : "text-[14px] font-bold"
+                          }`}
+                        >
+                          Remember this card
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {/* Bank Pin Option */}
+                <div
+                  className="border rounded-[5px] border-[#cfcfcf] p-[15px] mb-[15px] shadow cursor-pointer"
+                  onClick={() => {
+                    card
+                      ? (setCard(false), setBankpin((prev) => !prev))
+                      : setBankpin((prev) => !prev);
+                  }}
+                >
+                  <div className="flex justify-between mb-[10px]">
+                    <div className="flex items-center gap-[10px]">
+                      <span
+                        className={`
+                          w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px]
+                          ${
+                            bankPin
+                              ? "text-white bg-[#1bb66e] border-2 border-[#1bb66e]"
+                              : "border-2 border-[#c9c9c9] text-[#c9c9c9]"
+                          }
+                        `}
+                        onClick={() => {
+                          card
+                            ? (setCard(false), setBankpin((prev) => !prev))
+                            : setBankpin((prev) => !prev);
+                        }}
+                      >
+                        &#10004;
+                      </span>
+                      <h3>Bank Pin</h3>
+                    </div>
+                    <div className="max-w-[60px]">
+                      <img
+                        src="/CardLogo.png"
+                        alt=""
+                        className="w-full object-cover"
+                      />
+                    </div>
+                  </div>
+                  {bankPin && (
+                    <div className="grid grid-rows-[1fr_1fr_1fr] gap-[20px]">
+                      {/* Bank Pin fields replicate the Credit/Debit card fields */}
+                      <div className="grid grid-cols-[4fr_1fr_1fr] items-center">
+                        <div
+                          className={`
+                            flex flex-col text-[12px]
+                            ${
+                              cardNumber.length > 0 && cardNumber.length < 25
+                                ? "text-[#dd1b10]"
+                                : "text-gray-700"
+                            }
+                          `}
+                        >
+                          <label className="font-bold" htmlFor="cardNumber">
+                            Card number
+                          </label>
+                          <p className="text-[#5e5e5e]">
+                            Enter the 16-digit card number on the card
+                          </p>
+                        </div>
+                        <div className="relative">
+                          <span className="absolute left-[10px] top-1/2 -translate-y-1/2">
+                            <FaRegCreditCard size={20} />
+                          </span>
+                          <input
+                            type="text"
+                            name="cardNumber"
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                              formatCardNumber(e.target.value);
+                              checkFields();
+                            }}
+                            value={cardNumber}
+                            maxLength="25"
+                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-semibold text-[12px] rounded-[5px] pl-[35px]"
+                            style={
+                              cardNumber.length > 0 && cardNumber.length < 25
+                                ? { border: "2px solid red" }
+                                : {}
+                            }
+                          />
+                        </div>
+                        <div>
+                          {cardNumber.length === 25 ? (
+                            <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] text-white bg-[#1bb66e] border-2 border-[#1bb66e]">
+                              &#10004;
+                            </span>
+                          ) : cardNumber.length > 0 &&
+                            cardNumber.length < 25 ? (
+                            <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] border-2 border-[#dd1b10] text-white bg-[#dd1b10] font-bold">
+                              &#x2715;
+                            </span>
+                          ) : (
+                            <span className="w-[22px] h-[22px] rounded-full flex justify-center items-center p-[5px] text-[10px] ml-[2px] border-2 border-[#c9c9c9] text-[#c9c9c9]">
+                              &#10004;
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-[4fr_1fr_1fr] items-center">
+                        <div className="flex flex-col text-[12px]">
+                          <label className="font-bold" htmlFor="cardOwner">
+                            Card Owner
+                          </label>
+                          <p className="text-[#5e5e5e]">
+                            Enter the name on the card
+                          </p>
+                        </div>
+                        <div className="relative">
+                          <input
+                            type="text"
+                            name="cardOwner"
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => {
+                              setCardOwner(e.target.value);
+                              checkFields();
+                            }}
+                            value={cardOwner}
+                            className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] px-[16px] min-w-[200px] outline-none font-semibold text-[12px] rounded-[5px]"
+                          />
+                        </div>
+                        <div></div>
+                      </div>
+                      <div className="grid grid-cols-2 justify-between">
+                        <div className="flex flex-col text-[12px]">
+                          <label
+                            className="font-bold"
+                            htmlFor="cardExpiryMonth"
+                          >
+                            Expiry Date
+                          </label>
+                          <p className="text-[#5e5e5e]">
+                            Enter the expiration date of the card
+                          </p>
+                        </div>
+                        <div className="flex min-w-[50px]">
+                          <div className="flex items-center gap-[5px] mr-[10px] ml-10">
+                            <input
+                              type="text"
+                              name="cardExpiryMonth"
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                setCardExpiryMonth(e.target.value);
+                                checkFields();
+                              }}
+                              value={cardExpiryMonth}
+                              className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-semibold text-[12px] rounded-[5px] p-2"
+                            />
+                            <h3>/</h3>
+                            <input
+                              type="text"
+                              name="cardExpiryYear"
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                setCardExpiryYear(e.target.value);
+                                checkFields();
+                              }}
+                              value={cardExpiryYear}
+                              placeholder="23"
+                              className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-8 outline-none font-semibold text-[12px] rounded-[5px] p-2"
+                            />
+                          </div>
+                          <div className="flex items-center gap-[10px]">
+                            <div className="flex flex-col text-[12px]">
+                              <label className="font-bold" htmlFor="cardCvv">
+                                CVV Number
+                              </label>
+                              <p className="text-[#5e5e5e]">Security code</p>
+                            </div>
+                            <input
+                              type="text"
+                              name="cardCvv"
+                              onClick={(e) => e.stopPropagation()}
+                              onChange={(e) => {
+                                setCardCvv(e.target.value);
+                                checkFields();
+                              }}
+                              value={cardCvv}
+                              placeholder="012"
+                              className="bg-[#d9d9d9] border border-[#d9d9d9] py-[10px] w-10 outline-none font-semibold text-[12px] rounded-[5px] p-2"
+                            />
+                          </div>
+                        </div>
+                        <div></div>
+                      </div>
+                      <div className="flex items-center gap-[10px] justify-end">
+                        <input
+                          type="checkbox"
+                          id="remember"
+                          checked={remember}
+                          onClick={(e) => e.stopPropagation()}
+                          onChange={(e) => setRemember(e.target.checked)}
+                          className="appearance-none bg-[#fafafa] border-2 border-[#d9d9d9] rounded-[5px] w-[24px] h-[24px] cursor-pointer relative p-[4px] box-border outline-none checked:bg-[#fafafa] checked:border-[#1ed760]"
+                        />
+                        <label
+                          htmlFor="remember"
+                          className={`${
+                            remember
+                              ? "text-[#1ed760] font-bold text-[14px]"
+                              : "text-[14px] font-bold"
+                          }`}
+                        >
+                          Remember this card
+                        </label>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            {/* Payment Details Section (visible on xl and above) */}
+            <div className="hidden md:block xl:flex xl:flex-col xl:items-center xl:justify-center bg-white rounded-[15px] xl:p-[15px]">
+              <div className="flex gap-[10px] mb-[10px]">
+                <FaRegFileAlt size={20} />
+                <h3>Payment Details</h3>
+              </div>
+              <div className="mb-[15px]">
+                <select
+                  name="session"
+                  value={session}
+                  onChange={(e) => setSession(e.target.value)}
+                  required
+                  className="bg-[#cfcfcf66] border-0 rounded-[10px] text-[14px] outline-none"
+                >
+                  {dummysession.map((item, index) => (
+                    <option key={index} value={item}>
+                      {item}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="border-t-2 border-b-2 border-[#cfcfcf66] pt-[15px]">
+                {adjustedFees.map((item, index) => (
+                  <div
+                    key={index}
+                    className="grid mb-[5px] text-[12px] font-bold gap-[10px] [grid-template-columns:1fr_auto]"
+                  >
+                    <p>{item.purpose}</p>
+                    <p>
+                      {item.AmountBilled.toLocaleString("en-NG", {
+                        useGrouping: true,
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      })}
+                    </p>
+                  </div>
+                ))}
+              </div>
+              <div className="grid py-[10px] border-b-[2px] border-[#cfcfcf66] items-center [grid-template-columns:150px_auto]">
+                <p>Total</p>
+                <p className="text-[15px]">
+                  {adjustedFees
+                    .reduce((acc, item) => acc + item.AmountBilled, 0)
+                    .toLocaleString("en-NG", {
                       useGrouping: true,
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
                     })}
-                  </p>
-                </div>
-              ))}
-            </div>
-            <div className="grid py-[10px] border-b-[2px] border-[#cfcfcf66] items-center [grid-template-columns:150px_auto]">
-              <p>Total</p>
-              <p className="text-[15px]">
-                {adjustedFees
-                  .reduce((acc, item) => acc + item.AmountBilled, 0)
-                  .toLocaleString("en-NG", {
-                    useGrouping: true,
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
-              </p>
-            </div>
-            <div className="flex justify-center p-[20px]">
-              <button
-                onClick={handleConfirm}
-                className="bg-[#004080] border-0 text-white text-[12px] font-bold py-[5px] px-[15px] rounded-[5px] cursor-pointer"
-              >
-                Confirm
-              </button>
+                </p>
+              </div>
+              <div className="flex justify-center p-[20px]">
+                <button
+                  onClick={handleConfirm}
+                  className="bg-[#004080] border-0 text-white text-[12px] font-bold py-[5px] px-[15px] rounded-[5px] cursor-pointer"
+                >
+                  Confirm
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
+      {showConfirmModal && (
+        <ConfirmPaymentModal
+          amount={parseFloat(mobileAmount).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+          onClose={() => setShowConfirmModal(false)}
+          onConfirm={() => { setShowConfirmModal(false); router.push("/Student/Fees-Payment/Receipt"); }}
+        />
+      )}
     </Layout>
   );
 };

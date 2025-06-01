@@ -4,9 +4,9 @@ import React from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { AiOutlineHome, AiFillHome } from "react-icons/ai";
-import { IoMdNotificationsOutline, IoMdNotifications } from "react-icons/io";
 import { MdOutlineCalendarMonth, MdCalendarMonth } from "react-icons/md";
 import { FaRegUser, FaUser } from "react-icons/fa6";
+import {Wallet, Wallet2 } from "lucide-react";
 
 const BottomNavBar = ({ setUser, user }) => {
   const pathname = usePathname();
@@ -14,7 +14,7 @@ const BottomNavBar = ({ setUser, user }) => {
   const dashboardRoute = "/Student/DashBoard";
   const profileRoute = "/Student/Profile";
   const timetableRoute = "/Student/Timetable";
-  const notificationRoute = "";
+  const feepaymentRoute = "/Student/Fees-Payment";
 
   const navItems = [
     {
@@ -25,9 +25,9 @@ const BottomNavBar = ({ setUser, user }) => {
     },
     {
       id: "notifications",
-      href: notificationRoute,
-      icon: IoMdNotificationsOutline,
-      activeIcon: IoMdNotifications,
+      href: feepaymentRoute,
+      icon: Wallet,
+      activeIcon: Wallet2,
     },
     {
       id: "timetable",
