@@ -8,6 +8,7 @@ import { LuArrowDownUp } from "react-icons/lu";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getUserDetails } from "../../../Service/AuthService";
+import MakePaymentModal from "../MakePaymentModal";
 
 const FeesPaymentItem = () => {
   const [term, setTerm] = useState("");
@@ -16,6 +17,7 @@ const FeesPaymentItem = () => {
   const studentId = searchParams.get("studentId");
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [showMakePaymentModal, setShowMakePaymentModal] = useState(false);
 
   useEffect(() => {
     const userData = getUserDetails();
@@ -287,12 +289,13 @@ const FeesPaymentItem = () => {
       </div>
 
       {/* Mobile View */}
-      <div className="bg-white min-h-screen lg:hidden">
+      <div className="bg-[#FDFDFD] min-h-screen lg:hidden">
         <div className="p-4 flex flex-col gap-4">
           <div className="flex gap-4 text-white">
             <Link
-              href={`/Student/Fees-Payment/Make-Payment?studentId=${studentId}`}
-              className="bg-[#4084B1] text-white rounded-xl flex-1 overflow-hidden"
+              href={"#"}
+              className="bg-[#004080] text-white rounded-xl flex-1 overflow-hidden"
+              onClick={e => { e.preventDefault(); setShowMakePaymentModal(true); }}
             >
               <div className="p-2 flex">
                 <div className="flex items-start">
@@ -311,7 +314,7 @@ const FeesPaymentItem = () => {
 
             <Link
               href={`/Student/Fees-Payment/Receipt?studentId=${studentId}`}
-              className="bg-red-500 text-white rounded-xl flex-1 overflow-hidden"
+              className="bg-[#F94144] text-white rounded-xl flex-1 overflow-hidden"
             >
               <div className=" p-2">
                 <div className="flex items-start">
@@ -440,6 +443,10 @@ const FeesPaymentItem = () => {
           </div>
         </div>
       </div>
+
+      {showMakePaymentModal && (
+        <MakePaymentModal onClose={() => setShowMakePaymentModal(false)} />
+      )}
     </Layout>
   );
 };
