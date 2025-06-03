@@ -5,7 +5,7 @@ import RightSide from "../RightSide";
 import ResultSettings from "../Result-Settings";
 import GradingandScore from "../GradingandScore";
 import ViewStudentResult from "../ViewStudentResult";
-import Broadsheet from "../Broadsheet";
+import Broadsheet from "../BroadSheet";
 
 const Results = () => {
   const [activeTab, setActiveTab] = useState("Result Setting");
