@@ -12,7 +12,7 @@ const Results = () => {
 
   return (
     <SchoolAdminLayout>
-      <div className="w-full h-full flex flex-col bg-[#EEEEEE] pt-3 pl-2 pr-1 pb-3 overflow-hidden">
+      <div className="w-full h-full flex flex-col bg-[#F9FAFE] pt-3 pl-2 pr-1 pb-3 overflow-hidden">
         {/* Tabs section – fixed, no scroll */}
         <div className="bg-white mr-2 pb-2">
           <div className="pt-3 xl:text-sm text-xs flex xl:gap-10 gap-5 pl-6 whitespace-nowrap overflow-hidden">

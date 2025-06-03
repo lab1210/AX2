@@ -10,7 +10,7 @@ const TeacherAssignment = () => {
 
   return (
     <SchoolAdminLayout>
-      <div className="lg:grid lg:grid-cols-[1fr_270px] flex flex-col sm:gap-6 lg:gap-0 bg-[#EEEEEE] lg:h-full  pt-3 pl-2 pr-1 lg:pb-0 pb-3 overflow-y-auto">
+      <div className="lg:grid lg:grid-cols-[1fr_270px] flex flex-col sm:gap-6 lg:gap-0 bg-[#F9FAFE] lg:h-full  pt-3 pl-2 pr-1 lg:pb-0 pb-3 overflow-y-auto">
         <div className="bg-white sm:pb-3 lg:pb-0 h-full mr-2 overflow-y-auto no-scrollbar">
           <div className="pt-3 text-sm flex gap-14 pl-6 pr-2">
             {["Class Teachers Assignment", "Subject Teacher Assignment"].map(
