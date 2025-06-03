@@ -42,12 +42,12 @@ const SchoolAdminLeft = () => {
       Link: "/School-Admin/Result-Management",
     },
     {
-      Name: "School Fee Management",
+      Name: "Time Table Management",
       icon: <MdOutlineDashboard size={20} />,
       Link: "#",
     },
     {
-      Name: "Timetable Management",
+      Name: "Notification",
       icon: <MdOutlineDashboard size={20} />,
       Link: "#",
     },
