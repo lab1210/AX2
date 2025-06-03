@@ -41,7 +41,7 @@ const DashboardHeader = () => {
   }, [pathName]);
 
   return (
-    <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0 z-10 shadow-md flex justify-between items-center ">
+    <div className="bg-[#ffffff] pl-4 pt-4 pb-5 pr-4 sticky top-0 z-10  flex justify-between items-center ">
       <div>
         <p className="text-xl font-bold">{headerTitle}</p>
       </div>
