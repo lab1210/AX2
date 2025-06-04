@@ -231,7 +231,7 @@ const MakePaymentItem = () => {
                       </span>
                     </div>
                     <input
-                      type="text"
+                      type="number"
                       className="w-full bg-[#D9D9D9] rounded-lg p-3 mt-1"
                       placeholder=""
                       maxLength={16}
@@ -249,14 +249,14 @@ const MakePaymentItem = () => {
                       </div>
                       <div className="flex items-center gap-1 mt-1">
                         <input
-                          type="text"
+                          type="number"
                           className="w-20 bg-[#D9D9D9] rounded-lg p-2 text-center"
                           placeholder="01"
                           maxLength={2}
                         />
                         <span className="text-lg font-bold text-gray-500">/</span>
                         <input
-                          type="text"
+                          type="number"
                           className="w-20 bg-[#D9D9D9] rounded-lg p-2 text-center"
                           placeholder="25"
                           maxLength={2}
@@ -273,7 +273,7 @@ const MakePaymentItem = () => {
                         </span>
                       </div>
                       <input
-                        type="text"
+                        type="number"
                         className="w-full bg-[#D9D9D9] rounded-lg p-3 mt-1"
                         placeholder="012"
                         maxLength={3}
@@ -281,11 +281,11 @@ const MakePaymentItem = () => {
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 pl-3">
                   <input
                     type="checkbox"
                     id="rememberMobile"
-                    className="w-4 h-4 rounded border-gray-300"
+                    className="w-4 h-4 rounded border-gray-300 accent-green-500 text-white"
                   />
                   <label htmlFor="rememberMobile" className="text-sm">
                     Remember this card

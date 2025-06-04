@@ -201,7 +201,7 @@ export default function Studentdashboard() {
               </p>
               <div>
                 <Link
-                  href={`${overview[0].Link}?studentId=${studentId}`}
+                  href="/Student/Timetable"
                   className="bg-[#F94144] text-white px-3 py-3 rounded-lg text-sm cursor-pointer p-2"
                 >
                   View courses
