@@ -93,7 +93,7 @@ const Layout = ({ children }) => {
         </div>
 
         <div className="grid grid-rows-[auto_1fr] overflow-hidden h-full">
-          <div className="bg-white sticky top-0 z-10 p-3 pb-1.5 flex items-center justify-between lg:rounded-t-lg">
+          <div className="bg-white sticky top-0 z-10 p-3 pb-1.5 flex items-center justify-between lg:rounded-t-lg print:hidden">
             <div className="flex items-center gap-4">
               {!isDashboard && (
                 <button onClick={() => router.back()} className="lg:hidden">
@@ -110,23 +110,19 @@ const Layout = ({ children }) => {
                 <h2 className="text-2xl font-bold">{headerTitle}</h2>
               )}
             </div>
-            {user?.profilePicture ? (
-              <div className="rounded-full w-8 h-8 overflow-hidden block lg:hidden">
-                <img
-                  src={
-                    user?.student?.profile_picture_path
-                      ? user.student.profile_picture_path
-                      : "/female.png"
-                  }
-                  alt="Profile"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-            ) : (
+            {/* {user?.profilePicture ? ( */}
+              <div className="max-w-[240px] h-full object-contain ">
+              <img
+                src="/female.png"
+                alt="Teacher illustration"
+                className=" w-10 h-10"
+              />
+            </div>
+            {/* ) : (
               <div className="lg:hidden rounded-full bg-gray-300 w-8 h-8 flex items-center justify-center">
                 {user?.firstName?.charAt(0).toUpperCase()}{user?.lastName?.charAt(0).toUpperCase()}
               </div>
-            )}
+            )} */}
           </div>
           <div className="bg-white p-4 overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-16 lg:pb-4 lg:rounded-b-lg">
             {children}
