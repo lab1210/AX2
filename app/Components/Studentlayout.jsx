@@ -111,7 +111,7 @@ const Layout = ({ children }) => {
               )}
             </div>
             {/* {user?.profilePicture ? ( */}
-              <div className="max-w-[240px] h-full object-contain ">
+              <div className="lg:hidden max-w-[240px] h-full object-contain ">
               <img
                 src="/female.png"
                 alt="Teacher illustration"
