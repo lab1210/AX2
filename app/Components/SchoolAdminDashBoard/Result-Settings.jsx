@@ -7,16 +7,18 @@ import {
   createResult,
   deleteCategory,
   getCategory,
+  getResults,
+  UpdateResultVisibility,
 } from "../../Service/ResultService";
 const ResultSettings = () => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [AssessmentCategory, setAssessmentCategory] = useState([]);
-  const [result, setResult] = useState([]);
+  const [result, setResult] = useState({});
   const [selectedCategory, setSelectedCategory] = useState(null);
   const [editCategoryVisible, setEditCategoryVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedCategoryDelete, setSelectedCategoryDelete] = useState(null);
 
@@ -40,6 +42,24 @@ const ResultSettings = () => {
       else setMessage(error || "Failed to load Categories");
     };
     fetchCategories();
+  }, []);
+
+  useEffect(() => {
+    const fetchResult = async () => {
+      const { data, error } = await getResults();
+      if (data && data.length > 0) {
+        setResult(data[0]);
+        setResultFormData({
+          total_ca_score: data[0].total_ca_score.toString(),
+          total_exam_score: data[0].total_exam_score.toString(),
+          passMark: "",
+        });
+      } else if (error) {
+        setMessage("Error loading result configuration.");
+        setMessageType("error");
+      }
+    };
+    fetchResult();
   }, []);
 
   //PAGINATION
@@ -153,35 +173,63 @@ const ResultSettings = () => {
   // SUBMIT FOR RESULT
   const handleSubmitForResult = async (e) => {
     e.preventDefault();
+
+    const ca = parseFloat(ResultformData.total_ca_score) || 0;
+    const exam = parseFloat(ResultformData.total_exam_score) || 0;
+    const pass = parseFloat(ResultformData.passMark) || 0;
+    console.log("CA:", ca, "EXAM:", exam, "TOTAL:", ca + exam);
+
     if (
-      !ResultformData.total_ca_score ||
-      !ResultformData.total_exam_score ||
-      !ResultformData.passMark
+      ResultformData.total_ca_score === "" ||
+      ResultformData.total_exam_score === "" ||
+      ResultformData.passMark === ""
     ) {
       setMessage("All fields are required.");
       setMessageType("error");
+      return;
     }
 
-    if (ResultformData.total_ca_score + ResultformData.total_exam_score > 100) {
+    const total = ca + exam;
+
+    if (total > 100) {
       setMessage("Total score cannot exceed 100.");
       setMessageType("error");
       return;
-    } else {
-      try {
-        const { data, error } = await createResult(ResultformData);
+    }
 
-        if (error) {
-          setMessage(error || "Failed to add result.");
-          setMessageType("error");
-        } else {
-          setResult((prev) => [...prev, data]);
-          setMessage("Result added successfully.");
-          setMessageType("success");
-        }
-      } catch (err) {
-        setMessage("An error occurred while adding.");
-        setMessageType("error");
+    if (total < 100) {
+      setMessage("Total score cannot be less than 100.");
+      setMessageType("error");
+      return;
+    }
+
+    try {
+      const payload = {
+        total_ca_score: ca,
+        total_exam_score: exam,
+        passMark: pass,
+      };
+
+      let response;
+      if (result?.id) {
+        // Update if exists
+        response = await UpdateResultVisibility(result.id, payload);
+      } else {
+        // Create if not exists
+        response = await createResult(payload);
       }
+
+      if (response.error) {
+        setMessage(response.error || "Failed to save result configuration.");
+        setMessageType("error");
+      } else {
+        setResult(response.data);
+        setMessage("Result configuration saved successfully.");
+        setMessageType("success");
+      }
+    } catch (err) {
+      setMessage("An error occurred while saving.");
+      setMessageType("error");
     }
 
     setResultFormData({
@@ -315,7 +363,11 @@ const ResultSettings = () => {
                     total_ca_score: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`${
+                  ResultformData.total_ca_score !== ""
+                    ? "border-[#0071E3]"
+                    : "border-[#B6B6B6]"
+                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
                 required
               />
             </div>
@@ -336,7 +388,11 @@ const ResultSettings = () => {
                     total_exam_score: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`${
+                  ResultformData.total_exam_score !== ""
+                    ? "border-[#0071E3]"
+                    : "border-[#B6B6B6]"
+                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
                 required
               />
             </div>
@@ -356,7 +412,11 @@ const ResultSettings = () => {
                     passMark: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`${
+                  ResultformData.passMark !== ""
+                    ? "border-[#0071E3]"
+                    : "border-[#B6B6B6]"
+                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
                 required
               />
             </div>
@@ -402,7 +462,13 @@ const ResultSettings = () => {
                           assessment_name: value,
                         }));
                   }}
-                  className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                  className={`${
+                    CategoryformData.assessment_name !== "" ||
+                    (editCategoryVisible &&
+                      selectedCategory?.assessment_name !== "")
+                      ? "border-[#0071E3]"
+                      : "border-[#B6B6B6]"
+                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
                   required
                 />
               </div>
@@ -432,7 +498,13 @@ const ResultSettings = () => {
                           number_of_times: value,
                         }));
                   }}
-                  className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                  className={`${
+                    CategoryformData.number_of_times !== "" ||
+                    (editCategoryVisible &&
+                      selectedCategory?.number_of_times !== "")
+                      ? "border-[#0071E3]"
+                      : "border-[#B6B6B6]"
+                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
                   required
                 />
               </div>
@@ -461,7 +533,13 @@ const ResultSettings = () => {
                           max_score_per_one: value,
                         }));
                   }}
-                  className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                  className={`${
+                    CategoryformData.max_score_per_one !== "" ||
+                    (editCategoryVisible &&
+                      selectedCategory?.max_score_per_one !== "")
+                      ? "border-[#0071E3]"
+                      : "border-[#B6B6B6]"
+                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
                   required
                 />
               </div>
@@ -478,10 +556,10 @@ const ResultSettings = () => {
           <div className="overflow-y-auto max-h-[200px] no-scrollbar">
             <table className="min-w-full table-auto">
               {paginatedData.length > 0 && (
-                <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">
+                <thead className="bg-[#EDF0F3] text-center sticky top-0 z-10 lg:text-base text-xs">
                   <tr>
-                    <th className="p-2 pl-6 bg-[#EDF0F3]">Category</th>
-                    <th className="p-2 bg-[#EDF0F3]">No of Times</th>
+                    <th className="p-2  bg-[#EDF0F3]">Category</th>
+                    <th className="p-2  bg-[#EDF0F3]">No of Times</th>
                     <th className="p-2 bg-[#EDF0F3]">Max Score</th>
                     <th className="p-2 bg-[#EDF0F3]">Actions</th>
                   </tr>
@@ -499,12 +577,18 @@ const ResultSettings = () => {
                   </tr>
                 ) : (
                   paginatedData.map((item, index) => (
-                    <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                      <td className="p-2 pl-6">{item.assessment_name}</td>
-                      <td className="p-2">{item.number_of_times}</td>
-                      <td className="p-2">{item.max_score_per_one}</td>
-                      <td className="p-2">
-                        <div className="flex gap-4">
+                    <tr className="border-b-[#D0D0D0]  border-b" key={index}>
+                      <td className="p-2 text-center ">
+                        {item.assessment_name}
+                      </td>
+                      <td className="p-2 text-center ">
+                        {item.number_of_times}
+                      </td>
+                      <td className="p-2 text-center">
+                        {item.max_score_per_one}
+                      </td>
+                      <td className="p-2 text-center">
+                        <div className="flex gap-4 items-center justify-center">
                           <FiEdit3
                             onClick={() => handleEdit(item)}
                             className="text-[#80ADCB] cursor-pointer"
