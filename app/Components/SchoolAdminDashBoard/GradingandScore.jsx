@@ -1,15 +1,20 @@
 "use client";
 import {
+  AddAnnualweigh,
   AddResultVisibility,
   createGrading,
   deleteGrade,
+  getAnnualweigh,
   getGrading,
   getResultVisibility,
+  UpdateAnnualWeigh,
   UpdateGrade,
   UpdateResultVisibility,
 } from "@/Service/ResultService";
+import { getClass, getDepartment, getTerms } from "@/Service/schoolConfig";
 import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
+import Dropdown from "./DropDown";
 
 const GradingandScore = () => {
   const [message, setMessage] = useState("");
@@ -18,11 +23,18 @@ const GradingandScore = () => {
   const [selectedGrade, setselectedGrade] = useState(null);
   const [editGradeVisible, seteditGradeVisible] = useState(false);
   const [currentPageforgrade, setCurrentPageforgrade] = useState(1);
+  const [currentPageforterm, setCurrentPageforterm] = useState(1);
   const itemsPerPage = 5;
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [classYear, setClassYear] = useState([]);
+  const [term, setTerm] = useState([]);
+  const [departmentList, setDepartmentList] = useState([]);
   const [deleteModalVisibleforgrade, setDeleteModalVisibleforgrade] =
     useState(false);
   const [selectedGradeDelete, setselectedGradeDelete] = useState(null);
+  const [Weight, setWeight] = useState({});
+  const [originalWeights, setOriginalWeights] = useState({});
+
   const [toggle, setToggle] = useState({});
   const [toggleFormData, setToggleFormData] = useState({
     term_result_open: false,
@@ -36,26 +48,77 @@ const GradingandScore = () => {
     remarks: "",
   });
 
+  const toggleWeightEdit = (termId) => {
+    setWeight((prevState) => ({
+      ...prevState,
+      [termId]: !prevState[termId],
+    }));
+  };
+
+  const [computationFormData, setComputationFormData] = useState({
+    class_year: "",
+    department: "",
+    first_term_weight: "",
+    second_term_weight: "",
+    third_term_weight: "",
+  });
+
   useEffect(() => {
     const fetchGrade = async () => {
       const { data, error } = await getGrading();
       if (data) setgrade(data);
       else setMessage(error || "Failed to load grading system");
     };
+    const fetchClass = async () => {
+      const { data, error } = await getClass();
+      if (data) {
+        setClassYear(data);
+      } else {
+        setMessage(error || "Failed to load Class years");
+      }
+    };
+    const fetchTerms = async () => {
+      const { data, error } = await getTerms();
+      if (data) setTerm(data);
+      else setMessage(error || "Failed to load terms");
+    };
+    const fetchDepartments = async () => {
+      const { data, error } = await getDepartment();
+      if (data) setDepartmentList(data);
+      else setMessage(error || "Failed to load departments");
+    };
+    fetchDepartments();
+    fetchTerms();
+    fetchClass();
     fetchGrade();
   }, []);
 
+  const getClassYearName = (yearid) => {
+    const year = classYear.find((item) => item.class_year_id === yearid);
+    return year?.class_name;
+  };
+  const getDepartmentName = (depID) => {
+    const year = departmentList.find((item) => item.department_id === depID);
+    return year?.name;
+  };
+  const getTermName = (yearid) => {
+    const terms = term.find((item) => item.term_id === yearid);
+    return terms?.name;
+  };
   useEffect(() => {
     const fetchVisibility = async () => {
       const { data, error } = await getResultVisibility();
-      if (data && data.id) {
-        setToggle(data);
+      console.log("Fetched visibility:", data, "Error:", error);
+
+      if (Array.isArray(data) && data.length > 0) {
+        setToggle(data[0]);
         setToggleFormData({
-          term_result_open: data.term_result_open,
-          annual_result_open: data.annual_result_open,
+          term_result_open: data[0].term_result_open,
+          annual_result_open: data[0].annual_result_open,
         });
-      } else {
-        setMessage(error || "Failed to load result visibility ");
+      } else if (error) {
+        setMessage(error || "Failed to load result visibility");
+        setMessageType("error");
       }
     };
     fetchVisibility();
@@ -67,14 +130,27 @@ const GradingandScore = () => {
         currentPageforgrade * itemsPerPage
       )
     : [];
+  const paginatedDataforAnnualweigh = Array.isArray(term)
+    ? term.slice(
+        (currentPageforterm - 1) * itemsPerPage,
+        currentPageforterm * itemsPerPage
+      )
+    : [];
 
   const totalPages = Math.ceil(grade.length / itemsPerPage);
+  const totalPagesforterm = Math.ceil(term.length / itemsPerPage);
   const handlePrevious = () => {
     setCurrentPageforgrade((prev) => Math.max(prev - 1, 1));
+  };
+  const handlePreviousterm = () => {
+    setCurrentPageforterm((prev) => Math.max(prev - 1, 1));
   };
 
   const handleNext = () => {
     setCurrentPageforgrade((prev) => Math.min(prev + 1, totalPages));
+  };
+  const handleNextterm = () => {
+    setCurrentPageforterm((prev) => Math.min(prev + 1, totalPages));
   };
 
   const handleSubmitForGrading = async (e) => {
@@ -95,12 +171,14 @@ const GradingandScore = () => {
           updatedData
         );
 
-        if (error) {
-          setMessage(error || "Failed to update Grade.");
+        if (response?.status === 204) {
+          setMessage("Grade Updated successfully.");
+          setMessageType("success");
+          closeDeleteModal();
+        } else {
+          setMessage("Failed to update Grade.");
           setMessageType("error");
-          return;
         }
-
         const updatedList = grade.map((item) =>
           item.id === selectedGrade.id ? data : item
         );
@@ -222,11 +300,102 @@ const GradingandScore = () => {
     }, 3000);
   };
 
+  useEffect(() => {
+    const fetchAnnualWeight = async () => {
+      if (computationFormData.class_year && computationFormData.department) {
+        const { data, error } = await getAnnualweigh();
+        if (error) {
+          setMessage(error);
+          setMessageType("error");
+          return;
+        }
+
+        const match = data.find(
+          (item) =>
+            item.class_year === computationFormData.class_year &&
+            item.department === computationFormData.department
+        );
+
+        if (match) {
+          setComputationFormData((prev) => ({
+            ...prev,
+            first_term_weight: match.first_term_weight,
+            second_term_weight: match.second_term_weight,
+            third_term_weight: match.third_term_weight,
+            id: match.id, // Store id for update later
+          }));
+          setOriginalWeights({
+            first_term_weight: match.first_term_weight,
+            second_term_weight: match.second_term_weight,
+            third_term_weight: match.third_term_weight,
+          });
+        } else {
+          setComputationFormData((prev) => ({
+            ...prev,
+            first_term_weight: "",
+            second_term_weight: "",
+            third_term_weight: "",
+            id: null,
+          }));
+
+          setOriginalWeights({});
+        }
+      }
+    };
+
+    fetchAnnualWeight();
+  }, [computationFormData.class_year, computationFormData.department]);
+
+  const handleSaveAnnualWeight = async (e) => {
+    e.preventDefault();
+
+    const total =
+      parseFloat(computationFormData.first_term_weight || 0) +
+      parseFloat(computationFormData.second_term_weight || 0) +
+      parseFloat(computationFormData.third_term_weight || 0);
+
+    if (Math.abs(total - 1) > 0.001) {
+      setMessage("Total weight must equal 1.");
+      setMessageType("error");
+      return;
+    }
+
+    const payload = {
+      class_year: computationFormData.class_year,
+      department: computationFormData.department,
+      first_term_weight: parseFloat(computationFormData.first_term_weight),
+      second_term_weight: parseFloat(computationFormData.second_term_weight),
+      third_term_weight: parseFloat(computationFormData.third_term_weight),
+    };
+
+    let response;
+
+    if (computationFormData.id) {
+      response = await UpdateAnnualWeigh(computationFormData.id, payload);
+    } else {
+      response = await AddAnnualweigh(payload);
+    }
+
+    if (response?.error) {
+      setMessage("Failed to save weight configuration.");
+      setMessageType("error");
+    } else {
+      setMessage("Weight configuration saved successfully.");
+      setMessageType("success");
+      setWeight({});
+    }
+
+    setTimeout(() => {
+      setMessage("");
+      setMessageType("");
+    }, 3000);
+  };
+
   return (
     <div className="pr-1 h-full overflow-y-auto">
       {message && (
         <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
+          className={`mx-6 mb-3 z-[3000] sticky top-0 text-sm px-4 py-2 rounded-sm font-semibold ${
             messageType === "success"
               ? "bg-green-100 text-green-700"
               : "bg-red-100 text-red-700"
@@ -305,7 +474,12 @@ const GradingandScore = () => {
                           grade: value,
                         }));
                   }}
-                  className="focus:outline-[#0071E3] placeholder:xl:text-sm placeholder:text-xs placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                  className={`${
+                    GradeFormData.grade !== "" ||
+                    (editGradeVisible && selectedGrade?.grade !== "")
+                      ? "border-[#0071E3]"
+                      : "border-[#B6B6B6]"
+                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
                   required
                 />
               </div>
@@ -334,7 +508,12 @@ const GradingandScore = () => {
                             min_score: value,
                           }));
                     }}
-                    className="focus:outline-[#0071E3] placeholder:xl:text-sm placeholder:text-xs placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                    className={`${
+                      GradeFormData.min_score !== "" ||
+                      (editGradeVisible && selectedGrade?.min_score !== "")
+                        ? "border-[#0071E3]"
+                        : "border-[#B6B6B6]"
+                    } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
                     required
                   />
                   <input
@@ -358,7 +537,12 @@ const GradingandScore = () => {
                             max_score: value,
                           }));
                     }}
-                    className="focus:outline-[#0071E3]  placeholder:xl:text-sm placeholder:text-xs placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                    className={`${
+                      GradeFormData.max_score !== "" ||
+                      (editGradeVisible && selectedGrade?.max_score !== "")
+                        ? "border-[#0071E3]"
+                        : "border-[#B6B6B6]"
+                    } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
                     required
                   />
                 </div>
@@ -386,7 +570,12 @@ const GradingandScore = () => {
                           remarks: value,
                         }));
                   }}
-                  className="focus:outline-[#0071E3] placeholder:xl:text-sm placeholder:text-xs placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                  className={`${
+                    GradeFormData.remarks !== "" ||
+                    (editGradeVisible && selectedGrade?.remarks !== "")
+                      ? "border-[#0071E3]"
+                      : "border-[#B6B6B6]"
+                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
                   required
                 />
               </div>
@@ -403,9 +592,9 @@ const GradingandScore = () => {
           <div className="overflow-y-auto max-h-[200px] no-scrollbar">
             <table className="min-w-full table-auto">
               {paginatedDataforgrade.length > 0 && (
-                <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">
+                <thead className="bg-[#EDF0F3] text-center sticky top-0 z-10 lg:text-base text-xs">
                   <tr>
-                    <th className="p-2 pl-6 bg-[#EDF0F3]">Grade</th>
+                    <th className="p-2 bg-[#EDF0F3]">Grade</th>
                     <th className="p-2 bg-[#EDF0F3]">Range</th>
                     <th className="p-2 bg-[#EDF0F3]">Remark</th>
                     <th className="p-2 bg-[#EDF0F3]">Actions</th>
@@ -425,11 +614,11 @@ const GradingandScore = () => {
                 ) : (
                   paginatedDataforgrade.map((item, index) => (
                     <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                      <td className="p-2 pl-6">{item.grade}</td>
-                      <td className="p-2">{`${item.min_score}-${item.max_score}`}</td>
-                      <td className="p-2">{item.remarks}</td>
-                      <td className="p-2">
-                        <div className="flex gap-4">
+                      <td className="p-2 text-center">{item.grade}</td>
+                      <td className="p-2 text-center">{`${item.min_score}-${item.max_score}`}</td>
+                      <td className="p-2 text-center">{item.remarks}</td>
+                      <td className="p-2 text-center">
+                        <div className="flex gap-4 items-center justify-center">
                           <FiEdit3
                             onClick={() => handleEdit(item)}
                             className="text-[#80ADCB] cursor-pointer"
@@ -491,7 +680,7 @@ const GradingandScore = () => {
           </div>
         </div>
       </div>
-      <div className="pb-5 pt-3 mt-5 bg-white">
+      <div className="pb-5 pt-3 mt-5 bg-white  shadow-xl rounded-lg">
         <div className="pt-3 pl-6 pr-6 mb-5">
           <p className="font-bold text-[#07508F]">Result Visibility</p>
         </div>
@@ -532,6 +721,182 @@ const GradingandScore = () => {
             </label>
           </div>
         </div>
+      </div>
+
+      <div className="pb-5 pt-3 mt-5 bg-white  shadow-xl rounded-lg">
+        <div className="pt-3 pl-6 pr-6 mb-5 flex justify-between items-center">
+          <p className="font-bold text-[#07508F]">
+            Score Entry and Computation
+          </p>
+          <button
+            onClick={handleSaveAnnualWeight}
+            disabled={
+              !computationFormData.class_year || !computationFormData.department
+            }
+            className={`bg-[#07508F] text-white font-bold text-sm px-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90 ${
+              !computationFormData.class_year || !computationFormData.department
+                ? "cursor-not-allowed"
+                : ""
+            }`}
+          >
+            Save
+          </button>
+        </div>
+        <form>
+          <div className="pl-6 pr-6 space-y-4 mb-3">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="flex flex-col gap-2 mb-2">
+                <label className="text-[0.88rem] text-[#5E6A72]">
+                  Set Class:
+                </label>
+                <Dropdown
+                  label={
+                    getClassYearName(computationFormData.class_year) ||
+                    "Select Class"
+                  }
+                  items={classYear.map((t) => ({
+                    label: t.class_name,
+                    onClick: () =>
+                      setComputationFormData({
+                        ...computationFormData,
+                        class_year: t.class_year_id,
+                      }),
+                  }))}
+                />
+              </div>
+              <div className="flex flex-col gap-2 mb-2">
+                <label className="text-[0.88rem] text-[#5E6A72]">
+                  Set Department:
+                </label>
+                <Dropdown
+                  label={
+                    getDepartmentName(computationFormData.department) ||
+                    "Select Department"
+                  }
+                  items={departmentList.map((t) => ({
+                    label: t.name,
+                    onClick: () =>
+                      setComputationFormData({
+                        ...computationFormData,
+                        department: t.department_id,
+                      }),
+                  }))}
+                />
+              </div>
+            </div>
+          </div>
+          <hr className="text-gray-200" />
+          <div className="flex-shrink-0">
+            <p className="font-semibold flex justify-center p-3 text-[#333333]">
+              Set Term Annual Weigh
+            </p>
+          </div>
+          <div className="px-0">
+            <div>
+              <table className="min-w-full table-auto">
+                {paginatedDataforAnnualweigh.length > 0 && (
+                  <thead className="bg-[#EDF0F3] text-center sticky top-0 z-10 lg:text-base text-xs">
+                    <tr>
+                      <th className="p-2  bg-[#EDF0F3]">Term</th>
+                      <th className="p-2 bg-[#EDF0F3]">Input Score</th>
+                      <th className="p-2 bg-[#EDF0F3]">Action</th>
+                    </tr>
+                  </thead>
+                )}
+                <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
+                  {paginatedDataforAnnualweigh.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan="3"
+                        className="p-5  text-center border text-gray-500"
+                      >
+                        No Data Available
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedDataforAnnualweigh.map((item, index) => {
+                      let termKey = "";
+                      if (item.name.toLowerCase().includes("first"))
+                        termKey = "first_term_weight";
+                      else if (item.name.toLowerCase().includes("second"))
+                        termKey = "second_term_weight";
+                      else if (item.name.toLowerCase().includes("third"))
+                        termKey = "third_term_weight";
+
+                      const inputValue = computationFormData[termKey];
+                      const originalValue = originalWeights[termKey];
+
+                      const isSynced =
+                        parseFloat(inputValue) === parseFloat(originalValue);
+
+                      return (
+                        <tr
+                          className="border-b-[#D0D0D0]  border-b"
+                          key={index}
+                        >
+                          <td className="p-2 text-center ">{item.name}</td>
+                          <td className="p-2 text-center ">
+                            <input
+                              type="number"
+                              required
+                              className={` ${
+                                Weight[item.term_id] || isSynced
+                                  ? "text-sm"
+                                  : "border  text-xs"
+                              }  placeholder:text-[#000] rounded p-1  w-24 placeholder:text-center focus:border-[#99C4EF] outline-none text-center ${
+                                computationFormData[termKey] !== "" &&
+                                computationFormData[termKey] !== undefined
+                                  ? "border-[#99C4EF]"
+                                  : "border-[#A4A4A4]"
+                              }`}
+                              placeholder={
+                                Weight[item.term_id] ? "" : "Enter Weigh"
+                              }
+                              readOnly={Weight[item.term_id] ? true : false}
+                              min={0}
+                              step={0.1}
+                              value={computationFormData[termKey] || ""}
+                              onChange={(e) =>
+                                setComputationFormData((prev) => ({
+                                  ...prev,
+                                  [termKey]: e.target.value,
+                                }))
+                              }
+                            />
+                          </td>
+                          <td className="p-2 text-center ">
+                            {isSynced ? (
+                              <div className="flex gap-4 items-center justify-center">
+                                <FiEdit3
+                                  className="text-[#80ADCB] cursor-pointer"
+                                  size={15}
+                                  onClick={() => toggleWeightEdit(item.term_id)}
+                                />
+                                <FiTrash2
+                                  className="text-[#F94144] cursor-pointer"
+                                  size={15}
+                                />
+                              </div>
+                            ) : (
+                              <div className="flex items-center justify-center">
+                                <div
+                                  onClick={() => toggleWeightEdit(item.term_id)}
+                                  className="bg-[#07508F]   text-white  text-xs px-5 py-1 rounded cursor-pointer hover:opacity-90"
+                                >
+                                  Set
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </form>
       </div>
     </div>
   );

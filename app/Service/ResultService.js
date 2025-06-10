@@ -37,7 +37,6 @@ export const getCategory = async () => {
 
     const url = `${BASE_URL}/result/assessment-categories/`;
     const response = await axios.get(url, { headers });
-    console.log(response.data);
     return { data: response.data };
   } catch (error) {
     console.error("Failed to fetch category:", error);
@@ -258,6 +257,78 @@ export const UpdateResultVisibility = async (resultID, result) => {
     return { data: response.data };
   } catch (error) {
     console.error(`Failed to update result visibility:${resultID}`, error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const getAnnualweigh = async () => {
+  try {
+    const headers = createAuthHeaders();
+    const url = `${BASE_URL}/result/annual-weight-configs/`;
+
+    const response = await axios.get(url, { headers });
+    return { data: response.data };
+  } catch (error) {
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const AddAnnualweigh = async (result) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+
+    const url = `${BASE_URL}/result/annual-weight-configs/`;
+    const response = await axios.post(url, result, { headers });
+    return { data: response.data };
+  } catch (error) {
+    console.error("Failed to add annual weight:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const UpdateAnnualWeigh = async (annualID, annual) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/result/annual-weight-configs/${annualID}`;
+
+    const response = await axios.patch(url, annual, { headers });
+    return { data: response.data };
+  } catch (error) {
+    console.error(`Failed to update :${annualID}`, error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const DeleteAnnualWeigh = async (annualID, annual) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/result/annual-weight-configs/${annualID}`;
+
+    const response = await axios.delete(url, { headers });
+    return { data: response.data };
+  } catch (error) {
+    console.error(`Failed to delete :${annualID}`, error);
     return { error: error.response?.data || error.message || "Unknown error" };
   }
 };
