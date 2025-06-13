@@ -86,7 +86,7 @@ const TeacherLayout = ({ children, dynamicContent }) => {
   return (
     <>
       {/* Desktop Layout */}
-      <div className="hidden lg:grid w-full h-screen grid-cols-[15%_65%_20%] overflow-hidden">
+      <div className="hidden lg:grid w-full h-screen grid-cols-[20%_60%_20%] xl:grid-cols-[15%_65%_20%] overflow-hidden">
         {/* Left Sidebar */}
         <div>
           <Suspense>

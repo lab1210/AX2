@@ -124,11 +124,24 @@ const StudentToSubject = () => {
     });
   };
 
+  const handleDelete = (student) => {
+    setStudentSubjectList((prev) =>
+      prev.filter((item) => item.Student !== student)
+    );
+    setMessage("Student subject registration deleted successfully");
+    setMessageType("failed");
+
+    setTimeout(() => {
+      setMessage("");
+      setMessageType("");
+    }, 3000);
+  };
+
   return (
     <Layout>
       <div className="bg-[#F7F8FA] min-h-screen">
         {/* Header */}
-        <div className="fixed bg-white px-6 py-4 flex items-center justify-between mb-3 rounded w-[85%] z-20">
+        <div className="fixed bg-white px-6 py-4 flex items-center justify-between mb-3 rounded w-[80%] xl:w-[85%] z-20">
           <h1 className="text-2xl font-bold text-[#01427A]">
             Student Subject Registration
           </h1>
@@ -153,214 +166,215 @@ const StudentToSubject = () => {
 
         {/* Content Container */}
         <div className="p-2">
-        <div className="bg-white p-4 mt-20 overflow-y-hidden h-[95vh] fixed w-[64%]">
-          {message && (
-            <div
-              className={`mb-4 text-sm px-4 py-2 rounded font-semibold ${
-                messageType === "success"
-                  ? "bg-green-100 text-green-700"
-                  : "bg-red-100 text-red-700"
-              }`}
-            >
-              {" "}
-              {message}{" "}
-            </div>
-          )}
-
-          {/* Filter/Search */}
-          <div className="flex items-center gap-3 mb-6">
-            <div className="relative">
-              <button
-                onClick={() => setShowFilterDropdown((prev) => !prev)}
-                className="flex items-center text-[#01427A] border border-[#01427A] rounded-full py-2 px-3 gap-2 hover:bg-[#01427A] hover:text-white text-sm"
-              >
-                <span className="hidden xl:block">Filter by</span>{" "}
-                <IoFilter size={18} />
-              </button>
-              {showFilterDropdown && (
-                <div className="absolute bg-white border rounded shadow mt-2 z-10">
-                  {["name"].map((type) => (
-                    <button
-                      key={type}
-                      onClick={() => {
-                        setFilterType(type);
-                        setShowFilterDropdown(false);
-                      }}
-                      className="flex items-center gap-2 px-4 py-2 hover:bg-[#01427A]/20"
-                    >
-                      <IoSearch/>
-                      {type.charAt(0).toUpperCase() + type.slice(1)}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="relative flex-1">
-              <IoSearch
-                className="absolute top-2 right-3 text-[#AEAEAE]"
-                size={18}
-              />
-              <input
-                type="text"
-                value={searchText}
-                onChange={(e) => setSearchText(e.target.value)}
-                placeholder={`Type here to filter by ${filterType}`}
-                className="w-full border rounded-full pl-4 pr-12 py-2 placeholder-[#AEAEAE]"
-              />
-            </div>
-          </div>
-
-          {/* Registration Form */}
-          <form onSubmit={handleSubmit} className="mb-8">
-            <div className="flex items-center justify-between mb-4">
-              <p className="font-bold text-[#07508F]">
-                Register Students Subject
-              </p>
-              <button
-                type="submit"
-                className="bg-[#07508F] text-white px-6 py-2 rounded font-semibold hover:opacity-90"
-              >
-                {editSubjectAssignmentVisible ? "Save" : "Assign"}
-              </button>
-            </div>
-            <div className="flex flex-col space-y-3">
-              <div>
-                <label className="block text-sm text-[#5E6A72] mb-1">
-                  Student:
-                </label>
-                <MultiDropdown
-                  label="Select Student(s)"
-                  items={filteredStudents.map((s) => ({ label: s.name }))}
-                  selectedItems={
-                    editSubjectAssignmentVisible
-                      ? selectedSubjectAssignment.Student || []
-                      : formData.Student
-                  }
-                  onSelect={(sel) => {
-                    if (editSubjectAssignmentVisible) {
-                      setselectedSubjectAssignment((prev) => ({
-                        ...prev,
-                        Student: sel,
-                      }));
-                    } else {
-                      setFormData((prev) => ({ ...prev, Student: sel }));
-                    }
-                  }}
-                />
-              </div>
-              <div>
-                <label className="block text-sm text-[#5E6A72] mb-1">
-                  Subject:
-                </label>
-                <MultiDropdown
-                  label="Select Subject(s)"
-                  items={[
-                    { label: "Mathematics" },
-                    { label: "Science" },
-                    { label: "History" },
-                    { label: "Geography" },
-                    { label: "CRS" },
-                  ]}
-                  selectedItems={
-                    editSubjectAssignmentVisible
-                      ? selectedSubjectAssignment.Subject || []
-                      : formData.Subject
-                  }
-                  onSelect={(sel) => {
-                    if (editSubjectAssignmentVisible) {
-                      setselectedSubjectAssignment((prev) => ({
-                        ...prev,
-                        Subject: sel,
-                      }));
-                    } else {
-                      setFormData((prev) => ({ ...prev, Subject: sel }));
-                    }
-                  }}
-                />
-              </div>
-            </div>
-          </form>
-
-          <hr className="mb-4" />
-          <p className="font-semibold text-center text-[#333333] mb-4">
-            Existing Assigned Students to Subjects
-          </p>
-
-          {/* Table */}
-          <div className="overflow-x-auto">
-            <table className="min-w-full table-auto">
-              <thead className="bg-[#EDF0F3]">
-                <tr>
-                  <th className="p-2 text-left">Student</th>
-                  <th className="p-2 text-left">Subjects</th>
-                  <th className="p-2 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {paginatedData.length === 0 ? (
-                  <tr>
-                    <td colSpan={3} className="p-4 text-center text-gray-500">
-                      No Data Available
-                    </td>
-                  </tr>
-                ) : (
-                  paginatedData.map((item, idx) => (
-                    <tr key={idx} className="border-b">
-                      <td className="p-2">{item.Student}</td>
-                      <td className="p-2">{item.Subject.join(", ")}</td>
-                      <td className="p-2">
-                        <div className="flex gap-4">
-                          <FiEdit3
-                            className="text-[#80ADCB] cursor-pointer"
-                            onClick={() => handleEdit(item)}
-                            size={16}
-                          />
-                          <FiTrash2
-                            className="text-[#F94144] cursor-pointer"
-                            size={16}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination */}
-          <div className="flex justify-end items-center gap-2 mt-4">
-            <button
-              onClick={handlePrevious}
-              disabled={currentPage === 1}
-              className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
-            >
-              &lt;
-            </button>
-
-            {Array.from({ length: totalPages }, (_, i) => (
-              <button
-                key={i}
-                onClick={() => setCurrentPage(i + 1)}
-                className={`px-3 py-1 rounded ${
-                  currentPage === i + 1
-                    ? "bg-[#07508F] text-white"
-                    : "bg-[#FAFAFA] hover:bg-[#EDF0F3]"
+          <div className="bg-white p-4 mt-20 overflow-y-hidden h-full xl:h-[95vh] xl:fixed w-full xl:w-[64%]">
+            {message && (
+              <div
+                className={`mb-4 text-sm px-4 py-2 rounded font-semibold ${
+                  messageType === "success"
+                    ? "bg-green-100 text-green-700"
+                    : "bg-red-100 text-red-700"
                 }`}
               >
-                {i + 1}
-              </button>
-            ))}
+                {" "}
+                {message}{" "}
+              </div>
+            )}
 
-            <button
-              onClick={handleNext}
-              disabled={currentPage === totalPages}
-              className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
-            >
-              &gt;
-            </button>
+            {/* Filter/Search */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="relative">
+                <button
+                  onClick={() => setShowFilterDropdown((prev) => !prev)}
+                  className="flex items-center text-[#01427A] border border-[#01427A] rounded-full py-2 px-3 gap-2 hover:bg-[#01427A] hover:text-white text-sm"
+                >
+                  <span className="hidden xl:block">Filter by</span>{" "}
+                  <IoFilter size={18} />
+                </button>
+                {showFilterDropdown && (
+                  <div className="absolute bg-white border rounded shadow mt-2 z-10">
+                    {["name"].map((type) => (
+                      <button
+                        key={type}
+                        onClick={() => {
+                          setFilterType(type);
+                          setShowFilterDropdown(false);
+                        }}
+                        className="flex items-center gap-2 px-4 py-2 hover:bg-[#01427A]/20"
+                      >
+                        <IoSearch />
+                        {type.charAt(0).toUpperCase() + type.slice(1)}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div className="relative flex-1">
+                <IoSearch
+                  className="absolute top-2 right-3 text-[#AEAEAE]"
+                  size={18}
+                />
+                <input
+                  type="text"
+                  value={searchText}
+                  onChange={(e) => setSearchText(e.target.value)}
+                  placeholder={`Type here to filter by ${filterType}`}
+                  className="w-full border rounded-full pl-4 pr-12 py-2 placeholder-[#AEAEAE]"
+                />
+              </div>
+            </div>
+
+            {/* Registration Form */}
+            <form onSubmit={handleSubmit} className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <p className="font-bold text-[#07508F]">
+                  Register Students Subject
+                </p>
+                <button
+                  type="submit"
+                  className="bg-[#07508F] text-white px-6 py-2 rounded font-semibold hover:opacity-90"
+                >
+                  {editSubjectAssignmentVisible ? "Save" : "Assign"}
+                </button>
+              </div>
+              <div className="flex flex-col space-y-3">
+                <div>
+                  <label className="block text-sm text-[#5E6A72] mb-1">
+                    Student:
+                  </label>
+                  <MultiDropdown
+                    label="Select Student(s)"
+                    items={filteredStudents.map((s) => ({ label: s.name }))}
+                    selectedItems={
+                      editSubjectAssignmentVisible
+                        ? selectedSubjectAssignment.Student || []
+                        : formData.Student
+                    }
+                    onSelect={(sel) => {
+                      if (editSubjectAssignmentVisible) {
+                        setselectedSubjectAssignment((prev) => ({
+                          ...prev,
+                          Student: sel,
+                        }));
+                      } else {
+                        setFormData((prev) => ({ ...prev, Student: sel }));
+                      }
+                    }}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm text-[#5E6A72] mb-1">
+                    Subject:
+                  </label>
+                  <MultiDropdown
+                    label="Select Subject(s)"
+                    items={[
+                      { label: "Mathematics" },
+                      { label: "Science" },
+                      { label: "History" },
+                      { label: "Geography" },
+                      { label: "CRS" },
+                    ]}
+                    selectedItems={
+                      editSubjectAssignmentVisible
+                        ? selectedSubjectAssignment.Subject || []
+                        : formData.Subject
+                    }
+                    onSelect={(sel) => {
+                      if (editSubjectAssignmentVisible) {
+                        setselectedSubjectAssignment((prev) => ({
+                          ...prev,
+                          Subject: sel,
+                        }));
+                      } else {
+                        setFormData((prev) => ({ ...prev, Subject: sel }));
+                      }
+                    }}
+                  />
+                </div>
+              </div>
+            </form>
+
+            <hr className="mb-4" />
+            <p className="font-semibold text-center text-[#333333] mb-4">
+              Existing Assigned Students to Subjects
+            </p>
+
+            {/* Table */}
+            <div className="overflow-x-auto">
+              <table className="min-w-full table-auto">
+                <thead className="bg-[#EDF0F3]">
+                  <tr>
+                    <th className="p-2 text-left">Student</th>
+                    <th className="p-2 text-left">Subjects</th>
+                    <th className="p-2 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {paginatedData.length === 0 ? (
+                    <tr>
+                      <td colSpan={3} className="p-4 text-center text-gray-500">
+                        No Data Available
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedData.map((item, idx) => (
+                      <tr key={idx} className="border-b">
+                        <td className="p-2">{item.Student}</td>
+                        <td className="p-2">{item.Subject.join(", ")}</td>
+                        <td className="p-2">
+                          <div className="flex gap-4">
+                            <FiEdit3
+                              className="text-[#80ADCB] cursor-pointer"
+                              onClick={() => handleEdit(item)}
+                              size={16}
+                            />
+                            <FiTrash2
+                              className="text-[#F94144] cursor-pointer"
+                              size={16}
+                              onClick={() => handleDelete(item.Student)}
+                            />
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            <div className="flex justify-end items-center gap-2 mt-4">
+              <button
+                onClick={handlePrevious}
+                disabled={currentPage === 1}
+                className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+              >
+                &lt;
+              </button>
+
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === i + 1
+                      ? "bg-[#07508F] text-white"
+                      : "bg-[#FAFAFA] hover:bg-[#EDF0F3]"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={handleNext}
+                disabled={currentPage === totalPages}
+                className="px-3 py-1 bg-[#E6ECF2] rounded disabled:opacity-50"
+              >
+                &gt;
+              </button>
+            </div>
           </div>
-        </div>
         </div>
       </div>
     </Layout>

@@ -212,12 +212,12 @@ const AttendancePage = () => {
         {/* Desktop View */}
         <div className="hidden bg-[#F7F8FA] overflow-hidden lg:flex">
           <div className="flex-1 flex flex-col">
-            <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 w-[85%]">
+            <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 w-[81.5%] xl:w-[85%]">
               {renderHeaderContent()}
             </div>
 
             {/* Content Section */}
-            <div className="flex flex-1 p-6 w-[65%] mt-17 h-[92vh] fixed bg-[#F7F8FA]">
+            <div className="flex flex-1 p-3 xl:p-6 w-[60%] xl:w-[65%] mt-20 xl:mt-17 h-[92vh] fixed bg-[#F7F8FA]">
               <div className="flex-1 flex flex-col bg-white rounded-lg shadow p-4 mx-auto">
                 {/* Fixed Tabs Section */}
                 <div className="border-b border-gray-200 mb-4">

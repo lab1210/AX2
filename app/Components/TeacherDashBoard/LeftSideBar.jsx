@@ -64,7 +64,7 @@ const LeftSidebar = () => {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col h-screen bg-white shadow-lg border-r border-gray-200 overflow-hidden">
+    <div className="w-[20%] xl:w-[15%] fixed flex flex-col h-screen bg-white shadow-lg border-r border-gray-200 overflow-auto xl:overflow-hidden no-scrollbar">
       {/* Top section with logo */}
       <div className="flex items-center justify-center p-5 flex-col text-white">
         <img src="/logo.svg" alt="Foursquare Logo" className="h-16 w-16" />

@@ -84,7 +84,7 @@ const TeacherLayout = ({ children, dynamicContent }) => {
 
   return (
     <>
-      <div className="w-full h-screen grid grid-cols-[20%_1fr] lg:grid-cols-[15%_1fr] overflow-hidden bg-gray-100">
+      <div className="w-full h-screen grid xl:grid-cols-[15%_1fr] grid-cols-[20%_1fr] overflow-hidden lg:overflow-auto bg-gray-100">
         {/* Left Sidebar */}
         <div className="hidden md:block">
           <Suspense>

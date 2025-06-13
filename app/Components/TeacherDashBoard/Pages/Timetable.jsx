@@ -116,9 +116,9 @@ const Timetable = () => {
           </div>
 
           {/* Main content */}
-          <div className="flex flex-row pt-19 lg:pt-17 w-full lg:fixed lg:w-[64%] overflow-y-auto no-scrollbar">
+          <div className="flex flex-row pt-19 lg:pt-16 xl:pt-17 w-full lg:fixed lg:w-[61%] xl:w-[64%] overflow-y-auto no-scrollbar">
             <div className="w-full flex flex-col p-3 lg:p-6 mx-auto">
-              <div className="bg-white rounded-lg shadow p-6 lg:p-12 overflow-x-auto no-scrollbar">
+              <div className="bg-white rounded-lg shadow p-6 lg:p-3 xl:p-12 overflow-x-auto no-scrollbar">
                 <table className="w-full border-collapse">
                   <thead>
                     <tr className="bg-[#f6faff]">
@@ -164,23 +164,23 @@ const Timetable = () => {
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
                             <p className="font-semibold">{row.monday}</p>
-                            <p className="text-[#0B71B5] px-5">{row.class}</p>
+                            <p className="text-[#0B71B5] px-5 text-sm font-normal">{row.class}</p>
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
                             <p className="font-semibold">{row.tuesday}</p>
-                            <p className="text-[#0B71B5] px-5">{row.class}</p>
+                            <p className="text-[#0B71B5] px-5 text-sm font-normal">{row.class}</p>
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
                             <p className="font-semibold">{row.wednesday}</p>
-                            <p className="text-[#0B71B5] px-5">{row.class}</p>
+                            <p className="text-[#0B71B5] px-5 text-sm font-normal">{row.class}</p>
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
                             <p className="font-semibold">{row.thursday}</p>
-                            <p className="text-[#0B71B5] px-5">{row.class}</p>
+                            <p className="text-[#0B71B5] px-5 text-sm font-normal">{row.class}</p>
                           </td>
                           <td className="border border-gray-300 px-4 py-2">
                             <p className="font-semibold">{row.friday}</p>
-                            <p className="text-[#0B71B5] px-5">{row.class}</p>
+                            <p className="text-[#0B71B5] px-5 text-sm font-normal">{row.class}</p>
                           </td>
                         </tr>
                       );

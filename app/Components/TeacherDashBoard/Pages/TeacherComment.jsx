@@ -85,7 +85,7 @@ const TeacherComments = () => {
     <Layout>
       {/* Desktop View */}
       <div className="hidden lg:block bg-[#F7F8FA] min-h-screen overflow-hidden">
-        <div className="fixed top-0 z-30 flex items-center justify-between bg-white px-6 py-4 w-[85%]">
+        <div className="fixed top-0 z-30 flex items-center justify-between bg-white px-6 py-4 w-[80%] xl:w-[85%]">
           <h1 className="text-2xl font-bold text-[#01427A]">
             Teacher's Comments
           </h1>
@@ -98,7 +98,7 @@ const TeacherComments = () => {
         </div>
         <div className="pt-22 p-2">
           <div
-            className="bg-white rounded-lg shadow p-4 fixed w-[64%]"
+            className="bg-white rounded-lg shadow p-4 xl:fixed w-full xl:w-[64%]"
             style={{ height: "90vh", display: "flex", flexDirection: "column" }}
           >
             {comments.length === 0 ? (
@@ -108,7 +108,7 @@ const TeacherComments = () => {
             ) : (
               <>
                 <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column' }}>
-                  <div className="overflow-y-auto no-scrollbar fixed w-[62%]" style={{ flex: 1, minHeight: 0 }}>
+                  <div className="overflow-y-auto no-scrollbar xl:fixed w-full xl:w-[62%]" style={{ flex: 1, minHeight: 0 }}>
                     <table className="w-full border-collapse">
                       <thead className="sticky top-0 bg-white z-10">
                         <tr className="bg-[#6B90B5] text-white">
