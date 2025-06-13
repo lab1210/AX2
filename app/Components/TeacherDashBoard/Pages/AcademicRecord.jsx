@@ -115,7 +115,7 @@ const AcademicRecord = () => {
               <input
                 type="text"
                 placeholder="Search student name"
-                className="border border-gray-300 rounded-full px-6 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="border border-gray-100 rounded-full px-6 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
               <span className="absolute right-3 top-3 text-gray-400">
                 <Search className="w-5 h-5" />
@@ -180,7 +180,7 @@ const AcademicRecord = () => {
                           <label className="block text-sm font-medium mb-1">
                             Select Year:
                           </label>
-                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                          <select className="border border-gray-100 rounded-md px-4 py-3 max-w-md bg-gray-200">
                             <option>2023</option>
                             <option>2024</option>
                           </select>
@@ -189,7 +189,7 @@ const AcademicRecord = () => {
                           <label className="block text-sm font-medium mb-1">
                             Select Term:
                           </label>
-                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                          <select className="border border-gray-100 rounded-md px-4 py-3 max-w-md bg-gray-200">
                             <option>1st Term</option>
                             <option>2nd Term</option>
                             <option>3rd Term</option>
@@ -199,7 +199,7 @@ const AcademicRecord = () => {
                           <label className="block text-sm font-medium mb-1">
                             Select Class ID:
                           </label>
-                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                          <select className="border border-gray-100 rounded-md px-4 py-3 max-w-md bg-gray-200">
                             <option>JSS1</option>
                             <option>JSS2</option>
                             <option>JSS3</option>
@@ -209,7 +209,7 @@ const AcademicRecord = () => {
                           <label className="block text-sm font-medium mb-1">
                             Select Subject ID:
                           </label>
-                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                          <select className="border border-gray-100 rounded-md px-4 py-3 max-w-md bg-gray-200">
                             <option>Maths</option>
                             <option>English</option>
                             <option>Science</option>
@@ -219,7 +219,7 @@ const AcademicRecord = () => {
                           <label className="block text-sm font-medium mb-1">
                             Select Category:
                           </label>
-                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                          <select className="border border-gray-100 rounded-md px-4 py-3 max-w-md bg-gray-200">
                             <option>Test</option>
                             <option>Assignment</option>
                           </select>
@@ -228,7 +228,7 @@ const AcademicRecord = () => {
                           <label className="block text-sm font-medium mb-1">
                             Select Instances:
                           </label>
-                          <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                          <select className="border border-gray-100 rounded-md px-4 py-3 max-w-md bg-gray-200">
                             <option>1-50</option>
                             <option>51-100</option>
                           </select>
@@ -244,19 +244,19 @@ const AcademicRecord = () => {
                       <table className="w-full border-collapse">
                         <thead>
                           <tr className="bg-[#6B90B5] text-white">
-                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                            <th className="border-b border-gray-100 px-4 py-3 text-center">
                               S/N
                             </th>
-                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                            <th className="border-b border-gray-100 px-4 py-3 text-center">
                               Student Name
                             </th>
-                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                            <th className="border-b border-gray-100 px-4 py-3 text-center">
                               Student ID
                             </th>
-                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                            <th className="border-b border-gray-100 px-4 py-3 text-center">
                               Score
                             </th>
-                            <th className="border-b border-gray-300 px-4 py-3 text-left">
+                            <th className="border-b border-gray-100 px-4 py-3 text-left">
                               Edit
                             </th>
                           </tr>
@@ -266,16 +266,16 @@ const AcademicRecord = () => {
                             const index = (currentPage - 1) * itemsPerPage + idx;
                             return (
                               <tr key={index}>
-                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                <td className="border-b border-gray-100 px-4 py-3 text-center">
                                   {index + 1}
                                 </td>
-                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                <td className="border-b border-gray-100 px-4 py-3 text-center">
                                   {student.name}
                                 </td>
-                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                <td className="border-b border-gray-100 px-4 py-3 text-center">
                                   {student.id}
                                 </td>
-                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                <td className="border-b border-gray-100 px-4 py-3 text-center">
                                   {editableRow === index ? (
                                     <input
                                       type="number"
@@ -283,13 +283,13 @@ const AcademicRecord = () => {
                                       onChange={(e) =>
                                         setEditedScore(e.target.value)
                                       }
-                                      className="border-b border-gray-300 rounded px-2 py-1 w-16 text-center"
+                                      className="border-b border-gray-100 rounded px-2 py-1 w-16 text-center"
                                     />
                                   ) : (
                                     student.score
                                   )}
                                 </td>
-                                <td className="border-b border-gray-300 px-4 py-3 text-center cursor-pointer">
+                                <td className="border-b border-gray-100 px-4 py-3 text-center cursor-pointer">
                                   {editableRow === index ? (
                                     <Check
                                       className="text-green-500 w-5 h-5"
@@ -398,7 +398,7 @@ const AcademicRecord = () => {
                             <label className="block text-sm font-medium mb-1">
                               Select Year:
                             </label>
-                            <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                            <select className="border border-gray-100 rounded-md px-4 py-3 max-w-md bg-gray-200">
                               <option>2023</option>
                               <option>2024</option>
                             </select>
@@ -407,7 +407,7 @@ const AcademicRecord = () => {
                             <label className="block text-sm font-medium mb-1">
                               Select Term:
                             </label>
-                            <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                            <select className="border border-gray-100 rounded-md px-4 py-3 max-w-md bg-gray-200">
                               <option>1st Term</option>
                               <option>2nd Term</option>
                               <option>3rd Term</option>
@@ -417,7 +417,7 @@ const AcademicRecord = () => {
                             <label className="block text-sm font-medium mb-1">
                               Select Class ID:
                             </label>
-                            <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                            <select className="border border-gray-100 rounded-md px-4 py-3 max-w-md bg-gray-200">
                               <option>JSS1</option>
                               <option>JSS2</option>
                               <option>JSS3</option>
@@ -427,7 +427,7 @@ const AcademicRecord = () => {
                             <label className="block text-sm font-medium mb-1">
                               Select Subject ID:
                             </label>
-                            <select className="border border-gray-300 rounded-md px-4 py-3 max-w-md bg-gray-200">
+                            <select className="border border-gray-100 rounded-md px-4 py-3 max-w-md bg-gray-200">
                               <option>Maths</option>
                               <option>English</option>
                               <option>Science</option>
@@ -456,19 +456,19 @@ const AcademicRecord = () => {
                       <table className="w-full border-collapse">
                         <thead>
                           <tr className="bg-[#6B90B5] text-white">
-                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                            <th className="border-b border-gray-100 px-4 py-3 text-center">
                               S/N
                             </th>
-                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                            <th className="border-b border-gray-100 px-4 py-3 text-center">
                               Student Name
                             </th>
-                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                            <th className="border-b border-gray-100 px-4 py-3 text-center">
                               Student ID
                             </th>
-                            <th className="border-b border-gray-300 px-4 py-3 text-center">
+                            <th className="border-b border-gray-100 px-4 py-3 text-center">
                               Score
                             </th>
-                            <th className="border-b border-gray-300 px-4 py-3 text-left">
+                            <th className="border-b border-gray-100 px-4 py-3 text-left">
                               Edit
                             </th>
                           </tr>
@@ -478,16 +478,16 @@ const AcademicRecord = () => {
                             const index = (currentPage - 1) * itemsPerPage + idx;
                             return (
                               <tr key={index}>
-                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                <td className="border-b border-gray-100 px-4 py-3 text-center">
                                   {index + 1}
                                 </td>
-                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                <td className="border-b border-gray-100 px-4 py-3 text-center">
                                   {student.name}
                                 </td>
-                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                <td className="border-b border-gray-100 px-4 py-3 text-center">
                                   {student.id}
                                 </td>
-                                <td className="border-b border-gray-300 px-4 py-3 text-center">
+                                <td className="border-b border-gray-100 px-4 py-3 text-center">
                                   {editableRow === index ? (
                                     <input
                                       type="number"
@@ -495,13 +495,13 @@ const AcademicRecord = () => {
                                       onChange={(e) =>
                                         setEditedScore(e.target.value)
                                       }
-                                      className="border-b border-gray-300 rounded px-2 py-1 w-16 text-center"
+                                      className="border-b border-gray-100 rounded px-2 py-1 w-16 text-center"
                                     />
                                   ) : (
                                     student.score
                                   )}
                                 </td>
-                                <td className="border-b border-gray-300 px-4 py-3 text-center cursor-pointer">
+                                <td className="border-b border-gray-100 px-4 py-3 text-center cursor-pointer">
                                   {editableRow === index ? (
                                     <Check
                                       className="text-green-500 w-5 h-5"
@@ -583,7 +583,7 @@ const AcademicRecord = () => {
                     className="text-gray-500 hover:text-gray-700 text-2xl"
                     onClick={() => {
                       setIsAnimating(false);
-                      setTimeout(() => setIsModalOpen(false), 300);
+                      setTimeout(() => setIsModalOpen(false), 100);
                     }}
                   >
                     ✕
