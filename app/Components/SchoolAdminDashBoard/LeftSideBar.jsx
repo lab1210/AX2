@@ -44,7 +44,7 @@ const SchoolAdminLeft = () => {
     {
       Name: "Time Table Management",
       icon: <MdOutlineDashboard size={20} />,
-      Link: "#",
+      Link: "/School-Admin/Time-Table-Management",
     },
     {
       Name: "Notification",

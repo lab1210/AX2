@@ -43,7 +43,7 @@ const Results = () => {
         </div>
 
         {/* Content section – scrollable vertically */}
-        <div className="mt-2 flex-1 overflow-y-auto min-h-0">
+        <div className="mt-2 flex-1 overflow-y-auto no-scrollbar min-h-0">
           {activeTab === "Result Setting" && <ResultSettings />}
           {activeTab === "Grading & Score Computation" && <GradingandScore />}
           {activeTab === "View Student's Result" && <ViewStudentResult />}

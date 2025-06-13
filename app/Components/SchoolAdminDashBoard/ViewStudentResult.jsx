@@ -3,8 +3,10 @@ import React, { useEffect, useState } from "react";
 import { getAcademicYears, getClass, getTerms } from "@/Service/schoolConfig";
 import Dropdown from "./DropDown";
 import { getStudents } from "@/Service/studentService";
-import { RiErrorWarningFill } from "react-icons/ri";
+import ResultSheetImageDesign from "./ResultSheet";
 import { MdInfo } from "react-icons/md";
+import { useRef } from "react";
+
 const ViewStudentResult = () => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
@@ -14,6 +16,7 @@ const ViewStudentResult = () => {
   const [classYear, setClassYear] = useState([]);
   const [students, setStudents] = useState([]);
   const [generate, setGenerate] = useState(false);
+  const resultRef = useRef(null);
 
   const [formData, setFormData] = useState({
     year: "",
@@ -21,6 +24,7 @@ const ViewStudentResult = () => {
     class: "",
     student: "",
   });
+
   useEffect(() => {
     const fetchYears = async () => {
       const { data, error } = await getAcademicYears();
@@ -162,9 +166,20 @@ const ViewStudentResult = () => {
             </div>
           </div>
         </div>
-        <hr className="text-gray-100 mt-10 mb-10" />
+        <hr className={`text-gray-100 ${!generate ? "mt-10 mb-10" : ""}`} />
+        {generate && (
+          <>
+            <div className="flex-shrink-0">
+              <p className="font-semibold flex justify-center p-3 text-[#333333]">
+                Generated Result
+              </p>
+            </div>
+          </>
+        )}
         {generate ? (
-          <p>info</p>
+          <div ref={resultRef}>
+            <ResultSheetImageDesign />
+          </div>
         ) : (
           <div className="flex flex-col items-center justify-center mx-10 border border-[#9B9A9A] min-h-52 rounded">
             <div>
