@@ -8,6 +8,8 @@ const GlobalConstraint = ({ itemsperpage }) => {
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [activeTab, setActiveTab] = useState("Break");
   const [currentPage, setCurrentPage] = useState(1);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedDelete, setselectedDelete] = useState(null);
 
   const [formData, setFormData] = useState({
     days: "",
@@ -136,6 +138,16 @@ const GlobalConstraint = ({ itemsperpage }) => {
       : "Not Found";
   };
 
+  const openDeleteModal = (school) => {
+    setselectedDelete(school);
+    setDeleteModalVisible(true);
+  };
+
+  // Function to close delete modal
+  const closeDeleteModal = () => {
+    setselectedDelete(null);
+    setDeleteModalVisible(false);
+  };
   return (
     <div>
       {message && (
@@ -149,6 +161,45 @@ const GlobalConstraint = ({ itemsperpage }) => {
           {message}
         </div>
       )}
+
+      {deleteModalVisible && selectedDelete && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
+            <p className="font-bold text-center text-lg">
+              Delete Teacher Unavailability
+            </p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure want to delete
+                <span className="text-base font-bold ml-1 mr-1 text-[#858383]">
+                  ({getPeriodRange(selectedDelete.id)})
+                </span>
+                for
+                <span className="text-base font-bold ml-1 mr-1 text-[#858383]">
+                  {selectedDelete.days}
+                </span>
+                ?
+              </p>
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+              <button className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4">
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <form className="mb-3 flex-shrink-0">
         <div className="flex pt-3 pl-6 pr-6  justify-between mb-2 ">
           <p className="font-bold text-[#07508F]">Set Global Constraint</p>
@@ -254,6 +305,7 @@ const GlobalConstraint = ({ itemsperpage }) => {
                     <td className="p-2 text-center">
                       <div className="flex items-center justify-center">
                         <FiTrash2
+                          onClick={() => openDeleteModal(item)}
                           className="text-[#F94144] cursor-pointer"
                           size={15}
                         />
