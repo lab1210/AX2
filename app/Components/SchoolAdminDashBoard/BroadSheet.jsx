@@ -1,5 +1,5 @@
-import React from "react";
-const students = Array(10).fill({
+import React, { useState } from "react";
+const students = Array(20).fill({
   name: "Babalola Ifeoluwa",
   subjects: {
     Maths: 70,
@@ -16,6 +16,22 @@ const students = Array(10).fill({
   comment: "",
 });
 const BroadSheet = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
+
+  const totalPages = Math.ceil(students.length / itemsPerPage);
+  const paginatedStudents = students.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+  const handlePrevious = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNext = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
   return (
     <div className="overflow-x-auto w-full">
       <table className="w-max min-w-full border border-[#01427A]/15 text-sm">
@@ -51,7 +67,7 @@ const BroadSheet = () => {
           </tr>
         </thead>
         <tbody className="text-sm">
-          {students.map((student, idx) => (
+          {paginatedStudents.map((student, idx) => (
             <tr key={idx} className="text-center font-medium">
               <td
                 title={student.name}
@@ -101,6 +117,45 @@ const BroadSheet = () => {
           ))}
         </tbody>
       </table>
+      <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
+        <button
+          onClick={handlePrevious}
+          disabled={currentPage === 1}
+          className={`px-2 py-1  bg-[#E6ECF2] border ${
+            currentPage === 1
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-[#EDF0F3]"
+          }`}
+        >
+          &lt;
+        </button>
+
+        {Array.from({ length: totalPages }, (_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentPage(index + 1)}
+            className={`px-2 py-1   text-xs ${
+              currentPage === index + 1
+                ? "bg-[#07508F] text-white"
+                : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+            }`}
+          >
+            {index + 1}
+          </button>
+        ))}
+
+        <button
+          onClick={handleNext}
+          disabled={currentPage === totalPages}
+          className={`px-2 py-1  border bg-[#E6ECF2] ${
+            currentPage === totalPages
+              ? "opacity-50 cursor-not-allowed"
+              : "hover:bg-[#EDF0F3]"
+          }`}
+        >
+          &gt;
+        </button>
+      </div>
     </div>
   );
 };
