@@ -231,7 +231,7 @@ const StudentToSubject = () => {
                 </p>
                 <button
                   type="submit"
-                  className="bg-[#07508F] text-white px-6 py-2 rounded font-semibold hover:opacity-90"
+                  className="bg-[#07508F] text-white px-6 py-1 rounded font-semibold hover:opacity-90"
                 >
                   {editSubjectAssignmentVisible ? "Save" : "Assign"}
                 </button>
@@ -318,7 +318,7 @@ const StudentToSubject = () => {
                     </tr>
                   ) : (
                     paginatedData.map((item, idx) => (
-                      <tr key={idx} className="border-b">
+                      <tr key={idx} className="border-b border-gray-100">
                         <td className="p-2">{item.Student}</td>
                         <td className="p-2">{item.Subject.join(", ")}</td>
                         <td className="p-2">
