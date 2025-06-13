@@ -27,7 +27,7 @@ const Dropdown = ({ label = "Options", items = [] }) => {
         </MenuButton>
       </div>
 
-      <MenuItems className="absolute right-0 bottom-10 z-100 mt-2 w-full overflow-y-auto max-h-18 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+      <MenuItems className="absolute right-0  z-100 mt-2 w-full overflow-y-auto max-h-25 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
         <div className="py-1">
           {items.map((item, index) => (
             <MenuItem key={index}>

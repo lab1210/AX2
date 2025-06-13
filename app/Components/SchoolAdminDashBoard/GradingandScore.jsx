@@ -25,13 +25,15 @@ const GradingandScore = () => {
   const [currentPageforgrade, setCurrentPageforgrade] = useState(1);
   const [currentPageforterm, setCurrentPageforterm] = useState(1);
   const itemsPerPage = 5;
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [classYear, setClassYear] = useState([]);
   const [term, setTerm] = useState([]);
   const [departmentList, setDepartmentList] = useState([]);
   const [deleteModalVisibleforgrade, setDeleteModalVisibleforgrade] =
     useState(false);
   const [selectedGradeDelete, setselectedGradeDelete] = useState(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedWeightDelete, setselectedWeightDelete] = useState(null);
+
   const [Weight, setWeight] = useState({});
   const [originalWeights, setOriginalWeights] = useState({});
 
@@ -238,6 +240,16 @@ const GradingandScore = () => {
     setDeleteModalVisibleforgrade(false);
   };
 
+  const openDeleteModalforweigh = (school) => {
+    setselectedWeightDelete(school);
+    setDeleteModalVisible(true);
+  };
+
+  // Function to close delete modal
+  const closeDeleteModalforweigh = () => {
+    setselectedWeightDelete(null);
+    setDeleteModalVisible(false);
+  };
   const handleDelete = async () => {
     if (selectedGradeDelete?.id) {
       try {
