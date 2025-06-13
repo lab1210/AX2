@@ -64,9 +64,9 @@ const TeachingProgress = () => {
   const progress = teachingProgressData[selectedSubject];
 
   return (
-    <div className="w-full bg-white rounded-lg shadow p-2 overflow-hidden scrollbar-hidden h-[48vh]">
+    <div className="w-full bg-white rounded-lg shadow p-2 overflow-hidden scrollbar-hidden h-[62vh] xl:h-[48vh]">
       <div className="flex flex-col mb-4">
-        <h3 className="text-lg font-semibold">Teaching Progress in</h3>
+        <h3 className="text-md xl:text-lg font-semibold">Teaching Progress in</h3>
         <select
           value={selectedSubject}
           onChange={handleSubjectChange}
@@ -80,7 +80,7 @@ const TeachingProgress = () => {
         </select>
       </div>
       {/* Scrollable Section for All Classes */}
-      <div className="space-y-4 overflow-y-scroll no-scrollbar max-h-96">
+      <div className="space-y-4 overflow-y-scroll no-scrollbar max-h-[50vh]">
         {progress.map((p) => (
           <div
             key={p.className}

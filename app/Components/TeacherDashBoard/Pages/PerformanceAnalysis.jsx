@@ -76,7 +76,7 @@ const PerformanceAnalysis = () => {
   const renderHeader = () => {
     if (activeTab === "Subject Teacher") {
       return (
-        <div className="fixed top-0 z-30 flex items-center justify-between mb-6 bg-white p-4 w-[85%]">
+        <div className="fixed top-0 z-30 flex items-center justify-between mb-6 bg-white p-2 xl:p-4 w-[80%] xl:w-[85%]">
           <h1 className="text-lg xl:text-2xl font-bold">
             Performance Analysis
           </h1>
@@ -118,7 +118,7 @@ const PerformanceAnalysis = () => {
     }
     if (activeTab === "Class Teacher") {
       return (
-        <div className="fixed right-0 z-30 flex items-center justify-between mb-6 bg-white p-4 w-[85%]">
+        <div className="fixed right-0 z-30 flex items-center justify-between mb-6 bg-white p-2 xl:p-4 w-[80%] xl:w-[85%]">
           <h1 className="text-lg xl:text-2xl font-bold">
             Performance Analysis
           </h1>
@@ -227,14 +227,16 @@ const PerformanceAnalysis = () => {
   return (
     <Layout>
       <div className="bg-[#F7F8FA] min-h-screen">
+        {/* <div className="w-[5%] xl:w-[85%]"> */}
         {renderHeader()}
+        {/* </div> */}
         <div className="pt-20">
           {activeTab === "Subject Teacher" && (
             <div>
               {/* Current Content */}
               <div className="flex flex-row space-x-3 w-full mb-3 p-3">
                 {/* Subject Statistics */}
-                <div className="w-[65%] bg-white p-3 shadow rounded-md h-[50%]">
+                <div className="w-[55%] xl:w-[65%] bg-white p-3 shadow rounded-md h-[50%]">
                   {/* Tabs */}
                   <div className="flex space-x-6 mb-6">
                     <button
@@ -324,12 +326,12 @@ const PerformanceAnalysis = () => {
                   </div>
                 </div>
                 {/* Score Distribution */}
-                <div className="bg-white rounded-lg shadow p-4 w-[35%] flex">
-                  <div className="w-[60%]">
+                <div className="bg-white rounded-lg shadow p-4 w-[45%] xl:w-[35%] flex">
+                  <div className="w-[70%] xl:w-[60%] h-[20vh] xl:h-[25vh] ">
                     <h3 className="text-lg font-semibold mb-4">
                       Score Distribution
                     </h3>
-                    <ResponsiveContainer width="100%" height={150}>
+                    <ResponsiveContainer width="100%" height={150} className="lg:h-[200px] xl:h-[250px]">
                       <PieChart>
                         <Pie
                           data={scoreDistribution}
@@ -353,7 +355,7 @@ const PerformanceAnalysis = () => {
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="w-[40%] space-y-3 flex flex-col justify-center">
+                  <div className="w-[60%] xl:w-[40%] space-y-3 flex flex-col justify-center">
                     {scoreDistribution.map((entry, index) => (
                       <div key={index} className="flex items-center space-x-2">
                         <div
@@ -379,7 +381,7 @@ const PerformanceAnalysis = () => {
               </div>
 
               {/* Charts Section */}
-              <div className="grid grid-cols-[60%_40%] space-x-3 p-3">
+              <div className="grid grid-cols-[60%_40%] space-x-2 xl:space-x-3 p-1 xl:p-3">
                 {/* Left Column */}
                 <div className="space-y-6">
                   {/* Performance vs Attendance */}
@@ -588,19 +590,20 @@ const PerformanceAnalysis = () => {
                                   justifyContent: "center",
                                   alignItems: "center",
                                   gap: 5,
+                                  // padding: -5,
                                 }}
                               >
                                 <div
                                   style={{
-                                    width: 16,
-                                    height: 16,
+                                    width: 12,
+                                    height: 12,
                                     borderRadius: 50,
                                     backgroundColor: entry.color,
                                   }}
                                 ></div>
                                 <div
                                   style={{
-                                    fontSize: "16px",
+                                    fontSize: "12px",
                                     fontWeight: "bold",
                                     display: "flex",
                                     alignItems: "center",
@@ -610,6 +613,7 @@ const PerformanceAnalysis = () => {
                                 </div>
                                 <div
                                   style={{
+                                    fontSize: "12px",
                                     fontWeight: "bold",
                                     color: "#777474",
                                     display: "flex",
@@ -709,7 +713,7 @@ const PerformanceAnalysis = () => {
             <div>
               {/* Quick Stats Section */}
               <div className="flex flex-row space-x-3 w-full mb-3 p-3">
-                <div className="w-[65%] bg-white p-3 shadow rounded-md h-[50%]">
+                <div className="w-[55%] xl:w-[65%] bg-white p-3 shadow rounded-md h-[50%]">
                   {/* Tabs */}
                   <div className="flex space-x-6 mb-6">
                     <button
@@ -736,7 +740,7 @@ const PerformanceAnalysis = () => {
                   <h2 className="mb-2 text-xl font-semibold">
                     Subject Statistics
                   </h2>
-                  <div className="grid grid-cols-3 gap-6 mb-6 rounded-md items-center">
+                  <div className="grid grid-cols-2 xl:grid-cols-3 gap-6 mb-6 rounded-md items-center">
                     {/* First Position */}
                     <div className="bg-white rounded-lg shadow p-4 border border-gray-400">
                       <div className="flex flex-row items-center">
@@ -851,7 +855,7 @@ const PerformanceAnalysis = () => {
                   </div>
                 </div>
                 {/* Score Distribution */}
-                <div className="bg-white rounded-lg shadow p-4 w-[35%] flex h-[30vh]">
+                <div className="bg-white rounded-lg shadow p-4 w-[45%] xl:w-[35%] flex h-[45vh] xl:h-[30vh]">
                   <div className="w-[60%]">
                     <h3 className="text-lg font-semibold mb-4">
                       Percentage Distribution
@@ -953,7 +957,7 @@ const PerformanceAnalysis = () => {
                     </ResponsiveContainer>
                   </div>
                   {/* Best in All Subjects */}
-                  <div className="bg-white rounded-lg shadow p-4 mt-2 h-[30vh]">
+                  <div className="bg-white rounded-lg shadow p-4 mt-2 h-[40vh] xl:h-[30vh]">
                     <div className="flex justify-between items-start">
                       <h3 className="text-lg font-semibold">
                         Best in all subjects
@@ -1067,7 +1071,7 @@ const PerformanceAnalysis = () => {
                         cx="50%"
                         cy="50%"
                         innerRadius={0}
-                        outerRadius={150}
+                        outerRadius={120}
                         paddingAngle={2}
                         startAngle={90}
                         endAngle={450}
@@ -1123,7 +1127,7 @@ const PerformanceAnalysis = () => {
           {activeTab === "Class Teacher" && schoolType === "Snr Sch" && (
             <div>
               <div className="grid grid-cols-2 gap-4 p-4">
-                <div className="bg-white rounded-lg shadow p-4 h-[62vh]">
+                <div className="bg-white rounded-lg shadow p-4 h-[90vh] xl:h-[62vh]">
                   <div className="flex space-x-6 mb-6 border-b border-gray-200">
                     <button
                       className={`pb-2 text-md font-medium ${
@@ -1196,9 +1200,9 @@ const PerformanceAnalysis = () => {
                 </div>
 
                 <div className="flex flex-col space-y-6">
-                  <div className="bg-white rounded-lg shadow p-4 h-[25vh]">
+                  <div className="bg-white rounded-lg shadow p-4 h-[50vh] xl:h-[25vh]">
                     <h3 className="text-lg font-semibold mb-4">Quick Stat</h3>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
                       {/* Stat Card 1 */}
                       <div className="flex flex-row items-center justify-center border border-gray-300 rounded-lg p-4">
                         <div className="flex flex-col mb-2">
@@ -1301,7 +1305,7 @@ const PerformanceAnalysis = () => {
                   <h3 className="text-lg font-semibold mb-4">
                     Grade Distribution
                   </h3>
-                  <ResponsiveContainer width="100%" height={200}>
+                  <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart data={gradeDistribution}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis

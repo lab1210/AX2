@@ -78,7 +78,7 @@ export default function TeacherDashboard() {
       <div className="flex h-screen overflow-hidden">
         <div className="bg-[#F7F8FA] w-full">
           <div className="flex-1 flex flex-col h-screen">
-            <div className="flex items-center justify-between bg-white px-6 py-4 fixed w-[85%]">
+            <div className="flex items-center justify-between bg-white px-6 py-4 fixed w-[80%] xl:w-[85%] z-50">
               <h1 className="text-3xl font-bold">Dashboard</h1>
               <div className="flex items-center">
                 <button className="relative mr-4">
@@ -100,7 +100,7 @@ export default function TeacherDashboard() {
             </div>
 
             {/* Main Content */}
-            <div className="flex flex-1 p-6 gap-4 overflow-hidden mt-17 fixed w-[85%]">
+            <div className="flex flex-1 p-2 xl:p-6 gap-4 overflow-auto xl:overflow-hidden mt-20 xl:mt-17 absolute xl:fixed w-[80%] xl:w-[85%]">
               <div className="flex-1 overflow-hidden">
                 <div className="w-full bg-[#004080] rounded-lg shadow flex flex-row justify-between items-center text-white mb-6">
                   <div className="p-2">
@@ -142,7 +142,7 @@ export default function TeacherDashboard() {
 
                 <div className="flex justify-between gap-3">
                   {/* Attendance Chart */}
-                  <div className="flex flex-col mb-4 w-[70%] bg-white rounded-lg shadow-lg p-4">
+                  <div className="flex flex-col mb-4 w-[70%] xl:w-[70%] bg-white rounded-lg shadow-lg p-2 xl:p-4">
                     <div className="flex items-center justify-between mb-4">
                       <h3 className="text-lg font-semibold">Attendance</h3>
                       <div className="flex items-center space-x-4">
@@ -165,7 +165,7 @@ export default function TeacherDashboard() {
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={attendanceData}>
                         <XAxis dataKey="day" />
-                        <YAxis />
+                        {/* <YAxis className=""/> */}
                         <Tooltip />
                         <Bar
                           dataKey="present"
@@ -194,17 +194,17 @@ export default function TeacherDashboard() {
                   </div>
 
                   {/* Teaching Progress */}
-                  <div className="w-[30%]">
+                  <div className="w-[35%] xl:w-[30%]">
                     <TeachingProgress />
                   </div>
                 </div>
               </div>
 
               {/* Right Sidebar */}
-              <div className="w-[27%] space-y-3 sticky top-6 overflow-y-auto h-screen no-scrollbar">
+              <div className="w-[32%] xl:w-[27%] space-y-3 sticky top-0 xl:top-6 overflow-y-auto h-[115vh] no-scrollbar">
                 {/* Calendar */}
-                <div className="bg-white rounded-lg shadow-lg h-[40vh]">
-                  <LocalizationProvider dateAdapter={AdapterDayjs}>
+                <div className="bg-white rounded-lg shadow-lg h-[50vh] xl:h-[40vh]">
+                  <LocalizationProvider dateAdapter={AdapterDayjs} className="h-[30vh]">
                     <DemoContainer
                       components={["DateCalendar", "DateCalendar"]}
                     >
@@ -215,7 +215,7 @@ export default function TeacherDashboard() {
                   </LocalizationProvider>
                 </div>
                 {/* Events */}
-                <div className="bg-white rounded-lg shadow-lg p-4 h-[46vh] overflow-y-auto no-scrollbar">
+                <div className="bg-white rounded-lg shadow-lg p-4 h-[75vh] xl:h-[46vh] overflow-y-auto no-scrollbar">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Events</h3>
                     <button className="text-sm text-blue-600">View All</button>

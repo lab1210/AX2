@@ -108,7 +108,7 @@ const AcademicRecord = () => {
     <Layout>
       <div className="w-full flex flex-col bg-[#F7F8FA] min-h-screen">
         {/* Header Section */}
-        <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 mb-6 w-[85%]">
+        <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 mb-6 w-[80%] xl:w-[85%]">
           <h1 className="text-2xl font-bold">Academic Record</h1>
           <div className="flex items-center space-x-4">
             <div className="relative">
@@ -130,8 +130,8 @@ const AcademicRecord = () => {
           </div>
         </div>
 
-        <div className="flex flex-row gap-2 pt-19 w-[65%] h-screen fixed bg-[#F7F8FA]">
-          <div className="flex-1 p-4 w-full mx-auto">
+        <div className="flex flex-row gap-2 pt-19 w-[60%] xl:w-[65%] h-screen fixed bg-[#F7F8FA]">
+          <div className="flex-1 p-2 xl:p-4 w-full mx-auto">
             {activeTab === "ca" && (
               <div className="flex flex-col lg:flex-row gap-6">
                 <div className="flex-1">
@@ -175,7 +175,7 @@ const AcademicRecord = () => {
                           </button>
                         </div>
                       </div>
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                         <div className="flex flex-row max-w-md items-center space-x-2">
                           <label className="block text-sm font-medium mb-1">
                             Select Year:
@@ -392,7 +392,7 @@ const AcademicRecord = () => {
                         </div>
                       </div>
 
-                      <div className="flex flex-row justify-between">
+                      <div className="flex flex-col xl:flex-row justify-between space-y-2 ">
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-4">
                           <div className="flex flex-row max-w-md items-center space-x-2">
                             <label className="block text-sm font-medium mb-1">
@@ -434,7 +434,7 @@ const AcademicRecord = () => {
                             </select>
                           </div>
                         </div>
-                        <div className="flex flex-row max-w-md items-center justify-center space-x-2">
+                        <div className="flex flex-row max-w-md items-center xl:justify-center space-x-2">
                           <label className="block text-sm font-medium mb-1">
                             Score:
                           </label>
