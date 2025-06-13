@@ -49,7 +49,7 @@ const SchoolAdminLeft = () => {
     {
       Name: "Notification",
       icon: <MdOutlineDashboard size={20} />,
-      Link: "#",
+      Link: "/School-Admin/Notification",
     },
   ];
 
