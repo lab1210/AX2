@@ -148,7 +148,7 @@ export default function AttendancePage() {
           {/* Assembly Calendar */}
           <div className="bg-white rounded shadow p-6">
             <h2 className="text-center text-lg font-semibold text-gray-800 mb-4">
-              Assembly Attendance Summary
+              My Attendance Summary
             </h2>
             <div className="border border-gray-300 mb-4">
               <div className="flex justify-center items-center">

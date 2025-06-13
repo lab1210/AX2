@@ -41,7 +41,7 @@ const LeftSidebar = ({ setUser, user }) => {
     {
       Name: "Subject Registration",
       icon: <RiBookShelfLine />,
-      route: "/Student/Subject-Registration/Register",
+      route: "/Student/Subject-Registration/Confirm",
     },
     {
       Name: "Timetable",
