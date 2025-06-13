@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import Layout from "../../Studentlayout";
 import { getUserDetails } from "../../../Service/AuthService";
 import { MdOutlineCameraAlt } from "react-icons/md";
@@ -7,6 +7,28 @@ import { MdOutlineCameraAlt } from "react-icons/md";
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const fileInputRef = useRef(null);
+
+  const handleImageClick = () => {
+    fileInputRef.current.click();
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      // Create a local URL for the selected image
+      const imageUrl = URL.createObjectURL(file);
+
+      // Update the user state with the new image URL
+      setUser((prev) => ({
+        ...prev,
+        student: {
+          ...prev.student,
+          profile_picture_path: imageUrl,
+        },
+      }));
+    }
+  };
 
   // Example subjects
   const registeredSubjects = [
@@ -35,12 +57,15 @@ export default function ProfilePage() {
 
   return (
     <Layout>
-      {/* Desktop View (unchanged) */}
-      <div className="hidden lg:block">
+      {/* Desktop View */}
+      <div className="hidden lg:block xl:fixed xl:w-[64%]">
         <div className="min-h-screen bg-[#D9D9D9] rounded-lg p-4 md:p-8 flex flex-col space-y-6">
           <div className="bg-white flex items-center rounded-lg p-6 ">
             <div className="flex items-center gap-4 mb-6">
-              <div className="w-22 h-19 rounded-full overflow-hidden relative">
+              <div
+                className="w-22 h-19 rounded-full overflow-hidden relative cursor-pointer"
+                onClick={handleImageClick}
+              >
                 <img
                   src={
                     user.student.profile_picture_path === null
@@ -48,11 +73,18 @@ export default function ProfilePage() {
                       : user.student.profile_picture_path
                   }
                   alt="Avatar"
-                  className="object-cover w-full h-full  "
+                  className="object-cover w-full h-full"
                 />
-                <div className="absolute bottom-0 cursor-pointer bg-black/50 w-full">
+                <div className="absolute bottom-0 bg-black/50 w-full">
                   <MdOutlineCameraAlt className="ml-9 mb-1 mt-1" size={18} />
                 </div>
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  className="hidden"
+                  accept="image/*"
+                />
               </div>
               <h2 className="max-w-50 text-xl md:text-2xl font-bold text-gray-800">
                 {user?.student?.first_name + " " + user?.student?.last_name}
@@ -97,11 +129,13 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      {/* Mobile/Tablet View */}
+      {/* Mobile View */}
       <div className="block lg:hidden bg-[#D9D9D9] p-2">
-        {/* Profile Header */}
         <div className="bg-white rounded-md p-4 flex flex-col items-center mb-4">
-          <div className="w-24 h-24 rounded-full overflow-hidden mb-2">
+          <div
+            className="w-24 h-24 rounded-full overflow-hidden mb-2 relative cursor-pointer"
+            onClick={handleImageClick}
+          >
             <img
               src={
                 user.student.profile_picture_path === null
@@ -110,6 +144,16 @@ export default function ProfilePage() {
               }
               alt="Avatar"
               className="object-cover w-full h-full"
+            />
+            <div className="absolute bottom-0 bg-black/50 w-full">
+              <MdOutlineCameraAlt className="text-white mx-auto mb-1 mt-1" size={18} />
+            </div>
+            <input
+              type="file"
+              ref={fileInputRef}
+              onChange={handleImageChange}
+              className="hidden"
+              accept="image/*"
             />
           </div>
           <h2 className="text-xl font-bold text-gray-800 mb-1 text-center">
