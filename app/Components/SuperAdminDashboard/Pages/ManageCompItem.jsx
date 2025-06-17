@@ -105,19 +105,19 @@ const ManageCompItem = () => {
             <table className="min-w-full table-auto border-collapse bg-[#ffffff]">
               <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
                 <tr className="border-b-[#D0D0D0] border-b">
-                  <th className="p-3 text-left font-bold px-5 text-[#333333]">
+                  <th className="p-3 pl-10 text-left font-bold px-5 text-[#333333]">
                     School Name
                   </th>
-                  <th className="p-3 text-left font-bold px-5 text-[#333333]">
+                  <th className="p-3 text-center  font-bold px-5 text-[#333333]">
                     Tax Compliance
                   </th>
-                  <th className="p-3 text-left font-bold px-5 text-[#333333]">
+                  <th className="p-3 text-center  font-bold px-5 text-[#333333]">
                     Accredition Doc
                   </th>
-                  <th className="p-3 text-left font-bold px-5 text-[#333333]">
+                  <th className="p-3 text-center  font-bold px-5 text-[#333333]">
                     Proof of Reg.
                   </th>
-                  <th className="p-3 text-left font-bold px-5 text-[#333333]">
+                  <th className="p-3 text-center pr-10  font-bold px-5 text-[#333333]">
                     Uploaded on
                   </th>
                 </tr>
@@ -129,12 +129,12 @@ const ManageCompItem = () => {
                       key={index}
                       className="border-b-[#D0D0D0] border-b font-semibold text-xs cursor-pointer "
                     >
-                      <td className="p-3 px-5 text-[#333333]">
+                      <td className="p-3 px-5 pl-10 text-left text-[#333333]">
                         {item.school_name}
                       </td>
 
-                      <td className="p-3 px-5 font-normal ">
-                        <div className="flex items-center gap-2">
+                      <td className="p-3 px-5 font-normal text-center ">
+                        <div className="flex items-center justify-center gap-2">
                           <span
                             className={`${
                               item.tax_identification_number !== ""
@@ -162,8 +162,8 @@ const ManageCompItem = () => {
                         </div>
                       </td>
 
-                      <td className="p-3  px-5  font-normal">
-                        <div className="flex items-center gap-2">
+                      <td className="p-3  px-5  text-center  font-normal">
+                        <div className="flex items-center justify-center gap-2">
                           <span
                             className={`${
                               item.accreditation_certificates !== ""
@@ -191,7 +191,7 @@ const ManageCompItem = () => {
                         </div>
                       </td>
 
-                      <td className="font-normal p-3 px-5  flex items-center gap-2">
+                      <td className="font-normal p-3 px-5 text-center flex items-center gap-2">
                         <span
                           className={`${
                             item.proof_of_registration !== ""
@@ -218,7 +218,7 @@ const ManageCompItem = () => {
                         </span>
                       </td>
 
-                      <td className="p-3 px-5 text-[#333333]">
+                      <td className="p-3 px-5 text-[#333333] text-center pr-10">
                         {!item.uploaded_on ? "N/A" : item.uploaded_on}
                       </td>
                     </tr>

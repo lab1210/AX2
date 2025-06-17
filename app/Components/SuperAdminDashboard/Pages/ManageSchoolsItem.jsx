@@ -331,25 +331,26 @@ const ManageSchoolsItem = () => {
                 {error}
               </div>
             ) : (
-              <table className="min-w-full table-auto">
-                <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
+              <table className="min-w-full table-auto ">
+                <thead className="bg-[#E6EFF5]  lg:text-sm  sm:text-xs">
                   <tr className="border-b-[#D0D0D0] border-b">
-                    <th className="pt-3 pb-3 pl-12 text-left font-bold text-[#333333]">
+                    <th className="pt-3 pb-3 pl-10 text-left font-bold text-[#333333]">
                       School Name
                     </th>
-                    <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
+
+                    <th className="pt-3 pb-3 text-center font-bold text-[#333333]">
                       School Type
                     </th>
-                    <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
+                    <th className="pt-3 pb-3 text-center  font-bold text-[#333333]">
                       Short Sch Name
                     </th>
-                    <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
+                    <th className="pt-3 pb-3 text-center  font-bold text-[#333333]">
                       Registered By
                     </th>
-                    <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
+                    <th className="pt-3 pb-3 text-center  font-bold text-[#333333]">
                       Status
                     </th>
-                    <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
+                    <th className="pt-3 pb-3 text-center pr-10  font-bold text-[#333333]">
                       Modify
                     </th>
                   </tr>
@@ -359,24 +360,24 @@ const ManageSchoolsItem = () => {
                     schoolsData.map((item) => (
                       <tr
                         key={item.id}
-                        className="border-b-[#D0D0D0] border-b font-semibold text-xs cursor-pointer"
+                        className="border-b-[#D0D0D0] border-b font-semibold text-[0.85rem] cursor-pointer"
                         onClick={() => openDetailModal(item)}
                       >
-                        <td className="pt-3 pb-3 pl-12 text-[#333333]">
+                        <td className="pt-3 pb-3 pl-10  text-left text-[#333333]">
                           {item.school_name}
                         </td>
-                        <td className="pt-3 pb-3 text-[#333333]">
+                        <td className="pt-3 pb-3 text-center text-[#333333]">
                           {item.school_type}
                         </td>
-                        <td className="pt-3 pb-3 text-[#333333]">
+                        <td className="pt-3 pb-3 text-center text-[#333333]">
                           {item.short_name}
                         </td>
-                        <td className="pt-3 pb-3 text-[#333333]">
+                        <td className="pt-3 pb-3 text-center text-[#333333]">
                           {item.registered_by.surname +
                             " " +
                             item.registered_by.first_name}
                         </td>
-                        <td className="pt-3 pb-3 ">
+                        <td className="pt-3 pb-3 text-center ">
                           <span
                             className={`${
                               item.status
@@ -392,8 +393,8 @@ const ManageSchoolsItem = () => {
                             {item.status ? "Active" : "Inactive"}
                           </span>
                         </td>
-                        <td className="pt-3 pb-3 text-[#333333]">
-                          <div className="flex gap-4">
+                        <td className="pt-3 pb-3 text-[#333333] pr-10">
+                          <div className="flex items-center justify-center gap-4">
                             <Link
                               href={`/Super-Admin/Manage-Existing-Schools/Edit-School?adminId=${adminId}&schoolId=${item.id}`}
                               onClick={(e) => e.stopPropagation()}
