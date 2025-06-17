@@ -296,7 +296,7 @@ export default function ResultOverviewPage() {
             {/* Student Info */}
             <div className="flex flex-row justify-between gap-4 mb-2 text-sm">
               <div>
-                <div className="mb-2">
+                <div className="flex items-center justify-between mb-2">
                   <span className="font-nomral text-[16px]">
                     Student's Name:
                   </span>{" "}
@@ -304,23 +304,23 @@ export default function ResultOverviewPage() {
                     Toluwani Somade
                   </span>
                 </div>
-                <div>
+                <div className="flex items-center justify-between mb-2">
                   <span className="font-nomral text-[16px]">Class Year:</span>{" "}
-                  <span className="border-b border-gray-400 min-w-[80px] inline-block">
+                  <span className="border-b border-gray-400 min-w-[120px] inline-block">
                     SSS3
                   </span>
                 </div>
               </div>
               <div>
-                <div className="mb-2">
+                <div className="flex items-center justify-between mb-2">
                   <span className="font-nomral text-[16px]">Class Arm:</span>{" "}
-                  <span className="border-b border-gray-400 min-w-[80px] inline-block">
+                  <span className="border-b border-gray-400 min-w-[120px] inline-block">
                     Science
                   </span>
                 </div>
-                <div>
+                <div className="flex items-center justify-between mb-2">
                   <span className="font-nomral text-[16px]">Term:</span>{" "}
-                  <span className="border-b border-gray-400 min-w-[80px] inline-block">
+                  <span className="border-b border-gray-400 min-w-[120px] inline-block">
                     2nd Term
                   </span>
                 </div>
