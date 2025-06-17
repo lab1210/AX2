@@ -189,7 +189,11 @@ const AddUser = ({ onClose, onUserAdded }) => {
             name="first_name"
             value={formData.first_name}
             onChange={handleInputChange}
-            className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
+            className={`text-base  ${
+              formData.first_name !== ""
+                ? "border-[#0071E3]  border-2"
+                : "border-[#AEAEAE] border-[1.5px]"
+            }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
             placeholder="Enter First Name"
             required
           />
@@ -206,7 +210,11 @@ const AddUser = ({ onClose, onUserAdded }) => {
             name="surname"
             value={formData.surname}
             onChange={handleInputChange}
-            className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
+            className={`text-base  ${
+              formData.surname !== ""
+                ? "border-[#0071E3]  border-2"
+                : "border-[#AEAEAE] border-[1.5px]"
+            }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
             placeholder="Enter Surname"
             required
           />
@@ -223,7 +231,11 @@ const AddUser = ({ onClose, onUserAdded }) => {
             name="phone_number"
             value={formData.phone_number}
             onChange={handleInputChange}
-            className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
+            className={`text-base  ${
+              formData.phone_number !== ""
+                ? "border-[#0071E3]  border-2"
+                : "border-[#AEAEAE] border-[1.5px]"
+            }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
             placeholder="Enter Phone No"
             required
           />
@@ -241,7 +253,11 @@ const AddUser = ({ onClose, onUserAdded }) => {
             name="email"
             value={formData.email}
             onChange={handleInputChange}
-            className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
+            className={`text-base  ${
+              formData.email !== ""
+                ? "border-[#0071E3]  border-2"
+                : "border-[#AEAEAE] border-[1.5px]"
+            }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
             placeholder="Enter Email"
             required
           />
@@ -259,7 +275,11 @@ const AddUser = ({ onClose, onUserAdded }) => {
             name="password"
             value={formData.password}
             onChange={handleInputChange}
-            className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
+            className={`text-base  ${
+              formData.password !== ""
+                ? "border-[#0071E3]  border-2"
+                : "border-[#AEAEAE] border-[1.5px]"
+            }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
             placeholder="Enter Password"
             required
           />
@@ -277,7 +297,11 @@ const AddUser = ({ onClose, onUserAdded }) => {
             name="username"
             value={formData.username}
             onChange={handleInputChange}
-            className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
+            className={`text-base  ${
+              formData.username !== ""
+                ? "border-[#0071E3]  border-2"
+                : "border-[#AEAEAE] border-[1.5px]"
+            }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
             placeholder="Enter Username"
             required
           />

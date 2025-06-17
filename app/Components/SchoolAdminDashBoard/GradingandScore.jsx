@@ -692,7 +692,7 @@ const GradingandScore = () => {
           </div>
         </div>
       </div>
-      <div className="pb-5 pt-3 mt-5 bg-white  shadow-xl rounded-lg">
+      <div className="pb-5 pt-3 mt-5 bg-white rounded-lg">
         <div className="pt-3 pl-6 pr-6 mb-5">
           <p className="font-bold text-[#07508F]">Result Visibility</p>
         </div>
@@ -735,7 +735,7 @@ const GradingandScore = () => {
         </div>
       </div>
 
-      <div className="pb-5 pt-3 mt-5 bg-white  shadow-xl rounded-lg">
+      <div className="pb-5 pt-3 mt-5 bg-white   rounded-lg">
         <div className="pt-3 pl-6 pr-6 mb-5 flex justify-between items-center">
           <p className="font-bold text-[#07508F]">
             Score Entry and Computation

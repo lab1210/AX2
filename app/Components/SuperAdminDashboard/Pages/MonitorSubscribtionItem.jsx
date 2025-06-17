@@ -178,7 +178,7 @@ const MonitorSubscribtionItem = () => {
                 <p>Amount Per Student:</p>
                 <input
                   type="text"
-                  className="text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
+                  className="text-sm text-center pl-2 max-w-36 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
                   value={editAmountPerStudent}
                   onChange={(e) => setEditAmountPerStudent(e.target.value)}
                 />
@@ -187,7 +187,7 @@ const MonitorSubscribtionItem = () => {
                 <p className="text-[#01427A]">Amount Paid:</p>
                 <input
                   type="text"
-                  className="text-[#AEAEAE] text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
+                  className="text-[#AEAEAE] max-w-36 text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
                   value={editAmountPaid}
                   onChange={(e) => setEditAmountPaid(e.target.value)}
                 />
@@ -197,7 +197,7 @@ const MonitorSubscribtionItem = () => {
                 <p className="text-[#01427A]">Expired Date:</p>
                 <input
                   type="text"
-                  className="text-[#AEAEAE] text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
+                  className="text-[#AEAEAE] max-w-36 text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
                   value={editExpireDate}
                   onChange={(e) => setEditExpireDate(e.target.value)}
                 />
@@ -251,31 +251,31 @@ const MonitorSubscribtionItem = () => {
           <table className="min-w-full table-auto border-collapse">
             <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
               <tr className="border-b-[#D0D0D0] border-b">
-                <th className="pt-3 pb-3 px-5  text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 pl-10  text-left font-bold text-[#333333]">
                   School Name
                 </th>
-                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-center font-bold text-[#333333]">
                   No of Students
                 </th>
-                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-center font-bold text-[#333333]">
                   Amount per Student
                 </th>
-                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-center font-bold text-[#333333]">
                   Amount Expected
                 </th>
-                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-center font-bold text-[#333333]">
                   Amount Paid
                 </th>
-                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-center font-bold text-[#333333]">
                   Start Date
                 </th>
-                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-center font-bold text-[#333333]">
                   Expiring Date
                 </th>
-                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-center font-bold text-[#333333]">
                   Status
                 </th>
-                <th className="pt-3 pb-3 px-5 text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 text-center pr-10 font-bold text-[#333333]">
                   Edit
                 </th>
               </tr>
@@ -286,46 +286,50 @@ const MonitorSubscribtionItem = () => {
                   key={item.subscription_id}
                   className="border-b-[#D0D0D0] border-b font-semibold text-xs cursor-pointer "
                 >
-                  <td className="pt-3 pb-3 px-5 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 pl-10 text-left text-[#333333]">
                     {item.school_name}
                   </td>
-                  <td className="pt-3 pb-3 px-5 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
                     {item.live_number_students}
                   </td>
-                  <td className="pt-3 pb-3 px-5 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
                     {formatCurrency(item.amount_per_student)}
                   </td>
-                  <td className="pt-3 pb-3 px-5 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
                     {formatCurrency(item.live_expected_fee)}
                   </td>
-                  <td className="pt-3 pb-3 px-5 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
                     {formatCurrency(item.amount_paid)}
                   </td>
-                  <td className="pt-3 pb-3 px-5 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
                     {formatDate(item.active_date)}
                   </td>
-                  <td className="pt-3 pb-3 px-5 text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
                     {formatDate(item.expired_date)}
                   </td>
-                  <td className="pt-3 pb-3 px-5 flex items-center  gap-2">
-                    <span
-                      className={`${
-                        item.live_is_active
-                          ? " text-[#1BB66E] "
-                          : " text-[#F94144] "
-                      } font-bold `}
-                    >
-                      {item.live_is_active ? "Active" : "Inactive"}
-                    </span>
-                    <span
-                      className={`${
-                        item.live_is_active ? " bg-[#1BB66E]" : " bg-[#F94144]"
-                      } font-bold text-white text-center rounded-xs`}
-                    >
-                      {item.live_is_active ? <FaCheck /> : <IoClose />}
-                    </span>
+                  <td className="pt-3 pb-3 px-5 text-center ">
+                    <div className="flex items-center justify-center gap-2 ">
+                      <span
+                        className={`${
+                          item.live_is_active
+                            ? " text-[#1BB66E] "
+                            : " text-[#F94144] "
+                        } font-bold `}
+                      >
+                        {item.live_is_active ? "Active" : "Inactive"}
+                      </span>
+                      <span
+                        className={`${
+                          item.live_is_active
+                            ? " bg-[#1BB66E]"
+                            : " bg-[#F94144]"
+                        } font-bold text-white text-center rounded-xs`}
+                      >
+                        {item.live_is_active ? <FaCheck /> : <IoClose />}
+                      </span>
+                    </div>
                   </td>
-                  <td className="pt-3 pb-3 px-5  text-[#333333]">
+                  <td className="pt-3 pb-3 px-5 text-center  text-[#333333]">
                     <div className="flex gap-4">
                       <FiEdit3
                         className="text-[#80ADCB] cursor-pointer"

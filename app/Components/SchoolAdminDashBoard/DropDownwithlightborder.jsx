@@ -1,20 +1,22 @@
-import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { useState } from "react";
+import { Menu, MenuButton, MenuItem, MenuItems } from "@headlessui/react";
 import { HiOutlineChevronDown } from "react-icons/hi";
-const Dropdown = ({ label = "Options", items = [] }) => {
+
+const DropDownLight = ({ label = "Options", items = [] }) => {
   const [selected, setSelected] = useState(null);
 
   const handleSelect = (item) => {
     setSelected(item.label);
     if (item.onClick) item.onClick();
   };
+
   return (
-    <Menu as="div" className="relative inline-block text-left ">
+    <Menu as="div" className="relative inline-block text-left">
       <div>
         <MenuButton
-          className={`border-2 p-1.5 inline-flex w-full justify-between rounded-sm bg-white sm:text-xs lg:text-sm
+          className={` p-1.5 inline-flex w-full justify-between rounded-sm bg-white sm:text-xs lg:text-sm
             ${
-              selected ? "border-[#0071E3]" : "border-[#B6B6B6]"
+              selected ? "border-[#0071E3] border-2" : "border border-[#B6B6B6]"
             } text-[#808080]`}
         >
           {selected || label}
@@ -25,7 +27,7 @@ const Dropdown = ({ label = "Options", items = [] }) => {
         </MenuButton>
       </div>
 
-      <MenuItems className="absolute right-0 bottom-10  z-100 mt-2 w-full overflow-y-auto max-h-50 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
+      <MenuItems className="absolute right-0  z-100 mt-2 w-full overflow-y-auto max-h-25 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black/5 focus:outline-none">
         <div className="py-1">
           {items.map((item, index) => (
             <MenuItem key={index}>
@@ -46,4 +48,5 @@ const Dropdown = ({ label = "Options", items = [] }) => {
     </Menu>
   );
 };
-export default Dropdown;
+
+export default DropDownLight;
