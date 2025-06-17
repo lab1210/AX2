@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import Dropdown from "./DropDown";
+import Dropdown from "./DropDownwithlightborder";
 import { Country, State, City } from "country-state-city";
 import { LuUpload } from "react-icons/lu";
 const TeacherReg = () => {
@@ -95,7 +95,11 @@ const TeacherReg = () => {
                     firstName: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.firstName !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -114,7 +118,11 @@ const TeacherReg = () => {
                     middleName: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.middleName !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -133,7 +141,11 @@ const TeacherReg = () => {
                     lastName: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.lastName !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -153,7 +165,11 @@ const TeacherReg = () => {
                     },
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.user.username !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -173,7 +189,11 @@ const TeacherReg = () => {
                     },
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.user.email !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -193,7 +213,11 @@ const TeacherReg = () => {
                     },
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.user.password !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -209,7 +233,11 @@ const TeacherReg = () => {
                     date_of_birth: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.date_of_birth !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -245,7 +273,11 @@ const TeacherReg = () => {
                     date_of_hire: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.date_of_hire !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>

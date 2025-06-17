@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { Country, State, City } from "country-state-city";
 import React, { useEffect, useState } from "react";
 import { SchoolAdminRegisterStudent } from "@/Service/StudentRegService";
-import Dropdown from "./DropDown";
+import DropDownLight from "./DropDownwithlightborder";
 
 const StudentReg = () => {
   const [message, setMessage] = useState("");
@@ -180,7 +180,11 @@ const StudentReg = () => {
                     first_name: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.first_name !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -199,7 +203,11 @@ const StudentReg = () => {
                     middle_name: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.middle_name !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -218,7 +226,11 @@ const StudentReg = () => {
                     last_name: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.last_name !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -238,7 +250,11 @@ const StudentReg = () => {
                     },
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.user.username !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -258,7 +274,11 @@ const StudentReg = () => {
                     },
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.user.email !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -278,7 +298,11 @@ const StudentReg = () => {
                     },
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.user.password !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -296,13 +320,17 @@ const StudentReg = () => {
                     date_of_birth: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.date_of_birth !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">Gender:</label>
-              <Dropdown
+              <DropDownLight
                 label={formData.gender || "Select Gender"}
                 items={[
                   {
@@ -322,7 +350,7 @@ const StudentReg = () => {
           <div className="grid grid-cols-3 gap-x-6 gap-y-3 mt-3">
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">Address:</label>
-              <Dropdown
+              <DropDownLight
                 label={formData.country || "Select Country"}
                 items={countries.map((country) => ({
                   label: country.name,
@@ -337,7 +365,7 @@ const StudentReg = () => {
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#FFFFFF]">Address</label>
-              <Dropdown
+              <DropDownLight
                 label={formData.state || "Select State"}
                 items={states.map((state) => ({
                   label: state.name,
@@ -352,7 +380,7 @@ const StudentReg = () => {
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#FFFFFF]">Address</label>
-              <Dropdown
+              <DropDownLight
                 label={formData.city || "Select City"}
                 items={cities.map((city) => ({
                   label: city.name,
@@ -369,7 +397,7 @@ const StudentReg = () => {
         <div className=" pt-8 pl-6 pr-6 mb-2 ">
           <p className="font-bold text-[#07508F]">Admission Information</p>
         </div>
-        <div className="grid grid-cols-1 pl-6 pr-6 gap-y-3">
+        <div className="grid grid-cols-2 pl-6 pr-6 gap-3">
           <div className="flex flex-col gap-x-1">
             <label className="text-[0.88rem] text-[#5E6A72]">
               Admission Number:
@@ -385,7 +413,11 @@ const StudentReg = () => {
                   admission_number: value,
                 }));
               }}
-              className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+              className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                formData.admission_number !== ""
+                  ? "border-2 border-[#0071E3]"
+                  : "border border-[#B6B6B6]"
+              }`}
               required
             />
           </div>
@@ -403,7 +435,11 @@ const StudentReg = () => {
                   admission_date: value,
                 }));
               }}
-              className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+              className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                formData.admission_date !== ""
+                  ? "border-2 border-[#0071E3]"
+                  : "border border-[#B6B6B6]"
+              }`}
               required
             />
           </div>
@@ -446,7 +482,11 @@ const StudentReg = () => {
                     parent_first_name: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.parent_first_name !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -465,7 +505,11 @@ const StudentReg = () => {
                     parent_middle_name: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.parent_middle_name !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -484,7 +528,11 @@ const StudentReg = () => {
                     parent_last_name: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.parent_last_name !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -503,7 +551,11 @@ const StudentReg = () => {
                     parent_occupation: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.parent_occupation !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -522,7 +574,11 @@ const StudentReg = () => {
                     parent_email: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.parent_email !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -543,7 +599,11 @@ const StudentReg = () => {
                     parent_contact_info: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.parent_contact_info !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -566,7 +626,11 @@ const StudentReg = () => {
                     parent_emergency_contact: value,
                   }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.parent_emergency_contact !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
                 required
               />
             </div>
@@ -574,7 +638,7 @@ const StudentReg = () => {
           <div className="grid grid-cols-3 gap-x-6 gap-y-3 mt-3">
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">Address:</label>
-              <Dropdown
+              <DropDownLight
                 label={formData.parent_country || "Select Country"}
                 items={countries.map((country) => ({
                   label: country.name,
@@ -589,7 +653,7 @@ const StudentReg = () => {
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#FFFFFF]">Address</label>
-              <Dropdown
+              <DropDownLight
                 label={formData.parent_state || "Select State"}
                 items={states.map((state) => ({
                   label: state.name,
@@ -604,7 +668,7 @@ const StudentReg = () => {
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#FFFFFF]">Address</label>
-              <Dropdown
+              <DropDownLight
                 label={formData.parent_city || "Select City"}
                 items={cities.map((city) => ({
                   label: city.name,
@@ -622,7 +686,7 @@ const StudentReg = () => {
               <label className="text-[0.88rem] text-[#5E6A72]">
                 Relationship:
               </label>
-              <Dropdown
+              <DropDownLight
                 label={formData.parent_relationship || "Select Relationship"}
                 items={[
                   {
@@ -651,7 +715,7 @@ const StudentReg = () => {
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">Gender:</label>
-              <Dropdown
+              <DropDownLight
                 label={formData.parent_gender || "Select Gender"}
                 items={[
                   {
@@ -670,7 +734,7 @@ const StudentReg = () => {
               />
             </div>
           </div>
-          <div className="flex justify-start mb-5 mt-10">
+          <div className="flex justify-end mb-5 mt-10">
             <button className="bg-[#01427A] text-sm text-white font-bold py-1.5 cursor-pointer hover:opacity-80 px-5 rounded-sm">
               Save
             </button>

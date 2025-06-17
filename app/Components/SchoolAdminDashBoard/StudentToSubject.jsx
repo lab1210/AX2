@@ -47,7 +47,7 @@ const StudentToSubject = () => {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [searchText, setSearchText] = useState("");
 
-  const itemsPerPage = 5;
+  const itemsPerPage = 10;
   const [formData, setFormData] = useState([
     {
       Student: [],

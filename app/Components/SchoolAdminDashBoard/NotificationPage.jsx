@@ -199,13 +199,13 @@ const NotificationPage = () => {
         </div>
       )}
       <form className="mb-3 pb-5 pt-3  bg-white">
-        <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
+        <div className="flex pt-3 pl-6 pr-6 justify-between mb-5 ">
           <p className="font-bold text-[#07508F]">
             {editVisible ? "Edit Notification" : "Create Notification"}
           </p>
           <button
             type="submit"
-            className="bg-[#07508F] text-white font-bold text-sm px-3 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
+            className="bg-[#07508F] text-white font-bold text-sm px-5 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
           >
             {editVisible ? "Save" : "Create"}
           </button>
@@ -358,7 +358,7 @@ const NotificationPage = () => {
         </div>
       </div>
 
-      <div className="pl-6 pr-6 flex flex-col gap-5">
+      <div className="pl-6 pr-6 flex flex-col gap-5 mt-8">
         {paginatedData.length === 0 ? (
           <div className="flex justify-center items-center mt-10 h-full">
             <p className="text-center text-sm text-[#858383]">
@@ -366,7 +366,7 @@ const NotificationPage = () => {
             </p>
           </div>
         ) : (
-          paginatedData.map((item, index) => {
+          paginatedData.map((item) => {
             return (
               <div
                 key={item.id}
