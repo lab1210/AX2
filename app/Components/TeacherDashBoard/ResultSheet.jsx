@@ -1,56 +1,9 @@
 "use client";
 import React, { useRef } from "react";
-// import html2canvas from "html2canvas";
-// import jsPDF from "jspdf";
-import { useRouter } from "next/navigation";
 
-const ResultSheetImageDesign = ({ onClose }) => {
+const ResultSheetImageDesign = ({ onClose = () => {} }) => {
   const sheetRef = useRef(null);
-  const router = useRouter();
-
-  //   const handleDownload = async () => {
-  //     const input = sheetRef.current;
-  //     if (!input) return;
-  //     input.style.background = "#fff";
-  //     const canvas = await html2canvas(input, { scale: 2 });
-  //     const imgData = canvas.toDataURL("image/png");
-  //     const pdf = new jsPDF({
-  //       orientation: "portrait",
-  //       unit: "mm",
-  //       format: "a4",
-  //     });
-
-  //     const pageWidth = pdf.internal.pageSize.getWidth();
-  //     const pageHeight = pdf.internal.pageSize.getHeight();
-
-  //     const imgProps = pdf.getImageProperties(imgData);
-  //     const pxFullWidth = canvas.width;
-  //     const pxFullHeight = canvas.height;
-  //     const mmImgHeight = (pxFullHeight * pageWidth) / pxFullWidth;
-  //     let position = 0;
-  //     let remainingHeight = mmImgHeight;
-
-  //     while (remainingHeight > 0) {
-  //       pdf.addImage(
-  //         imgData,
-  //         "PNG",
-  //         0,
-  //         position,
-  //         pageWidth,
-  //         mmImgHeight,
-  //         undefined,
-  //         "FAST"
-  //       );
-  //       remainingHeight -= pageHeight;
-  //       if (remainingHeight > 0) {
-  //         pdf.addPage();
-  //         position = -remainingHeight;
-  //       }
-
-  //     pdf.save("result-sheet.pdf");
-  //     input.style.background = "";
-  //   };
-  // }
+  // const router = useRouter();
 
   const handlePrint = () => {
     window.print();
@@ -259,20 +212,21 @@ const ResultSheetImageDesign = ({ onClose }) => {
   //   { skill: "Coordination", grade: 5 },
   //   { skill: "Endurance", grade: 3 },
   // ];
-
   const handleClose = () => {
     if (onClose) onClose();
-    router.back();
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/10 print:p-6">
       <div>
         <div className="bg-white p-6 border-2 border-dashed border-[#01427a] print:p-6">
-          {/* Close Button */}
+          {/* Close Button */}{" "}
           <button
-            onClick={handleClose}
-            className="absolute top-0 right-0 bg-white text-gray-700 rounded-full w-10 h-10 flex items-center justify-center text-2xl font-bold shadow hover:bg-gray-300 z-100 cursor-pointer print:hidden"
+            onClick={(e) => {
+              e.stopPropagation(); 
+              onClose();
+            }}
+            className="absolute top-0 right-0 bg-white text-gray-700 rounded-full w-10 h-10 flex items-center justify-center text-2xl font-bold shadow hover:bg-gray-300 z-50 cursor-pointer print:hidden"
             aria-label="Close"
           >
             &times;
@@ -585,7 +539,6 @@ const ResultSheetImageDesign = ({ onClose }) => {
               </div>
             </div>
           </div>
-
           <div className="absolute bottom-5 right-4 flex gap-2 print:hidden">
             {/* <button
             onClick={handleDownload}

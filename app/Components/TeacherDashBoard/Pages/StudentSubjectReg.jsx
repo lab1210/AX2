@@ -166,7 +166,7 @@ const StudentToSubject = () => {
 
         {/* Content Container */}
         <div className="p-2">
-          <div className="bg-white p-4 mt-20 overflow-y-hidden h-full xl:h-[95vh] xl:fixed w-full xl:w-[64%]">
+          <div className="bg-white p-4 mt-20 overflow-y-hidden h-full xl:h-[95vh] 2xl:fixed w-full 2xl:w-[64%]">
             {message && (
               <div
                 className={`mb-4 text-sm px-4 py-2 rounded font-semibold ${
@@ -295,7 +295,7 @@ const StudentToSubject = () => {
             </form>
 
             <hr className="mb-4" />
-            <p className="font-semibold text-center text-[#333333] mb-4">
+            <p className="text-center text-[#333333] mb-4">
               Existing Assigned Students to Subjects
             </p>
 
@@ -304,9 +304,9 @@ const StudentToSubject = () => {
               <table className="min-w-full table-auto">
                 <thead className="bg-[#EDF0F3]">
                   <tr>
-                    <th className="p-2 text-left">Student</th>
-                    <th className="p-2 text-left">Subjects</th>
-                    <th className="p-2 text-left">Actions</th>
+                    <th className="p-2 text-left font-normal">Student</th>
+                    <th className="p-2 text-left font-normal">Subjects</th>
+                    <th className="p-2 text-left font-normal">Actions</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -216,7 +216,10 @@ const PerformanceAnalysis = () => {
               >
                 &times;
               </button> */}
-            <ResultSheet studentData={selectedStudent} />
+            <ResultSheet
+              studentData={selectedStudent}
+              onClose={() => setIsResultModalOpen(false)}
+            />
             {/* </div> */}
           </div>
         )}
@@ -331,7 +334,11 @@ const PerformanceAnalysis = () => {
                     <h3 className="text-lg font-semibold mb-4">
                       Score Distribution
                     </h3>
-                    <ResponsiveContainer width="100%" height={150} className="lg:h-[200px] xl:h-[250px]">
+                    <ResponsiveContainer
+                      width="100%"
+                      height={150}
+                      className="lg:h-[200px] xl:h-[250px]"
+                    >
                       <PieChart>
                         <Pie
                           data={scoreDistribution}
@@ -487,7 +494,7 @@ const PerformanceAnalysis = () => {
                         </ResponsiveContainer>
                       </div>
                       {/* Gender Performance Distribution */}
-                      <div className="bg-white rounded-md flex flex-col w-[45%] shadow">
+                      <div className="bg-white rounded-md flex flex-col w-[45%] shadow lg:pb-3">
                         <p className="font-bold text-lg text-center mt-3">
                           Gender Performance Distribution
                         </p>
@@ -855,7 +862,7 @@ const PerformanceAnalysis = () => {
                   </div>
                 </div>
                 {/* Score Distribution */}
-                <div className="bg-white rounded-lg shadow p-4 w-[45%] xl:w-[35%] flex h-[45vh] xl:h-[30vh]">
+                <div className="bg-white rounded-lg shadow p-4 w-[45%] xl:w-[35%] flex h-[50%]">
                   <div className="w-[60%]">
                     <h3 className="text-lg font-semibold mb-4">
                       Percentage Distribution
@@ -957,7 +964,7 @@ const PerformanceAnalysis = () => {
                     </ResponsiveContainer>
                   </div>
                   {/* Best in All Subjects */}
-                  <div className="bg-white rounded-lg shadow p-4 mt-2 h-[40vh] xl:h-[30vh]">
+                  <div className="bg-white rounded-lg shadow p-4 mt-2 h-[50%]">
                     <div className="flex justify-between items-start">
                       <h3 className="text-lg font-semibold">
                         Best in all subjects
@@ -1075,6 +1082,7 @@ const PerformanceAnalysis = () => {
                         paddingAngle={2}
                         startAngle={90}
                         endAngle={450}
+                        strokeWidth={0}
                         label={({
                           cx,
                           cy,
@@ -1159,6 +1167,33 @@ const PerformanceAnalysis = () => {
                     </button>
                   </div>
                   <ResponsiveContainer width="100%" height={250}>
+                    {/* <PieChart>
+                      <Pie
+                        data={[
+                          {
+                            name: "Percentage of Student Passed",
+                            value: 70,
+                            color: "#01427A",
+                          },
+                          {
+                            name: "Percentage of Student Failed",
+                            value: 30,
+                            color: "#4169E1",
+                          },
+                        ]}
+                        dataKey="value"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={0}
+                        outerRadius={120}
+                        paddingAngle={2}
+                        startAngle={90}
+                        endAngle={450}
+                      >
+                        <Cell key="passed" fill="#01427A" />
+                        <Cell key="failed" fill="#4169E1" />
+                      </Pie>
+                    </PieChart> */}
                     <PieChart>
                       <Pie
                         data={[
@@ -1181,6 +1216,36 @@ const PerformanceAnalysis = () => {
                         paddingAngle={2}
                         startAngle={90}
                         endAngle={450}
+                        strokeWidth={0}
+                        label={({
+                          cx,
+                          cy,
+                          midAngle,
+                          innerRadius,
+                          outerRadius,
+                          percent,
+                          value,
+                        }) => {
+                          const radius =
+                            innerRadius + (outerRadius - innerRadius) * 0.5;
+                          const x =
+                            cx + radius * Math.cos((-midAngle * Math.PI) / 180);
+                          const y =
+                            cy + radius * Math.sin((-midAngle * Math.PI) / 180);
+                          return (
+                            <text
+                              x={x}
+                              y={y}
+                              fill="white"
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              fontSize="16"
+                              fontWeight="bold"
+                            >
+                              {`${value}%`}
+                            </text>
+                          );
+                        }}
                       >
                         <Cell key="passed" fill="#01427A" />
                         <Cell key="failed" fill="#4169E1" />
