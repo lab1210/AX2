@@ -160,69 +160,73 @@ const RightSidebar = ({ user }) => {
           </div>
 
           {isDropdownOpen && (
-            <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg p-3 z-50">
-              <div className="mb-2 text-gray-800 cursor-pointer hover:text-[#F94144] p-2 rounded active:text-[#F94144]">
-                <Link href="/Student/Profile">Profile</Link>
-              </div>
-              <div className="mb-2 text-gray-800 cursor-pointer hover:text-[#F94144] p-2 rounded active:text-[#F94144]">
-                <Link href="">Settings</Link>
-              </div>
-              <div className="flex items-center gap-2 text-gray-800 cursor-pointer hover:text-[#F94144] p-2 rounded active:text-[#F94144]">
-                <IoLogOutOutline className="w-4 h-4" />
-                <span>Logout</span>
+            <div className="absolute top-full right-0 mt-2 w-48 bg-[#004080] rounded-md shadow-lg p-3 z-50">
+              <Link href="/Student/Profile" className="block mb-2">
+                <div className="text-white cursor-pointer hover:bg-[#01427A] p-2 rounded transition-all duration-200 hover:scale-[1.02]">
+                  Profile
+                </div>
+              </Link>
+              <Link href="" className="block mb-2">
+                <div className="text-white cursor-pointer hover:bg-[#01427A] p-2 rounded transition-all duration-200 hover:scale-[1.02]">
+                  Settings
+                </div>
+              </Link>
+              <div className="flex items-center gap-2 text-white cursor-pointer hover:bg-[#01427A] p-2 rounded transition-all duration-200 hover:scale-[1.02]">
+                <IoLogOutOutline className="w-4 h-4 text-white" />
+                <span className="text-white">Logout</span>
               </div>
             </div>
           )}
         </div>
       </div>
 
-      <div className="bg-[#004080] rounded-lg shadow-lg h-[40vh]">
-        <div className="rounded-lg h-full overflow-hidden">
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <DemoContainer components={["DateCalendar"]}>
-              <DemoItem>
-                <DateCalendar
-                  readOnly
-                  defaultValue={dayjs()}
-                  sx={{
-                    // Header styling
-                    "& .MuiPickersCalendarHeader-root": {
-                      backgroundColor: "#004080",
-                      color: "white",
-                    },
-                    "& .MuiPickersArrowSwitcher-root": {
-                      color: "#FFFFFF",
-                    },
-                    "& .MuiPickersCalendarHeader-label": {
-                      color: "#FFFFFF",
-                    },
-                    // Week day labels
-                    "& .MuiDayCalendar-weekDayLabel": {
-                      color: "#FFFFFF",
-                      fontWeight: "bold",
-                    },
-                    // All date numbers should be white by default
-                    "& .MuiPickersDay-root": {
-                      color: "white",
-                      backgroundColor: "transparent",
-                      fontSize: "1rem",
-                      "&:hover": {
-                        backgroundColor: "rgba(255, 255, 255, 0.1)",
-                      },
-                    },
-                    // Current day (today) styling
-                    "& .MuiPickersDay-today": {
-                      border: "2px solid white !important",
-                      color: "white",
-                    },
-                    // Apply dynamic event date styling
-                    ...generateEventDateStyles(),
-                  }}
-                />
-              </DemoItem>
-            </DemoContainer>
-          </LocalizationProvider>
-        </div>
+      <div className="bg-[#004080] rounded-lg">
+        <LocalizationProvider dateAdapter={AdapterDayjs}>
+          <DateCalendar
+            readOnly
+            sx={{
+              width: "100%",
+              height: "auto",
+              "& .MuiPickersCalendarHeader-root": {
+                paddingLeft: "8px",
+                paddingRight: "8px",
+                color: "white",
+              },
+              "& .MuiPickersCalendarHeader-label": {
+                color: "white",
+                fontWeight: "bold",
+              },
+              "& .MuiPickersArrowSwitcher-button": {
+                color: "white",
+              },
+              "& .MuiDayCalendar-weekDayLabel": {
+                color: "white",
+                fontWeight: "bold",
+              },
+              "& .MuiPickersDay-root": {
+                color: "white",
+                fontSize: "0.875rem",
+                "&:hover": {
+                  backgroundColor: "rgba(255, 255, 255, 0.2)",
+                  color: "white",
+                },
+                "&.Mui-selected": {
+                  backgroundColor: "rgba(255, 255, 255, 0.3)",
+                  color: "white",
+                },
+              },
+              "& .MuiPickersDay-today": {
+                border: "2px solid white",
+                color: "white",
+                fontWeight: "bold",
+              },
+              "& .MuiPickersDay-dayOutsideMonth": {
+                color: "rgba(255, 255, 255, 0.5)",
+              },
+              ...generateEventDateStyles(),
+            }}
+          />
+        </LocalizationProvider>
       </div>
 
       {/* Events Section */}

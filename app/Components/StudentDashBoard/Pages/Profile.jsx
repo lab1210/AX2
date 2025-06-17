@@ -58,7 +58,7 @@ export default function ProfilePage() {
   return (
     <Layout>
       {/* Desktop View */}
-      <div className="hidden lg:block xl:fixed xl:w-[64%]">
+      <div className="hidden lg:block w-full">
         <div className="min-h-screen bg-[#D9D9D9] rounded-lg p-4 md:p-8 flex flex-col space-y-6">
           <div className="bg-white flex items-center rounded-lg p-6 ">
             <div className="flex items-center gap-4 mb-6">
