@@ -206,9 +206,9 @@ export default function TeacherDashboard() {
                 </div>
               </div>
               {/* Right Sidebar */}{" "}
-              <div className="hidden lg:block w-[30%] xl:w-[25%] space-y-3 xl:sticky top-10 xl:top-20">
+              <div className="hidden lg:block w-[30%] xl:w-[25%] space-y-3 xl:sticky top-10 xl:top-20 border-l border-gray-200 pl-2">
                 {/* Calendar */}
-                <div className="bg-white rounded-lg">
+                <div className="bg-white rounded-lg shadow-xl">
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
                     <DateCalendar
                       readOnly
@@ -224,7 +224,7 @@ export default function TeacherDashboard() {
                   </LocalizationProvider>
                 </div>
                 {/* Events */}
-                <div className="bg-white rounded-lg p-4 h-[55vh] xl:h-[46vh] overflow-y-auto no-scrollbar">
+                <div className="bg-white rounded-lg p-4 h-[55vh] xl:h-[46vh] overflow-y-auto no-scrollbar shadow-xl">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Events</h3>
                     <button className="text-sm text-blue-600">View All</button>

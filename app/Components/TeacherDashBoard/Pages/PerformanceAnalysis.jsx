@@ -1078,7 +1078,7 @@ const PerformanceAnalysis = () => {
                         cx="50%"
                         cy="50%"
                         innerRadius={0}
-                        outerRadius={120}
+                        outerRadius={150}
                         paddingAngle={2}
                         startAngle={90}
                         endAngle={450}
@@ -1118,14 +1118,14 @@ const PerformanceAnalysis = () => {
                       </Pie>
                     </PieChart>
                   </ResponsiveContainer>
-                  <div className="flex justify-center mt-4">
+                  <div className="flex justify-center mt-8">
                     <div className="flex items-center space-x-2 mx-2">
                       <div className="w-3 h-3 rounded-full bg-[#01427A]"></div>
-                      <p className="text-sm">Percentage of Student Passed</p>
+                      <p className="text-[15px]">Percentage of Student Passed</p>
                     </div>
                     <div className="flex items-center space-x-2 mx-2">
                       <div className="w-3 h-3 rounded-full bg-[#4169E1]"></div>
-                      <p className="text-sm">Percentage of Student Failed</p>
+                      <p className="text-[15px]">Percentage of Student Failed</p>
                     </div>
                   </div>
                 </div>
@@ -1135,7 +1135,7 @@ const PerformanceAnalysis = () => {
           {activeTab === "Class Teacher" && schoolType === "Snr Sch" && (
             <div>
               <div className="grid grid-cols-2 gap-4 p-4">
-                <div className="bg-white rounded-lg shadow p-4 h-[90vh] xl:h-[62vh]">
+                <div className="bg-white rounded-lg shadow p-4 h-[90%]">
                   <div className="flex space-x-6 mb-6 border-b border-gray-200">
                     <button
                       className={`pb-2 text-md font-medium ${
@@ -1265,7 +1265,7 @@ const PerformanceAnalysis = () => {
                 </div>
 
                 <div className="flex flex-col space-y-6">
-                  <div className="bg-white rounded-lg shadow p-4 h-[50vh] xl:h-[25vh]">
+                  <div className="bg-white rounded-lg shadow p-4 h-[40%]">
                     <h3 className="text-lg font-semibold mb-4">Quick Stat</h3>
                     <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
                       {/* Stat Card 1 */}
