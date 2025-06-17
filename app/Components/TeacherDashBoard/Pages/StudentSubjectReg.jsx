@@ -304,8 +304,8 @@ const StudentToSubject = () => {
               <table className="min-w-full table-auto">
                 <thead className="bg-[#EDF0F3]">
                   <tr>
-                    <th className="p-2 text-left font-normal">Student</th>
-                    <th className="p-2 text-left font-normal">Subjects</th>
+                    <th className="p-2 text-center font-normal">Student</th>
+                    <th className="p-2 text-center font-normal">Subjects</th>
                     <th className="p-2 text-left font-normal">Actions</th>
                   </tr>
                 </thead>
@@ -319,8 +319,8 @@ const StudentToSubject = () => {
                   ) : (
                     paginatedData.map((item, idx) => (
                       <tr key={idx} className="border-b border-gray-100">
-                        <td className="p-2">{item.Student}</td>
-                        <td className="p-2">{item.Subject.join(", ")}</td>
+                        <td className="p-2 text-center">{item.Student}</td>
+                        <td className="p-2 text-center">{item.Subject.join(", ")}</td>
                         <td className="p-2">
                           <div className="flex gap-4">
                             <FiEdit3
