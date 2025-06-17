@@ -84,7 +84,7 @@ const Timetable = () => {
     <Layout>
       <div className="flex min-h-screen bg-[#F7F8FA] w-full">
         <div className="flex flex-col w-full">
-          <div className="fixed top-0 z-30 flex items-center justify-between bg-white px-6 py-4 w-full lg:w-[85%]">
+          <div className="fixed top-0 z-30 flex items-center justify-between bg-white px-6 py-4 w-full lg:w-[81%] xl:w-[85%]">
             <div className="flex flex-row items-center justify-center">
             <button
               onClick={() => {
