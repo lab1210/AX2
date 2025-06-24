@@ -1,7 +1,7 @@
 "use client";
 import React, { use, useEffect, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
-import Dropdown from "./DropDown";
+import Dropdown from "./DropDown2";
 import { getClass } from "@/Service/schoolConfig";
 
 const ClassConstraint = ({ itemsperpage }) => {
@@ -275,7 +275,7 @@ const ClassConstraint = ({ itemsperpage }) => {
               }}
               className={`${
                 formData.reason !== "" ? "border-[#0071E3]" : "border-[#B6B6B6]"
-              } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+              } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
               required
             />
           </div>

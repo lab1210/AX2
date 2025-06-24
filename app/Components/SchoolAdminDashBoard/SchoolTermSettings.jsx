@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
-import Dropdown from "./DropDown";
+import Dropdown from "./DropDown2";
 import {
   createTerm,
   deleteTerm,
@@ -275,7 +275,7 @@ const SchoolTermSettings = () => {
                         name: value,
                       }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm border-[#B6B6B6]"
                 required
               />
             </div>
@@ -346,7 +346,7 @@ const SchoolTermSettings = () => {
                       }))
                     : setFormData((prev) => ({ ...prev, start_date: value }));
                 }}
-                className="text-sm text-[#B6B6B6] border-2 p-1.5 rounded-sm border-[#B6B6B6] focus:outline-[#0071E3]"
+                className="text-sm text-[#B6B6B6] border-[1.5px] p-1.5 rounded-sm border-[#B6B6B6] focus:outline-[#0071E3]"
                 required
               />
             </div>
@@ -369,7 +369,7 @@ const SchoolTermSettings = () => {
                       }))
                     : setFormData((prev) => ({ ...prev, end_date: value }));
                 }}
-                className="text-sm text-[#B6B6B6] border-2 p-1.5 rounded-sm border-[#B6B6B6] focus:outline-[#0071E3]"
+                className="text-sm text-[#B6B6B6] border-[1.5px] p-1.5 rounded-sm border-[#B6B6B6] focus:outline-[#0071E3]"
                 required
               />
             </div>

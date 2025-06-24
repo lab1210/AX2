@@ -367,7 +367,7 @@ const ResultSettings = () => {
                   ResultformData.total_ca_score !== ""
                     ? "border-[#0071E3]"
                     : "border-[#B6B6B6]"
-                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                 required
               />
             </div>
@@ -392,7 +392,7 @@ const ResultSettings = () => {
                   ResultformData.total_exam_score !== ""
                     ? "border-[#0071E3]"
                     : "border-[#B6B6B6]"
-                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                 required
               />
             </div>
@@ -416,7 +416,7 @@ const ResultSettings = () => {
                   ResultformData.passMark !== ""
                     ? "border-[#0071E3]"
                     : "border-[#B6B6B6]"
-                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                 required
               />
             </div>
@@ -468,7 +468,7 @@ const ResultSettings = () => {
                       selectedCategory?.assessment_name !== "")
                       ? "border-[#0071E3]"
                       : "border-[#B6B6B6]"
-                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                   required
                 />
               </div>
@@ -504,7 +504,7 @@ const ResultSettings = () => {
                       selectedCategory?.number_of_times !== "")
                       ? "border-[#0071E3]"
                       : "border-[#B6B6B6]"
-                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                   required
                 />
               </div>
@@ -539,7 +539,7 @@ const ResultSettings = () => {
                       selectedCategory?.max_score_per_one !== "")
                       ? "border-[#0071E3]"
                       : "border-[#B6B6B6]"
-                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                   required
                 />
               </div>

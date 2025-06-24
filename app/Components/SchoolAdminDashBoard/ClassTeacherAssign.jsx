@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import Dropdown from "./DropDown";
+import Dropdown from "./DropDown2";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
 const ClassTeacherAssign = () => {

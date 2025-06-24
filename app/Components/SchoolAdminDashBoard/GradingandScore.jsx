@@ -14,7 +14,7 @@ import {
 import { getClass, getDepartment, getTerms } from "@/Service/schoolConfig";
 import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
-import Dropdown from "./DropDown";
+import Dropdown from "./DropDown2";
 
 const GradingandScore = () => {
   const [message, setMessage] = useState("");
@@ -491,7 +491,7 @@ const GradingandScore = () => {
                     (editGradeVisible && selectedGrade?.grade !== "")
                       ? "border-[#0071E3]"
                       : "border-[#B6B6B6]"
-                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                   required
                 />
               </div>
@@ -525,7 +525,7 @@ const GradingandScore = () => {
                       (editGradeVisible && selectedGrade?.min_score !== "")
                         ? "border-[#0071E3]"
                         : "border-[#B6B6B6]"
-                    } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                    } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                     required
                   />
                   <input
@@ -554,7 +554,7 @@ const GradingandScore = () => {
                       (editGradeVisible && selectedGrade?.max_score !== "")
                         ? "border-[#0071E3]"
                         : "border-[#B6B6B6]"
-                    } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                    } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                     required
                   />
                 </div>
@@ -587,7 +587,7 @@ const GradingandScore = () => {
                     (editGradeVisible && selectedGrade?.remarks !== "")
                       ? "border-[#0071E3]"
                       : "border-[#B6B6B6]"
-                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                   required
                 />
               </div>

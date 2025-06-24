@@ -35,7 +35,7 @@ const MultiDropdown = ({
     <Popover className="relative w-full">
       {() => (
         <>
-          <Popover.Button className="focus:border-[#0071E3] z-[100] border-2 p-1.5 border-[#B6B6B6] inline-flex w-full justify-between rounded-sm bg-white sm:text-xs lg:text-sm text-[#808080] flex-wrap gap-2">
+          <Popover.Button className="focus:border-[#0071E3] z-[100] border-[1.5px] p-1.5 border-[#B6B6B6] inline-flex w-full justify-between rounded-sm bg-white sm:text-xs lg:text-sm text-[#808080] flex-wrap gap-2">
             <div className="flex flex-wrap gap-1">
               {safeSelectedItems.length > 0 ? (
                 safeSelectedItems.map((item, idx) => (

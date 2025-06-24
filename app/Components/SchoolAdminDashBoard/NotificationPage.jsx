@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { getAllRoles } from "../../Service/RoleService";
-import Dropdown from "./DropDown";
+import Dropdown from "./DropDown2";
 import { RxLetterCaseCapitalize } from "react-icons/rx";
 import { IoFilter, IoSearch } from "react-icons/io5";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
@@ -236,7 +236,7 @@ const NotificationPage = () => {
                   (editVisible && selected?.title !== "")
                     ? "border-[#0071E3]"
                     : "border-[#B6B6B6]"
-                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                 required
               />
             </div>
@@ -264,7 +264,7 @@ const NotificationPage = () => {
                   (editVisible && selected?.content !== "")
                     ? "border-[#0071E3]"
                     : "border-[#B6B6B6]"
-                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                 required
               />
             </div>
