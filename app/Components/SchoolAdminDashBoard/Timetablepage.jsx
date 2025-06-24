@@ -284,7 +284,7 @@ const Timetablepage = () => {
                   periodFormData.start_time === ""
                     ? "border-[#B6B6B6]"
                     : "border-[#0071E3]"
-                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                 required
               />
             </div>
@@ -304,7 +304,7 @@ const Timetablepage = () => {
                   periodFormData.end_time === ""
                     ? "border-[#B6B6B6]"
                     : "border-[#0071E3]"
-                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
                 required
               />
             </div>

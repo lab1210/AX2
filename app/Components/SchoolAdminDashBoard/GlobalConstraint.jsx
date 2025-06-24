@@ -1,7 +1,7 @@
 "use client";
 import React, { use, useEffect, useState } from "react";
 import { FiTrash2 } from "react-icons/fi";
-import Dropdown from "./DropDown";
+import Dropdown from "./DropDown2";
 
 const GlobalConstraint = ({ itemsperpage }) => {
   const [message, setMessage] = useState("");

@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { getTeachers } from "../../Service/teacherService";
-import Dropdown from "../SchoolAdminDashBoard/DropDown";
+import Dropdown from "../SchoolAdminDashBoard/DropDown2";
 import { FiTrash2 } from "react-icons/fi";
 
 const TeacherUnavailablity = ({ itemsperpage }) => {
@@ -219,7 +219,7 @@ const TeacherUnavailablity = ({ itemsperpage }) => {
                 teacherUnavailabilityFormData.unavailable_time === ""
                   ? "border-[#B6B6B6]"
                   : "border-[#0071E3]"
-              } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm `}
+              } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
               required
             />
           </div>

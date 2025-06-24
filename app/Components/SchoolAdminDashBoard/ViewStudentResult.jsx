@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { getAcademicYears, getClass, getTerms } from "@/Service/schoolConfig";
-import Dropdown from "./DropDown";
+import Dropdown from "./DropDown2";
 import { getStudents } from "@/Service/studentService";
 import ResultSheetImageDesign from "./ResultSheet";
 import { MdInfo } from "react-icons/md";
