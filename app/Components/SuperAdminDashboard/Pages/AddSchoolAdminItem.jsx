@@ -9,7 +9,7 @@ import DashboardHeader from "../DashboardHeader";
 import { createSchoolAdmin } from "../../../Service/schoolAdminService";
 import { getSchools } from "../../../Service/schoolService";
 import { getAllRoles } from "../../../Service/RoleService";
-import Dropdown from "../../../Components/Dropdown";
+import Dropdown from "../../../Components/SchoolAdminDashBoard/DropDown2";
 
 const AddSchoolAdminItem = () => {
   const searchParams = useSearchParams();
@@ -301,7 +301,7 @@ const AddSchoolAdminItem = () => {
                     type="text"
                     id="middle_name"
                     name="middle_name"
-                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[2px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
+                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[1.5px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
                     placeholder="Enter Middle Name"
                     onChange={handleInputChange}
                   />
@@ -477,7 +477,7 @@ const AddSchoolAdminItem = () => {
                     name="role" // Or "display_role" if you prefer
                     value="School Admin" // Directly set the displayed value
                     readOnly
-                    className="text-base text-[#07508F] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#AEAEAE] font-bold "
+                    className="text-base text-[#07508F] rounded-sm focus:outline-none sm:text-sm border-[1.5px] p-2 border-[#AEAEAE] font-bold "
                   />
                   {/* The actual user_role ID is already in formData.user_role */}
                 </div>

@@ -281,8 +281,8 @@ const ClassConstraint = ({ itemsperpage }) => {
           </div>
         </div>
       </form>
-      <hr className="mt-5  text-[#A7B9CC]/50" />
-      <div className="flex-shrink-0">
+      <hr className="mt-10  text-[#A7B9CC]/50" />
+      <div className="flex-shrink-0 mb-2">
         <p className="font-semibold flex justify-center mb-5 p-3 text-[#333333]">
           Existing Class Constraints
         </p>

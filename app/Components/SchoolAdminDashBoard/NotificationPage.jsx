@@ -304,8 +304,8 @@ const NotificationPage = () => {
           </div>
         </div>
       </form>
-      <hr className="mt-5  text-[#A7B9CC]/50" />
-      <div className="flex-shrink-0">
+      <hr className=" text-[#A7B9CC]/50 mt-10" />
+      <div className="flex-shrink-0 mb-2">
         <p className="font-semibold flex justify-center mb-5 p-3 text-[#333333]">
           Existing Notifications
         </p>
@@ -370,7 +370,7 @@ const NotificationPage = () => {
             return (
               <div
                 key={item.id}
-                className="flex flex-col bg-white rounded-lg shadow-md p-4"
+                className="flex flex-col bg-white rounded-xl border-2 border-[#0B0A0A]/10  p-4"
               >
                 <div className="flex justify-between items-center mb-5">
                   <div className="flex flex-col gap-1">

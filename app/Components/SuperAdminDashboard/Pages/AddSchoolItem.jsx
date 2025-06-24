@@ -10,7 +10,7 @@ import {
   createSchool,
   createSchoolSubscription,
 } from "../../../Service/schoolService"; // Ensure this path is correct
-import Dropdown from "../../../Components/Dropdown";
+import Dropdown from "../../../Components/SchoolAdminDashBoard/DropDown2";
 import { getUserDetails } from "@/Service/AuthService";
 const AddSchoolItem = () => {
   const searchParams = useSearchParams();

@@ -4,7 +4,7 @@ import { Country, State, City } from "country-state-city";
 import { BiChevronDown } from "react-icons/bi";
 import { getAllRoles } from "../../../Service/RoleService";
 import { createSuperAdmin } from "../../../Service/userService";
-import Dropdown from "@/Components/Dropdown";
+import Dropdown from "@/Components/SchoolAdminDashBoard/DropDown2";
 
 const AddUser = ({ onClose, onUserAdded }) => {
   const [formData, setFormData] = useState({
@@ -353,7 +353,7 @@ const AddUser = ({ onClose, onUserAdded }) => {
             type="text"
             defaultValue="Super Admin"
             readOnly
-            className="text-base text-[#07508F] rounded-sm focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] font-bold "
+            className="text-base text-[#07508F] rounded-sm focus:outline-none sm:text-sm border-[1.5px] p-2 border-[#07508F] font-bold "
           />
         </div>
       </div>
