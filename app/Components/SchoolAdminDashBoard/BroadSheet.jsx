@@ -34,7 +34,7 @@ const BroadSheet = () => {
 
   return (
     <div className="overflow-x-auto w-full">
-      <table className="w-max min-w-full border border-[#01427A]/15 text-sm">
+      <table className="w-full min-w-full border overflow-x-auto border-[#01427A]/15 text-sm">
         <thead className="bg-[#f8fdff] text-gray-800">
           <tr>
             <th
@@ -45,7 +45,7 @@ const BroadSheet = () => {
             </th>
 
             <th
-              className="border px-3 py-4 font-normal bg-[#6B90B5]/4"
+              className="border px-3 py-4 font-bold bg-[#6B90B5]/4"
               colSpan={12}
             >
               SUBJECTS
@@ -53,17 +53,17 @@ const BroadSheet = () => {
           </tr>
 
           <tr className="bg-[#6B90B5]/4 ">
-            <th className="border px-3 py-2">Maths (100)</th>
-            <th className="border px-3 py-2">English (30)</th>
-            <th className="border px-3 py-2">Chemistry (30)</th>
-            <th className="border px-3 py-2">Physics (30)</th>
-            <th className="border px-3 py-2">Biology (30)</th>
-            <th className="border px-3 py-2">Agric (70)</th>
-            <th className="border px-3 py-2">Yoruba (100)</th>
-            <th className="border px-3 py-2">Geography</th>
-            <th className="border px-3 py-2">No of Subj. Passed</th>
-            <th className="border px-3 py-2">No of Subj. Failed</th>
-            <th className="border px-3 py-2">Comment</th>
+            <th className="border px-1 py-2">Maths (100)</th>
+            <th className="border px-1 py-2">English (30)</th>
+            <th className="border px-1 py-2">Chemistry (30)</th>
+            <th className="border px-1 py-2">Physics (30)</th>
+            <th className="border px-1 py-2">Biology (30)</th>
+            <th className="border px-1 py-2">Agric (70)</th>
+            <th className="border px-1 py-2">Yoruba (100)</th>
+            <th className="border px-1 py-2">Geography</th>
+            <th className="border px-1 py-2">No of Subj. Passed</th>
+            <th className="border px-1 py-2">No of Subj. Failed</th>
+            <th className="border px-1 py-2">Comment</th>
           </tr>
         </thead>
         <tbody className="text-sm">

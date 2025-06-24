@@ -235,8 +235,10 @@ const SchoolYearSettings = () => {
             {editYearVisible ? "Save" : "Set"}
           </button>
         </div>
-        <div className="pl-6 pr-6">
-          <div className={`${editYearVisible ? "grid grid-cols-2 gap-6" : ""}`}>
+        <div className="pl-6 pr-6 flex flex-col gap-2">
+          <div
+            className={`${editYearVisible ? "grid grid-cols-2 gap-6" : "  "}`}
+          >
             <div className="flex flex-col gap-2 mb-2">
               <label className="text-[0.88rem] text-[#5E6A72]">
                 Academic Session:
@@ -348,8 +350,8 @@ const SchoolYearSettings = () => {
           </div>
         </div>
       </form>
-      <hr />
-      <div className="flex-shrink-0">
+      <hr className="mt-10" />
+      <div className="flex-shrink-0 mb-2">
         <p className="font-semibold flex justify-center p-3 text-[#333333]">
           Existing Academic Year
         </p>

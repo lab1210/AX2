@@ -546,8 +546,9 @@ const ResultSettings = () => {
             </div>
           </div>
         </form>
-        <hr />
-        <div className="flex-shrink-0">
+        <hr className="mt-10" />
+
+        <div className="flex-shrink-0 mb-2">
           <p className="font-semibold flex justify-center p-3 text-[#333333]">
             Existing Categories
           </p>
