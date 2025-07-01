@@ -68,25 +68,6 @@ const ClassArm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const trimmedName = editClassVisible
-      ? selectedClass?.arm_name?.trim()
-      : formData.arm_name?.trim();
-
-    if (!trimmedName) {
-      setMessage("Class Arm is required.");
-      setMessageType("error");
-      return;
-    }
-    const existingClass = classList.find(
-      (item) => item.arm_name?.toLowerCase() === trimmedName.toLowerCase()
-    );
-
-    if (!editClassVisible && existingClass) {
-      setMessage("Class Arm already exists.");
-      setMessageType("error");
-      return;
-    }
-
     if (editClassVisible && selectedClass) {
       try {
         const updatedClass = {

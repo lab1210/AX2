@@ -6,12 +6,11 @@ import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Country, State, City } from "country-state-city";
 import { LuUpload } from "react-icons/lu";
-import {
-  createSchool,
-  createSchoolSubscription,
-} from "../../../Service/schoolService"; // Ensure this path is correct
+import { createSchool } from "../../../Service/schoolService"; // Ensure this path is correct
 import Dropdown from "../../../Components/SchoolAdminDashBoard/DropDown2";
 import { getUserDetails } from "@/Service/AuthService";
+import toast from "react-hot-toast";
+
 const AddSchoolItem = () => {
   const searchParams = useSearchParams();
   const adminId = searchParams.get("adminId");
@@ -28,8 +27,8 @@ const AddSchoolItem = () => {
   const [schoolLogo, setSchoolLogo] = useState(null);
   const [logoPreview, setLogoPreview] = useState("/icons.png");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
+  // const [error, setError] = useState(null);
+  // const [successMessage, setSuccessMessage] = useState(null);
   const [amountPerStudent, setAmountPerStudent] = useState("");
   const numberOfStudents = 100; // Hardcoded for now
 
@@ -73,8 +72,6 @@ const AddSchoolItem = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccessMessage(null);
 
     if (
       !schoolName ||
@@ -85,12 +82,10 @@ const AddSchoolItem = () => {
       !email ||
       !selectedCountry ||
       !selectedState ||
-      !selectedCity ||
-      !amountPerStudent
+      !selectedCity
     ) {
-      setError(
-        "Please fill in all required general and subscription information."
-      );
+      toast.error("Please fill in all required  information.");
+      // setError("Please fill in all required  information.");
       setLoading(false);
       return;
     }
@@ -120,56 +115,23 @@ const AddSchoolItem = () => {
       const schoolResponse = await createSchool(formData);
 
       if (schoolResponse?.status === 201 && schoolResponse.data?.id) {
-        setSuccessMessage(
-          "School created successfully! Now creating subscription..."
-        );
-
-        const subscriptionData = {
-          school: schoolResponse.data.id, // Use the ID of the newly created school
-          amount_per_student: parseFloat(amountPerStudent),
-          amount_paid: expectedAmountPaid,
-          expired_date: new Date(
-            new Date().setFullYear(new Date().getFullYear() + 1)
-          )
-            .toISOString()
-            .split("T")[0], // Example: 1 year from now
-          active_date: new Date().toISOString().split("T")[0], // Today's date
-        };
-
-        const subscriptionResponse = await createSchoolSubscription(
-          subscriptionData
-        );
-
-        if (subscriptionResponse?.status === 201) {
-          setSuccessMessage("School and subscription created successfully!");
-          setSchoolName("");
-          setShortName("");
-          setSchoolType("");
-          setEducationLevel("");
-          setPhoneNumber("");
-          setEmail("");
-          setSelectedCountry(null);
-          setSelectedState(null);
-          setSelectedCity(null);
-          setSchoolLogo(null);
-          setLogoPreview("/icons.png");
-          setAmountPerStudent("");
-        } else {
-          setError(
-            `Error creating subscription: ${
-              subscriptionResponse?.data?.message || "Something went wrong"
-            }`
-          );
-        }
+        toast.success("School created successfully!");
+        // setSuccessMessage("School created successfully!");
       } else {
-        setError(
+        toast.error(
           `Error creating school: ${
             schoolResponse?.data?.message || "Something went wrong"
           }`
         );
+        // setError(
+        //   `Error creating school: ${
+        //     schoolResponse?.data?.message || "Something went wrong"
+        //   }`
+        // );
       }
     } catch (error) {
-      setError(`An unexpected error occurred: ${error.message}`);
+      toast.error(`An unexpected error occurred: ${error.message}`);
+      // setError(`An unexpected error occurred: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -198,12 +160,12 @@ const AddSchoolItem = () => {
               <hr className="w-full border-t border-[#978F8F]" />
             </div>
             <div className="flex-grow flex flex-col ">
-              {error && <p className="pl-6 font-bold text-red-500">{error}</p>}
+              {/* {error && <p className="pl-6 font-bold text-red-500">{error}</p>}
               {successMessage && (
                 <p className="pl-6 font-bold text-green-500">
                   {successMessage}
                 </p>
-              )}
+              )} */}
               <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0 ">
                 <div className="flex flex-col gap-1 mb-2">
                   <label
@@ -382,6 +344,17 @@ const AddSchoolItem = () => {
                   </div>
                 </div>
               </div>
+              <div className="flex justify-end px-4">
+                <button
+                  type="submit"
+                  className={`bg-[#07508F] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save"}
+                </button>
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-2 h-screen  ">
@@ -417,7 +390,7 @@ const AddSchoolItem = () => {
                 </button>
               </div>
             </div>
-            <div className="bg-[#ffffff] xl:gap-0 lg:gap-2 h-auto rounded-lg pt-5 pl-5 pr-5 xl:pb-2 pb-8 drop-shadow-lg flex flex-col">
+            {/* <div className="bg-[#ffffff] xl:gap-0 lg:gap-2 h-auto rounded-lg pt-5 pl-5 pr-5 xl:pb-2 pb-8 drop-shadow-lg flex flex-col">
               <p className="font-bold sm:text-lg xl:text-xl mb-4 ">
                 SUBSCRIPTION PLAN
               </p>
@@ -464,7 +437,7 @@ const AddSchoolItem = () => {
                   {loading ? "Saving..." : "Save"}
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </form>
