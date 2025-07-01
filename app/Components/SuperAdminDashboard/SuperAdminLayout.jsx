@@ -1,5 +1,5 @@
 "use client";
-
+import { Toaster } from "react-hot-toast";
 import React, {
   Suspense,
   useEffect,
@@ -106,7 +106,10 @@ export default function SuperAdminRootLayout({ children }) {
             <LeftSidebar />
           </Suspense>
         </div>
-        <div className="flex flex-col h-screen overflow-hidden">{children}</div>
+        <div className="flex flex-col h-screen overflow-hidden">
+          <Toaster />
+          {children}
+        </div>
       </div>
     </SuperAdminAuthContext.Provider>
   );

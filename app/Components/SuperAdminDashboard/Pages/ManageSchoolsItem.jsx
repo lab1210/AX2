@@ -7,7 +7,7 @@ import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
-import { getSchools, deleteSchool } from "../../../Service/schoolService"; // Import school service functions
+import { getSchools } from "../../../Service/schoolService"; // Import school service functions
 
 const ITEMS_PER_PAGE = 7; // You can adjust this value
 
@@ -32,11 +32,9 @@ const ManageSchoolsItem = () => {
 
   // State to track selected school for details and deletion
   const [selectedschoolDetail, setselectedschoolDetail] = useState(null);
-  const [selectedSchoolDelete, setSelectedSchoolDelete] = useState(null);
 
   // Modal visibility states
   const [detailModalVisible, setDetailModalVisible] = useState(false);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   // Function to fetch all schools without search parameters
   const fetchAllSchools = useCallback(async () => {
@@ -101,34 +99,6 @@ const ManageSchoolsItem = () => {
     setDetailModalVisible(false);
   };
 
-  const openDeleteModal = (school) => {
-    setSelectedSchoolDelete(school);
-    setDeleteModalVisible(true);
-  };
-
-  // Function to close delete modal
-  const closeDeleteModal = () => {
-    setSelectedSchoolDelete(null);
-    setDeleteModalVisible(false);
-  };
-
-  const handleDeleteSchool = async () => {
-    if (selectedSchoolDelete?.id) {
-      try {
-        const response = await deleteSchool(selectedSchoolDelete.id);
-        if (response?.status === 200) {
-          console.log("School deleted successfully:", response.data);
-          closeDeleteModal();
-          fetchAllSchools();
-        } else {
-          console.error("Error deleting school:", response);
-        }
-      } catch (error) {
-        console.error("Error deleting school:", error);
-      }
-    }
-  };
-
   const handlePageChange = (newPage) => {
     setCurrentPage(newPage);
   };
@@ -167,46 +137,6 @@ const ManageSchoolsItem = () => {
 
   return (
     <SuperAdminLayout>
-      {/* Delete Modal */}
-      {deleteModalVisible && selectedSchoolDelete && (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
-          <div
-            className="absolute inset-0 bg-black/65"
-            onClick={closeDeleteModal}
-          ></div>
-          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
-            <p className="font-bold text-center text-lg">Delete School</p>
-            <div className="text-center pt-3">
-              <p className="text-base text-[#858383]">
-                Are you sure want to delete the
-              </p>
-              <p className="text-base text-[#858383]">
-                selected School:{" "}
-                <span className="font-bold">
-                  {selectedSchoolDelete.school_name}
-                </span>
-                ?
-              </p>
-            </div>
-            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
-              <button
-                onClick={handleDeleteSchool}
-                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
-              >
-                Yes, Delete
-              </button>
-              <button
-                onClick={closeDeleteModal}
-                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
-              >
-                No, Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Details Modal */}
       {detailModalVisible && selectedschoolDetail && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -404,14 +334,6 @@ const ManageSchoolsItem = () => {
                                 size={15}
                               />
                             </Link>
-                            <FiTrash2
-                              className="text-[#F94144] cursor-pointer"
-                              size={15}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                openDeleteModal(item);
-                              }}
-                            />
                           </div>
                         </td>
                       </tr>

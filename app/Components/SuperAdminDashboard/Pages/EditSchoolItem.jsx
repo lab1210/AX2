@@ -14,6 +14,7 @@ import {
   updateSchool,
   updateSchoolSubscription,
 } from "../../../Service/schoolService";
+import toast from "react-hot-toast";
 
 const EditSchoolItem = () => {
   const searchParams = useSearchParams();
@@ -34,8 +35,6 @@ const EditSchoolItem = () => {
   const [schoolLogo, setSchoolLogo] = useState(null);
   const [logoPreview, setLogoPreview] = useState("/icons.png");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [successMessage, setSuccessMessage] = useState(null);
   const [amountPerStudent, setAmountPerStudent] = useState("");
   const [numberOfStudents, setNumberOfStudents] = useState(100);
   const [subscriptionId, setSubscriptionId] = useState(null);
@@ -54,7 +53,6 @@ const EditSchoolItem = () => {
     const fetchSchoolandSubscriptionsDetails = async () => {
       if (schoolId) {
         setLoading(true);
-        setError(null);
         try {
           const schoolResponse = await getSchoolById(schoolId);
           if (schoolResponse?.status === 200 && schoolResponse.data) {
@@ -120,33 +118,11 @@ const EditSchoolItem = () => {
               setLogoPreview("/icons.png");
             }
           } else {
-            setError("Failed to fetch school details.");
-          }
-
-          // Fetch all subscriptions
-          const allSubscriptionsResponse = await getSchoolSubscriptions();
-          if (
-            allSubscriptionsResponse?.status === 200 &&
-            allSubscriptionsResponse.data
-          ) {
-            setAllSubscriptions(allSubscriptionsResponse.data);
-
-            // Filter to find the subscription for the current schoolId
-            const schoolSubscription = allSubscriptionsResponse.data.find(
-              (sub) => sub.school === schoolId // Assuming 'school' in subscription is the school ID
-            );
-
-            if (schoolSubscription) {
-              console.log("Found subscription for school:", schoolSubscription);
-              setAmountPerStudent(schoolSubscription.amount_per_student || "");
-              setSubscriptionId(schoolSubscription.id);
-            } else {
-              console.warn("No subscription found for school ID:", schoolId);
-            }
+            toast.error("Failed to fetch school details.");
           }
         } catch (err) {
           console.error("Error fetching details:", err);
-          setError("Error fetching school and/or subscriptions.");
+          toast.error("Error fetching school and/or subscriptions.");
         } finally {
           setLoading(false);
         }
@@ -189,8 +165,6 @@ const EditSchoolItem = () => {
   const handleSubmit = async (event) => {
     event.preventDefault();
     setLoading(true);
-    setError(null);
-    setSuccessMessage(null);
 
     if (
       !schoolName ||
@@ -201,12 +175,9 @@ const EditSchoolItem = () => {
       !email ||
       !selectedCountry ||
       !selectedState ||
-      !selectedCity ||
-      !amountPerStudent
+      !selectedCity
     ) {
-      setError(
-        "Please fill in all required general and subscription information."
-      );
+      toast.error("Please fill in all required  information.");
       setLoading(false);
       return;
     }
@@ -230,52 +201,16 @@ const EditSchoolItem = () => {
       const schoolUpdateResponse = await updateSchool(schoolId, formData);
 
       if (schoolUpdateResponse?.status === 200) {
-        setSuccessMessage(
-          "School details updated successfully! Updating subscription..."
-        );
-
-        const subscriptionData = {
-          amount_per_student: parseFloat(amountPerStudent),
-          amount_paid: expectedAmountPaid,
-        };
-
-        let subscriptionResponse;
-        if (subscriptionId) {
-          subscriptionResponse = await updateSchoolSubscription(
-            subscriptionId,
-            subscriptionData
-          );
-        } else {
-          setError("Subscription ID not found. Cannot update subscription.");
-          setLoading(false);
-          return;
-        }
-
-        if (subscriptionResponse?.status === 200) {
-          setSuccessMessage(
-            "School details and subscription updated successfully!"
-          );
-          setTimeout(() => {
-            router.push(
-              `/Super-Admin/Manage-Existing-Schools?adminId=${adminId}`
-            );
-          }, 1500);
-        } else {
-          setError(
-            `Failed to update subscription: ${
-              subscriptionResponse?.data?.message || "Something went wrong"
-            }`
-          );
-        }
+        toast.success("School details updated successfully!");
       } else {
-        setError(
+        toast.error(
           `Failed to update school details: ${
             schoolUpdateResponse?.data?.message || "Something went wrong"
           }`
         );
       }
     } catch (err) {
-      setError(`An unexpected error occurred: ${err.message}`);
+      toast.error(`An unexpected error occurred: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -285,14 +220,6 @@ const EditSchoolItem = () => {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
         <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
-        {error}
       </div>
     );
   }
@@ -320,12 +247,6 @@ const EditSchoolItem = () => {
               <hr className="w-full border-t border-[#978F8F]" />
             </div>
             <div className="flex-grow flex flex-col">
-              {error && <p className="pl-6 font-bold text-red-500">{error}</p>}
-              {successMessage && (
-                <p className="pl-6 font-bold text-green-500">
-                  {successMessage}
-                </p>
-              )}
               <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0">
                 <div className="flex flex-col gap-1 mb-2">
                   <label
@@ -488,6 +409,17 @@ const EditSchoolItem = () => {
                   </div>
                 </div>
               </div>
+              <div className="flex justify-end px-4 pb-2">
+                <button
+                  type="submit"
+                  className={`bg-[#07508F] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save"}
+                </button>
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-2 h-screen">
@@ -515,7 +447,7 @@ const EditSchoolItem = () => {
                     accept="image/*"
                   />
                 </div>
-                <button
+                <div
                   onClick={() => document.getElementById("logo-upload").click()}
                   className="text-[#07508F] border-[#07508F] border-[1.5px] rounded-lg cursor-pointer border-dashed w-48 p-2 flex items-center justify-between"
                 >
@@ -523,11 +455,11 @@ const EditSchoolItem = () => {
                   <span>
                     <LuUpload size={20} />
                   </span>
-                </button>
+                </div>
               </div>
             </div>
 
-            <div className="bg-[#ffffff] xl:gap-0 lg:gap-2 h-auto rounded-lg pt-5 pl-5 pr-5 xl:pb-2 pb-8 drop-shadow-lg flex flex-col">
+            {/* <div className="bg-[#ffffff] xl:gap-0 lg:gap-2 h-auto rounded-lg pt-5 pl-5 pr-5 xl:pb-2 pb-8 drop-shadow-lg flex flex-col">
               <p className="font-bold sm:text-lg xl:text-xl mb-4">
                 SUBSCRIPTION PLAN
               </p>
@@ -574,7 +506,7 @@ const EditSchoolItem = () => {
                   {loading ? "Saving..." : "Save"}
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </form>
