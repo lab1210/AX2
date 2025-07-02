@@ -9,6 +9,7 @@ import Modal from "react-modal";
 import useModalStyles from "../Components/testModal";
 import Get_token from "../Components/get-token";
 import { verifyOtp } from "../Service/RegisterService";
+import toast from "react-hot-toast";
 Modal.setAppElement(".app");
 const Register = () => {
   const router = useRouter();
@@ -49,7 +50,10 @@ const Register = () => {
       setSchoolid("");
       setPin("");
     } catch (error) {
-      const errorMsg = error.response?.data?.detail || error.message;
+      const errorMsg =
+        error.response?.data?.error || // <--- use `.error`
+        error.response?.data?.detail || // keep as fallback
+        error.message;
 
       if (errorMsg.toLowerCase().includes("school")) {
         setSchooliderror(errorMsg);
@@ -59,7 +63,7 @@ const Register = () => {
       ) {
         setPinerror(errorMsg);
       } else {
-        alert("Verification failed: " + errorMsg);
+        toast.error("Verification failed: " + errorMsg);
       }
     }
   };

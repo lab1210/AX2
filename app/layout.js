@@ -1,4 +1,5 @@
 import "./globals.css";
+import { Toaster } from "react-hot-toast";
 
 export const metadata = {
   title: "School Management",
@@ -16,8 +17,11 @@ export default function RootLayout({ children }) {
           rel="stylesheet"
         />
       </head>
-      <body >
-        <div className="app">{children}</div>
+      <body>
+        <div className="app">
+          <Toaster />
+          {children}
+        </div>
       </body>
     </html>
   );

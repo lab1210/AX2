@@ -4,15 +4,20 @@ import SchoolAdminLayout from "../SchoolAdminLayout";
 import RightSide from "../RightSide";
 import TeacherReg from "../TeacherReg";
 import StudentReg from "../StudentReg";
+import PinGen from "../PinGen";
 const Registration = () => {
-  const [activeTab, setActiveTab] = useState("Teacher Registration");
+  const [activeTab, setActiveTab] = useState("OTP Generation");
 
   return (
     <SchoolAdminLayout>
       <div className="lg:grid lg:grid-cols-[1fr_270px] flex flex-col sm:gap-6 lg:gap-0 bg-[#F9FAFE] lg:h-full  pt-3 pl-2 pr-1 lg:pb-0 pb-3 overflow-y-auto">
         <div className="bg-white h-full mr-2 lg:overflow-y-auto no-scrollbar sm:pb-3 lg:pb-0">
           <div className="pt-3 text-sm flex gap-10 pl-6">
-            {["Teacher Registration", "Student Registration"].map((tab) => (
+            {[
+              "OTP Generation",
+              "Teacher Registration",
+              "Student Registration",
+            ].map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -34,6 +39,7 @@ const Registration = () => {
           <hr className="mt-1.5" />
           {activeTab === "Teacher Registration" && <TeacherReg />}
           {activeTab === "Student Registration" && <StudentReg />}
+          {activeTab === "OTP Generation" && <PinGen />}
         </div>
         <div className="h-full lg:overflow-hidden">
           <RightSide />

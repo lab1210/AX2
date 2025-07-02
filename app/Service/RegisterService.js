@@ -30,15 +30,13 @@ export const generateOtp = async (numPins) => {
   try {
     const headers = createAuthHeaders();
     if (!headers.Authorization) {
-      console.error(
-        "Authentication token not found. Cannot make authenticated request."
-      );
-      return null; // Or throw an error
+      console.error("Authentication token not found.");
+      return null;
     }
     const url = `${BASE_URL}/registration-pins/generate/`;
     const response = await axios.post(url, { num_pins: numPins }, { headers });
 
-    return response.data;
+    return response.data.pins; // ✅ Return the array directly
   } catch (error) {
     console.error(
       "Error generating registration pin:",
@@ -52,19 +50,19 @@ export const getPins = async () => {
   try {
     const headers = createAuthHeaders();
     if (!headers.Authorization) {
-      console.error(
-        "Authentication token not found. Cannot make authenticated request."
-      );
-      return null; // Or throw an error
+      console.error("Authentication token not found.");
+      return { data: null, error: "Unauthorized" };
     }
+
     const url = `${BASE_URL}/registration-pins/`;
     const response = await axios.get(url, { headers });
-    return response.data;
+
+    return { data: response.data.pins }; // ✅ Return the array as `data`
   } catch (error) {
     console.error(
       "Error fetching registration pin:",
       error.response?.data || error.message
     );
-    throw error;
+    return { data: null, error: error.response?.data?.error || error.message };
   }
 };
