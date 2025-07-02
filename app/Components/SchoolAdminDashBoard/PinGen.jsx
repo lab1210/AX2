@@ -4,6 +4,14 @@ import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { LuCopy } from "react-icons/lu";
 
+const formatCreatedAt = (dateString) => {
+  try {
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? "Just now" : date.toLocaleString();
+  } catch {
+    return "Just now";
+  }
+};
 const PinGen = () => {
   const [otpList, setOtpList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -16,18 +24,27 @@ const PinGen = () => {
   useEffect(() => {
     const fetchOTP = async () => {
       const { data, error } = await getPins();
-      if (data) setOtpList(data);
-      else toast.error(error || "Failed to load OTP");
+      if (data) {
+        // Sort by creation date (newest first) when initially loading
+        const sortedData = [...data].sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+        setOtpList(sortedData);
+      } else toast.error(error || "Failed to load OTP");
     };
     fetchOTP();
   }, []);
 
-  const paginatedData = otpList.slice(
+  const sortedOtpList = [...otpList].sort((a, b) => {
+    return new Date(b.created_at) - new Date(a.created_at); // Newest first
+  });
+
+  const paginatedData = sortedOtpList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const totalPages = Math.ceil(otpList.length / itemsPerPage);
+  const totalPages = Math.ceil(sortedOtpList.length / itemsPerPage);
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
@@ -45,20 +62,29 @@ const PinGen = () => {
     }
 
     try {
-      const newPins = await generateOtp(numPins); // returns array
+      const newPins = await generateOtp(numPins);
       if (newPins && Array.isArray(newPins)) {
-        setOtpList((prev) => [...prev, ...newPins]);
+        // Ensure each new pin has a valid created_at date
+        const pinsWithDates = newPins.map((pin) => ({
+          ...pin,
+          created_at: pin.created_at || new Date().toISOString(),
+        }));
+
+        const sortedNewPins = [...pinsWithDates].sort((a, b) => {
+          return new Date(b.created_at) - new Date(a.created_at);
+        });
+
+        setOtpList((prev) => [...sortedNewPins, ...prev]);
         toast.success("OTP(s) generated successfully.");
+        setCurrentPage(1);
       }
     } catch (err) {
       toast.error(
         err.response?.data?.error || err.message || "Failed to generate."
       );
     }
-
     setFormData({ num_pins: "" });
   };
-
   const handleCopyOtp = (otp, schoolId) => {
     const textToCopy = `OTP: ${otp}\nSchool ID: ${schoolId}`;
     navigator.clipboard
@@ -138,7 +164,7 @@ const PinGen = () => {
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
                     <td className="p-2 text-center">{item.otp}</td>
                     <td className="p-2 text-center">
-                      {new Date(item.created_at).toLocaleString()}
+                      {formatCreatedAt(item.created_at)}
                     </td>
                     <td className="p-2 text-center">
                       <div className="flex items-center justify-center">
