@@ -70,8 +70,10 @@ const SchoolAdminLeft = () => {
           <img className="w-full h-full" src={"/logo.svg"} alt="logo" />
         </div>
         <div className="text-white">
-          <p className="font-bold">{user?.school_admin?.school_name}</p>
-          <p className="font-bold">Student Portal</p>
+          <p className="font-bold lg:text-base text-sm">
+            {user?.school_admin?.school_name}
+          </p>
+          <p className="font-bold text-center">Student Portal</p>
         </div>
       </div>
 
