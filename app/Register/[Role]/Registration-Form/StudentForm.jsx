@@ -5,7 +5,8 @@ import React, { useEffect, useState } from "react";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { Country, State, City } from "country-state-city";
 import { usePathname, useRouter } from "next/navigation";
-
+import { getClassArm, getClass } from "@/Service/schoolConfig";
+import toast from "react-hot-toast";
 const StudentForm = () => {
   const pathname = usePathname();
   const role = pathname.includes("/teacher")
@@ -23,6 +24,11 @@ const StudentForm = () => {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedState, setSelectedState] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [classYearOptions, setClassYearOptions] = useState([]);
+  const [allClassArms, setAllClassArms] = useState([]); // Store all class arms from API
+  const [filteredClassArms, setFilteredClassArms] = useState([]); // Store filtered class arms
+  const [classArmOptions, setClassArmOptions] = useState([]);
 
   const [formData, setFormData] = useState({
     temp_token: "",
@@ -50,6 +56,58 @@ const StudentForm = () => {
     class_arm: "",
     status: true,
   });
+
+  useEffect(() => {
+    const fetchInitialData = async () => {
+      // Fetch class years
+      const years = await getClass();
+      if (years.data) {
+        setClassYearOptions(
+          years.data.map((year) => ({
+            label: year.class_name,
+            value: year.class_year_id, // Use class_id as value for filtering
+          }))
+        );
+      }
+
+      // Fetch all class arms
+      const arms = await getClassArm();
+      if (arms.data) {
+        setAllClassArms(arms.data); // Store all class arms
+        setFilteredClassArms(arms.data); // Initially show all arms
+      }
+    };
+
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    if (formData.class_year && allClassArms.length > 0) {
+      const filtered = allClassArms.filter(
+        (arm) => arm.class_year === formData.class_year
+      );
+      setFilteredClassArms(filtered);
+
+      // Reset class_arm if it's no longer valid for the selected year
+      if (
+        filtered.length > 0 &&
+        !filtered.some((arm) => arm.arm_name === formData.class_arm)
+      ) {
+        setFormData((prev) => ({ ...prev, class_arm: "" }));
+      }
+    } else {
+      setFilteredClassArms(allClassArms); // Show all if no year selected
+    }
+  }, [formData.class_year, allClassArms]);
+
+  useEffect(() => {
+    setClassArmOptions(
+      filteredClassArms.map((arm) => ({
+        label: arm.arm_name,
+        value: arm.arm_name,
+      }))
+    );
+  }, [filteredClassArms]);
 
   const handleTokenChange = (e) => {
     const enteredToken = e.target.value;
@@ -83,16 +141,6 @@ const StudentForm = () => {
     { label: "Male", value: "Male" },
     { label: "Female", value: "Female" },
     { label: "Other", value: "Other" },
-  ];
-  const ClassYearOptions = [
-    { label: "2021", value: "2021" },
-    { label: "2022", value: "2022" },
-    { label: "2023", value: "2023" },
-  ];
-  const ClassArmOptions = [
-    { label: "A", value: "A" },
-    { label: "B", value: "B" },
-    { label: "C", value: "C" },
   ];
   const RelationshipOptions = [
     { label: "Father", value: "Father" },
@@ -130,29 +178,43 @@ const StudentForm = () => {
     });
   };
 
-  const handleNext = (e) => {
-    e.preventDefault(); // Prevent the default form submission behavior
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
     if (token.trim() !== expectedToken) {
       setErrors((prevErrors) => ({
         ...prevErrors,
         token: "Token does not match.",
       }));
-      return; // prevent moving forward
+      return;
     }
+    setIsSubmitting(true);
 
-    const studentInfo = {
+    // Prepare the data for API
+    const studentData = {
       ...formData,
-      country: selectedCountry?.isoCode || "", // Or name, depending on your backend
-      state: selectedState?.isoCode || "", // Or name
+      country: selectedCountry?.isoCode || "",
+      state: selectedState?.isoCode || "",
       city: selectedCity?.name || "",
+      temp_token: token,
     };
-    localStorage.setItem("studentInfo", JSON.stringify(studentInfo));
-    console.log("Student Info:", studentInfo);
-    router.push(`${registrationFormPath}Profile`);
-  };
 
+    try {
+      toast.success("Registration successful! Redirecting to Profile page...");
+      localStorage.setItem("studentInfo", JSON.stringify(studentData));
+      router.push(`${registrationFormPath}Profile`);
+    } catch (err) {
+      toast.error("An error occurred during registration.");
+      console.error(err);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
-    <form onSubmit={handleNext} className="bg-white max-w-full  flex flex-col ">
+    <form
+      onSubmit={handleSubmit}
+      className="bg-white max-w-full  flex flex-col "
+    >
       <div className="bg-[#01427a] w-full left-0 fixed top-0 z-[1000] text-white flex justify-between items-center px-8 py-5 font-bold">
         <h2 className="text-2xl">Student Registration</h2>
         <Link href={"/Register/Role"}>
@@ -448,12 +510,16 @@ const StudentForm = () => {
               </label>
 
               <RegDropdown
-                label={formData.class_year || "Select Year"}
-                items={ClassYearOptions}
-                onSelect={(value) =>
-                  setFormData((prev) => ({ ...prev, class_year: value }))
+                label={
+                  classYearOptions.find((y) => y.value === formData.class_year)
+                    ?.label || "Select Year"
                 }
+                items={classYearOptions}
+                onSelect={(value) => {
+                  setFormData((prev) => ({ ...prev, class_year: value }));
+                }}
               />
+
               {error?.class_year && (
                 <p className="text-red-500 text-xs mt-1">{error.class_year}</p>
               )}
@@ -468,11 +534,12 @@ const StudentForm = () => {
 
               <RegDropdown
                 label={formData.class_arm || "Select Arm"}
-                items={ClassArmOptions}
+                items={classArmOptions}
                 onSelect={(value) =>
                   setFormData((prev) => ({ ...prev, class_arm: value }))
                 }
               />
+
               {error?.class_arm && (
                 <p className="text-red-500 text-xs mt-1">{error.class_arm}</p>
               )}
@@ -616,29 +683,6 @@ const StudentForm = () => {
 
             <div className="personalInfoItem">
               <label
-                htmlFor="Email"
-                className="font-bold text-gray-500 text-base block mb-1"
-              >
-                Parent's E-mail
-              </label>
-              <input
-                type="email"
-                name="parent_email"
-                value={formData.parent_email}
-                placeholder="Enter E-mail"
-                onChange={handleInputChange}
-                // required
-                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
-              />
-              {error?.parent_email && (
-                <p className="text-red-500 text-xs mt-1">
-                  {error.parent_email}
-                </p>
-              )}
-            </div>
-
-            <div className="personalInfoItem">
-              <label
                 htmlFor="EmergencyContact"
                 className="font-bold text-gray-500 text-sm block mb-1"
               >
@@ -656,6 +700,30 @@ const StudentForm = () => {
               {error?.parent_emergency_contact && (
                 <p className="text-red-500 text-xs mt-1">
                   {error.parent_emergency_contact}
+                </p>
+              )}
+            </div>
+            <div>
+              <label
+                htmlFor={"relationship"}
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Relationship
+              </label>
+
+              <RegDropdown
+                label={formData.parent_relationship || "Select Relationship"}
+                items={RelationshipOptions}
+                onSelect={(value) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    parent_relationship: value,
+                  }))
+                }
+              />
+              {error?.parent_relationship && (
+                <p className="text-[#f2645c] text-sm mt-1">
+                  {error.parent_relationship}
                 </p>
               )}
             </div>
@@ -701,60 +769,18 @@ const StudentForm = () => {
               />
               <div></div>
             </div>
-
-            <div>
-              <label
-                htmlFor={"gender"}
-                className="font-bold text-gray-500 text-sm block mb-1"
-              >
-                Gender
-              </label>
-
-              <RegDropdown
-                label={formData.gender || "Select Gender"}
-                items={genderOptions}
-                onSelect={(value) =>
-                  setFormData((prev) => ({ ...prev, gender: value }))
-                }
-              />
-              {error?.gender && (
-                <p className="text-[#f2645c] text-sm mt-1">{error.gender}</p>
-              )}
-            </div>
-
-            <div>
-              <label
-                htmlFor={"relationship"}
-                className="font-bold text-gray-500 text-sm block mb-1"
-              >
-                Relationship
-              </label>
-
-              <RegDropdown
-                label={formData.parent_relationship || "Select Relationship"}
-                items={RelationshipOptions}
-                onSelect={(value) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    parent_relationship: value,
-                  }))
-                }
-              />
-              {error?.parent_relationship && (
-                <p className="text-[#f2645c] text-sm mt-1">
-                  {error.parent_relationship}
-                </p>
-              )}
-            </div>
           </div>
         </div>
       </div>
       <div className="flex justify-end pr-4 pb-3 mt-20">
         <button
           type="submit"
-          className="bg-[#01427a] text-white text-base rounded px-8 py-4 cursor-pointer hover:bg-[#01427a]/90 transition-colors"
+          disabled={isSubmitting}
+          className={`bg-[#01427a] text-white text-base rounded px-8 py-4 cursor-pointer hover:bg-[#01427a]/90 transition-colors ${
+            isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+          }`}
         >
-          Next Page
+          {isSubmitting ? "Processing..." : "Next Page"}
         </button>
       </div>
     </form>

@@ -11,7 +11,7 @@ export const RegisterStudent = async (studentData) => {
       "Error registering student:",
       error.response?.data || error.message
     );
-    throw error.response?.data || error;
+    throw error;
   }
 };
 
