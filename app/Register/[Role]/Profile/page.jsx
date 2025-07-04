@@ -6,6 +6,24 @@ import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import { RegisterTeacher } from "../../../Service/TeacherRegService";
 import { RegisterStudent } from "../../../Service/StudentRegService";
+import toast from "react-hot-toast";
+
+const extractFirstErrorMessage = (obj) => {
+  if (!obj || typeof obj !== "object") return null;
+
+  for (const key in obj) {
+    const value = obj[key];
+    if (Array.isArray(value) && value.length > 0) {
+      return value[0]; // Return first message from array
+    } else if (typeof value === "object") {
+      const nested = extractFirstErrorMessage(value);
+      if (nested) return nested;
+    }
+  }
+
+  return null;
+};
+
 const Profile = () => {
   const searchParams = useSearchParams();
   const role = searchParams.get("role");
@@ -21,8 +39,6 @@ const Profile = () => {
   const [profilePicture, setProfilePicture] = useState("/profile.png");
   const [newProfilePicture, setNewProfilePicture] = useState(null);
   const [studentInfo, setStudentInfo] = useState(null);
-  const [registrationError, setRegistrationError] = useState(null);
-  const [registrationSuccess, setRegistrationSuccess] = useState(false);
 
   useEffect(() => {
     const storedStudentInfo = localStorage.getItem("studentInfo");
@@ -51,8 +67,6 @@ const Profile = () => {
     setUsernameerror("");
     setPassworderror("");
     setConfirmPassworderror("");
-    setRegistrationError(null);
-    setRegistrationSuccess(false);
 
     let hasErrors = false;
 
@@ -100,22 +114,44 @@ const Profile = () => {
           : (response = await RegisterStudent(formData));
 
         console.log("Registration successful:", response);
+        toast.success("Registration successful, you can now log in ");
         localStorage.removeItem("studentInfo");
-        setRegistrationSuccess(true);
       } catch (error) {
-        console.error("Registration failed:", error);
-        setRegistrationError(error.message || "Registration failed");
+        console.log("RAW error:", error);
+        const data = error?.response?.data;
+
+        let errorMessage = "Registration failed";
+
+        if (data?.error) {
+          errorMessage = data.error;
+        } else if (data?.detail) {
+          errorMessage = data.detail;
+        } else if (typeof data === "object") {
+          for (const key in data) {
+            const fieldError = data[key];
+            if (Array.isArray(fieldError) && fieldError.length > 0) {
+              errorMessage = fieldError[0];
+              break;
+            }
+            if (typeof fieldError === "object") {
+              for (const subKey in fieldError) {
+                if (
+                  Array.isArray(fieldError[subKey]) &&
+                  fieldError[subKey].length > 0
+                ) {
+                  errorMessage = fieldError[subKey][0];
+                  break;
+                }
+              }
+            }
+          }
+        }
+
+        console.log("Extracted error message:", errorMessage);
+        toast.error(errorMessage);
       }
     }
   };
-
-  if (registrationSuccess) {
-    return (
-      <div className="text-green-600">
-        Registration successful! You can now log in.
-      </div>
-    ); // Or redirect
-  }
 
   return (
     <>
@@ -132,12 +168,7 @@ const Profile = () => {
             <div className="flex justify-center mb-8">
               <div className="bg-[#ffa500] w-[15%] h-1 rounded-lg"></div>
             </div>
-            {(registrationError && (
-              <p className="text-red-500 mt-3">{registrationError}</p>
-            )) ||
-              (registrationSuccess && (
-                <p className="text-green-500 mt-3">{registrationSuccess}</p>
-              ))}
+
             <div className="flex flex-col">
               <h3 className="text-[#01427a] text-lg font-bold mb-5">
                 Profile Picture
