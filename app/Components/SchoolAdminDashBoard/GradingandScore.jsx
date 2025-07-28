@@ -15,6 +15,7 @@ import { getClass, getDepartment, getTerms } from "@/Service/schoolConfig";
 import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import Dropdown from "./DropDown2";
+import toast from "react-hot-toast";
 
 const GradingandScore = () => {
   const [message, setMessage] = useState("");
@@ -119,8 +120,7 @@ const GradingandScore = () => {
           annual_result_open: data[0].annual_result_open,
         });
       } else if (error) {
-        setMessage(error || "Failed to load result visibility");
-        setMessageType("error");
+        toast.error(error || "Failed to load result visibility");
       }
     };
     fetchVisibility();
@@ -157,6 +157,49 @@ const GradingandScore = () => {
 
   const handleSubmitForGrading = async (e) => {
     e.preventDefault();
+    e.stopPropagation();
+
+    // Validate min_score is less than max_score
+    if (
+      parseInt(GradeFormData.min_score) >= parseInt(GradeFormData.max_score)
+    ) {
+      toast.error("Minimum score must be less than maximum score");
+      return;
+    }
+
+    // Check for duplicate grade letter (case insensitive)
+    const gradeLetterExists = grade.some(
+      (item) =>
+        item.grade.toLowerCase() === GradeFormData.grade.toLowerCase() &&
+        (!editGradeVisible || item.id !== selectedGrade?.id) // Skip current grade when editing
+    );
+
+    if (gradeLetterExists) {
+      toast.error("Grade letter already exists");
+      return;
+    }
+
+    // Check for overlapping score ranges
+    const rangeOverlaps = grade.some((item) => {
+      // Skip current grade when editing
+      if (editGradeVisible && item.id === selectedGrade?.id) return false;
+
+      const newMin = parseInt(GradeFormData.min_score);
+      const newMax = parseInt(GradeFormData.max_score);
+      const existingMin = parseInt(item.min_score);
+      const existingMax = parseInt(item.max_score);
+
+      return (
+        (newMin >= existingMin && newMin <= existingMax) ||
+        (newMax >= existingMin && newMax <= existingMax) ||
+        (newMin <= existingMin && newMax >= existingMax)
+      );
+    });
+
+    if (rangeOverlaps) {
+      toast.error("Score range overlaps with an existing grade");
+      return;
+    }
 
     if (editGradeVisible && selectedGrade) {
       try {
@@ -173,57 +216,43 @@ const GradingandScore = () => {
           updatedData
         );
 
-        if (response?.status === 204) {
-          setMessage("Grade Updated successfully.");
-          setMessageType("success");
-          closeDeleteModal();
-        } else {
-          setMessage("Failed to update Grade.");
-          setMessageType("error");
+        if (error) {
+          throw new Error(error);
         }
+
         const updatedList = grade.map((item) =>
           item.id === selectedGrade.id ? data : item
         );
         setgrade(updatedList);
-        setMessage("Grade updated successfully.");
-        setMessageType("success");
+        toast.success("Grade updated successfully.");
         seteditGradeVisible(false);
         setselectedGrade(null);
       } catch (err) {
-        setMessage("An error occurred while updating.");
-        setMessageType("error");
+        toast.error("An error occurred while updating.");
       }
     } else {
       try {
         const { data, error } = await createGrading(GradeFormData);
 
         if (error) {
-          setMessage(error || "Failed to add grade.");
-          setMessageType("error");
+          toast.error(error || "Failed to add grade.");
         } else {
           setgrade((prev) => [...prev, data]);
-          setMessage("Grade added successfully.");
-          setMessageType("success");
+          toast.success("Grade added successfully.");
         }
       } catch (err) {
-        setMessage("An error occurred while adding.");
-        setMessageType("error");
+        toast.error("An error occurred while adding.");
       }
     }
 
+    // Reset form
     setGradeFormData({
       min_score: "",
       max_score: "",
       grade: "",
       remarks: "",
     });
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
-
   const handleEdit = (grade) => {
     seteditGradeVisible(true);
     setselectedGrade({ ...grade });
@@ -255,17 +284,14 @@ const GradingandScore = () => {
       try {
         const response = await deleteGrade(selectedGradeDelete.id);
         if (response?.status === 204) {
-          setMessage("Grade deleted successfully.");
-          setMessageType("success");
+          toast.success("Grade deleted successfully.");
           closeDeleteModal();
         } else {
-          setMessage("Failed to delete Grade.");
-          setMessageType("error");
+          toast.error("Failed to delete Grade.");
           closeDeleteModal();
         }
       } catch (error) {
-        setMessageType("error");
-        setMessage("Failed to delete Grade.");
+        toast.success("Failed to delete Grade.");
       }
     }
   };
@@ -299,17 +325,10 @@ const GradingandScore = () => {
 
       if (error) throw new Error(error);
 
-      setMessage(`${name.replaceAll("_", " ")} updated successfully.`);
-      setMessageType("success");
+      toast.success(`${name.replaceAll("_", " ")} updated successfully.`);
     } catch (error) {
-      setMessage(`Failed to update ${name.replaceAll("_", " ")}`);
-      setMessageType("error");
+      toast.error(`Failed to update ${name.replaceAll("_", " ")}`);
     }
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   useEffect(() => {
@@ -317,8 +336,7 @@ const GradingandScore = () => {
       if (computationFormData.class_year && computationFormData.department) {
         const { data, error } = await getAnnualweigh();
         if (error) {
-          setMessage(error);
-          setMessageType("error");
+          toast.error(error);
           return;
         }
 
@@ -367,8 +385,7 @@ const GradingandScore = () => {
       parseFloat(computationFormData.third_term_weight || 0);
 
     if (Math.abs(total - 1) > 0.001) {
-      setMessage("Total weight must equal 1.");
-      setMessageType("error");
+      toast.error("Total weight must equal 1.");
       return;
     }
 
@@ -380,42 +397,61 @@ const GradingandScore = () => {
       third_term_weight: parseFloat(computationFormData.third_term_weight),
     };
 
-    let response;
+    try {
+      let response;
+      if (computationFormData.id) {
+        response = await UpdateAnnualWeigh(computationFormData.id, payload);
+      } else {
+        response = await AddAnnualweigh(payload);
+      }
 
-    if (computationFormData.id) {
-      response = await UpdateAnnualWeigh(computationFormData.id, payload);
-    } else {
-      response = await AddAnnualweigh(payload);
-    }
+      if (response?.error) {
+        throw new Error(
+          response.error || "Failed to save weight configuration."
+        );
+      }
 
-    if (response?.error) {
-      setMessage("Failed to save weight configuration.");
-      setMessageType("error");
-    } else {
-      setMessage("Weight configuration saved successfully.");
-      setMessageType("success");
+      toast.success("Weight configuration saved successfully.");
+
+      // Update the original weights to match the saved values
+      setOriginalWeights({
+        first_term_weight: computationFormData.first_term_weight,
+        second_term_weight: computationFormData.second_term_weight,
+        third_term_weight: computationFormData.third_term_weight,
+      });
+
+      // Close all edit modes
       setWeight({});
+
+      // If this was a new entry, update the ID
+      if (!computationFormData.id && response?.data?.id) {
+        setComputationFormData((prev) => ({
+          ...prev,
+          id: response.data.id,
+        }));
+      }
+
+      // Refresh the weights data
+      const { data } = await getAnnualweigh();
+      const match = data.find(
+        (item) =>
+          item.class_year === computationFormData.class_year &&
+          item.department === computationFormData.department
+      );
+
+      if (match) {
+        setOriginalWeights({
+          first_term_weight: match.first_term_weight,
+          second_term_weight: match.second_term_weight,
+          third_term_weight: match.third_term_weight,
+        });
+      }
+    } catch (error) {
+      toast.error(error.message || "Failed to save weight configuration.");
     }
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
-
   return (
     <div className="pr-1 h-full overflow-y-auto">
-      {message && (
-        <div
-          className={`mx-6 mb-3 z-[3000] sticky top-0 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
       {deleteModalVisibleforgrade && selectedGradeDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -829,12 +865,24 @@ const GradingandScore = () => {
                   ) : (
                     paginatedDataforAnnualweigh.map((item, index) => {
                       let termKey = "";
-                      if (item.name.toLowerCase().includes("first"))
+                      const termName = item.name.toLowerCase();
+
+                      if (
+                        termName.includes("first") ||
+                        termName.includes("1")
+                      ) {
                         termKey = "first_term_weight";
-                      else if (item.name.toLowerCase().includes("second"))
+                      } else if (
+                        termName.includes("second") ||
+                        termName.includes("2")
+                      ) {
                         termKey = "second_term_weight";
-                      else if (item.name.toLowerCase().includes("third"))
+                      } else if (
+                        termName.includes("third") ||
+                        termName.includes("3")
+                      ) {
                         termKey = "third_term_weight";
+                      }
 
                       const inputValue = computationFormData[termKey];
                       const originalValue = originalWeights[termKey];

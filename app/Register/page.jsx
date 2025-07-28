@@ -20,6 +20,8 @@ const Register = () => {
   const [pinerror, setPinerror] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [token, setToken] = useState("");
+  const [classYears, setClassYears] = useState([]); // New state for class years
+  const [classArms, setClassArms] = useState([]); // New state for class arms
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -41,18 +43,35 @@ const Register = () => {
 
     try {
       const result = await verifyOtp(Pin, schoolid);
+      console.log("Full API response:", result);
 
       // Save user and temp token
       localStorage.setItem("user", JSON.stringify({ schoolid, pin: Pin }));
-      setToken(result.temp_token); // This opens the modal
-      console.log(token);
+      setToken(result.temp_token);
+
+      // Update state and save to localStorage in one go
+      setClassYears(result.class_years || []);
+      setClassArms(result.class_arms || []);
+
+      // Save to localStorage after state is updated
+      localStorage.setItem(
+        "classYears",
+        JSON.stringify(result.class_years || [])
+      );
+      localStorage.setItem(
+        "classArms",
+        JSON.stringify(result.class_arms || [])
+      );
+
+      console.log(result.class_years);
+      console.log(result.class_arms);
       openModal();
       setSchoolid("");
       setPin("");
     } catch (error) {
       const errorMsg =
-        error.response?.data?.error || // <--- use `.error`
-        error.response?.data?.detail || // keep as fallback
+        error.response?.data?.error ||
+        error.response?.data?.detail ||
         error.message;
 
       if (errorMsg.toLowerCase().includes("school")) {

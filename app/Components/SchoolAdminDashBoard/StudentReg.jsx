@@ -4,19 +4,16 @@ import { Country, State, City } from "country-state-city";
 import React, { useEffect, useState } from "react";
 import { SchoolAdminRegisterStudent } from "@/Service/StudentRegService";
 import DropDownLight from "./DropDownwithlightborder";
+import { getClass, getClassArm } from "@/Service/schoolConfig";
 
 const StudentReg = () => {
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [Student, setStudent] = useState([]);
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
-  const [parent_countries, setParentCountries] = useState([]);
-  const [parent_states, setParentStates] = useState([]);
-  const [parent_cities, setParentCities] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const [classYears, setClassYears] = useState([]);
+  const [classArms, setClassArms] = useState([]);
   const [formData, setFormData] = useState({
     user: {
       username: "",
@@ -42,20 +39,30 @@ const StudentReg = () => {
     parent_email: "default",
     parent_emergency_contact: "",
     address: "default",
-    parent_country: "default",
-    parent_city: "default",
-    parent_state: "default",
     parent_contact_info: "",
     parent_relationship: "",
-    parent_gender: "",
     class_year: "",
     class_arm: "",
   });
 
+  useEffect(() => {
+    const fetchClassArms = async () => {
+      const { data, error } = await getClassArm();
+      if (data) setClassArms(data);
+      else toast.error(error || "Failed to load class arms");
+    };
+    const fetchClasses = async () => {
+      const { data, error } = await getClass();
+      if (data) setClassYears(data);
+      else toast.error(error || "Failed to load classes");
+    };
+    fetchClasses();
+    fetchClassArms();
+  }, []);
+
   //Setting countries
   useEffect(() => {
     setCountries(Country.getAllCountries());
-    setParentCountries(Country.getAllCountries());
   }, []);
 
   //Student country
@@ -64,22 +71,6 @@ const StudentReg = () => {
       const fetchedStates = State.getStatesOfCountry(formData.countryCode);
       setStates(fetchedStates);
       setFormData((prev) => ({ ...prev, state: "", stateCode: "", city: "" }));
-    }
-  }, [formData.countryCode]);
-
-  //Parent state
-  useEffect(() => {
-    if (formData.countryCode) {
-      const fetchedParentStates = State.getStatesOfCountry(
-        formData.countryCode
-      );
-      setParentStates(fetchedParentStates);
-      setFormData((prev) => ({
-        ...prev,
-        parent_state: "",
-        stateCode: "",
-        parent_city: "",
-      }));
     }
   }, [formData.countryCode]);
 
@@ -95,30 +86,13 @@ const StudentReg = () => {
     }
   }, [formData.stateCode]);
 
-  //Parent cities
-  useEffect(() => {
-    if (formData.countryCode && formData.stateCode) {
-      const fetchedCities = City.getCitiesOfState(
-        formData.countryCode,
-        formData.stateCode
-      );
-      setParentCities(fetchedCities);
-      setFormData((prev) => ({ ...prev, parent_city: "" }));
-    }
-  }, [formData.stateCode]);
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setMessage("");
-    setMessageType("");
 
     try {
       const response = await SchoolAdminRegisterStudent(formData);
       if (response?.status === 201) {
-        console.log("Student registered successfully", response.data);
-        setMessage("Student registered successfully");
-        setMessageType("success");
         toast.success("Student registered successfully");
       }
       setStudent([...Student, formData]);
@@ -145,12 +119,8 @@ const StudentReg = () => {
           }
         }
         const finalMessage = flatErrors.join(" ");
-        setMessage(finalMessage);
-        setMessageType("error");
         toast.error(finalMessage);
       } else {
-        setMessage("An unexpected error occurred.");
-        setMessageType("error");
         toast.error("An unexpected error occurred.");
       }
     }
@@ -397,7 +367,7 @@ const StudentReg = () => {
         <div className=" pt-8 pl-6 pr-6 mb-2 ">
           <p className="font-bold text-[#07508F]">Admission Information</p>
         </div>
-        <div className="grid grid-cols-2 pl-6 pr-6 gap-3">
+        <div className="grid grid-cols-2 pl-6 pr-6 gap-x-3 gap-y-0">
           <div className="flex flex-col gap-x-1">
             <label className="text-[0.88rem] text-[#5E6A72]">
               Admission Number:
@@ -441,6 +411,34 @@ const StudentReg = () => {
                   : "border border-[#B6B6B6]"
               }`}
               required
+            />
+          </div>
+          <div className="flex flex-col gap-x-1">
+            <label className="text-[0.88rem] text-[#FFFFFF]">Class Year</label>
+            <DropDownLight
+              label={formData.class_year || "Select Class Year"}
+              items={classYears.map((year) => ({
+                label: year.class_name,
+                onClick: () =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    class_year: year.class_year_id,
+                  })),
+              }))}
+            />
+          </div>
+          <div className="flex flex-col gap-x-1">
+            <label className="text-[0.88rem] text-[#FFFFFF]">Class Arm</label>
+            <DropDownLight
+              label={formData.class_arm || "Select Class Arm"}
+              items={classArms.map((year) => ({
+                label: year.arm_name,
+                onClick: () =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    class_arm: year.class_id,
+                  })),
+              }))}
             />
           </div>
         </div>
@@ -559,29 +557,7 @@ const StudentReg = () => {
                 required
               />
             </div>
-            <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Parent's E-mail:
-              </label>
-              <input
-                type="email"
-                placeholder="Enter Email"
-                value={formData.parent_email || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    parent_email: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.parent_email !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
-                required
-              />
-            </div>
+
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">
                 Parent's Phone Number:
@@ -607,8 +583,6 @@ const StudentReg = () => {
                 required
               />
             </div>
-          </div>
-          <div className="mt-3">
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">
                 Emergency Contact:
@@ -634,54 +608,7 @@ const StudentReg = () => {
                 required
               />
             </div>
-          </div>
-          <div className="grid grid-cols-3 gap-x-6 gap-y-3 mt-3">
-            <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">Address:</label>
-              <DropDownLight
-                label={formData.parent_country || "Select Country"}
-                items={countries.map((country) => ({
-                  label: country.name,
-                  onClick: () =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      parent_country: country.name,
-                      countryCode: country.isoCode,
-                    })),
-                }))}
-              />
-            </div>
-            <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#FFFFFF]">Address</label>
-              <DropDownLight
-                label={formData.parent_state || "Select State"}
-                items={states.map((state) => ({
-                  label: state.name,
-                  onClick: () =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      parent_state: state.name,
-                      stateCode: state.isoCode,
-                    })),
-                }))}
-              />
-            </div>
-            <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#FFFFFF]">Address</label>
-              <DropDownLight
-                label={formData.parent_city || "Select City"}
-                items={cities.map((city) => ({
-                  label: city.name,
-                  onClick: () =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      parent_city: city.name,
-                    })),
-                }))}
-              />
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-3">
+
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">
                 Relationship:
@@ -713,27 +640,8 @@ const StudentReg = () => {
                 ]}
               />
             </div>
-            <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">Gender:</label>
-              <DropDownLight
-                label={formData.parent_gender || "Select Gender"}
-                items={[
-                  {
-                    label: "Male",
-                    onClick: () =>
-                      setFormData({ ...formData, parent_gender: "Male" } || ""),
-                  },
-                  {
-                    label: "Female",
-                    onClick: () =>
-                      setFormData(
-                        { ...formData, parent_gender: "Female" } || ""
-                      ),
-                  },
-                ]}
-              />
-            </div>
           </div>
+
           <div className="flex justify-end mb-5 mt-10">
             <button className="bg-[#01427A] text-sm text-white font-bold py-1.5 cursor-pointer hover:opacity-80 px-5 rounded-sm">
               Save

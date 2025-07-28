@@ -8,15 +8,8 @@ export const verifyOtp = async (otp, schoolId) => {
       otp,
       school_id: schoolId,
     });
-    if (response.status === 200) {
-      const { message, temp_token } = response.data;
-      console.log("Verification successful:", message);
-      console.log("Temporary token:", temp_token);
 
-      return { message, temp_token }; // Return the response data
-    } else {
-      throw new Error("Unexpected response status");
-    }
+    return response.data;
   } catch (error) {
     console.error(
       "Error verifying registration pin:",

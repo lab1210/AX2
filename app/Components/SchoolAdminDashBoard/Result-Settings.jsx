@@ -8,11 +8,11 @@ import {
   deleteCategory,
   getCategory,
   getResults,
+  UpdateCategory,
   UpdateResultVisibility,
 } from "../../Service/ResultService";
+import toast from "react-hot-toast";
 const ResultSettings = () => {
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [AssessmentCategory, setAssessmentCategory] = useState([]);
   const [result, setResult] = useState({});
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -39,7 +39,7 @@ const ResultSettings = () => {
     const fetchCategories = async () => {
       const { data, error } = await getCategory();
       if (data) setAssessmentCategory(data);
-      else setMessage(error || "Failed to load Categories");
+      else toast.error(error || "Failed to load Categories");
     };
     fetchCategories();
   }, []);
@@ -55,8 +55,7 @@ const ResultSettings = () => {
           passMark: "",
         });
       } else if (error) {
-        setMessage("Error loading result configuration.");
-        setMessageType("error");
+        toast.error("Error loading result configuration.");
       }
     };
     fetchResult();
@@ -89,8 +88,7 @@ const ResultSettings = () => {
       : CategoryformData.assessment_name?.trim();
 
     if (!trimmedName) {
-      setMessage("Category name is required.");
-      setMessageType("error");
+      toast.error("Category name is required.");
       return;
     }
 
@@ -100,8 +98,7 @@ const ResultSettings = () => {
     );
 
     if (!editCategoryVisible && existingSession) {
-      setMessage("Category name already exists.");
-      setMessageType("error");
+      toast.error("Category name already exists.");
       return;
     }
 
@@ -109,19 +106,18 @@ const ResultSettings = () => {
       try {
         const updatedData = {
           ...selectedCategory,
-          category: selectedCategory.assessment_name,
-          numberOfTimes: selectedCategory.number_of_times,
-          maxScore: selectedCategory.maxScore,
+          assessment_name: selectedCategory.assessment_name,
+          number_of_times: selectedCategory.number_of_times,
+          max_score_per_one: selectedCategory.max_score_per_one,
         };
 
-        const { data, error } = await updateCategory(
+        const { data, error } = await UpdateCategory(
           selectedCategory.assessment_category_id,
           updatedData
         );
 
         if (error) {
-          setMessage(error || "Failed to update Category.");
-          setMessageType("error");
+          toast.error(error || "Failed to update Category.");
           return;
         }
 
@@ -132,29 +128,24 @@ const ResultSettings = () => {
             : item
         );
         setAssessmentCategory(updatedList);
-        setMessage("Category updated successfully.");
-        setMessageType("success");
+        toast.success("Category updated successfully.");
         setEditCategoryVisible(false);
         setSelectedCategory(null);
       } catch (err) {
-        setMessage("An error occurred while updating.");
-        setMessageType("error");
+        toast.error("An error occurred while updating.");
       }
     } else {
       try {
         const { data, error } = await createcategory(CategoryformData);
 
         if (error) {
-          setMessage(error || "Failed to add category.");
-          setMessageType("error");
+          toast.error(error || "Failed to add category.");
         } else {
           setAssessmentCategory((prev) => [...prev, data]);
-          setMessage("Category added successfully.");
-          setMessageType("success");
+          toast.success("Category added successfully.");
         }
       } catch (err) {
-        setMessage("An error occurred while adding.");
-        setMessageType("error");
+        toast.error("An error occurred while adding.");
       }
     }
 
@@ -163,11 +154,6 @@ const ResultSettings = () => {
       number_of_times: "",
       max_score_per_one: "",
     });
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   // SUBMIT FOR RESULT
@@ -184,22 +170,19 @@ const ResultSettings = () => {
       ResultformData.total_exam_score === "" ||
       ResultformData.passMark === ""
     ) {
-      setMessage("All fields are required.");
-      setMessageType("error");
+      toast.error("All fields are required.");
       return;
     }
 
     const total = ca + exam;
 
     if (total > 100) {
-      setMessage("Total score cannot exceed 100.");
-      setMessageType("error");
+      toast.error("Total score cannot exceed 100.");
       return;
     }
 
     if (total < 100) {
-      setMessage("Total score cannot be less than 100.");
-      setMessageType("error");
+      toast.error("Total score cannot be less than 100.");
       return;
     }
 
@@ -220,16 +203,13 @@ const ResultSettings = () => {
       }
 
       if (response.error) {
-        setMessage(response.error || "Failed to save result configuration.");
-        setMessageType("error");
+        toast.error(response.error || "Failed to save result configuration.");
       } else {
         setResult(response.data);
-        setMessage("Result configuration saved successfully.");
-        setMessageType("success");
+        toast.success("Result configuration saved successfully.");
       }
     } catch (err) {
-      setMessage("An error occurred while saving.");
-      setMessageType("error");
+      toast.error("An error occurred while saving.");
     }
 
     setResultFormData({
@@ -237,11 +217,6 @@ const ResultSettings = () => {
       total_exam_score: "",
       passMark: "",
     });
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const handleEdit = (category) => {
@@ -267,34 +242,20 @@ const ResultSettings = () => {
           selectedCategoryDelete.assessment_category_id
         );
         if (response?.status === 204) {
-          setMessage("Category deleted successfully.");
-          setMessageType("success");
+          toast.success("Category deleted successfully.");
           closeDeleteModal();
         } else {
-          setMessage("Failed to delete Category.");
-          setMessageType("error");
+          toast.error("Failed to delete Category.");
           closeDeleteModal();
         }
       } catch (error) {
-        setMessageType("error");
-        setMessage("Failed to delete Category.");
+        toast.error("Failed to delete Category.");
       }
     }
   };
 
   return (
     <div className="pr-1 h-full overflow-y-auto">
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
       {deleteModalVisible && selectedCategoryDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -480,6 +441,7 @@ const ResultSettings = () => {
                 <input
                   type="number"
                   name="name"
+                  min={0}
                   placeholder="Enter No of Times"
                   value={
                     editCategoryVisible
@@ -515,6 +477,7 @@ const ResultSettings = () => {
                 <input
                   type="number"
                   name="name"
+                  min={0}
                   placeholder="Enter Max Score"
                   value={
                     editCategoryVisible

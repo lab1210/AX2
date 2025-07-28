@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import Dropdown from "./DropDownwithlightborder";
 import { Country, State, City } from "country-state-city";
 import { LuUpload } from "react-icons/lu";
+import { SchoolAdminRegisterTeacher } from "@/Service/TeacherRegService";
+import toast from "react-hot-toast";
 const TeacherReg = () => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
@@ -53,27 +55,22 @@ const TeacherReg = () => {
     }
   }, [formData.stateCode]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setTeacher([...Teacher, formData]);
-    console.log(Teacher);
-    setMessage("Teacher registered successfully");
-    setMessageType("success");
+
+    try {
+      const response = await SchoolAdminRegisterTeacher(formData);
+      if (response?.status == 201) {
+        toast.success("Teacher registered successfully");
+      }
+      setTeacher([...Teacher, formData]);
+    } catch (error) {
+      console.error("Error ");
+      toast.error("Error registering teacher");
+    }
   };
   return (
     <div>
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
-
       <form onSubmit={handleSubmit} className="flex-shrink-0">
         <div className=" pt-5 pl-6 pr-6 mb-2 ">
           <p className="font-bold text-[#07508F]">Personal Information</p>

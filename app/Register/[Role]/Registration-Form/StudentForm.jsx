@@ -5,7 +5,6 @@ import React, { useEffect, useState } from "react";
 import { IoIosCloseCircleOutline } from "react-icons/io";
 import { Country, State, City } from "country-state-city";
 import { usePathname, useRouter } from "next/navigation";
-import { getClassArm, getClass } from "@/Service/schoolConfig";
 import toast from "react-hot-toast";
 const StudentForm = () => {
   const pathname = usePathname();
@@ -58,27 +57,33 @@ const StudentForm = () => {
   });
 
   useEffect(() => {
-    const fetchInitialData = async () => {
-      // Fetch class years
-      const years = await getClass();
-      if (years.data) {
-        setClassYearOptions(
-          years.data.map((year) => ({
-            label: year.class_name,
-            value: year.class_year_id, // Use class_id as value for filtering
-          }))
-        );
-      }
+    // Load saved class years and arms from localStorage
+    const savedClassYears =
+      JSON.parse(localStorage.getItem("classYears")) || [];
+    const savedClassArms = JSON.parse(localStorage.getItem("classArms")) || [];
 
-      // Fetch all class arms
-      const arms = await getClassArm();
-      if (arms.data) {
-        setAllClassArms(arms.data); // Store all class arms
-        setFilteredClassArms(arms.data); // Initially show all arms
-      }
-    };
+    // Set class year options from saved data
+    setClassYearOptions(
+      savedClassYears.map((year) => ({
+        label: year.name,
+        value: year.id, // Using the id from verifyOtp response
+      }))
+    );
 
-    fetchInitialData();
+    // Set class arms options from saved data
+    setAllClassArms(
+      savedClassArms.map((arm) => ({
+        arm_name: arm.name, // Adjust according to your actual data structure
+        class_year: arm.class_year_id, // Adjust according to your actual data structure
+      }))
+    );
+    setFilteredClassArms(savedClassArms);
+
+    // Load token from localStorage
+    const storedToken = localStorage.getItem("verificationToken");
+    if (storedToken) {
+      setExpectedToken(storedToken);
+    }
   }, []);
 
   useEffect(() => {
@@ -88,7 +93,6 @@ const StudentForm = () => {
       );
       setFilteredClassArms(filtered);
 
-      // Reset class_arm if it's no longer valid for the selected year
       if (
         filtered.length > 0 &&
         !filtered.some((arm) => arm.arm_name === formData.class_arm)
@@ -96,7 +100,7 @@ const StudentForm = () => {
         setFormData((prev) => ({ ...prev, class_arm: "" }));
       }
     } else {
-      setFilteredClassArms(allClassArms); // Show all if no year selected
+      setFilteredClassArms(allClassArms);
     }
   }, [formData.class_year, allClassArms]);
 
