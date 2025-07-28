@@ -1,45 +1,63 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Dropdown from "./DropDown";
 import MultiDropdown from "./MultiDropDown";
-
+import { getDepartment, getSubject } from "@/Service/schoolConfig";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
+import toast from "react-hot-toast";
+import {
+  createSubjectDepartmentRelationship,
+  deleteSubjectDepartmentRelationship,
+  getSubjectDepartmentRelationships,
+  updateSubjectDepartmentRelationship,
+} from "@/Service/SchoolAdminAssignmentService";
 
 const SubjecttoDept = () => {
-  const [classList, setClassList] = useState([
-    {
-      Department: "Department 1",
-      Subject: ["Mathematics", "Science"],
-    },
-    {
-      Department: "Department 2",
-      Subject: ["English", "History"],
-    },
-    {
-      Department: "Department 3",
-      Subject: ["Science", "Art"],
-    },
-  ]);
-
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
-  const [selectedClass, setSelectedClass] = useState(null);
-  const [editClassVisible, setEditClassVisible] = useState(false);
+  const [Subjects, setSubjects] = useState([]);
+  const [Department, setDepartment] = useState([]);
+  const [SubjectDepartmentList, setSubjectDepartmentList] = useState([]);
+  const [selectAssignment, setselectAssignment] = useState(null);
+  const [Edit, setEdit] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 2;
+  const [selectedAssignmentDelete, setselectedAssignmentDelete] =
+    useState(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+
+  const itemsPerPage = 10;
   const [formData, setFormData] = useState([
     {
-      Department: "",
-      Subject: [],
+      department: "",
+      subject: "",
     },
   ]);
 
-  const paginatedData = classList.slice(
+  useEffect(() => {
+    const fetchSubjects = async () => {
+      const { data, error } = await getSubject();
+      if (data) setSubjects(data);
+      else toast.error(error || "Failed to fetch subjects");
+    };
+    const fetchDepartments = async () => {
+      const { data, error } = await getDepartment();
+      if (data) setDepartment(data);
+      else toast.error(error || "Failed to fetch departments");
+    };
+    const fetchSubjectDepartmentList = async () => {
+      const { data, error } = await getSubjectDepartmentRelationships();
+      if (data) setSubjectDepartmentList(data);
+      else toast.error(error || "Failed to fetch List");
+    };
+    fetchSubjects();
+    fetchDepartments();
+    fetchSubjectDepartmentList();
+  }, []);
+
+  const paginatedData = SubjectDepartmentList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const totalPages = Math.ceil(classList.length / itemsPerPage);
+  const totalPages = Math.ceil(SubjectDepartmentList.length / itemsPerPage);
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
@@ -48,63 +66,155 @@ const SubjecttoDept = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const existingClass = classList.find(
-      (item) => item.Teacher === formData.Teacher
+    const existingDepartment = SubjectDepartmentList.find(
+      (item) => item.department === formData.department
     );
 
-    if (!editClassVisible && existingClass) {
-      setMessage("Department Assignment already exists.");
-      setMessageType("error");
+    if (!Edit && existingDepartment) {
+      toast.error("Department Assignment already exists.");
       return;
     }
 
-    if (editClassVisible && selectedClass) {
-      const updatedList = classList.map((item) =>
-        item.Class === selectedClass.Teacher ? selectedClass : item
-      );
-      setMessage("Department Assignment updated successfully.");
-      setMessageType("success");
-      setEditClassVisible(false);
-      setSelectedClass(null);
+    if (Edit && selectAssignment) {
+      try {
+        const updatedAssignment = {
+          ...selectAssignment,
+          subject: selectAssignment.subject,
+          department: selectAssignment.department,
+        };
+        const { data, error } = await updateSubjectDepartmentRelationship(
+          selectAssignment.subject_class_id,
+          updatedAssignment
+        );
+        if (error) {
+          toast.error(
+            error || "Failed to update Subject Department Assignment"
+          );
+          return;
+        }
+        const updatedList = SubjectDepartmentList.map((item) =>
+          item.subject_class_id === selectAssignment.subject_class_id
+            ? data
+            : item
+        );
+        setSubjectDepartmentList(updatedList);
+        toast.success("Subject Department Assignment updated successfully");
+        setEdit(false);
+        setselectAssignment(null);
+      } catch (error) {
+        toast.error("Failed to update Subject Department Assignment");
+      }
     } else {
-      setClassList((prev) => [...prev, formData]);
-      setMessage("Department Assignment added successfully.");
-      setMessageType("success");
-      setFormData({
-        Department: "",
-        Subject: [],
-      });
+      try {
+        const { data, error } = await createSubjectDepartmentRelationship(
+          formData
+        );
+        if (error) {
+          toast.error(
+            error || "Failed to create Subject Department Assignment"
+          );
+        } else {
+          setSubjectDepartmentList((prev) => [...prev, data]);
+          toast.success("Subject Department Assignment created successfully");
+        }
+      } catch (error) {
+        toast.error("Failed to create Subject Department Assignment");
+      }
     }
-
-    // Clear message after 3 seconds
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
+    setFormData({
+      department: "",
+      subject: "",
+    });
   };
 
-  const handleEdit = (Teacher) => {
-    setEditClassVisible(true);
-    setSelectedClass({ ...Teacher });
+  const handleEdit = (SubjectDepartment) => {
+    setEdit(true);
+    setselectAssignment({ ...SubjectDepartment });
   };
+
+  const openDeleteModal = (term) => {
+    setselectedAssignmentDelete(term);
+    setDeleteModalVisible(true);
+  };
+
+  // Function to close delete modal
+  const closeDeleteModal = () => {
+    setselectedAssignmentDelete(null);
+    setDeleteModalVisible(false);
+  };
+
+  const handleDelete = async () => {
+    if (selectedAssignmentDelete?.subject_class_id) {
+      try {
+        const response = await deleteSubjectDepartmentRelationship(
+          selectedAssignmentDelete.subject_class_id
+        );
+        if (response?.status === 204) {
+          toast.success("Subject Department Assignment deleted successfully.");
+          closeDeleteModal();
+        } else {
+          toast.error("Failed to delete Subject Department Assignment.");
+          closeDeleteModal();
+        }
+      } catch (error) {
+        toast.error(error || "Failed to delete Subject Department Assignment.");
+      }
+    }
+  };
+
+  const departmentOptions = Department.map((dept) => ({
+    label: dept.name,
+    value: dept.department_id,
+  }));
+
+  const subjectOptions = Subjects.map((subject) => ({
+    label: subject.name,
+    value: subject.subject_id,
+  }));
 
   return (
     <div>
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
+      {deleteModalVisible && selectedAssignmentDelete && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
+            <p className="font-bold text-center text-lg">
+              Delete Subject Department Relationship
+            </p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure want to delete
+              </p>
+              <p className="text-base text-[#858383]">
+                <span className="font-bold">
+                  {selectedAssignmentDelete?.department}
+                </span>
+                ?
+              </p>
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+              <button
+                onClick={handleDelete}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
         </div>
       )}
-
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
         <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
           <p className="font-bold text-[#07508F]">
@@ -114,7 +224,7 @@ const SubjecttoDept = () => {
             type="submit"
             className="bg-[#07508F] text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
           >
-            {editClassVisible ? "Save" : "Assign"}
+            {Edit ? "Save" : "Assign"}
           </button>
         </div>
         <div className="pl-6 pr-6">
@@ -123,29 +233,21 @@ const SubjecttoDept = () => {
               <label className="text-[0.88rem] text-[#5E6A72]">Subject:</label>
               <MultiDropdown
                 label="Select Subject (s)"
+                items={subjectOptions}
                 selectedItems={
-                  editClassVisible
-                    ? selectedClass.Subject || []
-                    : formData.Subject
+                  Edit ? selectAssignment.subject : formData.subject
                 }
                 onSelect={(selected) =>
-                  editClassVisible
-                    ? setSelectedClass((prev) => ({
+                  Edit
+                    ? setselectAssignment((prev) => ({
                         ...prev,
-                        Subject: selected,
+                        subject: selected,
                       }))
                     : setFormData((prev) => ({
                         ...prev,
-                        Subject: selected,
+                        subject: selected,
                       }))
                 }
-                items={[
-                  { label: "Mathematics" },
-                  { label: "English" },
-                  { label: "Science" },
-                  { label: "Art" },
-                  { label: "History" },
-                ]}
               />
             </div>
 
@@ -155,39 +257,27 @@ const SubjecttoDept = () => {
               </label>
               <Dropdown
                 label={
-                  editClassVisible
-                    ? selectedClass.Department
-                    : formData.Department || "Select Department"
+                  Edit
+                    ? Department.find(
+                        (d) => d.department_id === selectAssignment?.department
+                      )?.name || "Select Department"
+                    : Department.find(
+                        (d) => d.department_id === formData.department
+                      )?.name || "Select Department"
                 }
-                items={[
-                  {
-                    label: "Department 1",
-                    onClick: () =>
-                      editClassVisible
-                        ? setSelectedClass((prev) => ({
-                            ...prev,
-                            Department: "Department 1",
-                          }))
-                        : setFormData((prev) => ({
-                            ...prev,
-                            Department: "Department 1",
-                          })) || "",
-                  },
-
-                  {
-                    label: "Department 2",
-                    onClick: () =>
-                      editClassVisible
-                        ? setSelectedClass((prev) => ({
-                            ...prev,
-                            Department: "Department 2",
-                          }))
-                        : setFormData((prev) => ({
-                            ...prev,
-                            Department: "Department 2",
-                          })) || "",
-                  },
-                ]}
+                items={Department.map((dept) => ({
+                  label: dept.name,
+                  onClick: () =>
+                    Edit
+                      ? setselectAssignment((prev) => ({
+                          ...prev,
+                          department: dept.department_id,
+                        }))
+                      : setFormData((prev) => ({
+                          ...prev,
+                          department: dept.department_id,
+                        })),
+                }))}
               />
             </div>
           </div>
@@ -224,8 +314,8 @@ const SubjecttoDept = () => {
               ) : (
                 paginatedData.map((item, index) => (
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-16">{item.Subject?.join(",")}</td>
-                    <td>{item.Department}</td>
+                    <td className="p-2 pl-16">{item.subject_name}</td>
+                    <td>{item.department_name}</td>
                     <td className="p-2">
                       <div className="flex gap-4">
                         <FiEdit3
@@ -234,6 +324,7 @@ const SubjecttoDept = () => {
                           size={15}
                         />
                         <FiTrash2
+                          onClick={() => openDeleteModal(item)}
                           className="text-[#F94144] cursor-pointer"
                           size={15}
                         />
