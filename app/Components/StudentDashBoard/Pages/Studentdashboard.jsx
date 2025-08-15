@@ -10,55 +10,103 @@ import { LiaHeartbeatSolid } from "react-icons/lia";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { getUserDetails } from "../../../Service/AuthService";
-
-// Dummy data for events and notifications (replace with API calls)
-const dummyevents = [
-  {
-    title: "Inter-House Sports",
-    description:
-      "The 2nd term Inter-House sports has been rescheduled for  Thur 15th - Fri 16th October 2023",
-  },
-  {
-    title: "Boarders Meeting",
-    description:
-      " All JSS1-SS3 boarding school students will be having a meeting by 3pm on Friday 29th October, 2023",
-  },
-
-  {
-    title: "Spelling Bee",
-    description:
-      "The international spelling bee competition will hold on the 26th and 27th of October, 2023",
-  },
-];
-
-const dummyNotifications = [
-  {
-    day: "Thurs",
-    date: "13",
-    title: "Upcoming Fees Payment for the 2023/2024 Session",
-    description: "Updates on school fees for all junior and senior students",
-  },
-  {
-    day: "Mon",
-    date: "25",
-    title: "Mid-term Tests",
-    description: "Mid term tests will start on Monday 25th October, 2023",
-  },
-];
+import { getStudents } from "../../../Service/studentService";
+import { getNotifications } from "../../../Service/NotificationService";
+import { getAcademicYears, getTerms } from "../../../Service/schoolConfig";
+import toast from "react-hot-toast";
 
 export default function Studentdashboard() {
   const searchParams = useSearchParams();
   const studentId = searchParams.get("studentId");
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [events, setEvents] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [studentData, setStudentData] = useState(null);
+  const [currentAcademicYear, setCurrentAcademicYear] = useState(null);
+  const [currentTerm, setCurrentTerm] = useState(null);
 
   useEffect(() => {
-    const userData = getUserDetails();
-    setUser(userData);
-    setIsLoading(false);
+    const initializeData = async () => {
+      try {
+        setIsLoading(true);
+        const userData = getUserDetails();
+        setUser(userData);
+        
+        // Fetch academic year and term data
+        try {
+          const [academicYearsResult, termsResult] = await Promise.all([
+            getAcademicYears(),
+            getTerms()
+          ]);
+
+          if (academicYearsResult?.data) {
+            const activeYear = academicYearsResult.data.find(year => year.status === true) || academicYearsResult.data[0];
+            setCurrentAcademicYear(activeYear);
+          }
+
+          if (termsResult?.data) {
+            const activeTerm = termsResult.data.find(term => term.status === true) || termsResult.data[0];
+            setCurrentTerm(activeTerm);
+          }
+        } catch (err) {
+          console.error("Error fetching academic data:", err);
+        }
+        
+        if (userData?.student?.id) {
+          await fetchStudentData(userData.student.id);
+        }
+        setEvents([]);
+        try {
+          const { data: notificationData } = await getNotifications();
+          if (notificationData && notificationData.length > 0) {
+            const transformedNotifications = notificationData.map(notification => ({
+              day: new Date(notification.created_at).toLocaleDateString('en-US', { weekday: 'short' }),
+              date: new Date(notification.created_at).getDate().toString(),
+              title: notification.title,
+              description: notification.content,
+              type: notification.notification_type?.toLowerCase() || 'general'
+            }));
+            setNotifications(transformedNotifications);
+          } else {
+            setNotifications([]);
+          }
+        } catch (notificationErr) {
+          console.error("Error fetching notifications:", notificationErr);
+          toast.error("Failed to load notifications");
+          setNotifications([]);
+        }
+
+      } catch (error) {
+        console.error("Error initializing dashboard data:", error);
+        toast.error("Failed to load dashboard data");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeData();
   }, []);
 
-  // Same overview data
+  const fetchStudentData = async (studentId) => {
+    try {
+      const { data } = await getStudents();
+      if (data) {
+        const currentStudent = data.find(student => 
+          student.id === studentId || student.user?.id === studentId
+        );
+        if (currentStudent) {
+          setStudentData(currentStudent);
+          console.log("Student data loaded:", currentStudent);
+        }
+      } else {
+        console.error("Failed to fetch student data:", error);
+      }
+    } catch (error) {
+      console.error("Error fetching student data:", error);
+    }
+  };
+
   const overview = [
     {
       id: "Fees",
@@ -118,25 +166,29 @@ export default function Studentdashboard() {
 
   if (isLoading) {
     return (
-      <div className="absolute inset-0 flex justify-center items-center z-50 bg-white/50 backdrop-blur-sm">
-        <div className="border-4 border-[rgba(0,64,128,1)] border-t-[rgba(249,65,68,1)] rounded-full w-12 h-12 animate-spin"></div>
-      </div>
+      <Layout>
+        <div className="absolute inset-0 flex flex-col justify-center items-center z-50 bg-white/50 backdrop-blur-sm">
+          <div className="border-4 border-[rgba(0,64,128,1)] border-t-[rgba(249,65,68,1)] rounded-full w-12 h-12 animate-spin"></div>
+          <p className="mt-4 text-gray-600">Loading dashboard...</p>
+        </div>
+      </Layout>
     );
   }
 
-  const name = user?.student.first_name || "User";
+  const name = user?.student?.first_name || studentData?.first_name;
+  const schoolName = user?.student?.school || studentData?.school;
+  const studentClass = studentData?.class_year || user?.student?.class_year || "";
+  const studentArm = studentData?.class_arm || user?.student?.class_arm || "";
 
   return (
     <Layout>
-      {/*========== Desktop Version (unchanged) ==========*/}
       <div className="hidden lg:block">
-        {/* Your existing desktop code goes here */}
         <div className=" rounded-lg bg-[#e9e9e9] p-10 pl-3 pr-3 flex flex-col gap-5 items-center">
           <div className="w-full bg-[#004080] rounded-lg shadow  flex flex-row justify-between items-center text-white ">
             <div className="p-4">
               <h2 className="text-4xl font-bold mb-3">Hi, {name}</h2>
               <p className="text-sm">
-                Welcome to the official {user.student.school} student portal.
+                Welcome to the official {schoolName} student portal.
               </p>
             </div>
             <div className="max-w-[240px] h-full object-contain ">
@@ -197,7 +249,7 @@ export default function Studentdashboard() {
           <div className="w-full max-w-5xl bg-[#004080] rounded-md shadow p-6 flex items-center justify-between text-white">
             <div className="flex flex-col">
               <p className="text-sm text-white font-semibold mb-5">
-                View your registered subjects for 2023/2024 session
+                View your registered subjects for {currentAcademicYear?.name || "current"} session
               </p>
               <div>
                 <Link
@@ -260,27 +312,28 @@ export default function Studentdashboard() {
             </Link>
           </div>
           <div className="bg-white rounded p-3 flex flex-col gap-3">
-            {" "}
-            {dummyevents.map((event, index) => (
-              <div key={index} className="flex items-center justify-between">
-                {" "}
-                <div className="flex-1 flex flex-col">
-                  {" "}
-                  <h4 className="text-md font-semibold text-[#004080] mb-1">
-                    {" "}
-                    {event.title}
-                  </h4>
-                  <p className="text-xs text-[#242424]">{event.description}</p>
+            {events.length > 0 ? (
+              events.map((event, index) => (
+                <div key={index} className="flex items-center justify-between">
+                  <div className="flex-1 flex flex-col">
+                    <h4 className="text-md font-semibold text-[#004080] mb-1">
+                      {event.title}
+                    </h4>
+                    <p className="text-xs text-[#242424]">{event.description}</p>
+                  </div>
+                  <div className="ml-4 w-8 h-8 rounded-full bg-[#F94144] flex items-center justify-center">
+                    <BiChevronRight
+                      size={16}
+                      className="text-[#000000] font-bold"
+                    />
+                  </div>
                 </div>
-                <div className="ml-4 w-8 h-8 rounded-full bg-[#F94144] flex items-center justify-center">
-                  {" "}
-                  <BiChevronRight
-                    size={16}
-                    className="text-[#000000] font-bold"
-                  />
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-gray-500 text-sm">No events available</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
 
@@ -295,32 +348,38 @@ export default function Studentdashboard() {
             </Link>
           </div>
           <div className="bg-white rounded p-3 flex flex-col gap-3">
-            {dummyNotifications.map((notification, index) => (
-              <div key={index} className="flex items-center">
-                <div className="mr-4 flex flex-col items-center justify-center">
-                  <span className="text-md text-black font-semibold">
-                    {notification.day}
-                  </span>
-                  <span className="text-lg text-[#F94144] font-semibold">
-                    {notification.date}
-                  </span>
+            {notifications.length > 0 ? (
+              notifications.map((notification, index) => (
+                <div key={index} className="flex items-center">
+                  <div className="mr-4 flex flex-col items-center justify-center">
+                    <span className="text-md text-black font-semibold">
+                      {notification.day}
+                    </span>
+                    <span className="text-lg text-[#F94144] font-semibold">
+                      {notification.date}
+                    </span>
+                  </div>
+                  <div className="text-md flex-1">
+                    <p className="font-semibold text-[#004080]">
+                      {notification.title}
+                    </p>
+                    <p className="text-xs text-gray-600">
+                      {notification.description}
+                    </p>
+                  </div>
+                  <div className="mr-3 w-8 h-8 rounded-full bg-[#f9f9f9] flex items-center justify-center">
+                    <BiChevronRight
+                      size={16}
+                      className="text-[#000000] font-bold"
+                    />
+                  </div>
                 </div>
-                <div className="text-md flex-1">
-                  <p className="font-semibold text-[#004080]">
-                    {notification.title}
-                  </p>
-                  <p className="text-xs text-gray-600">
-                    {notification.description}
-                  </p>
-                </div>
-                <div className="mr-3 w-8 h-8 rounded-full bg-[#f9f9f9] flex items-center justify-center">
-                  <BiChevronRight
-                    size={16}
-                    className="text-[#000000] font-bold"
-                  />
-                </div>
+              ))
+            ) : (
+              <div className="text-center py-4">
+                <p className="text-gray-500 text-sm">No notifications available</p>
               </div>
-            ))}
+            )}
           </div>
         </div>
       </div>
