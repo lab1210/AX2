@@ -1,201 +1,171 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Layout from "../../../Components/Studentlayout";
-import { useUser } from "../../../context/UserProvider";
+import { useSearchParams } from "next/navigation";
+import { getClassTimetable } from "../../../Service/TimetableService";
+import { getUserDetails } from "../../../Service/AuthService";
+import { getAcademicYears, getTerms } from "../../../Service/schoolConfig";
+import toast from "react-hot-toast";
 import lunchImg from "../../../../public/LunchImg.png";
 
 export default function TimetablePage() {
-  const times = [
-    "09:00",
-    "09:40",
-    "10:20",
-    "11:00",
-    "11:15",
-    "11:55",
-    "12:35",
-    "13:15",
-    "14:00",
-    "14:40",
-    "15:20",
-  ];
-
-  const schedule = {
-    Monday: [
-      "ENG LANG",
-      "MATH",
-      "BREAK",
-      "PHYSICS",
-      "BIOLOGY",
-      "LUNCH",
-      "GOVT",
-      "GEO",
-      "CHEMISTRY",
-      "FUR MATH",
-      "LIT",
-    ],
-    Tuesday: [
-      "HIST",
-      "FUR MATH",
-      "BREAK",
-      "CHEMISTRY",
-      "CIVIC",
-      "LUNCH",
-      "ECONS",
-      "DATA PROCESSING",
-      "FUR MATH",
-      "LIT",
-      "MATH",
-    ],
-    Wednesday: [
-      "MATH",
-      "ENG LIT",
-      "BREAK",
-      "FRENCH",
-      "GEO",
-      "LUNCH",
-      "BIO PRACT",
-      "CHEM PRACT",
-      "PHYS PRACT",
-      "CHEM PRACT",
-      "BIO PRACT",
-    ],
-    Thursday: [
-      "FUR MATH",
-      "BIO PRACT",
-      "BREAK",
-      "CHEM PRACT",
-      "PHYS PRACT",
-      "LUNCH",
-      "ENG LANG",
-      "MATH",
-      "GOVT",
-      "GEO",
-      "CHEMISTRY",
-    ],
-    Friday: [
-      "GEO PRACT",
-      "CHEM TUTORIAL",
-      "BREAK",
-      "FREE STUDY",
-      "PHYS TUTORIAL",
-      "LUNCH",
-      "CLASS FINAL",
-    ],
-  };
-
+  const searchParams = useSearchParams();
+  const studentId = searchParams.get("studentId");
+  const [user, setUser] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [timetableData, setTimetableData] = useState(null);
+  const [periods, setPeriods] = useState([]);
+  const [academicYears, setAcademicYears] = useState([]);
+  const [terms, setTerms] = useState([]);
+  const [currentAcademicYear, setCurrentAcademicYear] = useState(null);
+  const [currentTerm, setCurrentTerm] = useState(null);
+  
   const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
   const [activeIndex, setActiveIndex] = useState(0);
-  const teachers = {
-    Monday: [
-      "Mr A",
-      "Mrs B",
-      "",
-      "Mr D",
-      "Ms E",
-      "",
-      "Mr G",
-      "Ms H",
-      "Mr I",
-      "Ms J",
-      "Mr K",
-    ],
-    Tuesday: [
-      "Ms L",
-      "Mr M",
-      "",
-      "Ms O",
-      "Mr P",
-      "",
-      "Ms R",
-      "Mr S",
-      "Mr T",
-      "Ms U",
-      "Mr V",
-    ],
-    Wednesday: [
-      "Mr W",
-      "Ms X",
-      "",
-      "Mr Z",
-      "Ms A",
-      "",
-      "Mr C",
-      "Ms D",
-      "Mr E",
-      "Ms F",
-      "Mr G",
-    ],
-    Thursday: [
-      "Ms H",
-      "Mr I",
-      "",
-      "Ms K",
-      "Mr L",
-      "",
-      "Ms N",
-      "Mr O",
-      "Ms P",
-      "Ms Q",
-      "Ms R",
-    ],
-    Friday: ["Mr S", "Ms T", "", "", "Mr V", "", "", "", "", ""],
+
+  // API integration for fetching timetable data
+  useEffect(() => {
+    const initializeTimetableData = async () => {
+      try {
+        setIsLoading(true);
+        
+        // Get user details from auth
+        const userData = getUserDetails();
+        setUser(userData);
+
+        // Fetch academic years and terms for header
+        try {
+          const [academicYearsResult, termsResult] = await Promise.all([
+            getAcademicYears(),
+            getTerms()
+          ]);
+
+          if (academicYearsResult?.data) {
+            setAcademicYears(academicYearsResult.data);
+            // Find current/active academic year
+            const activeYear = academicYearsResult.data.find(year => year.status === true) || academicYearsResult.data[0];
+            setCurrentAcademicYear(activeYear);
+          }
+
+          if (termsResult?.data) {
+            setTerms(termsResult.data);
+            // Find current/active term
+            const activeTerm = termsResult.data.find(term => term.status === true) || termsResult.data[0];
+            setCurrentTerm(activeTerm);
+          }
+        } catch (err) {
+          console.error("Error fetching academic data:", err);
+        }
+
+        // Fetch student timetable
+        try {
+          console.log("Fetching class timetable");
+          const timetableResult = await getClassTimetable();
+          
+          if (timetableResult?.data) {
+            const transformedData = transformTimetableData(timetableResult.data);
+            setTimetableData(transformedData);
+            console.log("Timetable data loaded:", transformedData);
+            toast.success("Timetable loaded successfully");
+          } else if (timetableResult?.error) {
+            console.error("Failed to fetch timetable:", timetableResult.error);
+            toast.error("Failed to load timetable from server");
+            setTimetableData(null);
+          } else {
+            // No data returned
+            console.log("No timetable data available");
+            toast.info("No timetable data available");
+            setTimetableData(null);
+          }
+        } catch (timetableErr) {
+          console.error("Error fetching timetable:", timetableErr);
+          toast.error("Failed to load timetable data");
+          setTimetableData(null);
+        }
+
+      } catch (error) {
+        console.error("Error initializing timetable:", error);
+        toast.error("Failed to load timetable data");
+        setTimetableData(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeTimetableData();
+  }, [studentId]);
+
+  // Helper function to transform API data to expected format
+  const transformTimetableData = (apiData) => {
+    if (!apiData) return null;
+    
+    const transformedData = {
+      schedule: {},
+      teachers: {},
+      locations: {},
+      periods: apiData.periods || []
+    };
+
+    // Handle different API response formats
+    if (apiData.weekly_schedule) {
+      // Format 1: weekly_schedule object
+      days.forEach(day => {
+        const dayData = apiData.weekly_schedule[day.toLowerCase()] || [];
+        transformedData.schedule[day] = dayData.map(entry => entry.subject || entry.name || '');
+        transformedData.teachers[day] = dayData.map(entry => entry.teacher || entry.instructor || '');
+        transformedData.locations[day] = dayData.map(entry => entry.location || entry.room || '');
+      });
+    } else if (apiData.timetable_entries) {
+      // Format 2: timetable_entries array
+      days.forEach(day => {
+        const dayEntries = apiData.timetable_entries.filter(entry => 
+          entry.day_of_week?.toLowerCase() === day.toLowerCase()
+        ).sort((a, b) => (a.period_number || 0) - (b.period_number || 0));
+        
+        transformedData.schedule[day] = dayEntries.map(entry => entry.subject?.name || entry.subject || '');
+        transformedData.teachers[day] = dayEntries.map(entry => entry.teacher?.name || entry.teacher || '');
+        transformedData.locations[day] = dayEntries.map(entry => entry.classroom?.name || entry.location || '');
+      });
+    } else if (apiData.results) {
+      // Format 3: paginated results
+      const entries = apiData.results;
+      days.forEach(day => {
+        const dayEntries = entries.filter(entry => 
+          entry.day_of_week?.toLowerCase() === day.toLowerCase()
+        ).sort((a, b) => (a.period_number || 0) - (b.period_number || 0));
+        
+        transformedData.schedule[day] = dayEntries.map(entry => entry.subject?.name || entry.subject || '');
+        transformedData.teachers[day] = dayEntries.map(entry => entry.teacher?.name || entry.teacher || '');
+        transformedData.locations[day] = dayEntries.map(entry => entry.classroom?.name || entry.location || '');
+      });
+    } else {
+      // Format 4: Direct format (already in expected structure)
+      transformedData.schedule = apiData.schedule || {};
+      transformedData.teachers = apiData.teachers || {};
+      transformedData.locations = apiData.locations || {};
+    }
+
+    return transformedData;
   };
-  const locations = {
-    Monday: [
-      "Rm 101",
-      "Rm 102",
-      "",
-      "Lab 1",
-      "Rm 103",
-      "",
-      "Rm 104",
-      "Rm 105",
-      "Rm 106",
-      "Rm 107",
-      "Rm 108",
-    ],
-    Tuesday: [
-      "Rm 201",
-      "Rm 202",
-      "",
-      "Lab 2",
-      "Rm 203",
-      "",
-      "Rm 204",
-      "Rm 205",
-      "Rm 206",
-      "Rm 207",
-      "Rm 208",
-    ],
-    Wednesday: [
-      "Rm 301",
-      "Rm 302",
-      "",
-      "Lab 3",
-      "Rm 303",
-      "",
-      "Rm 304",
-      "Rm 305",
-      "Rm 306",
-      "Rm 307",
-      "Rm 308",
-    ],
-    Thursday: [
-      "Rm 401",
-      "Rm 402",
-      "",
-      "Lab 4",
-      "Rm 403",
-      "",
-      "Rm 404",
-      "Rm 405",
-      "Rm 406",
-      "Rm 407",
-      "Rm 408",
-    ],
-    Friday: ["Rm 501", "Rm 502", "", "", "Rm 503", "", "", "", "", "", ""],
+
+  // Get the current schedule data - only from API
+  const times = timetableData?.periods?.map(p => p.start_time) || periods?.map(p => p.start_time) || [];
+  const schedule = timetableData?.schedule || {};
+  const teachers = timetableData?.teachers || {};
+  const locations = timetableData?.locations || {};
+
+  // Helper function to format header title
+  const getHeaderTitle = () => {
+    if (currentAcademicYear && currentTerm) {
+      return `${currentAcademicYear.name} ${currentTerm.name} Timetable`;
+    } else if (currentAcademicYear) {
+      return `${currentAcademicYear.name} Timetable`;
+    }
+    return "Timetable";
   };
-  const { user, isLoading } = useUser();
+
+  const hasScheduleData = timetableData && Object.keys(schedule).length > 0 && 
+    days.some(day => schedule[day] && schedule[day].length > 0);
 
   if (isLoading) {
     return (
@@ -205,14 +175,41 @@ export default function TimetablePage() {
     );
   }
 
+  // Render empty state if no data
+  if (!hasScheduleData) {
+    return (
+      <Layout>
+        <div className="min-h-screen bg-gray-100 p-4 pr-10 pl-6 flex-col rounded-lg">
+          <div className="bg-white rounded-lg p-6 pt-3 pb-3 mb-6 shadow xl:w-fit min-w-full">
+            <div className="flex justify-between items-center">
+              <h1 className="text-lg md:text-xl font-bold text-gray-800">
+                {getHeaderTitle()}
+              </h1>
+            </div>
+          </div>
+
+          {/* Empty State */}
+          <div className="bg-white rounded-lg p-8 text-center">
+            <h3 className="text-lg font-semibold text-gray-600 mb-2">No Timetable Available</h3>
+            <p className="text-gray-500">
+              No timetable data has been configured for your account yet. Please contact your administrator.
+            </p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
+
   return (
     <Layout>
       <div className="hidden lg:block min-h-screen bg-gray-100 p-4 pr-10 pl-6 flex-col rounded-lg">
         {/* Header Card */}
         <div className=" bg-white rounded-lg p-6 pt-3 pb-3 mb-6 shadow xl:w-fit min-w-full">
-          <h1 className="text-lg  md:text-xl font-bold text-gray-800">
-            2023/2024 SS1 1st Term Timetable
-          </h1>
+          <div className="flex justify-between items-center">
+            <h1 className="text-lg  md:text-xl font-bold text-gray-800">
+              {getHeaderTitle()}
+            </h1>
+          </div>
         </div>
 
         <div className="w-full no-scrollbar">
@@ -237,7 +234,7 @@ export default function TimetablePage() {
                     {time}
                   </td>
                   {days.map((day) => {
-                    const content = schedule[day][rowIndex];
+                    const content = schedule[day]?.[rowIndex] || "";
                     const isNoContent = !content || content.trim() === "";
                     const cellClassName = `py-1 px-1  text-center text-xs font-semibold  ${
                       isNoContent
@@ -259,6 +256,13 @@ export default function TimetablePage() {
 
       {/* ─── mobile/tablet only ─── */}
       <div className="block lg:hidden p-4 bg-white rounded-lg">
+        {/* Mobile Header */}
+        <div className="mb-4">
+          <h1 className="text-lg font-bold text-gray-800 mb-2">
+            {getHeaderTitle()}
+          </h1>
+        </div>
+
         <div className="relative mb-4 h-10 rounded-full overflow-hidden border border-black">
           <div
             className="absolute top-0 left-0 h-full w-1/5 bg-[#4169E1] rounded-full transition-transform duration-300"
@@ -285,7 +289,7 @@ export default function TimetablePage() {
         </div>
 
         <div className="space-y-4">
-          {schedule[days[activeIndex]].map((subject, i) => {
+          {schedule[days[activeIndex]]?.map((subject, i) => {
             const start = times[i];
             const end = times[i + 1] || "";
 
@@ -318,7 +322,7 @@ export default function TimetablePage() {
                     <div className="flex flex-col items-end">
                       {!isLunch && (
                         <p className="text-gray-400 text-xs md:text-sm font-semibold">
-                          {locations[days[activeIndex]][i]}
+                          {locations[days[activeIndex]]?.[i] || ""}
                         </p>
                       )}
                     </div>
@@ -350,7 +354,7 @@ export default function TimetablePage() {
                   {!isLunch && (
                     <div className="flex justify-between border-t pt-2 mt-2">
                       <span className="text-gray-400 text-xs md:text-sm">
-                        Teacher: {teachers[days[activeIndex]][i]}
+                        Teacher: {teachers[days[activeIndex]]?.[i] || "N/A"}
                       </span>
                       <span className="text-gray-400 text-xs md:text-sm">
                         Period {i + 1}
@@ -370,7 +374,11 @@ export default function TimetablePage() {
                 </div>
               </div>
             );
-          })}
+          }) || (
+            <div className="text-center text-gray-500 py-8">
+              No schedule available for {days[activeIndex]}
+            </div>
+          )}
         </div>
       </div>
     </Layout>

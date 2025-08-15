@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoChevronDownOutline, IoLogOutOutline } from "react-icons/io5";
 import { DateCalendar } from "@mui/x-date-pickers/DateCalendar";
 import { DemoContainer, DemoItem } from "@mui/x-date-pickers/internals/demo";
@@ -8,53 +8,102 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import Link from "next/link";
 import dayjs from "dayjs";
 import { IoNotificationsOutline } from "react-icons/io5";
+import { getNotifications } from "../../Service/NotificationService";
+import toast from "react-hot-toast";
 
 const RightSidebar = ({ user }) => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isNotification, setIsNotification] = useState(true);
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  const events = [
-    {
-      date: dayjs().date(12).format("D"),
-      title: "Upcoming Fees Payment",
-      subtitle: "Updates on school fees for all junior and senior students",
-      time: "8 A.M",
-      status: "upcoming",
-    },
-    {
-      date: dayjs().date(13).format("D"),
-      title: "Parents and Teachers Meeting on Zoom",
-      subtitle:
-        "Conference call with all parents having a child in JSS1 and 2 in preparation for the upcoming session",
-      time: "10 A.M",
-      status: "today",
-    },
-    {
-      date: "25",
-      title: "Inter-House Sports",
-      subtitle:
-        "The 2nd term Inter-House sports has been rescheduled for  Thur 15th - Fri 16th October 2023",
-      time: "8 A.M",
-      status: "upcoming",
-    },
-    {
-      date: "29",
-      title: "Mid-term Tests",
-      subtitle: "Mid term tests will start on Monday 25th October, 2023",
-      time: "10:00 A.M",
-      status: "upcoming",
-    },
-    {
-      date: "30",
-      title: "Borders Meeting",
-      subtitle:
-        "All JSS1-SS3 boarding school students will be having a meeting by 3pm on Friday 29th October, 2023",
-      time: "2:00 P.M",
-      status: "due",
-    },
-  ];
+  // const fallbackEvents = [
+  //   {
+  //     date: dayjs().date(12).format("D"),
+  //     title: "Upcoming Fees Payment",
+  //     subtitle: "Updates on school fees for all junior and senior students",
+  //     time: "8 A.M",
+  //     status: "upcoming",
+  //   },
+  //   {
+  //     date: dayjs().date(13).format("D"),
+  //     title: "Parents and Teachers Meeting on Zoom",
+  //     subtitle:
+  //       "Conference call with all parents having a child in JSS1 and 2 in preparation for the upcoming session",
+  //     time: "10 A.M",
+  //     status: "today",
+  //   },
+  //   {
+  //     date: "25",
+  //     title: "Inter-House Sports",
+  //     subtitle:
+  //       "The 2nd term Inter-House sports has been rescheduled for  Thur 15th - Fri 16th October 2023",
+  //     time: "8 A.M",
+  //     status: "upcoming",
+  //   },
+  //   {
+  //     date: "29",
+  //     title: "Mid-term Tests",
+  //     subtitle: "Mid term tests will start on Monday 25th October, 2023",
+  //     time: "10:00 A.M",
+  //     status: "upcoming",
+  //   },
+  //   {
+  //     date: "30",
+  //     title: "Borders Meeting",
+  //     subtitle:
+  //       "All JSS1-SS3 boarding school students will be having a meeting by 3pm on Friday 29th October, 2023",
+  //     time: "2:00 P.M",
+  //     status: "due",
+  //   },
+  // ];
 
-  // Create a map of dates with their event status for dynamic highlighting
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        setLoading(true);
+        const { data: notificationData, error } = await getNotifications();
+        
+        if (notificationData && notificationData.length > 0) {
+          const transformedEvents = notificationData.map((notification, index) => {
+            const createdDate = new Date(notification.created_at);
+            const today = new Date();
+            const daysDiff = Math.floor((createdDate - today) / (1000 * 60 * 60 * 24));
+            
+            let status = "upcoming";
+            if (daysDiff === 0) status = "today";
+            else if (daysDiff < 0) status = "due";
+            
+            return {
+              date: createdDate.getDate().toString(),
+              title: notification.title || "Notification",
+              subtitle: notification.content || "No description available",
+              time: createdDate.toLocaleTimeString('en-US', { 
+                hour: 'numeric', 
+                minute: '2-digit', 
+                hour12: true 
+              }),
+              status: status,
+              type: notification.notification_type?.toLowerCase() || 'general'
+            };
+          });
+          
+          setEvents(transformedEvents);
+        } else {
+          setEvents([]);
+        }
+      } catch (err) {
+        console.error("Error fetching notifications for events:", err);
+        toast.error("Failed to load notifications");
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
   const eventDateMap = events.reduce((acc, event) => {
     const dateKey = event.date.toString();
     if (!acc[dateKey]) {
@@ -235,8 +284,19 @@ const RightSidebar = ({ user }) => {
           <h3 className="text-lg font-semibold">Events</h3>
           <button className="text-sm text-blue-600">View All</button>
         </div>
-        <ul className="space-y-3">
-          {events.map((e, idx) => {
+        
+        {loading ? (
+          <div className="flex items-center justify-center h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        ) : (
+          <ul className="space-y-3">
+            {events.length === 0 ? (
+              <div className="text-center text-gray-500 py-8">
+                <p>No events available</p>
+              </div>
+            ) : (
+              events.map((e, idx) => {
             const bg = "border rounded-lg border-[#5E5D5D] shadow-md";
 
             const dateBgColor =
@@ -289,8 +349,10 @@ const RightSidebar = ({ user }) => {
                 )}
               </li>
             );
-          })}
+          })
+          )}
         </ul>
+        )}
       </div>
     </div>
   );

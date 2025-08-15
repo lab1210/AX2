@@ -2,11 +2,14 @@
 import React, { useEffect, useState, useRef } from "react";
 import Layout from "../../Studentlayout";
 import { getUserDetails } from "../../../Service/AuthService";
+import { getAcademicYears, getTerms } from "../../../Service/schoolConfig";
 import { MdOutlineCameraAlt } from "react-icons/md";
 
 export default function ProfilePage() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [currentAcademicYear, setCurrentAcademicYear] = useState(null);
+  const [currentTerm, setCurrentTerm] = useState(null);
   const fileInputRef = useRef(null);
 
   const handleImageClick = () => {
@@ -42,9 +45,39 @@ export default function ProfilePage() {
     "Civic Education",
   ];
   useEffect(() => {
-    const userData = getUserDetails();
-    setUser(userData);
-    setIsLoading(false);
+    const initializeData = async () => {
+      try {
+        setIsLoading(true);
+        const userData = getUserDetails();
+        setUser(userData);
+        
+        // Fetch academic year and term data
+        try {
+          const [academicYearsResult, termsResult] = await Promise.all([
+            getAcademicYears(),
+            getTerms()
+          ]);
+
+          if (academicYearsResult?.data) {
+            const activeYear = academicYearsResult.data.find(year => year.status === true) || academicYearsResult.data[0];
+            setCurrentAcademicYear(activeYear);
+          }
+
+          if (termsResult?.data) {
+            const activeTerm = termsResult.data.find(term => term.status === true) || termsResult.data[0];
+            setCurrentTerm(activeTerm);
+          }
+        } catch (err) {
+          console.error("Error fetching academic data:", err);
+        }
+      } catch (error) {
+        console.error("Error initializing profile data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    initializeData();
   }, []);
 
   if (isLoading) {
@@ -117,8 +150,7 @@ export default function ProfilePage() {
           {/* Registered Subjects Card */}
           <div className="bg-white rounded-lg shadow p-6 pt-4 pb-6">
             <p className=" text-[#808080] mb-2 font-semibold max-w-90">
-              {registeredSubjects.length} Registered Subjects for 1st Term
-              2023/2024 Session
+              {registeredSubjects.length} Registered Subjects for {currentTerm?.name || "current term"} {currentAcademicYear?.name || "session"}
             </p>
             <div className="grid sm:grid-cols-2 gap-2 text-sm text-gray-800 max-w-90 pl-5">
               {registeredSubjects.map((subj, idx) => (
