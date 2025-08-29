@@ -84,7 +84,7 @@ const TeacherLayoutEmpty = ({ children }) => {
   return (
     <>
       {/* Desktop Layout */}
-      <div className="w-full h-screen grid  xl:grid-cols-[220px_1fr] grid-cols-[190px_1fr] overflow-hidden lg:overflow-auto bg-gray-100">
+      <div className="hidden lg:grid w-full h-screen xl:grid-cols-[220px_1fr] grid-cols-[190px_1fr] overflow-hidden lg:overflow-auto bg-gray-100">
         {/* Left Sidebar */}
         <div className="hidden md:block">
           <Suspense>
