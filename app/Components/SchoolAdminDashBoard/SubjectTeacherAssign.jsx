@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Dropdown from "./DropDown2";
-import MultiDropdown from "./MultiDropdown";
+import MultiDropdown from "../SchoolAdminDashBoard/MultiDropDown";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import {
   createSubjectTeacherAssignment,

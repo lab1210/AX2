@@ -10,7 +10,7 @@ import {
   getSubjectDepartmentRelationships,
   updateSubjectDepartmentRelationship,
 } from "@/Service/SchoolAdminAssignmentService";
-import MultiDropdown from "./MultiDropdown";
+import MultiDropdown from "../SchoolAdminDashBoard/MultiDropDown";
 
 const SubjecttoDept = () => {
   const [Subjects, setSubjects] = useState([]);

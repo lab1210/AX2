@@ -2,10 +2,10 @@ import React, { useState, useEffect } from "react";
 import Layout from "../Teacherlayout";
 import { Bell, ChevronLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { getTeacherTimetable } from "../../Service/TimetableService";
-import { getUserDetails } from "../../Service/AuthService";
-import { getAcademicYears, getTerms } from "../../Service/schoolConfig";
 import toast from "react-hot-toast";
+import { getTeacherTimetable } from "@/Service/TimetableService";
+import { getUserDetails } from "@/Service/AuthService";
+import { getAcademicYears, getTerms } from "@/Service/schoolConfig";
 
 const Timetable = () => {
   const router = useRouter();
