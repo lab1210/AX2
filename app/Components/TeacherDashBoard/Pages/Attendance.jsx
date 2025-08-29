@@ -76,22 +76,22 @@ const AttendancePage = () => {
     { id: 20, name: "Babalola Ife Adeshewa", status: "Present" },
   ];
 
-  useEffect(() => {
-    const fetchStudents = async () => {
-      try {
-        setLoading(true);
-        const studentData = await getStudents();
-        const formattedStudents = studentData.map((student, index) => ({
-          id: student.student_id,
-          name: `${student.first_name} ${student.last_name}`,
-        }));
-        setStudents(formattedStudents);
-      } catch (error) {
-        toast.error("Error fetching students");
-      }
-    };
-    fetchStudents();
-  }, []);
+  // useEffect(() => {
+  //   const fetchStudents = async () => {
+  //     try {
+  //       setLoading(true);
+  //       const studentData = await getStudents();
+  //       const formattedStudents = studentData.map((student, index) => ({
+  //         id: student.student_id,
+  //         name: `${student.first_name} ${student.last_name}`,
+  //       }));
+  //       setStudents(formattedStudents);
+  //     } catch (error) {
+  //       toast.error("Error fetching students");
+  //     }
+  //   };
+  //   fetchStudents();
+  // }, []);
 
   const renderHeaderContent = () => {
     switch (activeTab) {
