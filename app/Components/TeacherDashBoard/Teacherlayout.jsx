@@ -9,10 +9,8 @@ import {
   getUserDetails,
   refreshToken,
 } from "../../Service/AuthService";
-import { BiChevronLeft } from "react-icons/bi";
-import RightSidebar from "./RightSideBar";
 
-const TeacherLayout = ({ children, dynamicContent }) => {
+const TeacherLayoutEmpty = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
@@ -81,39 +79,35 @@ const TeacherLayout = ({ children, dynamicContent }) => {
     );
   }
 
-  const isDashboard = pathName === "/Teacher";
+  // const isDashboard = pathName === "/Teacher";
 
   return (
     <>
       {/* Desktop Layout */}
-      <div className="hidden lg:grid w-full h-screen grid-cols-[20%_60%_20%] xl:grid-cols-[15%_65%_20%] overflow-hidden">
+      <div className="w-full h-screen grid  xl:grid-cols-[220px_1fr] grid-cols-[190px_1fr] overflow-hidden lg:overflow-auto bg-gray-100">
         {/* Left Sidebar */}
-        <div>
+        <div className="hidden md:block">
           <Suspense>
-            <LeftSidebar setUser={setUser} user={user} />
+            <LeftSidebar user={user} />
           </Suspense>
         </div>
         {/* Main Content */}
-        <div className="w-full h-screen overflow-y-scroll no-scrollbar">
-          <div className="pb-16 lg:pb-4 lg:rounded-b-lg">
-            {children}
-          </div>
+        <div className="w-full h-screen overflow-y-scroll no-scrollbar ">
+          <div className="pb-16 lg:pb-4 lg:rounded-b-lg">{children}</div>
         </div>
-        {/* Right Sidebar */}
+        {/* Right Sidebar
         <div className="bg-[#F7F8FA]">
           <RightSidebar />
-        </div>
+        </div> */}
       </div>
 
       {/* Mobile/Tablet Layout */}
       <div className="block lg:hidden w-full min-h-screen bg-[#F7F8FA]">
-        <div className="w-full min-h-screen">
-          {children}
-        </div>
+        <div className="w-full min-h-screen">{children}</div>
         <BottomNavBar setUser={setUser} user={user} />
       </div>
     </>
   );
 };
 
-export default TeacherLayout;
+export default TeacherLayoutEmpty;

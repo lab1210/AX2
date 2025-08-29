@@ -64,13 +64,13 @@ const TeachingProgress = () => {
   const progress = teachingProgressData[selectedSubject];
 
   return (
-    <div className="w-full bg-white rounded-lg shadow p-2 xl:overflow-hidden scrollbar-hidden h-[65vh] xl:h-[55vh]">
+    <div className="w-full bg-white rounded-lg shadow p-3 xl:overflow-hidden scrollbar-hidden ">
       <div className="flex flex-col mb-4">
-        <h3 className="text-md xl:text-lg font-semibold">Teaching Progress in</h3>
+        <p className="text-sm mb-1 font-semibold">Teaching Progress in</p>
         <select
           value={selectedSubject}
           onChange={handleSubjectChange}
-          className="w-3/5 bg-red-500 text-white text-sm font-medium px-4 py-2 rounded-md focus:outline-none"
+          className=" bg-red-500 w-fit text-white text-xs font-medium px-1 py-1 rounded-md focus:outline-none"
         >
           {subjects.map((subject) => (
             <option key={subject.value} value={subject.value}>
@@ -88,7 +88,9 @@ const TeachingProgress = () => {
           >
             <div>
               <p className="font-medium">{p.className}</p>
-              <p className="text-sm text-white font-semibold">{p.pupils} pupils</p>
+              <p className="text-sm text-white font-semibold">
+                {p.pupils} pupils
+              </p>
             </div>
             <div className="w-16 h-16 relative">
               <svg viewBox="0 0 36 36" className="w-full h-full">
@@ -111,8 +113,8 @@ const TeachingProgress = () => {
                      a 15.9155 15.9155 0 0 1 0 31.831
                      a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
-                </svg>
-                {/* Percentage Text */}
+              </svg>
+              {/* Percentage Text */}
               <div className="absolute inset-0 flex items-center justify-center">
                 <p className="text-sm font-bold text-black">{p.percent}%</p>
               </div>

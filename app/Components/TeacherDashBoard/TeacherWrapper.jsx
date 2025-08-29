@@ -10,8 +10,9 @@ import {
   refreshToken,
 } from "../../Service/AuthService";
 import { BiChevronLeft } from "react-icons/bi";
+import DashboardHeader from "./DashboardHeader";
 
-const TeacherLayout = ({ children, dynamicContent }) => {
+const TeacherLayout = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [headerTitle, setHeaderTitle] = useState("Dashboard");
@@ -84,7 +85,7 @@ const TeacherLayout = ({ children, dynamicContent }) => {
 
   return (
     <>
-      <div className="w-full h-screen grid xl:grid-cols-[15%_1fr] grid-cols-[20%_1fr] overflow-hidden lg:overflow-auto bg-gray-100">
+      <div className="w-full h-screen grid  xl:grid-cols-[220px_1fr] grid-cols-[190px_1fr] overflow-hidden lg:overflow-auto bg-gray-100">
         {/* Left Sidebar */}
         <div className="hidden md:block">
           <Suspense>
@@ -94,6 +95,7 @@ const TeacherLayout = ({ children, dynamicContent }) => {
 
         {/* Main Content */}
         <div className="grid grid-rows-[auto_1fr] overflow-hidden h-full">
+          <DashboardHeader />
           {/* Content Section */}
           <div className="overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] pb-16 lg:pb-4 lg:rounded-b-lg">
             {children}
