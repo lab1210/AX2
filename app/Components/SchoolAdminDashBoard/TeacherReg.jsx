@@ -6,12 +6,10 @@ import { LuUpload } from "react-icons/lu";
 import { SchoolAdminRegisterTeacher } from "@/Service/TeacherRegService";
 import toast from "react-hot-toast";
 const TeacherReg = () => {
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
-  const [Teacher, setTeacher] = useState([]);
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
+  const [errors, setErrors] = useState({});
 
   const [formData, setFormData] = useState({
     user: {
@@ -19,17 +17,21 @@ const TeacherReg = () => {
       email: "",
       password: "",
     },
-    firstName: "",
-    lastName: "",
+    first_name: "",
+    last_name: "",
     middleName: "",
     date_of_birth: "",
     gender: "",
-    date_of_hire: "",
+    date_hire: "",
+    address: "default",
     country: "",
     state: "",
     city: "",
-    Status: true,
+    status: "Active",
+    region: "default",
     cv: null,
+    qualification: "",
+    specialization: "",
   });
 
   useEffect(() => {
@@ -55,23 +57,90 @@ const TeacherReg = () => {
     }
   }, [formData.stateCode]);
 
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result.split(",")[1]; // Remove the data URL prefix
+        setFormData((prev) => ({
+          ...prev,
+          cv: {
+            filename: file.name,
+            content_type: file.type,
+            data: base64String,
+          },
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       const response = await SchoolAdminRegisterTeacher(formData);
-      if (response?.status == 201) {
-        toast.success("Teacher registered successfully");
-      }
-      setTeacher([...Teacher, formData]);
+      toast.success("Teacher registered successfully");
+      setFormData({
+        user: {
+          username: "",
+          email: "",
+          password: "",
+        },
+        first_name: "",
+        last_name: "",
+        middleName: "",
+        date_of_birth: "",
+        gender: "",
+        date_hire: "",
+        address: "default",
+        state: "",
+        city: "",
+        status: "Active",
+        region: "default",
+        cv: null,
+        qualification: "",
+        specialization: "",
+      });
     } catch (error) {
-      console.error("Error ");
-      toast.error("Error registering teacher");
+      console.error("Full error object:", error);
+
+      if (error.response?.data?.user?.username) {
+        toast.error(error.response.data.user.username[0]);
+      } else if (error.response?.data) {
+        const errorData = error.response.data;
+
+        const findErrorMessage = (obj) => {
+          for (const key in obj) {
+            if (Array.isArray(obj[key]) && obj[key].length > 0) {
+              return obj[key][0];
+            } else if (typeof obj[key] === "object" && obj[key] !== null) {
+              const nestedError = findErrorMessage(obj[key]);
+              if (nestedError) return nestedError;
+            } else if (typeof obj[key] === "string") {
+              return obj[key];
+            }
+          }
+          return "Error registering teacher";
+        };
+
+        const errorMessage = findErrorMessage(errorData);
+        toast.error(errorMessage);
+      } else if (error.message) {
+        toast.error(error.message);
+      } else {
+        toast.error("Error registering teacher");
+      }
     }
   };
   return (
     <div>
-      <form onSubmit={handleSubmit} className="flex-shrink-0">
+      <form
+        onSubmit={handleSubmit}
+        className="flex-shrink-0"
+        // encType="multipart/form-data"
+      >
         <div className=" pt-5 pl-6 pr-6 mb-2 ">
           <p className="font-bold text-[#07508F]">Personal Information</p>
         </div>
@@ -84,16 +153,16 @@ const TeacherReg = () => {
               <input
                 type="text"
                 placeholder="Enter First Name"
-                value={formData.firstName || ""}
+                value={formData.first_name || ""}
                 onChange={(e) => {
                   const value = e.target.value;
                   setFormData((prev) => ({
                     ...prev,
-                    firstName: value,
+                    first_name: value,
                   }));
                 }}
                 className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.firstName !== ""
+                  formData.first_name !== ""
                     ? "border-2 border-[#0071E3]"
                     : "border border-[#B6B6B6]"
                 }`}
@@ -130,16 +199,16 @@ const TeacherReg = () => {
               <input
                 type="text"
                 placeholder="Enter Last Name"
-                value={formData.lastName || ""}
+                value={formData.last_name || ""}
                 onChange={(e) => {
                   const value = e.target.value;
                   setFormData((prev) => ({
                     ...prev,
-                    lastName: value,
+                    last_name: value,
                   }));
                 }}
                 className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.lastName !== ""
+                  formData.last_name !== ""
                     ? "border-2 border-[#0071E3]"
                     : "border border-[#B6B6B6]"
                 }`}
@@ -262,16 +331,60 @@ const TeacherReg = () => {
               </label>
               <input
                 type="date"
-                value={formData.date_of_hire || ""}
+                value={formData.date_hire || ""}
                 onChange={(e) => {
                   const value = e.target.value;
                   setFormData((prev) => ({
                     ...prev,
-                    date_of_hire: value,
+                    date_hire: value,
                   }));
                 }}
                 className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.date_of_hire !== ""
+                  formData.date_hire !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-x-1">
+              <label className="text-[0.88rem] text-[#5E6A72]">
+                Qualification:
+              </label>
+              <input
+                type="text"
+                value={formData.qualification || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    qualification: value,
+                  }));
+                }}
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.qualification !== ""
+                    ? "border-2 border-[#0071E3]"
+                    : "border border-[#B6B6B6]"
+                }`}
+                required
+              />
+            </div>
+            <div className="flex flex-col gap-x-1">
+              <label className="text-[0.88rem] text-[#5E6A72]">
+                Specialization:
+              </label>
+              <input
+                type="text"
+                value={formData.specialization || ""}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setFormData((prev) => ({
+                    ...prev,
+                    specialization: value,
+                  }));
+                }}
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                  formData.specialization !== ""
                     ? "border-2 border-[#0071E3]"
                     : "border border-[#B6B6B6]"
                 }`}
@@ -327,16 +440,16 @@ const TeacherReg = () => {
               <label className="text-[0.88rem] text-[#5E6A72]">Status:</label>
               <div
                 className={`${
-                  formData.Status ? "bg-[#1BB66E]" : "bg-red-500"
+                  formData.status === "Active" ? "bg-[#1BB66E]" : "bg-red-500"
                 } text-white font-bold max-w-36 text-sm rounded py-2 cursor-pointer flex justify-center`}
                 onClick={() => {
                   setFormData((prev) => ({
                     ...prev,
-                    Status: !formData.Status,
+                    status: prev.status === "Active" ? "Inactive" : "Active",
                   }));
                 }}
               >
-                {formData.Status ? "Active" : "In-active"}
+                {formData.status}
               </div>
             </div>
           </div>
@@ -356,10 +469,7 @@ const TeacherReg = () => {
                   type="file"
                   accept=".pdf,.doc,.docx"
                   id="cv-upload"
-                  onChange={(e) => {
-                    const file = e.target.files[0];
-                    setFormData((prev) => ({ ...prev, cv: file }));
-                  }}
+                  onChange={handleFileChange}
                   style={{ display: "none" }}
                 />
                 <label

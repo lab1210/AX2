@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import Dropdown from "./DropDown";
-import MultiDropdown from "./MultiDropDown";
 import { getDepartment, getSubject } from "@/Service/schoolConfig";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
@@ -11,6 +10,7 @@ import {
   getSubjectDepartmentRelationships,
   updateSubjectDepartmentRelationship,
 } from "@/Service/SchoolAdminAssignmentService";
+import MultiDropdown from "./MultiDropdown";
 
 const SubjecttoDept = () => {
   const [Subjects, setSubjects] = useState([]);
@@ -27,114 +27,124 @@ const SubjecttoDept = () => {
   const [formData, setFormData] = useState([
     {
       department: "",
-      subject: "",
+      subject: [],
     },
   ]);
 
   useEffect(() => {
     const fetchSubjects = async () => {
-      const { data, error } = await getSubject();
-      if (data) setSubjects(data);
-      else toast.error(error || "Failed to fetch subjects");
+      try {
+        const response = await getSubject();
+        setSubjects(response);
+      } catch (error) {
+        toast.error("Failed to fetch subjects.");
+      }
     };
     const fetchDepartments = async () => {
-      const { data, error } = await getDepartment();
-      if (data) setDepartment(data);
-      else toast.error(error || "Failed to fetch departments");
+      try {
+        const response = await getDepartment();
+        setDepartment(response);
+      } catch (error) {
+        toast.error("Failed to fetch departments.");
+      }
     };
-    const fetchSubjectDepartmentList = async () => {
-      const { data, error } = await getSubjectDepartmentRelationships();
-      if (data) setSubjectDepartmentList(data);
-      else toast.error(error || "Failed to fetch List");
-    };
+
     fetchSubjects();
     fetchDepartments();
     fetchSubjectDepartmentList();
   }, []);
 
-  const paginatedData = SubjectDepartmentList.slice(
+  const fetchSubjectDepartmentList = async () => {
+    try {
+      const response = await getSubjectDepartmentRelationships();
+      setSubjectDepartmentList(response);
+    } catch (error) {
+      toast.error("Failed to fetch subject-department relationships.");
+    }
+  };
+  const paginatedData = SubjectDepartmentList?.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const totalPages = Math.ceil(SubjectDepartmentList.length / itemsPerPage);
+  const totalPages = Math.ceil(SubjectDepartmentList?.length / itemsPerPage);
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
 
+  const resetForm = () => {
+    setFormData({
+      department: "",
+      subject: [],
+    });
+    setEdit(false);
+    setselectAssignment(null);
+  };
   const handleNext = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const getDepartmentName = (id) => {
+    const dept = Department.find((d) => d.department_id === id);
+    return dept?.name || "Unknown";
+  };
+
+  const getSubjectName = (id) => {
+    const subject = Subjects.find((s) => s.subject_id === id);
+    return subject?.name || "Unknown";
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const existingDepartment = SubjectDepartmentList.find(
-      (item) => item.department === formData.department
-    );
-
-    if (!Edit && existingDepartment) {
-      toast.error("Department Assignment already exists.");
+    if (!formData.department || formData.subject.length === 0) {
+      toast.error("Please select both department and at least one subject");
       return;
     }
 
-    if (Edit && selectAssignment) {
-      try {
-        const updatedAssignment = {
-          ...selectAssignment,
-          subject: selectAssignment.subject,
-          department: selectAssignment.department,
+    try {
+      if (Edit && selectAssignment) {
+        const updatedData = {
+          department: formData.department,
+          subject: formData.subject[0], // Take first subject in array
         };
-        const { data, error } = await updateSubjectDepartmentRelationship(
+
+        await updateSubjectDepartmentRelationship(
           selectAssignment.subject_class_id,
-          updatedAssignment
+          updatedData
         );
-        if (error) {
-          toast.error(
-            error || "Failed to update Subject Department Assignment"
-          );
-          return;
-        }
-        const updatedList = SubjectDepartmentList.map((item) =>
-          item.subject_class_id === selectAssignment.subject_class_id
-            ? data
-            : item
+        toast.success("Assignment updated successfully");
+      } else {
+        const assignments = formData.subject.map((subject_id) => ({
+          department: formData.department,
+          subject: subject_id,
+        }));
+
+        await Promise.all(
+          assignments.map((assignment) =>
+            createSubjectDepartmentRelationship(assignment)
+          )
         );
-        setSubjectDepartmentList(updatedList);
-        toast.success("Subject Department Assignment updated successfully");
-        setEdit(false);
-        setselectAssignment(null);
-      } catch (error) {
-        toast.error("Failed to update Subject Department Assignment");
+        toast.success(`${assignments.length} assignments created successfully`);
       }
-    } else {
-      try {
-        const { data, error } = await createSubjectDepartmentRelationship(
-          formData
-        );
-        if (error) {
-          toast.error(
-            error || "Failed to create Subject Department Assignment"
-          );
-        } else {
-          setSubjectDepartmentList((prev) => [...prev, data]);
-          toast.success("Subject Department Assignment created successfully");
-        }
-      } catch (error) {
-        toast.error("Failed to create Subject Department Assignment");
-      }
+
+      // Refresh data
+      const relationshipsRes = await getSubjectDepartmentRelationships();
+      setSubjectDepartmentList(relationshipsRes || []);
+      resetForm();
+    } catch (error) {
+      toast.error(error.message || "Failed to save assignment");
     }
+  };
+
+  const handleEdit = (assignment) => {
+    setEdit(true);
+    setselectAssignment(assignment);
     setFormData({
-      department: "",
-      subject: "",
+      department: assignment.department,
+      subject: [assignment.subject], // Convert to array for MultiDropdown
     });
   };
-
-  const handleEdit = (SubjectDepartment) => {
-    setEdit(true);
-    setselectAssignment({ ...SubjectDepartment });
-  };
-
   const openDeleteModal = (term) => {
     setselectedAssignmentDelete(term);
     setDeleteModalVisible(true);
@@ -152,13 +162,9 @@ const SubjecttoDept = () => {
         const response = await deleteSubjectDepartmentRelationship(
           selectedAssignmentDelete.subject_class_id
         );
-        if (response?.status === 204) {
-          toast.success("Subject Department Assignment deleted successfully.");
-          closeDeleteModal();
-        } else {
-          toast.error("Failed to delete Subject Department Assignment.");
-          closeDeleteModal();
-        }
+        toast.success("Subject Department Assignment deleted successfully.");
+        closeDeleteModal();
+        fetchSubjectDepartmentList();
       } catch (error) {
         toast.error(error || "Failed to delete Subject Department Assignment.");
       }
@@ -193,7 +199,8 @@ const SubjecttoDept = () => {
               </p>
               <p className="text-base text-[#858383]">
                 <span className="font-bold">
-                  {selectedAssignmentDelete?.department}
+                  {getSubjectName(selectedAssignmentDelete?.subject)} from {""}
+                  {getDepartmentName(selectedAssignmentDelete?.department)}
                 </span>
                 ?
               </p>
@@ -232,22 +239,27 @@ const SubjecttoDept = () => {
             <div className="flex flex-col gap-x-2 ">
               <label className="text-[0.88rem] text-[#5E6A72]">Subject:</label>
               <MultiDropdown
-                label="Select Subject (s)"
-                items={subjectOptions}
-                selectedItems={
-                  Edit ? selectAssignment.subject : formData.subject
-                }
-                onSelect={(selected) =>
-                  Edit
-                    ? setselectAssignment((prev) => ({
-                        ...prev,
-                        subject: selected,
-                      }))
-                    : setFormData((prev) => ({
-                        ...prev,
-                        subject: selected,
-                      }))
-                }
+                label="Select Subject(s)"
+                items={Subjects.map((subject) => ({
+                  label: subject.name,
+                  value: subject.subject_id,
+                }))}
+                selectedItems={formData.subject?.map((id) =>
+                  getSubjectName(id)
+                )}
+                onSelect={(selectedLabels) => {
+                  const selectedIds = selectedLabels
+                    .map((label) => {
+                      const subject = Subjects.find((s) => s.name === label);
+                      return subject?.subject_id;
+                    })
+                    .filter(Boolean);
+
+                  setFormData((prev) => ({
+                    ...prev,
+                    subject: selectedIds,
+                  }));
+                }}
               />
             </div>
 
@@ -257,26 +269,17 @@ const SubjecttoDept = () => {
               </label>
               <Dropdown
                 label={
-                  Edit
-                    ? Department.find(
-                        (d) => d.department_id === selectAssignment?.department
-                      )?.name || "Select Department"
-                    : Department.find(
-                        (d) => d.department_id === formData.department
-                      )?.name || "Select Department"
+                  formData.department
+                    ? getDepartmentName(formData.department)
+                    : "Select Department"
                 }
                 items={Department.map((dept) => ({
                   label: dept.name,
                   onClick: () =>
-                    Edit
-                      ? setselectAssignment((prev) => ({
-                          ...prev,
-                          department: dept.department_id,
-                        }))
-                      : setFormData((prev) => ({
-                          ...prev,
-                          department: dept.department_id,
-                        })),
+                    setFormData((prev) => ({
+                      ...prev,
+                      department: dept.department_id,
+                    })),
                 }))}
               />
             </div>
@@ -292,7 +295,7 @@ const SubjecttoDept = () => {
       <div className="px-0">
         <div className="overflow-y-auto max-h-[200px] no-scrollbar">
           <table className="min-w-full table-auto">
-            {paginatedData.length > 0 && (
+            {paginatedData?.length > 0 && (
               <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">
                 <tr>
                   <th className="p-2 pl-16 bg-[#EDF0F3]">Subject (s)</th>
@@ -302,7 +305,7 @@ const SubjecttoDept = () => {
               </thead>
             )}
             <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
-              {paginatedData.length === 0 ? (
+              {paginatedData?.length === 0 ? (
                 <tr>
                   <td
                     colSpan="3"
@@ -312,7 +315,7 @@ const SubjecttoDept = () => {
                   </td>
                 </tr>
               ) : (
-                paginatedData.map((item, index) => (
+                paginatedData?.map((item, index) => (
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
                     <td className="p-2 pl-16">{item.subject_name}</td>
                     <td>{item.department_name}</td>

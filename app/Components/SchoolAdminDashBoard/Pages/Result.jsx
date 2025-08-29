@@ -40,6 +40,7 @@ const Results = () => {
               </button>
             ))}
           </div>
+          
         </div>
 
         {/* Content section – scrollable vertically */}

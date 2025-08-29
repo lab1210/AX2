@@ -327,7 +327,6 @@ export const createArm = async (armData) => {
   }
 };
 
-//GET TERMS
 export const getClassArm = async () => {
   try {
     const headers = createAuthHeaders();
@@ -440,7 +439,7 @@ export const getDepartment = async () => {
     const url = `${BASE_URL}/school_config/departments/`;
     const response = await axios.get(url, { headers });
     console.log(response.data);
-    return { data: response.data };
+    return response.data;
   } catch (error) {
     console.error("Failed to get departments:", error);
     return { error: error.response?.data || error.message || "Unknown error" };
@@ -638,7 +637,7 @@ export const getSubject = async () => {
     const url = `${BASE_URL}/school_config/subjects/`;
     const response = await axios.get(url, { headers });
     console.log(response.data);
-    return { data: response.data };
+    return response.data;
   } catch (error) {
     console.error("Failed to get subjects:", error);
     return { error: error.response?.data || error.message || "Unknown error" };

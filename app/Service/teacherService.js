@@ -16,9 +16,12 @@ export const getTeachers = async () => {
     const url = `${BASE_URL}/teachers/list/`;
     const response = await axios.get(url, { headers });
     console.log(response.data);
-    return { data: response.data };
+    return response.data;
   } catch (error) {
-    console.error("Failed to get teachers:", error);
-    return { error: error.response?.data || error.message || "Unknown error" };
+    if (error.response) {
+      throw error; // This preserves the error response structure
+    } else {
+      throw new Error(error.message || "Failed to register teacher");
+    }
   }
 };

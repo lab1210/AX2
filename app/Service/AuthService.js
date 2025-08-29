@@ -53,7 +53,6 @@ export const Login = async (username, password) => {
       throw new Error("Login failed");
     }
   } catch (error) {
-    console.error("Login error:", error);
     throw error;
   }
 };
