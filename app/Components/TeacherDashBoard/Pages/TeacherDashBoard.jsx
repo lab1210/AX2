@@ -75,15 +75,18 @@ export default function TeacherDashboard() {
   // Desktop View
   const DesktopView = () => (
     <Layout>
-      <div className="flex h-screen overflow-hidden">
+      {" "}
+      <div className="flex h-screen 2xl:overflow-hidden">
         <div className="bg-[#F7F8FA] w-full">
           <div className="flex-1 flex flex-col h-screen">
-            <div className="flex items-center justify-between bg-white px-6 py-4 fixed w-[85%]">
-              <h1 className="text-3xl font-bold">Dashboard</h1>
-              <div className="flex items-center">
-                <button className="relative mr-4">
-                  <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full" />
-                  <Bell />
+            <div className="flex items-center justify-between bg-white px-4 sm:px-6 py-3 sm:py-4 fixed w-full lg:w-[80%] xl:w-[85%] z-50">
+              <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold">
+                Dashboard
+              </h1>
+              <div className="flex items-center gap-2 sm:gap-4">
+                <button className="relative">
+                  <span className="absolute -top-1 -right-1 inline-block w-2 h-2 bg-red-500 rounded-full" />
+                  <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
                 <div className="flex items-center space-x-2">
                   <img
@@ -100,26 +103,28 @@ export default function TeacherDashboard() {
             </div>
 
             {/* Main Content */}
-            <div className="flex flex-1 p-6 gap-4 overflow-hidden mt-17 fixed w-[85%]">
-              <div className="flex-1 overflow-hidden">
-                <div className="w-full bg-[#004080] rounded-lg shadow flex flex-row justify-between items-center text-white mb-6">
-                  <div className="p-2">
-                    <h2 className="text-4xl font-bold mb-3">Hi, Mr Joshua</h2>
-                    <p className="text-sm">
+            <div className="flex flex-1 p-2 xl:p-6 gap-4 mt-20 xl:mt-17 w-full">
+              <div className="flex-1 xl:overflow-hidden">
+                {" "}
+                <div className="w-full bg-[#004080] rounded-lg shadow flex flex-row justify-between items-center text-white mb-4 sm:mb-6">
+                  <div className="p-3 sm:p-4 lg:p-6">
+                    <h2 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3">
+                      Hi, Mr Joshua
+                    </h2>
+                    <p className="text-xs sm:text-sm">
                       Welcome to the official Foursquare student portal.
                     </p>
                   </div>
-                  <div className="max-w-[240px] h-full object-contain">
+                  <div className="max-w-[120px] sm:max-w-[180px] lg:max-w-[240px] h-full">
                     <img
                       src="/male.png"
                       alt="Teacher illustration"
-                      className="w-full h-full"
+                      className="w-full h-full object-contain"
                     />
                   </div>
                 </div>
-
-                {/* Quick Stats */}
-                <div className="grid grid-cols-3 gap-4 mb-6">
+                {/* Quick Stats */}{" "}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 sm:gap-4 mb-4 sm:mb-6">
                   <StatCard
                     label="Total Classes"
                     value={10}
@@ -138,23 +143,24 @@ export default function TeacherDashboard() {
                     icon={Board}
                     percentage={0.8}
                   />
-                </div>
-
-                <div className="flex justify-between gap-3">
+                </div>{" "}
+                <div className="flex flex-col lg:flex-row justify-between gap-2 sm:gap-4">
                   {/* Attendance Chart */}
-                  <div className="flex flex-col mb-4 w-[70%] bg-white rounded-lg shadow-lg p-4">
-                    <div className="flex items-center justify-between mb-4">
-                      <h3 className="text-lg font-semibold">Attendance</h3>
-                      <div className="flex items-center space-x-4">
-                        <div className="flex items-center space-x-2">
+                  <div className="w-full lg:w-[70%] xl:w-[70%] bg-white rounded-lg shadow-lg p-3 sm:p-4">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4">
+                      <h3 className="text-base sm:text-lg font-semibold mb-2 sm:mb-0">
+                        Attendance
+                      </h3>
+                      <div className="flex flex-wrap gap-2 sm:gap-4">
+                        <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full bg-[#F16960]"></div>
-                          <span className="text-sm text-gray-600">
+                          <span className="text-xs sm:text-sm text-gray-600">
                             Total Present
                           </span>
                         </div>
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center gap-2">
                           <div className="w-3 h-3 rounded-full bg-[#065293]"></div>
-                          <span className="text-sm text-gray-600">
+                          <span className="text-xs sm:text-sm text-gray-600">
                             Total Absent
                           </span>
                         </div>
@@ -165,7 +171,7 @@ export default function TeacherDashboard() {
                     <ResponsiveContainer width="100%" height={300}>
                       <BarChart data={attendanceData}>
                         <XAxis dataKey="day" />
-                        <YAxis />
+                        {/* <YAxis className=""/> */}
                         <Tooltip />
                         <Bar
                           dataKey="present"
@@ -194,28 +200,31 @@ export default function TeacherDashboard() {
                   </div>
 
                   {/* Teaching Progress */}
-                  <div className="w-[30%]">
+                  <div className="w-[35%] xl:w-[30%]">
                     <TeachingProgress />
                   </div>
                 </div>
               </div>
-
-              {/* Right Sidebar */}
-              <div className="w-[27%] space-y-3 sticky top-6 overflow-y-auto h-screen no-scrollbar">
+              {/* Right Sidebar */}{" "}
+              <div className="hidden lg:block w-[30%] xl:w-[25%] space-y-3 xl:sticky top-10 xl:top-20 border-l border-gray-200 pl-2">
                 {/* Calendar */}
-                <div className="bg-white rounded-lg shadow-lg h-[40vh]">
+                <div className="bg-white rounded-lg shadow-xl">
                   <LocalizationProvider dateAdapter={AdapterDayjs}>
-                    <DemoContainer
-                      components={["DateCalendar", "DateCalendar"]}
-                    >
-                      <DemoItem>
-                        <DateCalendar readOnly />
-                      </DemoItem>
-                    </DemoContainer>
+                    <DateCalendar
+                      readOnly
+                      sx={{
+                        width: "100%",
+                        height: "auto",
+                        "& .MuiPickersCalendarHeader-root": {
+                          paddingLeft: "8px",
+                          paddingRight: "8px",
+                        },
+                      }}
+                    />
                   </LocalizationProvider>
                 </div>
                 {/* Events */}
-                <div className="bg-white rounded-lg shadow-lg p-4 h-[46vh] overflow-y-auto no-scrollbar">
+                <div className="bg-white rounded-lg p-4 h-[55vh] xl:h-[46vh] overflow-y-auto no-scrollbar shadow-xl">
                   <div className="flex items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold">Events</h3>
                     <button className="text-sm text-blue-600">View All</button>
@@ -391,7 +400,7 @@ export default function TeacherDashboard() {
               </DemoContainer>
             </LocalizationProvider>
             {/* Teaching Progress */}
-            <div className="mt-4 bg-white rounded-lg shadow-lg p-4 w-full mb-15">
+            <div className="mt-4 bg-white rounded-lg p-4 w-full mb-15 h-screen">
               <TeachingProgress />
             </div>
           </div>

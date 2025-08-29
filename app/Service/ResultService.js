@@ -332,3 +332,94 @@ export const DeleteAnnualWeigh = async (annualID, annual) => {
     return { error: error.response?.data || error.message || "Unknown error" };
   }
 };
+
+// STUDENT RESULT APIs
+export const getStudentResult = async (studentId, academicYearId, termId) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+
+    let url = `${BASE_URL}/result/student-results/`;
+    const params = new URLSearchParams();
+    
+    if (studentId) params.append('student_id', studentId);
+    if (academicYearId) params.append('academic_year_id', academicYearId);
+    if (termId) params.append('term_id', termId);
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    const response = await axios.get(url, { headers });
+    return { data: response.data };
+  } catch (error) {
+    console.error("Failed to fetch student result:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const getStudentSubjects = async (studentId, academicYearId, termId) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+
+    let url = `${BASE_URL}/result/student-subjects/`;
+    const params = new URLSearchParams();
+    
+    if (studentId) params.append('student_id', studentId);
+    if (academicYearId) params.append('academic_year_id', academicYearId);
+    if (termId) params.append('term_id', termId);
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    const response = await axios.get(url, { headers });
+    return { data: response.data };
+  } catch (error) {
+    console.error("Failed to fetch student subjects:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const getStudentGrades = async (studentId, academicYearId, termId) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+
+    let url = `${BASE_URL}/result/student-grades/`;
+    const params = new URLSearchParams();
+    
+    if (studentId) params.append('student_id', studentId);
+    if (academicYearId) params.append('academic_year_id', academicYearId);
+    if (termId) params.append('term_id', termId);
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
+    }
+
+    const response = await axios.get(url, { headers });
+    return { data: response.data };
+  } catch (error) {
+    console.error("Failed to fetch student grades:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};

@@ -148,7 +148,7 @@ export default function AttendancePage() {
           {/* Assembly Calendar */}
           <div className="bg-white rounded shadow p-6">
             <h2 className="text-center text-lg font-semibold text-gray-800 mb-4">
-              Assembly Attendance Summary
+              My Attendance Summary
             </h2>
             <div className="border border-gray-300 mb-4">
               <div className="flex justify-center items-center">
@@ -203,7 +203,7 @@ export default function AttendancePage() {
         </div>
 
         {/* Class Attendance Table */}
-        <div className="bg-white rounded shadow p-6">
+        {/* <div className="bg-white rounded shadow p-6">
           <h2 className="text-center text-lg font-semibold text-gray-800 mb-4">
             Class Attendance
           </h2>
@@ -233,7 +233,6 @@ export default function AttendancePage() {
               </tbody>
             </table>
 
-            {/* Pagination Controls */}
             {totalPages > 1 && (
               <div className="flex justify-end items-center gap-2 mt-4">
                 <button
@@ -266,7 +265,7 @@ export default function AttendancePage() {
               </div>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
 
       {/* Mobile/Tablet Version */}

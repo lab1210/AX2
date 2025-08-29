@@ -76,7 +76,7 @@ const PerformanceAnalysis = () => {
   const renderHeader = () => {
     if (activeTab === "Subject Teacher") {
       return (
-        <div className="fixed top-0 z-30 flex items-center justify-between mb-6 bg-white p-4 w-[85%]">
+        <div className="fixed top-0 z-30 flex items-center justify-between mb-6 bg-white p-2 xl:p-4 w-[80%] xl:w-[85%]">
           <h1 className="text-lg xl:text-2xl font-bold">
             Performance Analysis
           </h1>
@@ -118,7 +118,7 @@ const PerformanceAnalysis = () => {
     }
     if (activeTab === "Class Teacher") {
       return (
-        <div className="fixed right-0 z-30 flex items-center justify-between mb-6 bg-white p-4 w-[85%]">
+        <div className="fixed right-0 z-30 flex items-center justify-between mb-6 bg-white p-2 xl:p-4 w-[80%] xl:w-[85%]">
           <h1 className="text-lg xl:text-2xl font-bold">
             Performance Analysis
           </h1>
@@ -216,7 +216,10 @@ const PerformanceAnalysis = () => {
               >
                 &times;
               </button> */}
-              <ResultSheet studentData={selectedStudent} />
+            <ResultSheet
+              studentData={selectedStudent}
+              onClose={() => setIsResultModalOpen(false)}
+            />
             {/* </div> */}
           </div>
         )}
@@ -227,14 +230,16 @@ const PerformanceAnalysis = () => {
   return (
     <Layout>
       <div className="bg-[#F7F8FA] min-h-screen">
+        {/* <div className="w-[5%] xl:w-[85%]"> */}
         {renderHeader()}
+        {/* </div> */}
         <div className="pt-20">
           {activeTab === "Subject Teacher" && (
             <div>
               {/* Current Content */}
               <div className="flex flex-row space-x-3 w-full mb-3 p-3">
                 {/* Subject Statistics */}
-                <div className="w-[65%] bg-white p-3 shadow-xl rounded-md h-[50%]">
+                <div className="w-[55%] xl:w-[65%] bg-white p-3 shadow rounded-md h-[50%]">
                   {/* Tabs */}
                   <div className="flex space-x-6 mb-6">
                     <button
@@ -263,7 +268,7 @@ const PerformanceAnalysis = () => {
                   </h2>
                   <div className="grid grid-cols-3 gap-6 mb-6 rounded-md items-center">
                     {/* Average Score */}
-                    <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-400 flex flex-col justify-between">
+                    <div className="bg-white rounded-lg shadow p-4 border border-gray-400 flex flex-col justify-between">
                       <div className="flex items-center">
                         <div className="flex items-center justify-center mr-4">
                           <img
@@ -283,7 +288,7 @@ const PerformanceAnalysis = () => {
                     </div>
 
                     {/* Highest Score */}
-                    <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-400 flex flex-col justify-between">
+                    <div className="bg-white rounded-lg shadow p-4 border border-gray-400 flex flex-col justify-between">
                       <div className="flex items-center">
                         <div className="flex items-center justify-center mr-4">
                           <img
@@ -303,7 +308,7 @@ const PerformanceAnalysis = () => {
                     </div>
 
                     {/* Lowest Score */}
-                    <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-400 flex flex-col justify-between">
+                    <div className="bg-white rounded-lg shadow p-4 border border-gray-400 flex flex-col justify-between">
                       <div className="flex items-center">
                         <div className="flex items-center justify-center mr-4">
                           <img
@@ -324,12 +329,16 @@ const PerformanceAnalysis = () => {
                   </div>
                 </div>
                 {/* Score Distribution */}
-                <div className="bg-white rounded-lg shadow-xl p-4 w-[35%] flex">
-                  <div className="w-[60%]">
+                <div className="bg-white rounded-lg shadow p-4 w-[45%] xl:w-[35%] flex">
+                  <div className="w-[70%] xl:w-[60%] h-[20vh] xl:h-[25vh] ">
                     <h3 className="text-lg font-semibold mb-4">
                       Score Distribution
                     </h3>
-                    <ResponsiveContainer width="100%" height={150}>
+                    <ResponsiveContainer
+                      width="100%"
+                      height={150}
+                      className="lg:h-[200px] xl:h-[250px]"
+                    >
                       <PieChart>
                         <Pie
                           data={scoreDistribution}
@@ -353,7 +362,7 @@ const PerformanceAnalysis = () => {
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="w-[40%] space-y-3 flex flex-col justify-center">
+                  <div className="w-[60%] xl:w-[40%] space-y-3 flex flex-col justify-center">
                     {scoreDistribution.map((entry, index) => (
                       <div key={index} className="flex items-center space-x-2">
                         <div
@@ -379,7 +388,7 @@ const PerformanceAnalysis = () => {
               </div>
 
               {/* Charts Section */}
-              <div className="grid grid-cols-[60%_40%] space-x-3 p-3">
+              <div className="grid grid-cols-[60%_40%] space-x-2 xl:space-x-3 p-1 xl:p-3">
                 {/* Left Column */}
                 <div className="space-y-6">
                   {/* Performance vs Attendance */}
@@ -389,7 +398,11 @@ const PerformanceAnalysis = () => {
                         Performance vs Attendance
                       </h3>
                       <ResponsiveContainer width="100%" height={200}>
-                        <ComposedChart data={performanceData}>
+                        <ComposedChart
+                          data={performanceData}
+                          margin={{ right: 30 }}
+                          style={{ fontSize: "12px" }}
+                        >
                           <CartesianGrid strokeDasharray="3 3" />
                           <XAxis dataKey="week" />
                           <YAxis />
@@ -481,7 +494,7 @@ const PerformanceAnalysis = () => {
                         </ResponsiveContainer>
                       </div>
                       {/* Gender Performance Distribution */}
-                      <div className="bg-white rounded-md flex flex-col w-[45%] shadow-lg">
+                      <div className="bg-white rounded-md flex flex-col w-[45%] shadow lg:pb-3">
                         <p className="font-bold text-lg text-center mt-3">
                           Gender Performance Distribution
                         </p>
@@ -584,19 +597,20 @@ const PerformanceAnalysis = () => {
                                   justifyContent: "center",
                                   alignItems: "center",
                                   gap: 5,
+                                  // padding: -5,
                                 }}
                               >
                                 <div
                                   style={{
-                                    width: 16,
-                                    height: 16,
+                                    width: 12,
+                                    height: 12,
                                     borderRadius: 50,
                                     backgroundColor: entry.color,
                                   }}
                                 ></div>
                                 <div
                                   style={{
-                                    fontSize: "16px",
+                                    fontSize: "12px",
                                     fontWeight: "bold",
                                     display: "flex",
                                     alignItems: "center",
@@ -606,6 +620,7 @@ const PerformanceAnalysis = () => {
                                 </div>
                                 <div
                                   style={{
+                                    fontSize: "12px",
                                     fontWeight: "bold",
                                     color: "#777474",
                                     display: "flex",
@@ -705,7 +720,7 @@ const PerformanceAnalysis = () => {
             <div>
               {/* Quick Stats Section */}
               <div className="flex flex-row space-x-3 w-full mb-3 p-3">
-                <div className="w-[65%] bg-white p-3 shadow-xl rounded-md h-[50%]">
+                <div className="w-[55%] xl:w-[65%] bg-white p-3 shadow rounded-md h-[50%]">
                   {/* Tabs */}
                   <div className="flex space-x-6 mb-6">
                     <button
@@ -732,9 +747,9 @@ const PerformanceAnalysis = () => {
                   <h2 className="mb-2 text-xl font-semibold">
                     Subject Statistics
                   </h2>
-                  <div className="grid grid-cols-3 gap-6 mb-6 rounded-md items-center">
+                  <div className="grid grid-cols-2 xl:grid-cols-3 gap-6 mb-6 rounded-md items-center">
                     {/* First Position */}
-                    <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-400">
+                    <div className="bg-white rounded-lg shadow p-4 border border-gray-400">
                       <div className="flex flex-row items-center">
                         <div className="flex items-center">
                           <div className="flex items-center justify-center mr-4">
@@ -771,7 +786,7 @@ const PerformanceAnalysis = () => {
                       </div>
                     </div>
                     {/* Second Position */}
-                    <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-400">
+                    <div className="bg-white rounded-lg shadow p-4 border border-gray-400">
                       <div className="flex flex-row items-center">
                         <div className="flex items-center">
                           <div className="flex items-center justify-center mr-4">
@@ -808,7 +823,7 @@ const PerformanceAnalysis = () => {
                       </div>
                     </div>
                     {/* Third Position */}
-                    <div className="bg-white rounded-lg shadow-lg p-4 border border-gray-400">
+                    <div className="bg-white rounded-lg shadow p-4 border border-gray-400">
                       <div className="flex flex-row items-center">
                         <div className="flex items-center">
                           <div className="flex items-center justify-center mr-4">
@@ -847,7 +862,7 @@ const PerformanceAnalysis = () => {
                   </div>
                 </div>
                 {/* Score Distribution */}
-                <div className="bg-white rounded-lg shadow-xl p-4 w-[35%] flex h-[30vh]">
+                <div className="bg-white rounded-lg shadow p-4 w-[45%] xl:w-[35%] flex h-[50%]">
                   <div className="w-[60%]">
                     <h3 className="text-lg font-semibold mb-4">
                       Percentage Distribution
@@ -905,7 +920,7 @@ const PerformanceAnalysis = () => {
               <div className="grid grid-cols-[60%_40%] space-x-3 p-3">
                 <div className="space-y-6">
                   {/* Performance vs Attendance Section */}
-                  <div className="bg-white rounded-lg shadow-xl p-4 mb-6">
+                  <div className="bg-white rounded-lg shadow p-4 mb-6">
                     <h3 className="text-lg font-semibold mb-4">
                       Performance vs Attendance
                     </h3>
@@ -949,7 +964,7 @@ const PerformanceAnalysis = () => {
                     </ResponsiveContainer>
                   </div>
                   {/* Best in All Subjects */}
-                  <div className="bg-white rounded-lg shadow p-4 mt-2 h-[30vh]">
+                  <div className="bg-white rounded-lg shadow p-4 mt-2 h-[50%]">
                     <div className="flex justify-between items-start">
                       <h3 className="text-lg font-semibold">
                         Best in all subjects
@@ -1011,11 +1026,11 @@ const PerformanceAnalysis = () => {
                     </table>
                   </div>
                 </div>
-                <div className="bg-white rounded-lg shadow-lg p-4">
+                <div className="bg-white rounded-lg shadow p-4">
                   <h3 className="text-lg font-semibold mb-4">
                     Overall Performance Distribution
                   </h3>
-                  <ResponsiveContainer width="100%" height={350}>
+                  {/* <ResponsiveContainer width="100%" height={350}>
                     <PieChart>
                       <Pie
                         data={[
@@ -1043,15 +1058,74 @@ const PerformanceAnalysis = () => {
                         <Cell key="failed" fill="#4169E1" />
                       </Pie>
                     </PieChart>
+                  </ResponsiveContainer> */}
+                  <ResponsiveContainer width="100%" height={350}>
+                    <PieChart>
+                      <Pie
+                        data={[
+                          {
+                            name: "Percentage of Student Passed",
+                            value: 70,
+                            color: "#01427A",
+                          },
+                          {
+                            name: "Percentage of Student Failed",
+                            value: 30,
+                            color: "#4169E1",
+                          },
+                        ]}
+                        dataKey="value"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={0}
+                        outerRadius={150}
+                        paddingAngle={2}
+                        startAngle={90}
+                        endAngle={450}
+                        strokeWidth={0}
+                        label={({
+                          cx,
+                          cy,
+                          midAngle,
+                          innerRadius,
+                          outerRadius,
+                          percent,
+                          value,
+                        }) => {
+                          const radius =
+                            innerRadius + (outerRadius - innerRadius) * 0.5;
+                          const x =
+                            cx + radius * Math.cos((-midAngle * Math.PI) / 180);
+                          const y =
+                            cy + radius * Math.sin((-midAngle * Math.PI) / 180);
+                          return (
+                            <text
+                              x={x}
+                              y={y}
+                              fill="white"
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              fontSize="16"
+                              fontWeight="bold"
+                            >
+                              {`${value}%`}
+                            </text>
+                          );
+                        }}
+                      >
+                        <Cell key="passed" fill="#01427A" />
+                        <Cell key="failed" fill="#4169E1" />
+                      </Pie>
+                    </PieChart>
                   </ResponsiveContainer>
-                  <div className="flex justify-center mt-4">
+                  <div className="flex justify-center mt-8">
                     <div className="flex items-center space-x-2 mx-2">
                       <div className="w-3 h-3 rounded-full bg-[#01427A]"></div>
-                      <p className="text-sm">Percentage of Student Passed</p>
+                      <p className="text-[15px]">Percentage of Student Passed</p>
                     </div>
                     <div className="flex items-center space-x-2 mx-2">
                       <div className="w-3 h-3 rounded-full bg-[#4169E1]"></div>
-                      <p className="text-sm">Percentage of Student Failed</p>
+                      <p className="text-[15px]">Percentage of Student Failed</p>
                     </div>
                   </div>
                 </div>
@@ -1061,7 +1135,7 @@ const PerformanceAnalysis = () => {
           {activeTab === "Class Teacher" && schoolType === "Snr Sch" && (
             <div>
               <div className="grid grid-cols-2 gap-4 p-4">
-                <div className="bg-white rounded-lg shadow-lg p-4 h-[62vh]">
+                <div className="bg-white rounded-lg shadow p-4 h-[90%]">
                   <div className="flex space-x-6 mb-6 border-b border-gray-200">
                     <button
                       className={`pb-2 text-md font-medium ${
@@ -1093,7 +1167,7 @@ const PerformanceAnalysis = () => {
                     </button>
                   </div>
                   <ResponsiveContainer width="100%" height={250}>
-                    <PieChart>
+                    {/* <PieChart>
                       <Pie
                         data={[
                           {
@@ -1119,6 +1193,63 @@ const PerformanceAnalysis = () => {
                         <Cell key="passed" fill="#01427A" />
                         <Cell key="failed" fill="#4169E1" />
                       </Pie>
+                    </PieChart> */}
+                    <PieChart>
+                      <Pie
+                        data={[
+                          {
+                            name: "Percentage of Student Passed",
+                            value: 70,
+                            color: "#01427A",
+                          },
+                          {
+                            name: "Percentage of Student Failed",
+                            value: 30,
+                            color: "#4169E1",
+                          },
+                        ]}
+                        dataKey="value"
+                        cx="50%"
+                        cy="50%"
+                        innerRadius={0}
+                        outerRadius={120}
+                        paddingAngle={2}
+                        startAngle={90}
+                        endAngle={450}
+                        strokeWidth={0}
+                        label={({
+                          cx,
+                          cy,
+                          midAngle,
+                          innerRadius,
+                          outerRadius,
+                          percent,
+                          value,
+                        }) => {
+                          const radius =
+                            innerRadius + (outerRadius - innerRadius) * 0.5;
+                          const x =
+                            cx + radius * Math.cos((-midAngle * Math.PI) / 180);
+                          const y =
+                            cy + radius * Math.sin((-midAngle * Math.PI) / 180);
+                          return (
+                            <text
+                              x={x}
+                              y={y}
+                              fill="white"
+                              textAnchor="middle"
+                              dominantBaseline="middle"
+                              fontSize="16"
+                              fontWeight="bold"
+                            >
+                              {`${value}%`}
+                            </text>
+                          );
+                        }}
+                      >
+                        <Cell key="passed" fill="#01427A" />
+                        <Cell key="failed" fill="#4169E1" />
+                      </Pie>
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="flex justify-center space-y-3 flex-col">
@@ -1134,9 +1265,9 @@ const PerformanceAnalysis = () => {
                 </div>
 
                 <div className="flex flex-col space-y-6">
-                  <div className="bg-white rounded-lg shadow-lg p-4 h-[25vh]">
+                  <div className="bg-white rounded-lg shadow p-4 h-[40%]">
                     <h3 className="text-lg font-semibold mb-4">Quick Stat</h3>
-                    <div className="grid grid-cols-3 gap-4">
+                    <div className="grid grid-cols-2 xl:grid-cols-3 gap-4">
                       {/* Stat Card 1 */}
                       <div className="flex flex-row items-center justify-center border border-gray-300 rounded-lg p-4">
                         <div className="flex flex-col mb-2">
@@ -1189,7 +1320,7 @@ const PerformanceAnalysis = () => {
                   </div>
 
                   {/* Performance vs Attendance */}
-                  <div className="bg-white rounded-lg shadow-xl p-4 mb-6">
+                  <div className="bg-white rounded-lg shadow p-4 mb-6">
                     <h3 className="text-lg font-semibold mb-4">
                       Performance vs Attendance
                     </h3>
@@ -1239,7 +1370,7 @@ const PerformanceAnalysis = () => {
                   <h3 className="text-lg font-semibold mb-4">
                     Grade Distribution
                   </h3>
-                  <ResponsiveContainer width="100%" height={200}>
+                  <ResponsiveContainer width="100%" height={300}>
                     <ComposedChart data={gradeDistribution}>
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis

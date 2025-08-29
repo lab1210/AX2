@@ -64,18 +64,18 @@ const LeftSidebar = () => {
   const pathname = usePathname();
 
   return (
-    <div className="flex flex-col h-screen bg-white shadow-lg border-r border-gray-200 overflow-hidden">
+    <div className="fixed w-[20%] xl:w-[15%] flex flex-col h-screen bg-white shadow-lg border-r border-gray-200 overflow-hidden no-scrollbar">
       {/* Top section with logo */}
-      <div className="flex items-center justify-center p-5 flex-col text-white">
-        <img src="/logo.svg" alt="Foursquare Logo" className="h-16 w-16" />
-        <h2 className="text-[#004080] text-xl font-semibold text-center p-2">
+      <div className="flex items-center justify-center p-2 flex-col text-white">
+        <img src="/logo.svg" alt="Foursquare Logo" className="h-13 w-13" />
+        <h2 className="text-[#004080] text-lg font-semibold text-center p-2">
           {SchoolName}
         </h2>
       </div>
 
       {/* Navigation Links */}
       <div className="flex-1">
-        <nav className="flex flex-col space-y-2 p-2">
+        <nav className="flex flex-col gap-0.5 p-2">
           {sidebarItems.map((item) => (
             <button
               key={item.label}

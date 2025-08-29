@@ -24,6 +24,7 @@ export const createNotifications = async (notifications) => {
 };
 
 export const getNotifications = async (notifications) => {
+
   try {
     const headers = createAuthHeaders();
 
@@ -44,6 +45,7 @@ export const getNotifications = async (notifications) => {
 };
 
 export const getNotification = async (id) => {
+
   try {
     const headers = createAuthHeaders();
 
@@ -120,5 +122,6 @@ export const DeleteNotification = async (id) => {
   } catch (error) {
     console.error("Failed to delete notification:", error);
     return { error: error.response?.data || error.message || "Unknown error" };
+
   }
 };
