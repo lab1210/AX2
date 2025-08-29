@@ -4,6 +4,8 @@ import SchoolAdminLayout from "../SchoolAdminLayout";
 import RightSide from "../RightSide";
 import TeacherReg from "../TeacherReg";
 import StudentReg from "../StudentReg";
+import TeacherList from "../TeacherList";
+import StudentList from "../StudentList";
 import PinGen from "../PinGen";
 const Registration = () => {
   const [activeTab, setActiveTab] = useState("OTP Generation");
@@ -16,7 +18,9 @@ const Registration = () => {
             {[
               "OTP Generation",
               "Teacher Registration",
+              "Teacher's List",
               "Student Registration",
+              "Student's List",
             ].map((tab) => (
               <button
                 key={tab}
@@ -38,6 +42,8 @@ const Registration = () => {
           </div>
           <hr className="mt-1.5" />
           {activeTab === "Teacher Registration" && <TeacherReg />}
+          {activeTab === "Teacher's List" && <TeacherList />}
+          {activeTab === "Student's List" && <StudentList />}
           {activeTab === "Student Registration" && <StudentReg />}
           {activeTab === "OTP Generation" && <PinGen />}
         </div>

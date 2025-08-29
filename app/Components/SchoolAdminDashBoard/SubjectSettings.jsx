@@ -5,6 +5,7 @@ import {
   UpdateSubject,
 } from "@/Service/schoolConfig";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
 const SubjectSettings = () => {
@@ -26,9 +27,12 @@ const SubjectSettings = () => {
 
   useEffect(() => {
     const fetchSubjects = async () => {
-      const { data, error } = await getSubject();
-      if (data) setsubjectList(data);
-      else setMessage(error || "Failed to load subjects");
+      try {
+        const data = await getSubject();
+        setsubjectList(data);
+      } catch (error) {
+        toast.error("Failed to fetch subjects.");
+      }
     };
     fetchSubjects();
   }, []);

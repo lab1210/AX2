@@ -6,7 +6,7 @@ import { IoClose, IoFilterOutline } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa6";
 import { getComplianceDocs } from "../../../Service/complianceDocService";
 
-const itemsPerPage = 7; // You can adjust this value
+const itemsPerPage = 10; // You can adjust this value
 
 const ManageCompItem = () => {
   const [complianceData, setComplianceData] = useState([]);

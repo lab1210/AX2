@@ -7,7 +7,8 @@ import { useSearchParams } from "next/navigation";
 import { LuUpload } from "react-icons/lu";
 import UploadProgress from "./UploadProgress";
 import { createComplianceDoc } from "../../../Service/complianceDocService";
-
+import { getSchools } from "@/Service/schoolService";
+import Dropdown2 from "@/Components/SchoolAdminDashBoard/DropDown2";
 const ComplianceDocumentUploadItem = () => {
   const searchParams = useSearchParams();
   const adminId = searchParams.get("adminId");
@@ -19,6 +20,34 @@ const ComplianceDocumentUploadItem = () => {
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState(null);
+  const [schools, setSchools] = useState([]); // State for schools list
+  const [selectedSchool, setSelectedSchool] = useState(null); // State for selected school
+  const [loadingSchools, setLoadingSchools] = useState(false); // Loading state for schools
+
+  // Fetch schools on component mount
+  useEffect(() => {
+    const fetchSchools = async () => {
+      try {
+        setLoadingSchools(true);
+        const response = await getSchools({}, 1, 100); // Fetch first 100 schools
+        if (response && response.data && response.data.results) {
+          const formattedSchools = response.data.results.map((school) => ({
+            id: school.id,
+            label: school.school_name,
+            value: school.id,
+          }));
+          setSchools(formattedSchools);
+        }
+      } catch (error) {
+        console.error("Error fetching schools:", error);
+        setUploadError("Failed to load schools");
+      } finally {
+        setLoadingSchools(false);
+      }
+    };
+
+    fetchSchools();
+  }, []);
 
   const handleCertificateUpload = (event) => {
     const file = event.target.files[0];
@@ -42,9 +71,15 @@ const ComplianceDocumentUploadItem = () => {
     }
   };
 
+  const handleSchoolSelect = (school) => {
+    setSelectedSchool(school);
+  };
+
   const handleSave = async () => {
-    if (!taxIdNumber || !certificateFile || !proofFile) {
-      setUploadError("Please fill all required fields");
+    if (!taxIdNumber || !certificateFile || !proofFile || !selectedSchool) {
+      setUploadError(
+        "Please fill all required fields including school selection"
+      );
       return;
     }
     setUploading(true);
@@ -54,6 +89,7 @@ const ComplianceDocumentUploadItem = () => {
     formData.append("tax_identification_number", taxIdNumber);
     formData.append("accreditation_certificates", certificateFile);
     formData.append("proof_of_registration", proofFile);
+    formData.append("school", selectedSchool.id); // Add school ID to the form data
 
     try {
       const response = await createComplianceDoc(formData);
@@ -65,7 +101,7 @@ const ComplianceDocumentUploadItem = () => {
       setUploading(false);
     }
   };
-  console.log("rendering, saved:", saved);
+
   return (
     <SuperAdminLayout>
       <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
@@ -96,6 +132,25 @@ const ComplianceDocumentUploadItem = () => {
         <div className="bg-[#D4D4D4] overflow-auto h-screen  p-4 ">
           <div className="sm:flex sm:flex-col sm:gap-2 lg:grid lg:grid-cols-[1.5fr_1fr] overflow-auto  lg:gap-4 lg:h-screen ">
             <div className="bg-[#ffffff] rounded-md no-scrollbar p-6 flex flex-col gap-6">
+              {/* School Dropdown */}
+              <div className="flex flex-col gap-1.5 mb-2">
+                <label
+                  className="text-[#808080] font-semibold"
+                  htmlFor="school"
+                >
+                  School
+                </label>
+                <Dropdown2
+                  label={
+                    loadingSchools ? "Loading schools..." : "Select School"
+                  }
+                  items={schools.map((school) => ({
+                    label: school.label,
+                    onClick: () => handleSchoolSelect(school),
+                  }))}
+                />
+              </div>
+
               <div className="flex flex-col gap-1.5 mb-2 ">
                 <label className="text-[#808080] font-semibold" htmlFor="">
                   Tax Identification Number

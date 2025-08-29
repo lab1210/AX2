@@ -1,14 +1,19 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { getAllRoles } from "../../Service/RoleService";
+import {
+  createNotifications,
+  DeleteNotification,
+  getNotifications,
+  UpdateNotification,
+} from "../../Service/NotificationService";
 import Dropdown from "./DropDown2";
 import { RxLetterCaseCapitalize } from "react-icons/rx";
 import { IoFilter, IoSearch } from "react-icons/io5";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
-
+import toast from "react-hot-toast";
+import formatdate from "../SchoolAdminDashBoard/Formatdate";
 const NotificationPage = () => {
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [role, setRole] = useState([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedDelete, setselectedDelete] = useState(null);
@@ -18,30 +23,44 @@ const NotificationPage = () => {
   const [filterType, setFilterType] = useState("title");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [formData, setformData] = useState({
     title: "",
     content: "",
-    recipient: "",
+    recipient_group: "",
     notification_type: "",
   });
 
   const notificationTypes = [
     { label: "Information", value: "Information" },
-    { label: "Announcement", value: "Announcement" },
+    { label: "Reminder", value: "Reminder" },
+    { label: "Alert", value: "Alert" },
   ];
-  useEffect(() => {
-    const fetchRoles = async () => {
-      const { data, error } = await getAllRoles();
-      if (data) {
-        setRole(data);
-        console.log(data);
-      } else {
-        setMessage(error || "Something went wrong");
-      }
-    };
 
-    fetchRoles();
+  const fetchData = async () => {
+    try {
+      const roleRes = await getAllRoles();
+      if (roleRes.data) {
+        setRole(roleRes.data);
+      } else {
+        toast.error("Failed to fetch roles");
+      }
+      const notificationRes = await getNotifications();
+      if (notificationRes) {
+        setNotifications(notificationRes);
+      } else {
+        toast.error("Failed to fetch notifications");
+      }
+    } catch (error) {
+      toast.error("Failed to fetch data");
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchData();
   }, []);
 
   const getRoleName = (roleID) => {
@@ -68,60 +87,87 @@ const NotificationPage = () => {
     setformData({
       title: notification.title,
       content: notification.content,
-      recipient: notification.recipient,
+      recipient_group: notification.recipient_group,
       notification_type: notification.notification_type,
     });
   };
 
-  const data = [
-    {
-      id: 1,
-      title: "Notification Title 1",
-      content: "Notification Content 1",
-      recipient: "5d84da90-e266-4667-9956-c15a0ce27f53",
-      notification_type: "Information",
-      created_at: "2021-08-10 10:00am",
-    },
-    {
-      id: 2,
-      title: "Notification Title 2",
-      content: "Notification Content 2",
-      recipient: "f1a3a511-61b7-466e-8ab3-3a7c2420a800",
-      notification_type: "Announcement",
-      created_at: "2021-08-11 10:00am",
-    },
-    {
-      id: 3,
-      title: "Notification Title 3",
-      content: "Notification Content 3",
-      recipient: "5d84da90-e266-4667-9956-c15a0ce27f53",
-      notification_type: "Information",
-      created_at: "2021-08-12 10:00am",
-    },
-    {
-      id: 4,
-      title: "Notification Title 4",
-      content: "Notification Content 4",
-      recipient: "5d84da90-e266-4667-9956-c15a0ce27f53",
-      notification_type: "Announcement",
-      created_at: "2021-08-13 10:00am",
-    },
-    {
-      id: 5,
-      title: "Notification Title 5",
-      content: "Notification Content 5",
-      recipient: "f1a3a511-61b7-466e-8ab3-3a7c2420a800",
-      notification_type: "Information",
-      created_at: "2021-08-14 10:00am",
-    },
-  ];
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    try {
+      let response;
+      const notificationData = {
+        title: formData.title,
+        content: formData.content,
+        recipient_group: formData.recipient_group,
+        notification_type: formData.notification_type,
+      };
+
+      if (editVisible && selected) {
+        response = await UpdateNotification(
+          selected.notification_id,
+          notificationData
+        );
+      } else {
+        response = await createNotifications(notificationData);
+      }
+
+      if (response.error) {
+        console.log(response.error);
+        toast.error("Failed to create or update notification");
+        return;
+      }
+
+      fetchData();
+
+      toast.success(
+        editVisible
+          ? "Notification updated successfully"
+          : "Notification created successfully"
+      );
+      setEditVisible(false);
+      setformData({
+        title: "",
+        content: "",
+        recipient_group: "",
+        notification_type: "",
+      });
+    } catch (error) {
+      console.log(error);
+      toast.error("An error occurred while processing your request");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!selectedDelete) return;
+
+    try {
+      const response = await DeleteNotification(selectedDelete.id);
+      if (response.error) {
+        toast.error(response.error);
+        return;
+      }
+
+      // Refresh notifications after successful deletion
+      const updatedNotifications = await getNotifications();
+      if (updatedNotifications.data) {
+        setNotifications(updatedNotifications.data);
+      }
+
+      toast.success("Notification deleted successfully");
+      closeDeleteModal();
+    } catch (error) {
+      console.log(error);
+      toast.error("An error occurred while deleting the notification");
+    }
+  };
 
   const itemsPerPage = 10;
 
   const filteredNotifications =
     searchText.trim() === ""
-      ? data
-      : data.filter((d) => {
+      ? notifications
+      : notifications.filter((d) => {
           const lowerSearch = searchText.toLowerCase();
 
           if (filterType === "title") {
@@ -133,7 +179,8 @@ const NotificationPage = () => {
           }
 
           if (filterType === "user") {
-            const recipientName = getRoleName(d.recipient)?.toLowerCase() || "";
+            const recipientName =
+              getRoleName(d.recipient_group)?.toLowerCase() || "";
             return recipientName.includes(lowerSearch);
           }
 
@@ -157,17 +204,6 @@ const NotificationPage = () => {
 
   return (
     <div className="pr-1 w-full h-full overflow-y-auto no-scrollbar">
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
       {deleteModalVisible && selectedDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -198,7 +234,7 @@ const NotificationPage = () => {
           </div>
         </div>
       )}
-      <form className="mb-3 pb-5 pt-3  bg-white">
+      <form onSubmit={handleSubmit} className="mb-3 pb-5 pt-3  bg-white">
         <div className="flex pt-3 pl-6 pr-6 justify-between mb-5 ">
           <p className="font-bold text-[#07508F]">
             {editVisible ? "Edit Notification" : "Create Notification"}
@@ -274,13 +310,13 @@ const NotificationPage = () => {
                 Recipient:
               </label>
               <Dropdown
-                label={getRoleName(formData.recipient) || "Select Recipient"}
+                label={formData.recipient_group || "Select Recipient"}
                 items={role.map((t) => ({
                   label: t.name,
                   onClick: () =>
                     setformData((prev) => ({
                       ...prev,
-                      recipient: t.id,
+                      recipient_group: t.name,
                     })),
                 }))}
               />
@@ -378,14 +414,14 @@ const NotificationPage = () => {
                     <p className="text-sm text-[#333333]">{item.content}</p>
                   </div>
                   <p className="text-sm font-light text-[#333333]">
-                    {item.created_at}
+                    {formatdate(item.created_at)}
                   </p>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-5">
                     <div className="bg-[#9747FF]/30 p-2.5 py-1 rounded-sm">
                       <p className="text-sm font-medium text-[#9747FF]">
-                        {getRoleName(item.recipient)}
+                        {item.recipient_group}
                       </p>
                     </div>
                     <div className="bg-[#2D9CFB]/25 p-2.5 py-1 rounded-sm">

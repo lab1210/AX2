@@ -5,6 +5,7 @@ import {
   UpdateDepartment,
 } from "@/Service/schoolConfig";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
 const DepartmentSettings = () => {
@@ -25,9 +26,12 @@ const DepartmentSettings = () => {
 
   useEffect(() => {
     const fetchDepartments = async () => {
-      const { data, error } = await getDepartment();
-      if (data) setDepartmentList(data);
-      else setMessage(error || "Failed to load departments");
+      try {
+        const data = await getDepartment();
+        setDepartmentList(data);
+      } catch (error) {
+        toast.error(error || "Failed to fetch departments");
+      }
     };
     fetchDepartments();
   }, []);

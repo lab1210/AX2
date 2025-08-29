@@ -8,6 +8,7 @@ import { getClass, getClassArm } from "@/Service/schoolConfig";
 
 const StudentReg = () => {
   const [Student, setStudent] = useState([]);
+  const [filteredClassArms, setFilteredClassArms] = useState([]);
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
@@ -48,8 +49,10 @@ const StudentReg = () => {
   useEffect(() => {
     const fetchClassArms = async () => {
       const { data, error } = await getClassArm();
-      if (data) setClassArms(data);
-      else toast.error(error || "Failed to load class arms");
+      if (data) {
+        setClassArms(data);
+        setFilteredClassArms(data); // Initialize with all class arms
+      } else toast.error(error || "Failed to load class arms");
     };
     const fetchClasses = async () => {
       const { data, error } = await getClass();
@@ -59,6 +62,21 @@ const StudentReg = () => {
     fetchClasses();
     fetchClassArms();
   }, []);
+
+  useEffect(() => {
+    if (formData.class_year) {
+      const filtered = classArms.filter(
+        (arm) => arm.class_year === formData.class_year
+      );
+      setFilteredClassArms(filtered);
+      // Reset class arm if it's not available for the selected year
+      if (!filtered.some((arm) => arm.class_id === formData.class_arm)) {
+        setFormData((prev) => ({ ...prev, class_arm: "" }));
+      }
+    } else {
+      setFilteredClassArms(classArms);
+    }
+  }, [formData.class_year, classArms]);
 
   //Setting countries
   useEffect(() => {
@@ -416,7 +434,10 @@ const StudentReg = () => {
           <div className="flex flex-col gap-x-1">
             <label className="text-[0.88rem] text-[#FFFFFF]">Class Year</label>
             <DropDownLight
-              label={formData.class_year || "Select Class Year"}
+              label={
+                classYears.find((y) => y.class_year_id === formData.class_year)
+                  ?.class_name || "Select Class Year"
+              }
               items={classYears.map((year) => ({
                 label: year.class_name,
                 onClick: () =>
@@ -431,12 +452,12 @@ const StudentReg = () => {
             <label className="text-[0.88rem] text-[#FFFFFF]">Class Arm</label>
             <DropDownLight
               label={formData.class_arm || "Select Class Arm"}
-              items={classArms.map((year) => ({
-                label: year.arm_name,
+              items={filteredClassArms.map((arm) => ({
+                label: arm.arm_name,
                 onClick: () =>
                   setFormData((prev) => ({
                     ...prev,
-                    class_arm: year.class_id,
+                    class_arm: arm.class_id,
                   })),
               }))}
             />

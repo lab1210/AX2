@@ -16,7 +16,7 @@ export const getStudents = async () => {
     const url = `${BASE_URL}/students/list/`;
     const response = await axios.get(url, { headers });
     console.log(response.data);
-    return { data: response.data.results };
+    return response.data.results;
   } catch (error) {
     console.error("Failed to get students:", error);
     return { error: error.response?.data || error.message || "Unknown error" };
