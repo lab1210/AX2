@@ -1,18 +1,22 @@
 "use client";
 import React, { useState, useCallback, useEffect } from "react";
-import Layout from "../Teacherlayout";
 import { Search, Download, CloudUpload } from "lucide-react";
 import { useDropzone } from "react-dropzone";
 import { ChevronLeft, Upload } from "lucide-react";
 import { useRouter } from "next/navigation";
-
+import TeacherLayoutEmpty from "../Teacherlayout";
+import { getStudents } from "../../../Service/studentService";
+import RightSide from "../RightSideBar";
+import toast from "react-hot-toast";
 const AttendancePage = () => {
   const [activeTab, setActiveTab] = useState("mark");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [file, setFile] = useState(null);
   const [error, setError] = useState("");
   const [isAnimating, setIsAnimating] = useState(false);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [Students, setStudents] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 15;
   const router = useRouter();
@@ -72,15 +76,32 @@ const AttendancePage = () => {
     { id: 20, name: "Babalola Ife Adeshewa", status: "Present" },
   ];
 
+  useEffect(() => {
+    const fetchStudents = async () => {
+      try {
+        setLoading(true);
+        const studentData = await getStudents();
+        const formattedStudents = studentData.map((student, index) => ({
+          id: student.student_id,
+          name: `${student.first_name} ${student.last_name}`,
+        }));
+        setStudents(formattedStudents);
+      } catch (error) {
+        toast.error("Error fetching students");
+      }
+    };
+    fetchStudents();
+  }, []);
+
   const renderHeaderContent = () => {
     switch (activeTab) {
       case "mark":
         return (
           <>
-            <h1 className="text-2xl font-bold">
+            <p className="text-xl font-bold">
               Attendance /{" "}
               <span className="text-[#7E7E7E]">Mark Attendance</span>
-            </h1>
+            </p>
             <div className="flex items-center space-x-4">
               <label htmlFor="searchDate" className="text-sm font-medium">
                 Search Date:
@@ -102,7 +123,7 @@ const AttendancePage = () => {
       case "view":
         return (
           <>
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-xl font-bold">
               Attendance /{" "}
               <span className="text-[#7E7E7E]">View Attendance</span>
             </h1>
@@ -129,7 +150,7 @@ const AttendancePage = () => {
       case "summary":
         return (
           <>
-            <h1 className="text-2xl font-bold">
+            <h1 className="text-xl font-bold">
               Attendance / <span className="text-[#7E7E7E]">Summary</span>
             </h1>
             <div className="flex items-center space-x-4">
@@ -144,7 +165,7 @@ const AttendancePage = () => {
                 </span>
               </div>
               <div className="relative">
-                <button className="bg-[#07508F] text-white px-6 py-3 rounded flex items-center space-x-2">
+                <button className="bg-[#07508F] text-white px-6 py-2 rounded flex items-center space-x-2">
                   <span className="flex flex-row">Download</span>
                   <span className="text-right">
                     <Download className="w-4 h-4 font-semibold" />
@@ -202,28 +223,37 @@ const AttendancePage = () => {
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+
+  //FIRST TAB
+  const totalPages1 = Math.ceil(Students.length / itemsPerPage);
+  const paginatedStudents1 = Students.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
+
   const handlePrevious = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
-  const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  const handleNext = () =>
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   const handlePageChange = (page) => setCurrentPage(page);
 
   return (
     <>
-      <Layout>
+      <TeacherLayoutEmpty>
         {/* Desktop View */}
-        <div className="hidden bg-[#F7F8FA] overflow-hidden lg:flex">
-          <div className="flex-1 flex flex-col">
-            <div className="fixed top-0 z-30 flex items-center justify-between bg-white p-4 w-[81.5%] xl:w-[85%]">
+        <div className="hidden bg-[#F7F8FA] overflow-hidden h-full w-full lg:block">
+          <div className="grid grid-rows-[auto_1fr] w-full">
+            <div className="bg-[#ffffff] pl-4 py-2 pr-4 sticky top-0 z-10  flex justify-between items-center ">
               {renderHeaderContent()}
             </div>
 
             {/* Content Section */}
-            <div className="flex flex-1 p-3 xl:p-6 w-[60%] xl:w-[65%] mt-20 xl:mt-17 h-[92vh] fixed bg-[#F7F8FA]">
-              <div className="flex-1 flex flex-col bg-white rounded-lg shadow p-4 mx-auto">
+            <div className="grid grid-cols-[1fr_300px] p-3 xl:p-4  gap-2  bg-[#F7F8FA]">
+              <div className="flex-1 flex flex-col bg-white rounded-lg shadow px-4 py-1 ">
                 {/* Fixed Tabs Section */}
                 <div className="border-b border-gray-200 mb-4">
                   <div className="flex items-center space-x-8">
                     <button
-                      className={`px-4 py-3 ${
+                      className={`px-4 py-3 text-sm ${
                         activeTab === "mark"
                           ? "border-b-4 border-[#07508F] text-black"
                           : "text-gray-400"
@@ -233,7 +263,7 @@ const AttendancePage = () => {
                       Mark Attendance
                     </button>
                     <button
-                      className={`px-4 py-3 ${
+                      className={`px-4 py-3 text-sm ${
                         activeTab === "view"
                           ? "border-b-4 border-[#07508F] text-black"
                           : "text-gray-400"
@@ -243,7 +273,7 @@ const AttendancePage = () => {
                       View Attendance
                     </button>
                     <button
-                      className={`px-4 py-3 ${
+                      className={`px-4 py-3 text-sm ${
                         activeTab === "summary"
                           ? "border-b-4 border-[#07508F] text-black"
                           : "text-gray-400"
@@ -277,19 +307,22 @@ const AttendancePage = () => {
                             Select All
                           </label>
                         </div>
-                        <input
-                          type="date"
-                          className="border border-gray-100 rounded px-2 py-1"
-                        />
-                        <button className="bg-[#07508F] text-white px-4 py-1 rounded font-medium">
+                        <div className="flex items-center gap-2">
+                          <p className="text-sm">Select Date:</p>
+                          <input
+                            type="date"
+                            className="border border-gray-100 rounded px-2 py-0"
+                          />
+                        </div>
+                        <button className="bg-[#07508F] text-white px-4 py-0 rounded font-medium">
                           Save
                         </button>
                       </div>
 
-                      <table className="w-full border-collapse">
-                        <thead>
+                      <table className="w-full border-collapse ">
+                        <thead className="">
                           <tr className="bg-[#6B90B5] text-white">
-                            <th className="border-b border-gray-300 px-4 py-3 text-left">
+                            <th className="border-b border-gray-300 px-4 py-3  text-left">
                               Action
                             </th>
                             <th className="border-b border-gray-300 px-4 py-3 text-center">
@@ -302,7 +335,7 @@ const AttendancePage = () => {
                         </thead>
                         <tbody>
                           {paginatedStudents.map((student) => (
-                            <tr key={student.id}>
+                            <tr key={student.id} className="text-sm">
                               <td className="border-b border-gray-300 px-4 py-3 text-left">
                                 <input
                                   type="checkbox"
@@ -387,7 +420,7 @@ const AttendancePage = () => {
                         </thead>
                         <tbody>
                           {paginatedStudents.map((student, index) => (
-                            <tr key={student.id}>
+                            <tr key={student.id} className="text-sm">
                               <td className="border-b border-gray-300 px-4 py-3">
                                 {(currentPage - 1) * itemsPerPage + index + 1}
                               </td>
@@ -449,7 +482,7 @@ const AttendancePage = () => {
                     <div>
                       <table className="w-full border-collapse">
                         <thead>
-                          <tr className="bg-[#6B90B5] text-white">
+                          <tr className="bg-[#6B90B5] text-white text-sm">
                             <th className="border-b border-gray-300 px-4 py-3 text-left">
                               Student Name
                             </th>
@@ -469,7 +502,7 @@ const AttendancePage = () => {
                         </thead>
                         <tbody>
                           {paginatedStudents.map((student, index) => (
-                            <tr key={index}>
+                            <tr key={index} className="text-sm">
                               <td className="border-b border-gray-300 px-4 py-3">
                                 {student.name}
                               </td>
@@ -525,6 +558,7 @@ const AttendancePage = () => {
                   )}
                 </div>
               </div>
+              <RightSide />
             </div>
           </div>
         </div>
@@ -533,11 +567,14 @@ const AttendancePage = () => {
         <div className="block lg:hidden w-full min-h-screen bg-[#F7F8FA]">
           <div className="sticky top-0 z-20 bg-white border-b flex items-center justify-between px-4 py-3">
             <button className="text-xl">
-              <ChevronLeft onClick={() => router.back()}/>
+              <ChevronLeft onClick={() => router.back()} />
             </button>
             <span className="font-semibold text-base">Mark Attendance</span>
             <button className="bg-[#07508F] rounded-full p-2">
-              <Upload className="text-white w-5 h-5"  onClick={() => setIsModalOpen(true)}/>
+              <Upload
+                className="text-white w-5 h-5"
+                onClick={() => setIsModalOpen(true)}
+              />
             </button>
           </div>
 
@@ -553,12 +590,12 @@ const AttendancePage = () => {
               Select All
             </label>
             <div className="flex flex-row items-center gap-2">
-            <span className="text-xs">Select Date:</span>
-            <select className="border rounded px-2 py-1 text-xs">
-              <option>2023/2024</option>
-              <option>2024/2025</option>
-              <option>2025/2026</option>
-            </select>
+              <span className="text-xs">Select Date:</span>
+              <select className="border rounded px-2 py-1 text-xs">
+                <option>2023/2024</option>
+                <option>2024/2025</option>
+                <option>2025/2026</option>
+              </select>
             </div>
             <button className="bg-[#07508F] text-white px-3 py-2 rounded text-xs ml-auto">
               Save
@@ -692,7 +729,7 @@ const AttendancePage = () => {
             </div>
           </div>
         )}
-      </Layout>
+      </TeacherLayoutEmpty>
     </>
   );
 };
