@@ -29,11 +29,13 @@ import {
   refreshToken,
 } from "@/Service/AuthService";
 import { useRouter } from "next/navigation";
+import { getTeacherNotifications } from "@/Service/NotificationService";
 
 export default function TeacherDashboard() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const [notifications, setNotifications] = useState([]);
 
   const [date, setDate] = useState(new Date());
   const [activeTab, setActiveTab] = useState("calendar");
@@ -49,6 +51,10 @@ export default function TeacherDashboard() {
         const userDetails = getUserDetails();
         setUser(userDetails);
         console.log(userDetails);
+        const teacherNotifications = await getTeacherNotifications();
+        if (!teacherNotifications.error) {
+          setNotifications(teacherNotifications);
+        }
         setIsLoading(false);
       } catch (err) {
         try {
@@ -56,6 +62,10 @@ export default function TeacherDashboard() {
           if (newToken) {
             const refreshedUserDetails = getUserDetails();
             setUser(refreshedUserDetails);
+            const teacherNotifications = await getTeacherNotifications();
+            if (!teacherNotifications.error) {
+              setNotifications(teacherNotifications);
+            }
           } else {
             clearAuthToken();
             router.push("/");
@@ -79,43 +89,25 @@ export default function TeacherDashboard() {
     { day: "Fri", present: 90, absent: 10 },
   ];
 
-  const events = [
-    {
-      date: 12,
-      title: "Send Mr Ayo class Schedule",
-      subtitle: "Send Document via email",
-      time: "8 A.M",
-      status: "today",
-    },
-    {
-      date: 12,
-      title: "Meet with Prefects",
-      subtitle: "Have a work flow",
-      time: "8 A.M",
-      status: "due",
-    },
-    // {
-    //   date: 25,
-    //   title: "JSS1B Test",
-    //   subtitle: "Set Question",
-    //   time: "8 A.M",
-    //   status: "upcoming",
-    // },
-    // {
-    //   date: 30,
-    //   title: "Send a Doc to Admin",
-    //   subtitle: "Send Document via email",
-    //   time: "10:00 A.M",
-    //   status: "upcoming",
-    // },
-    // {
-    //   date: 31,
-    //   title: "Have a meeting with the Parents",
-    //   subtitle: "Regarding their wards",
-    //   time: "2:00 P.M",
-    //   status: "due",
-    // },
-  ];
+  const mapNotificationsToEvents = (notifications) => {
+    return notifications.map((notification) => {
+      const notificationDate = new Date(notification.created_at);
+      const day = notificationDate.getDate();
+
+      return {
+        date: day,
+        title: notification.title,
+        subtitle: notification.content,
+        time: notificationDate.toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+        status: "today", // You can customize this based on your logic
+      };
+    });
+  };
+
+  const events = mapNotificationsToEvents(notifications);
 
   // Desktop View
   const DesktopView = () => (

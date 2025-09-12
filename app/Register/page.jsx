@@ -21,7 +21,6 @@ const Register = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [token, setToken] = useState("");
   const [classYears, setClassYears] = useState([]); // New state for class years
-  const [classArms, setClassArms] = useState([]); // New state for class arms
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -51,20 +50,14 @@ const Register = () => {
 
       // Update state and save to localStorage in one go
       setClassYears(result.class_years || []);
-      setClassArms(result.class_arms || []);
 
       // Save to localStorage after state is updated
       localStorage.setItem(
         "classYears",
         JSON.stringify(result.class_years || [])
       );
-      localStorage.setItem(
-        "classArms",
-        JSON.stringify(result.class_arms || [])
-      );
 
       console.log(result.class_years);
-      console.log(result.class_arms);
       openModal();
       setSchoolid("");
       setPin("");

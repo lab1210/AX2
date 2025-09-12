@@ -1,185 +1,267 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { IoFilter, IoSearch } from "react-icons/io5";
-import MultiDropdown from "../MultiDropDown";
+import MultiDropdown from "../MultiDropdown";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import { Bell } from "lucide-react";
-import Layout from "../Teacherlayout";
+import Layout from "../TeacherWrapper";
+import { getStudents } from "@/Service/studentService";
+import { getSubject } from "@/Service/schoolConfig";
+import {
+  getStudentSubjectRegistrations,
+  registerStudentSubject,
+  updateStudentSubject,
+} from "@/Service/StudentSubjectReg";
+import toast from "react-hot-toast";
 
 const StudentToSubject = () => {
-  const allStudents = [
-    { name: "Babalola Ifeoluwa", class: "SS1", classArm: "A" },
-    { name: "Babalola Joseph", class: "SS1", classArm: "B" },
-    { name: "Jane Doe", class: "SS2", classArm: "A" },
-    { name: "John Doe", class: "SS2", classArm: "B" },
-    { name: "Will Smith", class: "SS3", classArm: "A" },
-    { name: "Joseph Adams", class: "SS3", classArm: "C" },
-  ];
-
-  const [StudentSubjectList, setStudentSubjectList] = useState([
-    {
-      Student: "Babalola Ifeoluwa",
-      Subject: ["Mathematics", "History", "English"],
-    },
-    {
-      Student: "Babalola Joseph",
-      Subject: ["Mathematics", "History", "Geography"],
-    },
-    {
-      Student: "Babalola Ifeoluwa",
-      Subject: ["Mathematics", "History", "English"],
-    },
-    {
-      Student: "Babalola Joseph",
-      Subject: ["Mathematics", "History", "Geography"],
-    },
-  ]);
-
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
-  const [selectedSubjectAssignment, setselectedSubjectAssignment] =
+  const [allStudents, setAllStudents] = useState([]);
+  const [allSubjects, setAllSubjects] = useState([]);
+  const [studentSubjectList, setStudentSubjectList] = useState([]);
+  const [selectedSubjectAssignment, setSelectedSubjectAssignment] =
     useState(null);
-  const [editSubjectAssignmentVisible, seteditSubjectAssignmentVisible] =
+  const [editSubjectAssignmentVisible, setEditSubjectAssignmentVisible] =
     useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [filterType, setFilterType] = useState("name");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [searchText, setSearchText] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const itemsPerPage = 5;
-  const [formData, setFormData] = useState({ Student: [], Subject: [] });
+  const itemsPerPage = 10;
+  const [formData, setFormData] = useState({
+    student_classes: [],
+    subject_classes: [],
+  });
+
+  // Fetch data on component mount
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [studentsRes, subjectsRes, registrationsRes] = await Promise.all([
+        getStudents(),
+        getSubject(),
+        getStudentSubjectRegistrations(),
+      ]);
+
+      if (!studentsRes.error) setAllStudents(studentsRes);
+      if (!subjectsRes.error)
+        setAllSubjects(subjectsRes.results || subjectsRes);
+      if (!registrationsRes.error)
+        setStudentSubjectList(registrationsRes.results || registrationsRes);
+    } catch (error) {
+      console.error("Failed to fetch data:", error);
+      toast.error("Failed to load data");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Format students for MultiDropdown
+  const studentOptions = allStudents.map((student) => ({
+    label: `${student.first_name} ${student.last_name}`,
+    value: student.id,
+    original: student,
+  }));
+
+  // Format subjects for MultiDropdown
+  const subjectOptions = allSubjects.map((subject) => ({
+    label: subject.name,
+    value: subject.id,
+    original: subject,
+  }));
 
   const filteredStudents =
     searchText.trim() === ""
-      ? allStudents.map((student) => ({ name: student.name }))
-      : allStudents
-          .filter((student) =>
-            student[filterType]
-              ?.toLowerCase()
-              .includes(searchText.toLowerCase())
-          )
-          .map((student) => ({ name: student.name }));
+      ? studentOptions
+      : studentOptions.filter((student) =>
+          student.label.toLowerCase().includes(searchText.toLowerCase())
+        );
 
-  const paginatedData = StudentSubjectList.slice(
+  const paginatedData = studentSubjectList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
 
-  const totalPages = Math.ceil(StudentSubjectList.length / itemsPerPage);
+  const totalPages = Math.ceil(studentSubjectList.length / itemsPerPage);
   const handlePrevious = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
   const handleNext = () =>
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const selectedStudents = Array.isArray(formData.Student)
-      ? formData.Student
-      : [formData.Student];
-    const duplicateStudent = selectedStudents.find((student) =>
-      StudentSubjectList.some((item) => item.Student === student)
-    );
 
-    if (!editSubjectAssignmentVisible && duplicateStudent) {
-      setMessage(`Student "${duplicateStudent}" has already been registered.`);
-      setMessageType("error");
+    // Check if any student or subject is selected
+    if (
+      formData.student_classes.length === 0 ||
+      formData.subject_classes.length === 0
+    ) {
+      toast.error("Please select at least one student and one subject");
       return;
     }
 
-    if (editSubjectAssignmentVisible && selectedSubjectAssignment) {
-      setStudentSubjectList((prev) =>
-        prev.map((item) =>
-          item.Student === selectedSubjectAssignment.Student
-            ? selectedSubjectAssignment
-            : item
-        )
-      );
-      setMessage("Subject Registration updated successfully.");
-      setMessageType("success");
-      seteditSubjectAssignmentVisible(false);
-      setselectedSubjectAssignment(null);
-    } else {
-      const newEntries = selectedStudents.map((student) => ({
-        Student: student,
-        Subject: formData.Subject,
-      }));
-      setStudentSubjectList((prev) => [...prev, ...newEntries]);
-      setMessage("Student Subject Registration successful.");
-      setMessageType("success");
-      setFormData({ Student: [], Subject: [] });
+    try {
+      if (editSubjectAssignmentVisible && selectedSubjectAssignment) {
+        // For editing, we assume single student and subject (as per typical API design)
+        const updateData = {
+          student_class:
+            formData.student_classes[0]?.value || formData.student_classes[0],
+          subject_class:
+            formData.subject_classes[0]?.value || formData.subject_classes[0],
+        };
+
+        const response = await updateStudentSubject(
+          selectedSubjectAssignment.id,
+          updateData
+        );
+
+        if (response.error) {
+          throw new Error(response.error);
+        }
+
+        setStudentSubjectList((prev) =>
+          prev.map((item) =>
+            item.id === selectedSubjectAssignment.id ? response : item
+          )
+        );
+        toast.success("Subject Registration updated successfully.");
+        setEditSubjectAssignmentVisible(false);
+        setSelectedSubjectAssignment(null);
+        setFormData({ student_classes: [], subject_classes: [] });
+      } else {
+        // For new registrations, create one registration per student-subject combination
+        const promises = [];
+
+        formData.student_classes.forEach((student) => {
+          formData.subject_classes.forEach((subject) => {
+            const studentId = student.value || student;
+            const subjectId = subject.value || subject;
+
+            // Check if this combination already exists
+            const exists = studentSubjectList.some(
+              (item) =>
+                item.student_class?.id === studentId &&
+                item.subject_class?.id === subjectId
+            );
+
+            if (!exists) {
+              promises.push(
+                registerStudentSubject({
+                  student_class: studentId,
+                  subject_class: subjectId,
+                })
+              );
+            }
+          });
+        });
+
+        if (promises.length === 0) {
+          toast.error(
+            "All selected student-subject combinations already exist"
+          );
+
+          return;
+        }
+
+        const results = await Promise.all(promises);
+        const newRegistrations = results.filter((res) => !res.error);
+
+        if (newRegistrations.length > 0) {
+          setStudentSubjectList((prev) => [...prev, ...newRegistrations]);
+          toast.success(
+            `${newRegistrations.length} registration(s) created successfully.`
+          );
+        }
+
+        if (results.length > newRegistrations.length) {
+          toast.error(
+            `${
+              results.length - newRegistrations.length
+            } registration(s) failed.`
+          );
+        }
+
+        setFormData({ student_classes: [], subject_classes: [] });
+      }
+    } catch (error) {
+      console.error("Registration failed:", error);
+      toast.error(error.message || "Registration failed");
+    }
+  };
+
+  const handleEdit = async (assignment) => {
+    try {
+      // Fetch the full assignment data by ID
+      const response = await getStudentSubjectById(assignment.id);
+
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      setEditSubjectAssignmentVisible(true);
+      setSelectedSubjectAssignment(response);
+
+      // Format data for MultiDropdown
+      setFormData({
+        student_classes: [
+          {
+            label: `${response.student_class?.student?.first_name} ${response.student_class?.student?.last_name}`,
+            value: response.student_class?.id,
+          },
+        ],
+        subject_classes: [
+          {
+            label: response.subject_class?.subject?.name,
+            value: response.subject_class?.id,
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Failed to fetch assignment:", error);
+      toast.error("Failed to load assignment data");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this registration?")) {
+      return;
     }
 
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
+    try {
+      const response = await deleteStudentSubject(id);
+
+      if (response.error) {
+        throw new Error(response.error);
+      }
+
+      setStudentSubjectList((prev) => prev.filter((item) => item.id !== id));
+      toast.success("Student subject registration deleted successfully");
+    } catch (error) {
+      console.error("Deletion failed:", error);
+      toast.error("Failed to delete registration");
+    }
   };
 
-  const handleEdit = (assignment) => {
-    seteditSubjectAssignmentVisible(true);
-    setselectedSubjectAssignment({
-      ...assignment,
-      Student: Array.isArray(assignment.Student)
-        ? assignment.Student
-        : [assignment.Student],
-    });
-  };
-
-  const handleDelete = (student) => {
-    setStudentSubjectList((prev) =>
-      prev.filter((item) => item.Student !== student)
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex justify-center items-center h-screen">
+          <div className="text-xl">Loading...</div>
+        </div>
+      </Layout>
     );
-    setMessage("Student subject registration deleted successfully");
-    setMessageType("failed");
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
-  };
+  }
 
   return (
     <Layout>
       <div className="bg-[#F7F8FA] min-h-screen">
-        {/* Header */}
-        <div className="fixed bg-white px-6 py-4 flex items-center justify-between mb-3 rounded w-[80%] xl:w-[85%] z-20">
-          <h1 className="text-2xl font-bold text-[#01427A]">
-            Student Subject Registration
-          </h1>
-          <div className="flex items-center">
-            <button className="relative mr-4">
-              <span className="absolute top-0 right-0 inline-block w-2 h-2 bg-red-500 rounded-full" />
-              <Bell className="text-[#01427A]" />
-            </button>
-            <div className="flex items-center space-x-2">
-              <img
-                src="/female2.png"
-                alt="Avatar"
-                className="w-8 h-8 rounded-full object-cover"
-              />
-              <div>
-                <p className="font-medium text-sm">Joshua Daniel</p>
-                <p className="text-xs text-gray-500">Teacher</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
         {/* Content Container */}
         <div className="p-2">
-          <div className="bg-white p-4 mt-20 overflow-y-hidden h-full xl:h-[95vh] 2xl:fixed w-full 2xl:w-[64%]">
-            {message && (
-              <div
-                className={`mb-4 text-sm px-4 py-2 rounded font-semibold ${
-                  messageType === "success"
-                    ? "bg-green-100 text-green-700"
-                    : "bg-red-100 text-red-700"
-                }`}
-              >
-                {" "}
-                {message}{" "}
-              </div>
-            )}
-
+          <div className="bg-white p-4  overflow-y-hidden h-full xl:h-[95vh] 2xl:fixed w-full 2xl:w-[64%]">
             {/* Filter/Search */}
             <div className="flex items-center gap-3 mb-6">
               <div className="relative">
@@ -243,22 +325,11 @@ const StudentToSubject = () => {
                   </label>
                   <MultiDropdown
                     label="Select Student(s)"
-                    items={filteredStudents.map((s) => ({ label: s.name }))}
-                    selectedItems={
-                      editSubjectAssignmentVisible
-                        ? selectedSubjectAssignment.Student || []
-                        : formData.Student
+                    items={filteredStudents}
+                    selectedItems={formData.student_classes}
+                    onSelect={(selected) =>
+                      setFormData({ ...formData, student_classes: selected })
                     }
-                    onSelect={(sel) => {
-                      if (editSubjectAssignmentVisible) {
-                        setselectedSubjectAssignment((prev) => ({
-                          ...prev,
-                          Student: sel,
-                        }));
-                      } else {
-                        setFormData((prev) => ({ ...prev, Student: sel }));
-                      }
-                    }}
                   />
                 </div>
                 <div>
@@ -267,28 +338,11 @@ const StudentToSubject = () => {
                   </label>
                   <MultiDropdown
                     label="Select Subject(s)"
-                    items={[
-                      { label: "Mathematics" },
-                      { label: "Science" },
-                      { label: "History" },
-                      { label: "Geography" },
-                      { label: "CRS" },
-                    ]}
-                    selectedItems={
-                      editSubjectAssignmentVisible
-                        ? selectedSubjectAssignment.Subject || []
-                        : formData.Subject
+                    items={subjectOptions}
+                    selectedItems={formData.subject_classes}
+                    onSelect={(selected) =>
+                      setFormData({ ...formData, subject_classes: selected })
                     }
-                    onSelect={(sel) => {
-                      if (editSubjectAssignmentVisible) {
-                        setselectedSubjectAssignment((prev) => ({
-                          ...prev,
-                          Subject: sel,
-                        }));
-                      } else {
-                        setFormData((prev) => ({ ...prev, Subject: sel }));
-                      }
-                    }}
                   />
                 </div>
               </div>
@@ -305,7 +359,7 @@ const StudentToSubject = () => {
                 <thead className="bg-[#EDF0F3]">
                   <tr>
                     <th className="p-2 text-center font-normal">Student</th>
-                    <th className="p-2 text-center font-normal">Subjects</th>
+                    <th className="p-2 text-center font-normal">Subject</th>
                     <th className="p-2 text-left font-normal">Actions</th>
                   </tr>
                 </thead>
@@ -317,10 +371,15 @@ const StudentToSubject = () => {
                       </td>
                     </tr>
                   ) : (
-                    paginatedData.map((item, idx) => (
-                      <tr key={idx} className="border-b border-gray-100">
-                        <td className="p-2 text-center">{item.Student}</td>
-                        <td className="p-2 text-center">{item.Subject.join(", ")}</td>
+                    paginatedData.map((item) => (
+                      <tr key={item.id} className="border-b border-gray-100">
+                        <td className="p-2 text-center">
+                          {item.student_class?.student?.first_name}{" "}
+                          {item.student_class?.student?.last_name}
+                        </td>
+                        <td className="p-2 text-center">
+                          {item.subject_class?.subject?.name}
+                        </td>
                         <td className="p-2">
                           <div className="flex gap-4">
                             <FiEdit3
@@ -331,7 +390,7 @@ const StudentToSubject = () => {
                             <FiTrash2
                               className="text-[#F94144] cursor-pointer"
                               size={16}
-                              onClick={() => handleDelete(item.Student)}
+                              onClick={() => handleDelete(item.id)}
                             />
                           </div>
                         </td>

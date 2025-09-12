@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import { IoClose } from "react-icons/io5";
 import toast from "react-hot-toast";
 
-const RegControlModal = ({ onClose, setRegistrationEnabled, setShowModal }) => {
+const RegControlModal = ({
+  onClose,
+  setRegistrationEnabled,
+  setShowModal,
+  onSubmit,
+}) => {
   const [formData, setFormData] = useState({
     startDate: "",
     endDate: "",
@@ -32,10 +37,10 @@ const RegControlModal = ({ onClose, setRegistrationEnabled, setShowModal }) => {
       toast.error("End date must be after start date.");
       return;
     }
-
-    setRegistrationEnabled(true);
-    setShowModal(false);
-    toast.success("Registration successfully enabled!");
+    onSubmit(formData);
+    // setRegistrationEnabled(true);
+    // setShowModal(false);
+    // toast.success("Registration successfully enabled!");
     setFormData({ startDate: "", endDate: "" });
   };
 

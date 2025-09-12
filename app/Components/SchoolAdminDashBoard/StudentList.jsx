@@ -9,11 +9,11 @@ const StudentList = () => {
   const itemsPerPage = 10;
 
   useEffect(() => {
-    const fetchTeachers = async () => {
+    const fetchStudents = async () => {
       const response = await getStudents();
       setTeachers(response);
     };
-    fetchTeachers();
+    fetchStudents();
   }, []);
 
   const paginatedData = teachers.slice(
@@ -41,8 +41,8 @@ const StudentList = () => {
                   <tr>
                     <th className="p-2 bg-[#EDF0F3]">S/N</th>
                     <th className="p-2 bg-[#EDF0F3]">Name</th>
-                    <th className="p-2 bg-[#EDF0F3]">Qualification</th>
-                    <th className="p-2 bg-[#EDF0F3]">Specialization</th>
+                    <th className="p-2 bg-[#EDF0F3]">Admission NO</th>
+                    <th className="p-2 bg-[#EDF0F3]">Parent Contact Info</th>
                     <th className="p-2 bg-[#EDF0F3]">Status</th>
                   </tr>
                 </thead>
@@ -64,21 +64,21 @@ const StudentList = () => {
                         <td className="p-2 text-center ">{index + 1}</td>
                         <td className="p-2 text-center ">{`${item.last_name} ${item.first_name} `}</td>
                         <td className="p-2 text-center ">
-                          {item.qualification}
+                          {item.admission_number}
                         </td>
                         <td className="p-2 text-center ">
-                          {item.specialization}
+                          {item.parent_contact_info}
                         </td>
 
                         <td className="p-2 text-center ">
                           <div
                             className={`${
-                              item.status === "Active"
+                              item.status
                                 ? "bg-green-100 text-green-600"
                                 : "bg-red-100 text-red-800"
                             } rounded-lg font-bold`}
                           >
-                            {item.status}
+                            {item.status ? "Active" : "Inactive"}
                           </div>
                         </td>
                       </tr>

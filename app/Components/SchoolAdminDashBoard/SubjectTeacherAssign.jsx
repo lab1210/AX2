@@ -5,7 +5,6 @@ import MultiDropdown from "../SchoolAdminDashBoard/MultiDropDown";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import {
   createSubjectTeacherAssignment,
-  // getSubjectTeacherAssignments,
   updateSubjectTeacherAssignment,
   deleteSubjectTeacherAssignment,
   getSubjectDepartmentRelationships,

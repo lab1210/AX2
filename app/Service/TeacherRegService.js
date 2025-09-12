@@ -44,3 +44,35 @@ export const SchoolAdminRegisterTeacher = async (teacherData) => {
     throw error.response?.data || error;
   }
 };
+
+export const SchoolAdminBulkRegisterTeachers = async (csvFile) => {
+  try {
+    const headers = createAuthHeaders();
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return null;
+    }
+
+    const formData = new FormData();
+    formData.append("file", csvFile);
+
+    const fileUploadHeaders = {
+      ...headers,
+      "Content-Type": "multipart/form-data",
+    };
+
+    const url = `${BASE_URL}/teachers/bulk_create/`;
+    const response = await axios.post(url, formData, {
+      headers: fileUploadHeaders,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      "Error in bulk teacher registration:",
+      error.response?.data || error.message
+    );
+    throw error.response?.data || error;
+  }
+};

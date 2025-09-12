@@ -55,7 +55,7 @@ const sidebarItems = [
   {
     label: "Subject Registration",
     icon: <Library className="w-4 h-4" />,
-    route: "/Teacher/SubjectReg",
+    route: "/Teacher/Student-Subject-Registration",
   },
 ];
 
