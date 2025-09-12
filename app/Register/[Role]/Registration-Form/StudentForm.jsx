@@ -26,7 +26,6 @@ const StudentForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [classYearOptions, setClassYearOptions] = useState([]);
   const [allClassArms, setAllClassArms] = useState([]); // Store all class arms from API
-  const [filteredClassArms, setFilteredClassArms] = useState([]); // Store filtered class arms
   const [classArmOptions, setClassArmOptions] = useState([]);
 
   const [formData, setFormData] = useState({
@@ -53,6 +52,8 @@ const StudentForm = () => {
     parent_relationship: "",
     class_year: "",
     class_arm: "",
+    class_year_name: "",
+    class_arm_name: "",
     status: true,
   });
 
@@ -60,7 +61,6 @@ const StudentForm = () => {
     // Load saved class years and arms from localStorage
     const savedClassYears =
       JSON.parse(localStorage.getItem("classYears")) || [];
-    const savedClassArms = JSON.parse(localStorage.getItem("classArms")) || [];
 
     // Set class year options from saved data
     setClassYearOptions(
@@ -70,15 +70,6 @@ const StudentForm = () => {
       }))
     );
 
-    // Set class arms options from saved data
-    setAllClassArms(
-      savedClassArms.map((arm) => ({
-        arm_name: arm.name, // Adjust according to your actual data structure
-        class_year: arm.class_year_id, // Adjust according to your actual data structure
-      }))
-    );
-    setFilteredClassArms(savedClassArms);
-
     // Load token from localStorage
     const storedToken = localStorage.getItem("verificationToken");
     if (storedToken) {
@@ -87,31 +78,48 @@ const StudentForm = () => {
   }, []);
 
   useEffect(() => {
-    if (formData.class_year && allClassArms.length > 0) {
-      const filtered = allClassArms.filter(
-        (arm) => arm.class_year === formData.class_year
+    if (formData.class_year) {
+      const savedClassYears =
+        JSON.parse(localStorage.getItem("classYears")) || [];
+      const selectedYear = savedClassYears.find(
+        (year) => year.id === formData.class_year
       );
-      setFilteredClassArms(filtered);
 
-      if (
-        filtered.length > 0 &&
-        !filtered.some((arm) => arm.arm_name === formData.class_arm)
-      ) {
-        setFormData((prev) => ({ ...prev, class_arm: "" }));
+      if (selectedYear) {
+        setFormData((prev) => ({
+          ...prev,
+          class_year_name: selectedYear.name,
+        }));
+
+        if (selectedYear.class_arms) {
+          setClassArmOptions(
+            selectedYear.class_arms.map((arm) => ({
+              label: arm.arm_name,
+              value: arm.class_id,
+              name: arm.arm_name,
+            }))
+          );
+        } else {
+          setClassArmOptions([]);
+        }
       }
-    } else {
-      setFilteredClassArms(allClassArms);
-    }
-  }, [formData.class_year, allClassArms]);
 
-  useEffect(() => {
-    setClassArmOptions(
-      filteredClassArms.map((arm) => ({
-        label: arm.arm_name,
-        value: arm.arm_name,
-      }))
-    );
-  }, [filteredClassArms]);
+      // Reset class arm when class year changes
+      setFormData((prev) => ({ ...prev, class_arm: "", class_arm_name: "" }));
+    } else {
+      setClassArmOptions([]);
+    }
+  }, [formData.class_year]);
+
+  const handleClassArmSelect = (value) => {
+    const selectedArm = classArmOptions.find((arm) => arm.value === value);
+
+    setFormData((prev) => ({
+      ...prev,
+      class_arm: value,
+      class_arm_name: selectedArm ? selectedArm.name : "",
+    }));
+  };
 
   const handleTokenChange = (e) => {
     const enteredToken = e.target.value;
@@ -537,13 +545,14 @@ const StudentForm = () => {
               </label>
 
               <RegDropdown
-                label={formData.class_arm || "Select Arm"}
-                items={classArmOptions}
-                onSelect={(value) =>
-                  setFormData((prev) => ({ ...prev, class_arm: value }))
+                label={
+                  classArmOptions.find((a) => a.value === formData.class_arm)
+                    ?.label || "Select Arm"
                 }
+                items={classArmOptions}
+                onSelect={handleClassArmSelect}
+                disabled={!formData.class_year}
               />
-
               {error?.class_arm && (
                 <p className="text-red-500 text-xs mt-1">{error.class_arm}</p>
               )}

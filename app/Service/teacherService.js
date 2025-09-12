@@ -21,7 +21,7 @@ export const getTeachers = async () => {
     if (error.response) {
       throw error; // This preserves the error response structure
     } else {
-      throw new Error(error.message || "Failed to register teacher");
+      throw new Error(error.message || "Failed to fetch teacher");
     }
   }
 };

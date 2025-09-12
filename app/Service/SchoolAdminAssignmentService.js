@@ -147,7 +147,7 @@ export const updateTeacherClassRelationship = async (
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/assignments/class_teachers/${teacherClassId}`;
+    const url = `${BASE_URL}/assignments/class_teachers/${teacherClassId}/`;
     const response = await axios.patch(url, teacherClassData, { headers });
     return response.data;
   } catch (error) {
@@ -216,7 +216,7 @@ export const getSubjectTeacherAssignments = async () => {
     const url = `${BASE_URL}/assignments/teacher_assignments/`;
     const response = await axios.get(url, { headers });
     console.log(response.data);
-    return response.data.results;
+    return response.data;
   } catch (error) {
     console.error("Failed to get Subject Teacher Assignments:", error);
     return { error: error.response?.data || error.message || "Unknown error" };
@@ -270,5 +270,303 @@ export const deleteSubjectTeacherAssignment = async (
       `Failed to delete subject teacher assignment by id:${subjectTeacherAssignmentId}`,
       error
     );
+  }
+};
+
+//class dept assignment
+
+export const createClassDepartmentAssignment = async (
+  classDepartmentAssignment
+) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+
+    const url = `${BASE_URL}/assignments/class_departments/`;
+    const response = await axios.post(url, classDepartmentAssignment, {
+      headers,
+    });
+  } catch (error) {
+    console.error("Failed to create class department Assignment:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const getClassDepartmentAssignments = async () => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/class_departments/`;
+    const response = await axios.get(url, { headers });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to get class department Assignments:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const updateClassDepartmentAssignment = async (
+  classDepartmentAssignmentId,
+  classDepartmentAssignmentData
+) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/class_departments/${classDepartmentAssignmentId}`;
+    const response = await axios.put(url, classDepartmentAssignmentData, {
+      headers,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Failed to update class teacher assignment by id:${subjectTeacherAssignmentId}`,
+      error
+    );
+  }
+};
+export const deleteClassDepartmentAssignment = async (
+  classDepartmentAssignmentId
+) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/class_departments/${classDepartmentAssignmentId}`;
+    const response = await axios.delete(url, {
+      headers,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Failed to delete class department assignment by id:${classDepartmentAssignmentId}`,
+      error
+    );
+  }
+};
+
+export const getclassdepartmentbyid = async (classDepartmentAssignmentId) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/class_departments/${classDepartmentAssignmentId}`;
+    const response = await axios.get(url, {
+      headers,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Failed to get class department assignment by id:${classDepartmentAssignmentId}`,
+      error
+    );
+  }
+};
+
+//Student to class relationship
+export const getStudenttoClassRelationship = async () => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/student-classes/`;
+    const response = await axios.get(url, { headers });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to get Student to Class Relationships:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+export const updateStudenttoClassRelationship = async (
+  studentClassId,
+  studentClassData
+) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/student-classes/${studentClassId}/`;
+    const response = await axios.patch(url, studentClassData, { headers });
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Failed to update student to class relationship by id:${studentClassId}`,
+      error
+    );
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+//STUDENT SUBJECT REGISTRATION
+
+export const registerStudentSubject = async (studentSubjectRegistration) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+
+    const url = `${BASE_URL}/assignments/student-subject-registrations/`;
+    const response = await axios.post(url, studentSubjectRegistration, {
+      headers,
+    });
+  } catch (error) {
+    console.error("Failed to Register Student Subject:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const getStudentSubjectRegistrations = async () => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/student-subject-registrations/`;
+    const response = await axios.get(url, { headers });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to get Student Subject Registrations:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const updateStudentSubjectRegistration = async (
+  studentSubjectRegistrationId,
+  studentSubjectRegistrationData
+) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/student-subject-registrations/${studentSubjectRegistrationId}`;
+    const response = await axios.put(url, studentSubjectRegistrationData, {
+      headers,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Failed to update student subject registration by id:${studentSubjectRegistrationId}`,
+      error
+    );
+  }
+};
+export const deleteStudentSubjectRegistration = async (
+  studentSubjectRegistrationId
+) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/class_departments/${studentSubjectRegistrationId}`;
+    const response = await axios.delete(url, {
+      headers,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(
+      `Failed to delete class department assignment by id:${studentSubjectRegistrationId}`,
+      error
+    );
+  }
+};
+
+//Registration Control
+
+export const getRegistrationControl = async () => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/registration-control/`;
+    const response = await axios.get(url, { headers });
+    console.log(response.data);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to get Registration Control:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
+
+export const updateRegistrationControl = async (registrationControlData) => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+    const url = `${BASE_URL}/assignments/registration-control/`;
+    const response = await axios.put(url, registrationControlData, {
+      headers,
+    });
+    return response.data;
+  } catch (error) {
+    console.error(`Failed to update student subject registration `, error);
   }
 };

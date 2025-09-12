@@ -24,7 +24,6 @@ export const createNotifications = async (notifications) => {
 };
 
 export const getNotifications = async (notifications) => {
-
   try {
     const headers = createAuthHeaders();
 
@@ -45,7 +44,6 @@ export const getNotifications = async (notifications) => {
 };
 
 export const getNotification = async (id) => {
-
   try {
     const headers = createAuthHeaders();
 
@@ -122,6 +120,31 @@ export const DeleteNotification = async (id) => {
   } catch (error) {
     console.error("Failed to delete notification:", error);
     return { error: error.response?.data || error.message || "Unknown error" };
+  }
+};
 
+export const getTeacherNotifications = async () => {
+  try {
+    const headers = createAuthHeaders();
+
+    if (!headers.Authorization) {
+      console.error(
+        "Authentication token not found. Cannot make authenticated request."
+      );
+      return { error: "Unauthorized: No authentication token provided." };
+    }
+
+    const url = `${BASE_URL}/notifications/`;
+    const response = await axios.get(url, { headers });
+
+    // Filter notifications for teachers only
+    const teacherNotifications = response.data.filter(
+      (notification) => notification.recipient_group === "Teacher"
+    );
+
+    return teacherNotifications;
+  } catch (error) {
+    console.error("Failed to get teacher notifications:", error);
+    return { error: error.response?.data || error.message || "Unknown error" };
   }
 };

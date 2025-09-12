@@ -31,6 +31,10 @@ const SchoolAdminSettingsPopup = ({
       Link: "/School-Admin/Teacher-Assignment",
     },
     {
+      Name: "Class to Department Assignment",
+      Link: "/School-Admin/Class-Assignment",
+    },
+    {
       Name: "Subject to Department Assignment",
       Link: "/School-Admin/Subject-Assignment",
     },
