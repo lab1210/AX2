@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { IoFilter, IoSearch } from "react-icons/io5";
-import MultiDropdown from "../MultiDropdown";
+import MultiDropdown from "@/Components/SchoolAdminDashBoard/MultiDropDown";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import { Bell } from "lucide-react";
 import Layout from "../TeacherWrapper";
