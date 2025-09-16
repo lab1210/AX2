@@ -10,7 +10,9 @@ const TeacherReg = () => {
   const [states, setStates] = useState([]);
   const [cities, setCities] = useState([]);
   const [errors, setErrors] = useState({});
-
+  const nigeria = Country.getAllCountries().find(
+    (country) => country.name === "Nigeria"
+  );
   const [formData, setFormData] = useState({
     user: {
       username: "",
@@ -24,7 +26,8 @@ const TeacherReg = () => {
     gender: "",
     date_hire: "",
     address: "default",
-    country: "",
+    country: nigeria ? "Nigeria" : "",
+    countryCode: nigeria ? nigeria.isoCode : "",
     state: "",
     city: "",
     status: "Active",

@@ -15,6 +15,9 @@ const StudentReg = () => {
   const [loading, setLoading] = useState(false);
   const [classYears, setClassYears] = useState([]);
   const [classArms, setClassArms] = useState([]);
+  const nigeria = Country.getAllCountries().find(
+    (country) => country.name === "Nigeria"
+  );
   const [formData, setFormData] = useState({
     user: {
       username: "",
@@ -26,7 +29,8 @@ const StudentReg = () => {
     middle_name: "",
     date_of_birth: "",
     gender: "",
-    country: "",
+    country: nigeria ? "Nigeria" : "",
+    countryCode: nigeria ? nigeria.isoCode : "",
     state: "",
     city: "",
     region: "default",
@@ -112,13 +116,25 @@ const StudentReg = () => {
       const response = await SchoolAdminRegisterStudent(formData);
       if (response?.status === 201) {
         toast.success("Student registered successfully");
+        setStudent([...Student, formData]);
+      } else {
+        if (response?.data?.error) {
+          toast.error(response.data.error);
+        } else {
+          toast.error("Student Registration failed");
+        }
       }
-      setStudent([...Student, formData]);
     } catch (error) {
       console.error("Error while registering student", error);
 
       if (error.response && error.response.data) {
         const errors = error.response.data;
+
+        // Handle the specific error message from network response
+        if (typeof errors === "object" && errors.error) {
+          toast.error(errors.error); // This will show "Student creation failed: ClassDepartment matching query does not exist."
+          return;
+        }
 
         const flatErrors = [];
         for (const key in errors) {
@@ -138,6 +154,8 @@ const StudentReg = () => {
         }
         const finalMessage = flatErrors.join(" ");
         toast.error(finalMessage);
+      } else if (error.message) {
+        toast.error(error.message);
       } else {
         toast.error("An unexpected error occurred.");
       }

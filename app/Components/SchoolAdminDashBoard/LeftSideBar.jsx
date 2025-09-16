@@ -27,14 +27,15 @@ const SchoolAdminLeft = () => {
       Name: "School Settings",
       icon: <MdOutlineDashboard size={20} />,
     },
+
+    {
+      Name: "Assignment",
+      icon: <MdOutlineDashboard size={20} />,
+    },
     {
       Name: "Registration",
       icon: <MdOutlineDashboard size={20} />,
       Link: "/School-Admin/Registration",
-    },
-    {
-      Name: "Assignment",
-      icon: <MdOutlineDashboard size={20} />,
     },
     {
       Name: "Result Management",

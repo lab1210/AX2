@@ -9,10 +9,9 @@ import {
   getTerms,
   UpdateTerm,
 } from "@/Service/schoolConfig";
+import toast from "react-hot-toast";
 
 const SchoolTermSettings = () => {
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [term, setTerm] = useState([]);
   const [years, setYears] = useState([]);
   const [selectedTerm, setSelectedTerm] = useState(null);
@@ -27,14 +26,13 @@ const SchoolTermSettings = () => {
     start_date: "",
     end_date: "",
     year: "",
-    status: true,
   });
 
   useEffect(() => {
     const fetchTerms = async () => {
       const { data, error } = await getTerms();
       if (data) setTerm(data);
-      else setMessage(error || "Failed to load terms");
+      else toast.error(error || "Failed to load terms");
     };
     fetchTerms();
     fetchYears();
@@ -45,7 +43,7 @@ const SchoolTermSettings = () => {
     if (data) {
       setYears(data);
     } else {
-      setMessage(error || "Failed to load academic years");
+      toast.error(error || "Failed to load academic years");
     }
   };
 
@@ -74,8 +72,7 @@ const SchoolTermSettings = () => {
       : formData.name?.trim();
 
     if (!trimmedName) {
-      setMessage("Term name is required.");
-      setMessageType("error");
+      toast.error("Term name is required.");
       return;
     }
     const existingSession = term.find(
@@ -83,8 +80,7 @@ const SchoolTermSettings = () => {
     );
 
     if (!editTermVisible && existingSession) {
-      setMessage("Term already exists.");
-      setMessageType("error");
+      toast.error("Term already exists.");
       return;
     }
 
@@ -103,21 +99,26 @@ const SchoolTermSettings = () => {
           updatedTerm
         );
         if (error) {
-          setMessage(error || "Failed to update term.");
-          setMessageType("error");
+          toast.error(error || "Failed to update term.");
           return;
         }
         const updatedList = term.map((item) =>
           item.term_id === selectedTerm.term_id ? data : item
         );
         setTerm(updatedList);
-        setMessage("Term updated successfully.");
-        setMessageType("success");
+        toast.success("Term updated successfully.");
         setEditTermVisible(false);
         setSelectedTerm(null);
+
+        setFormData({
+          name: "",
+          start_date: "",
+          end_date: "",
+          year: "",
+          status: true,
+        });
       } catch (error) {
-        setMessage("An error occurred while updating.");
-        setMessageType("error");
+        toast.error("An error occurred while updating.");
       }
     } else {
       try {
@@ -126,22 +127,19 @@ const SchoolTermSettings = () => {
           start_date: formData.start_date,
           end_date: formData.end_date,
           year: formData.year,
-          status: formData.status,
+          // status: formData.status,
         };
 
         const { data, error } = await createTerm(createPayload);
 
         if (error) {
-          setMessage(error || "Failed to add term.");
-          setMessageType("error");
+          toast.error(error || "Failed to add term.");
         } else {
           setTerm((prev) => [...prev, data]);
-          setMessage("Term added successfully.");
-          setMessageType("success");
+          toast.success("Term added successfully.");
         }
       } catch (err) {
-        setMessage("An error occurred while adding.");
-        setMessageType("error");
+        toast.error("An error occurred while adding.");
       }
     }
     setFormData({
@@ -151,11 +149,6 @@ const SchoolTermSettings = () => {
       year: "",
       status: true,
     });
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const handleEdit = (term) => {
@@ -179,34 +172,20 @@ const SchoolTermSettings = () => {
       try {
         const response = await deleteTerm(selectedTermDelete.term_id);
         if (response?.status === 204) {
-          setMessage("Term deleted successfully.");
-          setMessageType("success");
+          toast.success("Term deleted successfully.");
           closeDeleteModal();
         } else {
-          setMessage("Failed to delete Term.");
-          setMessageType("error");
+          toast.error("Failed to delete Term.");
           closeDeleteModal();
         }
       } catch (error) {
-        setMessageType("error");
-        setMessage("Failed to delete term.");
+        toast.error("Failed to delete term.");
       }
     }
   };
 
   return (
     <div>
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
       {deleteModalVisible && selectedTermDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -288,6 +267,11 @@ const SchoolTermSettings = () => {
                   label={selectedTerm.status ? "Active" : "Inactive"}
                   items={[
                     {
+                      label: "Select Status",
+                      onClick: () => {},
+                      disabled: true,
+                    },
+                    {
                       label: "Active",
                       onClick: () =>
                         setSelectedTerm(
@@ -311,14 +295,21 @@ const SchoolTermSettings = () => {
                   label={
                     getYearName(formData.year) || "Select Academic Session"
                   }
-                  items={years.map((year) => ({
-                    label: year.name,
-                    onClick: () =>
-                      setFormData({
-                        ...formData,
-                        year: year.year_id,
-                      }),
-                  }))}
+                  items={[
+                    {
+                      label: "Select Academic Session",
+                      onClick: () => {},
+                      disabled: true,
+                    },
+                    years.map((year) => ({
+                      label: year.name,
+                      onClick: () =>
+                        setFormData({
+                          ...formData,
+                          year: year.year_id,
+                        }),
+                    })),
+                  ]}
                 />
               )}
             </div>
