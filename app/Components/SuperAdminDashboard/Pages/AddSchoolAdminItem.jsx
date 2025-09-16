@@ -10,6 +10,7 @@ import { createSchoolAdmin } from "../../../Service/schoolAdminService";
 import { getSchools } from "../../../Service/schoolService";
 import { getAllRoles } from "../../../Service/RoleService";
 import Dropdown from "../../../Components/SchoolAdminDashBoard/DropDown2";
+import toast from "react-hot-toast";
 
 const AddSchoolAdminItem = () => {
   const searchParams = useSearchParams();
@@ -44,8 +45,6 @@ const AddSchoolAdminItem = () => {
   const [selectedState, setSelectedState] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
   const [schoolLogo, setSchoolLogo] = useState("/icons.png");
-  const [apiError, setApiError] = useState(null);
-  const [apiSuccess, setApiSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const fetchSchools = useCallback(async () => {
@@ -155,8 +154,6 @@ const AddSchoolAdminItem = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setApiError(null);
-    setApiSuccess(false);
     setLoading(true);
 
     const payload = {
@@ -179,7 +176,7 @@ const AddSchoolAdminItem = () => {
       const response = await createSchoolAdmin(payload);
       if (response?.status === 201) {
         console.log("School Admin created successfully:", response.data);
-        setApiSuccess(true);
+        toast.success("School Admin created successfully");
         setFormData({
           user: {
             username: "",
@@ -205,13 +202,13 @@ const AddSchoolAdminItem = () => {
         }, 2000);
       } else {
         console.error("Failed to create school admin:", response?.data);
-        setApiError(
+        toast.error(
           response?.data?.message || "Failed to create school admin."
         );
       }
     } catch (error) {
       console.error("Error creating school admin:", error);
-      setApiError(error.message || "An unexpected error occurred.");
+      toast.error(error.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -249,16 +246,6 @@ const AddSchoolAdminItem = () => {
       >
         <div className="sm:flex sm:flex-col h-screen sm:gap-2 lg:grid lg:grid-cols-[2.5fr_1fr] overflow-auto  gap-3 lg:h-screen ">
           <div className="bg-[#ffffff] rounded-lg flex flex-col lg:overflow-y-auto lg:max-h-[calc(100vh-95px)] lg:overflow-auto no-scrollbar">
-            {apiSuccess && (
-              <div className="mt-4 pl-6 text-green-500">
-                School Admin created successfully!
-              </div>
-            )}
-            {apiError && (
-              <div className="mt-4 pl-6 font-bold text-red-500">
-                Error: {apiError}
-              </div>
-            )}
             <div>
               <p className="font-bold text-xl p-6">
                 Administrative Information

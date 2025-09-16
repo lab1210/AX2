@@ -85,11 +85,19 @@ const PinGen = () => {
     }
     setFormData({ num_pins: "" });
   };
-  const handleCopyOtp = (otp, schoolId) => {
-    const textToCopy = `OTP: ${otp}\nSchool ID: ${schoolId}`;
+  const handleCopyOtp = (otp) => {
+    const textToCopy = otp;
     navigator.clipboard
       .writeText(textToCopy)
-      .then(() => toast.success("OTP and School ID copied to clipboard!"))
+      .then(() => toast.success("OTP copied to clipboard!"))
+      .catch(() => toast.error("Failed to copy to clipboard"));
+  };
+
+  const handleCopySchoolId = (schoolId) => {
+    const textToCopy = schoolId;
+    navigator.clipboard
+      .writeText(textToCopy)
+      .then(() => toast.success("School ID copied to clipboard!"))
       .catch(() => toast.error("Failed to copy to clipboard"));
   };
 
@@ -131,11 +139,16 @@ const PinGen = () => {
         </div>
       </form>
       <hr />
-      <div className="flex-shrink-0">
+      <div className="flex-shrink-0 flex items-center justify-center">
         <p className="font-semibold flex justify-center p-3 text-[#333333]">
           Generated OTPs for{" "}
           <span className="text-[#07508F] font-bold ml-2">{schoolId}</span>
         </p>
+        <LuCopy
+          className="text-[#80ADCB] hover:text-[#0071E3] cursor-pointer"
+          size={15}
+          onClick={() => handleCopySchoolId(schoolId)}
+        />
       </div>
       <div className="px-0">
         <div className="overflow-y-auto max-h-[200px] no-scrollbar">
@@ -171,7 +184,7 @@ const PinGen = () => {
                         <LuCopy
                           className="text-[#80ADCB] hover:text-[#0071E3] cursor-pointer"
                           size={15}
-                          onClick={() => handleCopyOtp(item.otp, item.school)}
+                          onClick={() => handleCopyOtp(item.otp)}
                         />
                       </div>
                     </td>

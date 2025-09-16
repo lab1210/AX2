@@ -171,15 +171,15 @@ const SubjecttoDept = () => {
     }
   };
 
-  const departmentOptions = Department.map((dept) => ({
-    label: dept.name,
-    value: dept.department_id,
-  }));
+  // const departmentOptions = Department.map((dept) => ({
+  //   label: dept.name,
+  //   value: dept.department_id,
+  // }));
 
-  const subjectOptions = Subjects.map((subject) => ({
-    label: subject.name,
-    value: subject.subject_id,
-  }));
+  // const subjectOptions = Subjects.map((subject) => ({
+  //   label: subject.name,
+  //   value: subject.subject_id,
+  // }));
 
   return (
     <div>

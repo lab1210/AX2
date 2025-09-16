@@ -8,8 +8,7 @@ import {
   deleteClassDepartmentAssignment,
   getclassdepartmentbyid,
 } from "../../Service/SchoolAdminAssignmentService";
-import { getDepartment } from "../../Service/schoolConfig";
-import { getClass } from "../../Service/schoolConfig";
+import { getClassArm, getDepartment } from "../../Service/schoolConfig";
 import toast from "react-hot-toast";
 
 const ClasstoDept = () => {
@@ -19,7 +18,8 @@ const ClasstoDept = () => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 10;
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const [formData, setFormData] = useState({
     classes: "",
@@ -35,7 +35,7 @@ const ClasstoDept = () => {
       const [assignmentsRes, departmentsRes, classesRes] = await Promise.all([
         getClassDepartmentAssignments(),
         getDepartment(),
-        getClass(),
+        getClassArm(),
       ]);
 
       setAssignments(assignmentsRes || []);
@@ -108,17 +108,29 @@ const ClasstoDept = () => {
   };
 
   const handleDelete = async (assignmentId) => {
-    if (!window.confirm("Are you sure you want to delete this assignment?")) {
-      return;
-    }
-
     try {
-      await deleteClassDepartmentAssignment(assignmentId);
-      toast.success("Assignment deleted successfully");
-      await fetchData();
+      const response = await deleteClassDepartmentAssignment(assignmentId);
+      if (response?.status === 204) {
+        toast.success("Assignment deleted successfully");
+        fetchData();
+        closeDeleteModal();
+      } else {
+        toast.error("Failed to delete assignment");
+      }
     } catch (error) {
       toast.error("Failed to delete assignment");
     }
+  };
+
+  const openDeleteModal = (classDept) => {
+    setSelectedAssignment(classDept);
+    setDeleteModalVisible(true);
+  };
+
+  // Function to close delete modal
+  const closeDeleteModal = () => {
+    setSelectedAssignment(null);
+    setDeleteModalVisible(false);
   };
 
   const resetForm = () => {
@@ -131,8 +143,8 @@ const ClasstoDept = () => {
   };
 
   const getClassName = (classId) => {
-    const classItem = classes.find((c) => c.class_year_id === classId);
-    return classItem ? classItem.class_name : "Unknown";
+    const classItem = classes.find((c) => c.class_id === classId);
+    return classItem ? classItem.arm_name : "Unknown";
   };
 
   const getDepartmentName = (departmentId) => {
@@ -144,6 +156,47 @@ const ClasstoDept = () => {
 
   return (
     <div>
+      {deleteModalVisible && selectedAssignment && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
+            <p className="font-bold text-center text-lg">
+              Delete Class Department Relationship
+            </p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure want to delete
+              </p>
+              <p className="text-base text-[#858383]">
+                <span className="font-bold">
+                  {selectedAssignment.class_name} from{" "}
+                  {selectedAssignment.department_name}
+                </span>
+                ?
+              </p>
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+              <button
+                onClick={() =>
+                  handleDelete(selectedAssignment.subject_class_id)
+                } // Pass ID to handleDelete
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
         <div className="flex pt-3 pl-6 pr-6 justify-between mb-2">
           <p className="font-bold text-[#07508F]">
@@ -178,11 +231,11 @@ const ClasstoDept = () => {
                     : "Select Class"
                 }
                 items={classes.map((classItem) => ({
-                  label: classItem.class_name,
+                  label: `${classItem.class_year_name}  ${classItem.arm_name}`,
                   onClick: () =>
                     setFormData((prev) => ({
                       ...prev,
-                      classes: classItem.class_year_id,
+                      classes: classItem.class_id,
                     })),
                 }))}
               />
@@ -260,7 +313,7 @@ const ClasstoDept = () => {
                           size={15}
                         />
                         <FiTrash2
-                          onClick={() => handleDelete(item.subject_class_id)}
+                          onClick={() => openDeleteModal(item)}
                           className="text-[#F94144] cursor-pointer"
                           size={15}
                         />

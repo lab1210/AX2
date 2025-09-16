@@ -77,7 +77,7 @@ export const updateAcademicYear = async (yearId, yearData) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/years/${yearId}`;
+    const url = `${BASE_URL}/school_config/years/${yearId}/`;
     const response = await axios.patch(url, yearData, { headers });
     return { data: response.data };
   } catch (error) {
@@ -97,7 +97,7 @@ export const deleteAcademicYear = async (yearId) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/years/${yearId}`;
+    const url = `${BASE_URL}/school_config/years/${yearId}/`;
     const response = await axios.delete(url, { headers });
     return { data: response.data };
   } catch (error) {
@@ -177,7 +177,7 @@ export const UpdateTerm = async (termID, termData) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/terms/${termID}`;
+    const url = `${BASE_URL}/school_config/terms/${termID}/`;
     const response = await axios.patch(url, termData, { headers });
     return { data: response.data };
   } catch (error) {
@@ -197,7 +197,7 @@ export const deleteTerm = async (termID) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/terms/${termID}`;
+    const url = `${BASE_URL}/school_config/terms/${termID}/`;
     const response = await axios.delete(url, { headers });
     return { data: response.data };
   } catch (error) {
@@ -277,7 +277,7 @@ export const UpdateClass = async (classID, classData) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/class_years/${classID}`;
+    const url = `${BASE_URL}/school_config/class_years/${classID}/`;
     const response = await axios.patch(url, classData, { headers });
     return { data: response.data };
   } catch (error) {
@@ -297,7 +297,7 @@ export const deleteClass = async (classID) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/class_years/${classID}`;
+    const url = `${BASE_URL}/school_config/class_years/${classID}/`;
     const response = await axios.delete(url, { headers });
     return { data: response.data };
   } catch (error) {
@@ -376,7 +376,7 @@ export const UpdateClassArm = async (classArmID, classArmData) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/classes/${classArmID}`;
+    const url = `${BASE_URL}/school_config/classes/${classArmID}/`;
     const response = await axios.patch(url, classArmData, { headers });
     return { data: response.data };
   } catch (error) {
@@ -396,7 +396,7 @@ export const deleteClassArm = async (classArmID) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/classes/${classArmID}`;
+    const url = `${BASE_URL}/school_config/classes/${classArmID}/`;
     const response = await axios.delete(url, { headers });
     return { data: response.data };
   } catch (error) {
@@ -475,7 +475,7 @@ export const UpdateDepartment = async (departmentID, departmentData) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/departments/${departmentID}`;
+    const url = `${BASE_URL}/school_config/departments/${departmentID}/`;
     const response = await axios.patch(url, departmentData, { headers });
     return { data: response.data };
   } catch (error) {
@@ -495,7 +495,7 @@ export const deleteDepartment = async (departmentID) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/departments/${departmentID}`;
+    const url = `${BASE_URL}/school_config/departments/${departmentID}/`;
     const response = await axios.delete(url, { headers });
     return { data: response.data };
   } catch (error) {
@@ -574,7 +574,7 @@ export const UpdateClassroom = async (classroomID, classroomData) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/classrooms/${classroomID}`;
+    const url = `${BASE_URL}/school_config/classrooms/${classroomID}/`;
     const response = await axios.patch(url, classroomData, { headers });
     return { data: response.data };
   } catch (error) {
@@ -594,7 +594,7 @@ export const deleteClassroom = async (classroomID) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/classrooms/${classroomID}`;
+    const url = `${BASE_URL}/school_config/classrooms/${classroomID}/`;
     const response = await axios.delete(url, { headers });
     return { data: response.data };
   } catch (error) {
@@ -672,7 +672,7 @@ export const UpdateSubject = async (subjectID, subjectData) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/subjects/${subjectID}`;
+    const url = `${BASE_URL}/school_config/subjects/${subjectID}/`;
     const response = await axios.patch(url, subjectData, { headers });
     return { data: response.data };
   } catch (error) {
@@ -692,7 +692,7 @@ export const deleteSubject = async (subjectID) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/school_config/subjects/${subjectID}`;
+    const url = `${BASE_URL}/school_config/subjects/${subjectID}/`;
     const response = await axios.delete(url, { headers });
     return { data: response.data };
   } catch (error) {

@@ -8,6 +8,7 @@ import {
   getAcademicYears,
   updateAcademicYear,
 } from "../../Service/schoolConfig";
+import toast from "react-hot-toast";
 const SchoolYearSettings = () => {
   const [message, setMessage] = useState("");
   const [messageType, setMessageType] = useState(""); // 'success' or 'error'
@@ -15,7 +16,7 @@ const SchoolYearSettings = () => {
   const [selectedYear, setSelectedYear] = useState(null);
   const [editYearVisible, setEditYearVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 2;
+  const itemsPerPage = 10;
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedYearDelete, setSelectedYearDelete] = useState(null);
 
@@ -30,7 +31,7 @@ const SchoolYearSettings = () => {
     const fetchYears = async () => {
       const { data, error } = await getAcademicYears();
       if (data) setAcademicYears(data);
-      else setMessage(error || "Failed to load academic years");
+      else toast.error(error || "Failed to load academic years");
     };
     fetchYears();
   }, []);
@@ -60,8 +61,7 @@ const SchoolYearSettings = () => {
       : formData.name?.trim();
 
     if (!trimmedName) {
-      setMessage("Academic session name is required.");
-      setMessageType("error");
+      toast.error("Academic session name is required.");
       return;
     }
 
@@ -70,8 +70,7 @@ const SchoolYearSettings = () => {
     );
 
     if (!editYearVisible && existingSession) {
-      setMessage("Academic session already exists.");
-      setMessageType("error");
+      toast.error("Academic session already exists.");
       return;
     }
 
@@ -91,8 +90,7 @@ const SchoolYearSettings = () => {
         );
 
         if (error) {
-          setMessage(error || "Failed to update academic year.");
-          setMessageType("error");
+          toast.error(error || "Failed to update academic year.");
           return;
         }
 
@@ -100,13 +98,11 @@ const SchoolYearSettings = () => {
           item.year_id === selectedYear.year_id ? data : item
         );
         setAcademicYears(updatedList);
-        setMessage("Academic year updated successfully.");
-        setMessageType("success");
+        toast.success("Academic year updated successfully.");
         setEditYearVisible(false);
         setSelectedYear(null);
       } catch (err) {
-        setMessage("An error occurred while updating.");
-        setMessageType("error");
+        toast.error("An error occurred while updating.");
       }
     } else {
       try {
@@ -114,16 +110,13 @@ const SchoolYearSettings = () => {
         const { data, error } = await createAcademicYear(createPayload);
 
         if (error) {
-          setMessage(error || "Failed to add academic year.");
-          setMessageType("error");
+          toast.error(error || "Failed to add academic year.");
         } else {
           setAcademicYears((prev) => [...prev, data]);
-          setMessage("Academic year added successfully.");
-          setMessageType("success");
+          toast.success("Academic year added successfully.");
         }
       } catch (err) {
-        setMessage("An error occurred while adding.");
-        setMessageType("error");
+        toast.error("An error occurred while adding.");
       }
     }
 
@@ -132,11 +125,6 @@ const SchoolYearSettings = () => {
       start_date: "",
       end_date: "",
     });
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const handleEdit = (year) => {
@@ -160,34 +148,20 @@ const SchoolYearSettings = () => {
       try {
         const response = await deleteAcademicYear(selectedYearDelete.year_id);
         if (response?.status === 204) {
-          setMessage("Academic year deleted successfully.");
-          setMessageType("success");
+          toast.success("Academic year deleted successfully.");
           closeDeleteModal();
         } else {
-          setMessage("Failed to delete academic year.");
-          setMessageType("error");
+          toast.error(response || "Failed to delete academic year.");
           closeDeleteModal();
         }
       } catch (error) {
-        setMessageType("error");
-        setMessage("Failed to delete academic year.");
+        toast.error("Failed to delete academic year.");
       }
     }
   };
 
   return (
     <div>
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
       {deleteModalVisible && selectedYearDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div

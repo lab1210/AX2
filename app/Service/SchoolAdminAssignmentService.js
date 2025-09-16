@@ -331,7 +331,7 @@ export const updateClassDepartmentAssignment = async (
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/assignments/class_departments/${classDepartmentAssignmentId}`;
+    const url = `${BASE_URL}/assignments/class_departments/${classDepartmentAssignmentId}/`;
     const response = await axios.put(url, classDepartmentAssignmentData, {
       headers,
     });
@@ -355,7 +355,7 @@ export const deleteClassDepartmentAssignment = async (
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/assignments/class_departments/${classDepartmentAssignmentId}`;
+    const url = `${BASE_URL}/assignments/class_departments/${classDepartmentAssignmentId}/`;
     const response = await axios.delete(url, {
       headers,
     });
@@ -378,7 +378,7 @@ export const getclassdepartmentbyid = async (classDepartmentAssignmentId) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/assignments/class_departments/${classDepartmentAssignmentId}`;
+    const url = `${BASE_URL}/assignments/class_departments/${classDepartmentAssignmentId}/`;
     const response = await axios.get(url, {
       headers,
     });
