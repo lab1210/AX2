@@ -31,9 +31,8 @@ const AddSchoolItem = () => {
   // const [successMessage, setSuccessMessage] = useState(null);
   const [amountPerStudent, setAmountPerStudent] = useState("");
   const numberOfStudents = 100; // Hardcoded for now
-
   const expectedAmountPaid = amountPerStudent * numberOfStudents || 0;
-
+  const router = useRouter();
   const countries = Country.getAllCountries();
   const states = selectedCountry
     ? State.getStatesOfCountry(selectedCountry.isoCode)
@@ -116,22 +115,16 @@ const AddSchoolItem = () => {
 
       if (schoolResponse?.status === 201 && schoolResponse.data?.id) {
         toast.success("School created successfully!");
-        // setSuccessMessage("School created successfully!");
+        router.push(`/Super-Admin/Manage-Existing-Schools?adminId=${adminId}`);
       } else {
         toast.error(
           `Error creating school: ${
             schoolResponse?.data?.message || "Something went wrong"
           }`
         );
-        // setError(
-        //   `Error creating school: ${
-        //     schoolResponse?.data?.message || "Something went wrong"
-        //   }`
-        // );
       }
     } catch (error) {
       toast.error(`An unexpected error occurred: ${error.message}`);
-      // setError(`An unexpected error occurred: ${error.message}`);
     } finally {
       setLoading(false);
     }

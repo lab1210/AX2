@@ -5,7 +5,7 @@ import DashboardHeader from "../DashboardHeader";
 import { IoClose, IoFilterOutline } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa6";
 import { getComplianceDocs } from "../../../Service/complianceDocService";
-
+import formatDate from "@/Components/SchoolAdminDashBoard/Formatdate";
 const itemsPerPage = 10; // You can adjust this value
 
 const ManageCompItem = () => {
@@ -219,7 +219,9 @@ const ManageCompItem = () => {
                       </td>
 
                       <td className="p-3 px-5 text-[#333333] text-center pr-10">
-                        {!item.uploaded_on ? "N/A" : item.uploaded_on}
+                        {!item.uploaded_on
+                          ? "N/A"
+                          : formatDate(item.uploaded_on)}
                       </td>
                     </tr>
                   ))

@@ -15,6 +15,8 @@ const StudentReg = () => {
   const [loading, setLoading] = useState(false);
   const [classYears, setClassYears] = useState([]);
   const [classArms, setClassArms] = useState([]);
+  const [errors, setErrors] = useState({});
+
   const nigeria = Country.getAllCountries().find(
     (country) => country.name === "Nigeria"
   );
@@ -50,6 +52,49 @@ const StudentReg = () => {
     class_arm: "",
   });
 
+  const handleInputChange = (field, value, nested = false) => {
+    if (errors[field]) {
+      setErrors((prev) => {
+        const newErrors = { ...prev };
+        delete newErrors[field];
+        return newErrors;
+      });
+    }
+
+    if (nested) {
+      const [parent, child] = field.split(".");
+      setFormData((prev) => ({
+        ...prev,
+        [parent]: {
+          ...prev[parent],
+          [child]: value,
+        },
+      }));
+    } else {
+      setFormData((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
+  };
+
+  const getFieldError = (fieldName) => {
+    return errors[fieldName]?.[0] || "";
+  };
+
+  const getInputBorderClass = (fieldName, value) => {
+    if (errors[fieldName]) {
+      return "border-2 border-red-500";
+    }
+    return value !== ""
+      ? "border-2 border-[#0071E3]"
+      : "border border-[#B6B6B6]";
+  };
+
+  const getDropdownErrorClass = (fieldName) => {
+    return errors[fieldName] ? "border-2 border-red-500" : "";
+  };
+
   useEffect(() => {
     const fetchClassArms = async () => {
       const { data, error } = await getClassArm();
@@ -73,7 +118,6 @@ const StudentReg = () => {
         (arm) => arm.class_year === formData.class_year
       );
       setFilteredClassArms(filtered);
-      // Reset class arm if it's not available for the selected year
       if (!filtered.some((arm) => arm.class_id === formData.class_arm)) {
         setFormData((prev) => ({ ...prev, class_arm: "" }));
       }
@@ -111,56 +155,48 @@ const StudentReg = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setErrors({});
 
     try {
       const response = await SchoolAdminRegisterStudent(formData);
-      if (response?.status === 201) {
-        toast.success("Student registered successfully");
-        setStudent([...Student, formData]);
-      } else {
-        if (response?.data?.error) {
-          toast.error(response.data.error);
-        } else {
-          toast.error("Student Registration failed");
-        }
-      }
+      toast.success("Student registered successfully");
+
+      setFormData({
+        user: {
+          username: "",
+          email: "",
+          password: "",
+        },
+        first_name: "",
+        last_name: "",
+        middle_name: "",
+        date_of_birth: "",
+        gender: "",
+        country: nigeria ? "Nigeria" : "",
+        countryCode: nigeria ? nigeria.isoCode : "",
+        state: "",
+        city: "",
+        region: "default",
+        admission_number: "",
+        admission_date: "",
+        status: "Active",
+        parent_first_name: "",
+        parent_last_name: "",
+        parent_middle_name: "",
+        parent_occupation: "",
+        parent_email: "default",
+        parent_emergency_contact: "",
+        address: "default",
+        parent_contact_info: "",
+        parent_relationship: "",
+        class_year: "",
+        class_arm: "",
+      });
     } catch (error) {
-      console.error("Error while registering student", error);
-
-      if (error.response && error.response.data) {
-        const errors = error.response.data;
-
-        // Handle the specific error message from network response
-        if (typeof errors === "object" && errors.error) {
-          toast.error(errors.error); // This will show "Student creation failed: ClassDepartment matching query does not exist."
-          return;
-        }
-
-        const flatErrors = [];
-        for (const key in errors) {
-          if (Array.isArray(errors[key])) {
-            flatErrors.push(...errors[key]);
-          } else if (typeof errors[key] === "object") {
-            for (const subKey in errors[key]) {
-              if (Array.isArray(errors[key][subKey])) {
-                flatErrors.push(...errors[key][subKey]);
-              } else {
-                flatErrors.push(errors[key][subKey]);
-              }
-            }
-          } else {
-            flatErrors.push(errors[key]);
-          }
-        }
-        const finalMessage = flatErrors.join(" ");
-        toast.error(finalMessage);
-      } else if (error.message) {
-        toast.error(error.message);
-      } else {
-        toast.error("An unexpected error occurred.");
-      }
+      console.log("Error while registering student", error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -179,20 +215,20 @@ const StudentReg = () => {
                 type="text"
                 placeholder="Enter First Name"
                 value={formData.first_name || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    first_name: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.first_name !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
+                onChange={(e) =>
+                  handleInputChange("first_name", e.target.value)
+                }
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
+                  "first_name",
+                  formData.first_name
+                )}`}
                 required
               />
+              {errors.first_name && (
+                <p className="text-red-500 text-xs mt-1">
+                  {getFieldError("first_name")}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">
@@ -202,20 +238,20 @@ const StudentReg = () => {
                 type="text"
                 placeholder="Enter Middle Name"
                 value={formData.middle_name || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    middle_name: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.middle_name !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
+                onChange={(e) =>
+                  handleInputChange("middle_name", e.target.value)
+                }
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
+                  "middle_name",
+                  formData.middle_name
+                )}`}
                 required
               />
+              {errors.middle_name && (
+                <p className="text-red-500 text-xs mt-1">
+                  {getFieldError("middle_name")}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">
@@ -225,20 +261,18 @@ const StudentReg = () => {
                 type="text"
                 placeholder="Enter Last Name"
                 value={formData.last_name || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    last_name: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.last_name !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
+                onChange={(e) => handleInputChange("last_name", e.target.value)}
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
+                  "last_name",
+                  formData.last_name
+                )}`}
                 required
               />
+              {errors.last_name && (
+                <p className="text-red-500 text-xs mt-1">
+                  {getFieldError("last_name")}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">Username:</label>
@@ -246,23 +280,20 @@ const StudentReg = () => {
                 type="text"
                 placeholder="Enter Username"
                 value={formData.user.username || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    user: {
-                      ...prev.user,
-                      username: value,
-                    },
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.user.username !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
+                onChange={(e) =>
+                  handleInputChange("user.username", e.target.value, true)
+                }
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
+                  "user.username",
+                  formData.user.username
+                )}`}
                 required
               />
+              {errors.user?.username && (
+                <p className="text-red-500 text-xs mt-1">
+                  {getFieldError("user.username")}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">Email:</label>
@@ -270,23 +301,20 @@ const StudentReg = () => {
                 type="email"
                 placeholder="Enter Email"
                 value={formData.user.email || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    user: {
-                      ...prev.user,
-                      email: value,
-                    },
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.user.email !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
+                onChange={(e) =>
+                  handleInputChange("user.email", e.target.value, true)
+                }
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
+                  "user.email",
+                  formData.user.email
+                )}`}
                 required
               />
+              {errors.user?.email && (
+                <p className="text-red-500 text-xs mt-1">
+                  {getFieldError("user.email")}
+                </p>
+              )}
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">Password:</label>
@@ -412,20 +440,20 @@ const StudentReg = () => {
               type="text"
               placeholder="Enter Admission Number"
               value={formData.admission_number || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setFormData((prev) => ({
-                  ...prev,
-                  admission_number: value,
-                }));
-              }}
-              className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                formData.admission_number !== ""
-                  ? "border-2 border-[#0071E3]"
-                  : "border border-[#B6B6B6]"
-              }`}
+              onChange={(e) =>
+                handleInputChange("admission_number", e.target.value)
+              }
+              className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
+                "admission_number",
+                formData.admission_number
+              )}`}
               required
             />
+            {errors.admission_number && (
+              <p className="text-red-500 text-xs mt-1">
+                {getFieldError("admission_number")}
+              </p>
+            )}
           </div>
           <div className="flex flex-col gap-x-1">
             <label className="text-[0.88rem] text-[#5E6A72]">
@@ -450,7 +478,7 @@ const StudentReg = () => {
             />
           </div>
           <div className="flex flex-col gap-x-1">
-            <label className="text-[0.88rem] text-[#FFFFFF]">Class Year</label>
+            <label className="text-[0.88rem] text-[#5E6A72]">Class Year</label>
             <DropDownLight
               label={
                 classYears.find((y) => y.class_year_id === formData.class_year)

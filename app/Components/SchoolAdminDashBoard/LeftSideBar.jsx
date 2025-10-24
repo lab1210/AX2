@@ -1,10 +1,16 @@
 "use client";
 import React, { useState } from "react";
 import { useInitializeUser } from "../hooks/InitializeUser";
-import { MdOutlineDashboard } from "react-icons/md";
-import { usePathname, useSearchParams } from "next/navigation";
+import { MdOutlineAssignment, MdOutlineDashboard } from "react-icons/md";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { CiLogout, CiSettings } from "react-icons/ci";
 import SchoolAdminSettingsPopup from "../SchoolAdminSettingsPopup";
+import { FiCalendar, FiUserPlus } from "react-icons/fi";
+import { IoDocumentTextOutline, IoNotificationsOutline } from "react-icons/io5";
+import { FaCalendar } from "react-icons/fa";
+import { logout } from "@/Service/AuthService";
+import toast from "react-hot-toast";
 
 const SchoolAdminLeft = () => {
   const [user, setUser] = useState(null);
@@ -12,7 +18,7 @@ const SchoolAdminLeft = () => {
   const searchParams = useSearchParams();
   const schooladminId = searchParams.get("schooladminId");
   const pathname = usePathname();
-
+  const router = useRouter();
   useInitializeUser(setUser, setIsLoading);
 
   const [activePopup, setActivePopup] = useState(null);
@@ -25,35 +31,45 @@ const SchoolAdminLeft = () => {
     },
     {
       Name: "School Settings",
-      icon: <MdOutlineDashboard size={20} />,
+      icon: <CiSettings size={20} />,
     },
 
     {
       Name: "Assignment",
-      icon: <MdOutlineDashboard size={20} />,
+      icon: <MdOutlineAssignment size={20} />,
     },
     {
       Name: "Registration",
-      icon: <MdOutlineDashboard size={20} />,
+      icon: <FiUserPlus size={20} />,
       Link: "/School-Admin/Registration",
     },
     {
       Name: "Result Management",
-      icon: <MdOutlineDashboard size={20} />,
+      icon: <IoDocumentTextOutline size={20} />,
       Link: "/School-Admin/Result-Management",
     },
     {
       Name: "Time Table Management",
-      icon: <MdOutlineDashboard size={20} />,
+      icon: <FiCalendar size={20} />,
       Link: "/School-Admin/Time-Table-Management",
     },
     {
       Name: "Notification",
-      icon: <MdOutlineDashboard size={20} />,
+      icon: <IoNotificationsOutline size={20} />,
       Link: "/School-Admin/Notification",
     },
   ];
 
+  const handleLogout = async (e) => {
+    e.preventDefault();
+    try {
+      const response = await logout();
+      toast.success(response.message);
+      router.push("/");
+    } catch (error) {
+      toast.error("Logout failed. Please try again." || error.message);
+    }
+  };
   const isSpecialRouteActive = (name) => {
     if (name === "School Settings") {
       return pathname.includes("Configure");
@@ -78,7 +94,7 @@ const SchoolAdminLeft = () => {
         </div>
       </div>
 
-      <ul className="pt-6 text-white pl-4 pr-4 flex flex-col gap-2">
+      <ul className="pt-6 text-white pl-4 pr-4 flex flex-col gap-2 w-full ">
         {DashboardLinks.map((item, index) => {
           const isSpecial =
             item.Name === "School Settings" || item.Name === "Assignment";
@@ -89,7 +105,7 @@ const SchoolAdminLeft = () => {
           return (
             <li
               key={index}
-              className={`relative max-w-50 cursor-pointer rounded-sm p-1 ${
+              className={`relative  cursor-pointer rounded-sm p-1 w-full ${
                 isActive
                   ? "bg-[#f5f5f5] text-[#01427A] "
                   : "hover:bg-[#ABBED2] hover:text-[#01427A]"
@@ -99,7 +115,7 @@ const SchoolAdminLeft = () => {
               {isSpecial ? (
                 <>
                   <div
-                    className={`flex items-center gap-4 sm:text-[0.94rem] xl:text-base p-1 `}
+                    className={`flex items-center gap-4 sm:text-[0.94rem] xl:text-base  `}
                   >
                     <span>{item.icon}</span>
                     {item.Name}
@@ -124,6 +140,20 @@ const SchoolAdminLeft = () => {
             </li>
           );
         })}
+        <li
+          onClick={handleLogout}
+          className={`relative  cursor-pointer rounded-sm p-1 w-full bg-[#F94144] text-white]
+          `}
+        >
+          <div
+            className={`flex items-center gap-4 sm:text-[0.94rem] xl:text-base  `}
+          >
+            <span>
+              <CiLogout size={20} />
+            </span>
+            Logout
+          </div>
+        </li>
       </ul>
 
       <div className="flex justify-center">

@@ -9,6 +9,7 @@ import {
   getClassArm,
   UpdateClassArm,
 } from "@/Service/schoolConfig";
+import toast from "react-hot-toast";
 
 const ClassArm = () => {
   const [classList, setClassList] = useState([]);
@@ -18,7 +19,7 @@ const ClassArm = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [editClassVisible, setEditClassVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 10;
   const [selectedClassDelete, setSelectedClassDelete] = useState(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
@@ -150,34 +151,20 @@ const ClassArm = () => {
       try {
         const response = await deleteClassArm(selectedClassDelete.class_id);
         if (response?.status === 204) {
-          setMessage("Class Arm deleted successfully.");
-          setMessageType("success");
+          toast.success("Class Arm deleted successfully.");
           closeDeleteModal();
         } else {
-          setMessage("Failed to delete Class Arm.");
-          setMessageType("error");
+          toast.error("Failed to delete Class Arm.");
           closeDeleteModal();
         }
       } catch (error) {
-        setMessageType("error");
-        setMessage("Failed to delete Class Arm.");
+        toast.error("Failed to delete Class Arm.");
       }
     }
   };
 
   return (
     <div>
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
       {deleteModalVisible && selectedClassDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div

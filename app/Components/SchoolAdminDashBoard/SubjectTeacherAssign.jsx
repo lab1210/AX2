@@ -1,7 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import Dropdown from "./DropDown2";
-import MultiDropdown from "../SchoolAdminDashBoard/MultiDropDown";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import {
   createSubjectTeacherAssignment,
@@ -9,10 +8,9 @@ import {
   deleteSubjectTeacherAssignment,
   getSubjectDepartmentRelationships,
   getSubjectTeacherAssignments,
+  getClassDepartmentAssignments,
 } from "../../Service/SchoolAdminAssignmentService";
 import { getTeachers } from "../../Service/teacherService";
-import { getClassArm } from "../../Service/schoolConfig";
-import { getSubject } from "../../Service/schoolConfig";
 import toast from "react-hot-toast";
 
 const SubjectTeacherAssign = () => {
@@ -23,7 +21,7 @@ const SubjectTeacherAssign = () => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 10;
   const [formData, setFormData] = useState({
     teacher: "",
     subject_class: "",
@@ -36,17 +34,17 @@ const SubjectTeacherAssign = () => {
 
   const fetchData = async () => {
     try {
-      const [assignmentsRes, teachersRes, classArmsRes, subjectsRes] =
+      const [assignmentsRes, teachersRes, classdeptres, subjectsRes] =
         await Promise.all([
           getSubjectTeacherAssignments(),
           getTeachers(),
-          getClassArm(),
+          getClassDepartmentAssignments(),
           getSubjectDepartmentRelationships(),
         ]);
 
       setAssignments(assignmentsRes || []);
       setTeachers(teachersRes);
-      setClassArms(classArmsRes.data);
+      setClassArms(classdeptres);
       setSubjects(subjectsRes);
     } catch (error) {
       toast.error(
@@ -142,13 +140,6 @@ const SubjectTeacherAssign = () => {
     return subject ? subject.subject_name : "Unknown";
   };
 
-  const getClassName = (classId) => {
-    const classArm = classArms.find((c) => c.class_id === classId);
-    return classArm
-      ? `${classArm.class_year_name} (${classArm.arm_name})`
-      : "Unknown";
-  };
-
   return (
     <div>
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
@@ -169,9 +160,9 @@ const SubjectTeacherAssign = () => {
               <label className="text-[0.88rem] text-[#5E6A72]">Teacher:</label>
               <Dropdown
                 label={
-                  formData.teacher
+                  editMode
                     ? getTeacherName(formData.teacher)
-                    : "Select Teacher"
+                    : formData.teacher || "Select Teacher"
                 }
                 items={teachers?.map((teacher) => ({
                   label: `${teacher.first_name} ${teacher.last_name}`,
@@ -197,7 +188,7 @@ const SubjectTeacherAssign = () => {
                   onClick: () =>
                     setFormData((prev) => ({
                       ...prev,
-                      subject: subject.subject_class_id,
+                      subject_class: subject.subject_class_id,
                     })),
                 }))}
               />
@@ -210,15 +201,17 @@ const SubjectTeacherAssign = () => {
               <Dropdown
                 label={
                   formData.class_department_assigned
-                    ? getClassName(formData.class_department_assigned)
+                    ? formData.class_department_assigned
                     : "Select Class Arm"
                 }
                 items={classArms.map((classArm) => ({
-                  label: `${classArm.class_year_name} (${classArm.arm_name})`,
+                  label: `${
+                    classArm.class_year_name + " " + classArm.class_arm_name
+                  }`,
                   onClick: () =>
                     setFormData((prev) => ({
                       ...prev,
-                      class_department_assigned: classArm.class_id,
+                      class_department_assigned: classArm.subject_class_id,
                     })),
                 }))}
               />
@@ -241,7 +234,7 @@ const SubjectTeacherAssign = () => {
                 <tr>
                   <th className="p-2 pl-12 bg-[#EDF0F3]">Teacher</th>
                   <th className="p-2 bg-[#EDF0F3]">Subject</th>
-                  <th className="p-2 bg-[#EDF0F3]">Class Arm</th>
+                  <th className="p-2 bg-[#EDF0F3]">Class</th>
                   <th className="p-2 bg-[#EDF0F3]">Actions</th>
                 </tr>
               </thead>
@@ -263,7 +256,9 @@ const SubjectTeacherAssign = () => {
                       {item.teacher_name} {item.teacher_lastname}
                     </td>
                     <td className="p-2">{item.subject_name}</td>
-                    <td className="p-2">{item.class_name}</td>
+                    <td className="p-2">
+                      {item.class_year_name + " " + item.class_name}
+                    </td>
                     <td className="p-2">
                       <div className="flex gap-4">
                         <FiEdit3

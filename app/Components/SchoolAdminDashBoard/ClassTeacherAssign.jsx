@@ -19,8 +19,9 @@ const ClassTeacherAssign = () => {
   const [editMode, setEditMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [selectedClassDelete, setSelectedClassDelete] = useState(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
-  // SEPARATE FORM STATES FOR CREATE AND EDIT
   const [createFormData, setCreateFormData] = useState({
     assignments: [{ teacher_id: "", class_id: "" }],
   });
@@ -166,18 +167,30 @@ const ClassTeacherAssign = () => {
     setEditMode(true);
   };
 
-  const handleDelete = async (relationshipId) => {
-    if (!window.confirm("Are you sure you want to delete this assignment?"))
-      return;
+  const openDeleteModal = (term) => {
+    setSelectedClassDelete(term);
+    setDeleteModalVisible(true);
+  };
 
-    try {
-      await deleteTeacherClassRelationship(relationshipId);
-      toast.success("Relationship deleted successfully");
-      await fetchData();
-    } catch (error) {
-      toast.error(
-        "Failed to delete relationship: " + (error.message || "Unknown error")
-      );
+  const closeDeleteModal = () => {
+    setSelectedClassDelete(null);
+    setDeleteModalVisible(false);
+  };
+
+  const handleDelete = async () => {
+    if (selectedClassDelete?.class_teacher_id) {
+      try {
+        const response = await deleteTeacherClassRelationship(
+          selectedClassDelete?.class_teacher_id
+        );
+        toast.success("Relationship deleted successfully");
+        closeDeleteModal();
+        await fetchData();
+      } catch (error) {
+        toast.error(
+          "Failed to delete relationship: " + (error.message || "Unknown error")
+        );
+      }
     }
   };
 
@@ -189,6 +202,46 @@ const ClassTeacherAssign = () => {
 
   return (
     <div>
+      {deleteModalVisible && selectedClassDelete && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
+            <p className="font-bold text-center text-lg">
+              Delete Class Teacher
+            </p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure want to delete the class teacher
+              </p>
+              <p className="text-base text-[#858383]">
+                <span className="font-bold">
+                  {selectedClassDelete?.teacher_name +
+                    " " +
+                    selectedClassDelete?.teacher_lastname}
+                </span>
+                ?
+              </p>
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+              <button
+                onClick={handleDelete}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
         <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
           <p className="font-bold text-[#07508F]">
@@ -390,7 +443,7 @@ const ClassTeacherAssign = () => {
                             size={15}
                           />
                           <FiTrash2
-                            onClick={() => handleDelete(item.class_teacher_id)}
+                            onClick={() => openDeleteModal(item)}
                             className="text-[#F94144] cursor-pointer"
                             size={15}
                           />

@@ -148,7 +148,7 @@ export const updateTeacherClassRelationship = async (
       return { error: "Unauthorized: No authentication token provided." };
     }
     const url = `${BASE_URL}/assignments/class_teachers/${teacherClassId}/`;
-    const response = await axios.patch(url, teacherClassData, { headers });
+    const response = await axios.put(url, teacherClassData, { headers });
     return response.data;
   } catch (error) {
     console.error(
@@ -159,7 +159,7 @@ export const updateTeacherClassRelationship = async (
   }
 };
 
-export const deleteTeacherClassRelationship = async () => {
+export const deleteTeacherClassRelationship = async (id) => {
   try {
     const headers = createAuthHeaders();
 
@@ -169,7 +169,7 @@ export const deleteTeacherClassRelationship = async () => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/assignments/class_teachers/delete-multiple/`;
+    const url = `${BASE_URL}/assignments/class_teachers/${id}/`;
     const response = await axios.delete(url, { headers });
     return { data: response.data };
   } catch (error) {
@@ -424,7 +424,7 @@ export const updateStudenttoClassRelationship = async (
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/assignments/student-classes/${studentClassId}/`;
+    const url = `${BASE_URL}/assignments/student-classes/${studentClassId}/update/`;
     const response = await axios.patch(url, studentClassData, { headers });
     return response.data;
   } catch (error) {
@@ -492,7 +492,7 @@ export const updateStudentSubjectRegistration = async (
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/assignments/student-subject-registrations/${studentSubjectRegistrationId}`;
+    const url = `${BASE_URL}/assignments/student-subject-registrations/${studentSubjectRegistrationId}/`;
     const response = await axios.put(url, studentSubjectRegistrationData, {
       headers,
     });
@@ -516,14 +516,14 @@ export const deleteStudentSubjectRegistration = async (
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/assignments/class_departments/${studentSubjectRegistrationId}`;
+    const url = `${BASE_URL}/assignments/student-subject-registrations/${studentSubjectRegistrationId}/`;
     const response = await axios.delete(url, {
       headers,
     });
     return response.data;
   } catch (error) {
     console.error(
-      `Failed to delete class department assignment by id:${studentSubjectRegistrationId}`,
+      `Failed to delete student subject:${studentSubjectRegistrationId}`,
       error
     );
   }
