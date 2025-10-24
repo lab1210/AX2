@@ -1,6 +1,5 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { getAllRoles } from "../../Service/RoleService";
 import {
   createNotifications,
   DeleteNotification,
@@ -14,7 +13,7 @@ import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import toast from "react-hot-toast";
 import formatdate from "../SchoolAdminDashBoard/Formatdate";
 const NotificationPage = () => {
-  const [role, setRole] = useState([]);
+  const role = ["Teacher", "Student", "Everyone"];
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedDelete, setselectedDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -41,12 +40,6 @@ const NotificationPage = () => {
 
   const fetchData = async () => {
     try {
-      const roleRes = await getAllRoles();
-      if (roleRes.data) {
-        setRole(roleRes.data);
-      } else {
-        toast.error("Failed to fetch roles");
-      }
       const notificationRes = await getNotifications();
       if (notificationRes) {
         setNotifications(notificationRes);
@@ -62,12 +55,6 @@ const NotificationPage = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  const getRoleName = (roleID) => {
-    const t = role.find((item) => item.id === roleID);
-    if (!t) return null; // explicitly return null if not found
-    return t.name;
-  };
 
   const openDeleteModal = (school) => {
     setselectedDelete(school);
@@ -91,7 +78,12 @@ const NotificationPage = () => {
       notification_type: notification.notification_type,
     });
   };
-
+  const handleInputChange = (field, value) => {
+    setformData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -142,18 +134,16 @@ const NotificationPage = () => {
     if (!selectedDelete) return;
 
     try {
-      const response = await DeleteNotification(selectedDelete.id);
+      const response = await DeleteNotification(selectedDelete.notification_id);
       if (response.error) {
         toast.error(response.error);
         return;
       }
 
-      // Refresh notifications after successful deletion
       const updatedNotifications = await getNotifications();
       if (updatedNotifications.data) {
         setNotifications(updatedNotifications.data);
       }
-
       toast.success("Notification deleted successfully");
       closeDeleteModal();
     } catch (error) {
@@ -179,8 +169,7 @@ const NotificationPage = () => {
           }
 
           if (filterType === "user") {
-            const recipientName =
-              getRoleName(d.recipient_group)?.toLowerCase() || "";
+            const recipientName = d.recipient_group || "";
             return recipientName.includes(lowerSearch);
           }
 
@@ -221,7 +210,10 @@ const NotificationPage = () => {
               </p>
             </div>
             <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
-              <button className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4">
+              <button
+                onClick={() => handleDelete(selectedDelete.notification_id)}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+              >
                 Yes, Delete
               </button>
               <button
@@ -311,13 +303,9 @@ const NotificationPage = () => {
               </label>
               <Dropdown
                 label={formData.recipient_group || "Select Recipient"}
-                items={role.map((t) => ({
-                  label: t.name,
-                  onClick: () =>
-                    setformData((prev) => ({
-                      ...prev,
-                      recipient_group: t.name,
-                    })),
+                items={role.map((roleItem) => ({
+                  label: roleItem,
+                  onClick: () => handleInputChange("recipient_group", roleItem),
                 }))}
               />
             </div>
@@ -405,7 +393,7 @@ const NotificationPage = () => {
           paginatedData.map((item) => {
             return (
               <div
-                key={item.id}
+                key={item.notification_id}
                 className="flex flex-col bg-white rounded-xl border-2 border-[#0B0A0A]/10  p-4"
               >
                 <div className="flex justify-between items-center mb-5">

@@ -1,27 +1,28 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { IoFilter, IoSearch } from "react-icons/io5";
-import MultiDropdown from "./MultiDropDown";
-import { FiEdit3, FiTrash2 } from "react-icons/fi";
+import MultiDropdown from "./Multidropdownbyid";
+import { FiEdit, FiEdit2, FiEdit3, FiTrash2 } from "react-icons/fi";
 import RegControlModal from "./RegControlModal";
 import { RxLetterCaseCapitalize } from "react-icons/rx";
 import {
   deleteStudentSubjectRegistration,
   getRegistrationControl,
   getStudentSubjectRegistrations,
+  getStudenttoClassRelationship,
+  getSubjectDepartmentRelationships,
   registerStudentSubject,
   updateRegistrationControl,
   updateStudentSubjectRegistration,
 } from "@/Service/SchoolAdminAssignmentService";
-import { getStudents } from "@/Service/studentService";
-import { getSubject } from "@/Service/schoolConfig";
+import toast from "react-hot-toast";
+
+const MAX_CHIPS = 5; // show this many chips before collapsing
 
 const StudentToSubject = () => {
   const [allStudents, setAllStudents] = useState([]);
   const [allSubjects, setAllSubjects] = useState([]);
   const [StudentSubjectList, setStudentSubjectList] = useState([]);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("");
   const [selectedSubjectAssignment, setSelectedSubjectAssignment] =
     useState(null);
   const [editSubjectAssignmentVisible, setEditSubjectAssignmentVisible] =
@@ -34,6 +35,8 @@ const StudentToSubject = () => {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [editStatus, setEditStatus] = useState("Pending");
+  const [expandedRows, setExpandedRows] = useState({}); // { [student_id]: boolean }
 
   const itemsPerPage = 10;
 
@@ -45,11 +48,10 @@ const StudentToSubject = () => {
     try {
       setIsLoading(true);
 
-      // Fetch all necessary data
       const [studentsRes, subjectsRes, registrationsRes, controlRes] =
         await Promise.all([
-          getStudents(),
-          getSubject(),
+          getStudenttoClassRelationship(),
+          getSubjectDepartmentRelationships(),
           getStudentSubjectRegistrations(),
           getRegistrationControl(),
         ]);
@@ -63,8 +65,7 @@ const StudentToSubject = () => {
       }
     } catch (error) {
       console.error("Failed to fetch data:", error);
-      setMessage("Failed to load data");
-      setMessageType("error");
+      toast.error("Failed to load data");
     } finally {
       setIsLoading(false);
     }
@@ -72,144 +73,137 @@ const StudentToSubject = () => {
 
   const filteredStudents =
     searchText.trim() === ""
-      ? allStudents.map((student) => ({
-          id: student.student_id,
-          name: `${student.first_name} ${student.last_name}`,
-          admission_number: student.admission_number,
-        }))
-      : allStudents
-          .filter((student) => {
-            const fullName =
-              `${student.first_name} ${student.last_name}`.toLowerCase();
-            const admissionNumber =
-              student.admission_number?.toLowerCase() || "";
+      ? allStudents
+      : allStudents.filter((student) => {
+          const fullName = student.student_name.toLowerCase();
+          const className = student.class_year_name?.toLowerCase() || "";
 
-            return filterType === "name"
-              ? fullName.includes(searchText.toLowerCase())
-              : admissionNumber.includes(searchText.toLowerCase());
-          })
-          .map((student) => ({
-            id: student.student_id,
-            name: `${student.first_name} ${student.last_name}`,
-            admission_number: student.admission_number,
-          }));
+          return filterType === "name"
+            ? fullName.includes(searchText.toLowerCase())
+            : className.includes(searchText.toLowerCase());
+        });
 
-  const paginatedData = StudentSubjectList.slice(
+  // Group raw registration rows by student_id
+  const groupedByStudent = useMemo(() => {
+    const map = new Map();
+    StudentSubjectList.forEach((item) => {
+      const key = item.student_id;
+      if (!map.has(key)) {
+        map.set(key, {
+          key,
+          student_id: item.student_id,
+          student_name: item.student_name,
+          student_admission_number: item.student_admission_number,
+          class_arm: item.class_arm,
+          subjects: [],
+        });
+      }
+      map.get(key).subjects.push({
+        subject_name: item.subject_name,
+        status: item.status,
+        registration_id: item.registration_id,
+        student_class: item.student_class,
+        subject_class: item.subject_class,
+        raw: item,
+      });
+    });
+    return Array.from(map.values());
+  }, [StudentSubjectList]);
+
+  // Paginate the grouped rows
+  const paginatedData = groupedByStudent.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
+  const totalPages = Math.ceil(groupedByStudent.length / itemsPerPage);
 
-  const totalPages = Math.ceil(StudentSubjectList.length / itemsPerPage);
-
-  const handlePrevious = () => {
-    setCurrentPage((prev) => Math.max(prev - 1, 1));
-  };
-
-  const handleNext = () => {
-    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-  };
+  const handlePrevious = () => setCurrentPage((p) => Math.max(p - 1, 1));
+  const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
       if (editSubjectAssignmentVisible && selectedSubjectAssignment) {
-        // Update existing registration
-        const response = await updateStudentSubjectRegistration(
+        const studentId = formData.Student?.[0];
+        const subjectId = formData.Subject?.[0];
+
+        if (!studentId || !subjectId) {
+          toast.error("Please select both student and subject.");
+          return;
+        }
+
+        await updateStudentSubjectRegistration(
           selectedSubjectAssignment.registration_id,
           {
-            student_class: selectedSubjectAssignment.student_class_id,
-            subject_class: selectedSubjectAssignment.subject_class_id,
+            student_class: studentId,
+            subject_class: subjectId,
+            status: editStatus,
           }
         );
 
-        if (!response.error) {
-          setMessage("Subject Registration updated successfully.");
-          setMessageType("success");
-          setEditSubjectAssignmentVisible(false);
-          setSelectedSubjectAssignment(null);
-          fetchData(); // Refresh data
-        } else {
-          throw new Error(response.error);
-        }
+        toast.success("Subject Registration updated successfully.");
+        setEditSubjectAssignmentVisible(false);
+        setSelectedSubjectAssignment(null);
+        setFormData({ Student: [], Subject: [] });
+        setEditStatus("Pending");
+        fetchData();
+        return;
       } else {
-        // Create new registrations
-        const registrations = formData.Student.map((studentId) => {
-          const student = allStudents.find((s) => s.student_id === studentId);
-          return {
-            student_class: student.class_id, // You'll need to ensure students have class_id
-            subject_class: formData.Subject[0], // Assuming single subject selection for now
-          };
-        });
+        const registrations = formData.Student.map((studentClassId) => ({
+          student_class: studentClassId,
+          subject_class: formData.Subject[0],
+        }));
 
-        const results = await Promise.all(
+        await Promise.all(
           registrations.map((reg) => registerStudentSubject(reg))
         );
 
-        const hasError = results.some((result) => result.error);
-
-        if (hasError) {
-          throw new Error("Some registrations failed");
-        }
-
-        setMessage("Student Subject Registration successful.");
-        setMessageType("success");
-        setFormData({
-          Student: [],
-          Subject: [],
-        });
-        fetchData(); // Refresh data
+        toast.success("Student Subject Registration successful.");
+        fetchData();
+        setFormData({ Student: [], Subject: [] });
       }
     } catch (error) {
       console.error("Registration failed:", error);
-      setMessage(error.message || "Registration failed");
-      setMessageType("error");
+      toast.error(error.message || "Registration failed");
     }
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const handleEdit = (assignment) => {
     setEditSubjectAssignmentVisible(true);
     setSelectedSubjectAssignment(assignment);
+
+    const studentId = assignment.student_class; // from GET
+    const subjectId = assignment.subject_class;
+
+    setFormData({
+      Student: studentId ? [String(studentId)] : [],
+      Subject: subjectId ? [String(subjectId)] : [],
+    });
+
+    setEditStatus(assignment.status || "Pending");
   };
 
   const handleDelete = async (registrationId) => {
-    if (!window.confirm("Are you sure you want to delete this registration?")) {
+    if (!window.confirm("Are you sure you want to delete this registration?"))
       return;
-    }
-
     try {
       const response = await deleteStudentSubjectRegistration(registrationId);
-
       if (!response.error) {
-        setMessage("Registration deleted successfully.");
-        setMessageType("success");
-        fetchData(); // Refresh data
+        toast.success("Registration deleted successfully.");
+        fetchData();
       } else {
         throw new Error(response.error);
       }
     } catch (error) {
       console.error("Deletion failed:", error);
-      setMessage("Failed to delete registration");
-      setMessageType("error");
+      toast.error("Failed to delete registration");
     }
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const toggleRegistration = () => {
-    if (!registrationEnabled) {
-      setShowModal(true);
-    } else {
-      handleCloseRegistration();
-    }
+    if (!registrationEnabled) setShowModal(true);
+    else handleCloseRegistration();
   };
 
   const handleCloseRegistration = async () => {
@@ -223,21 +217,14 @@ const StudentToSubject = () => {
       if (!response.error) {
         setRegistrationEnabled(false);
         setRegistrationControl(response);
-        setMessage("Registration closed successfully.");
-        setMessageType("success");
+        toast.success("Registration closed successfully.");
       } else {
         throw new Error(response.error);
       }
     } catch (error) {
       console.error("Failed to close registration:", error);
-      setMessage("Failed to close registration");
-      setMessageType("error");
+      toast.error("Failed to close registration");
     }
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const handleModalSubmit = async (formData) => {
@@ -252,21 +239,14 @@ const StudentToSubject = () => {
         setRegistrationEnabled(true);
         setRegistrationControl(response);
         setShowModal(false);
-        setMessage("Registration successfully enabled!");
-        setMessageType("success");
+        toast.success("Registration successfully enabled!");
       } else {
         throw new Error(response.error);
       }
     } catch (error) {
       console.error("Failed to enable registration:", error);
-      setMessage("Failed to enable registration");
-      setMessageType("error");
+      toast.error("Failed to enable registration");
     }
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const [formData, setFormData] = useState({
@@ -274,26 +254,20 @@ const StudentToSubject = () => {
     Subject: [],
   });
 
+  const toggleRowExpand = (studentId) => {
+    setExpandedRows((prev) => ({ ...prev, [studentId]: !prev[studentId] }));
+  };
+
   if (isLoading) {
     return (
-      <div className="flex justify-center items-center h-64">Loading...</div>
+      <div className="flex justify-center items-center p-10">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#07508F]"></div>
+      </div>
     );
   }
 
   return (
     <div className="overflow-y-auto no-scrollbar h-full ">
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
-
       {registrationControl && (
         <div className="mx-6 mb-3 p-3 bg-blue-50 border border-blue-200 rounded">
           <p className="text-sm font-semibold">Registration Period:</p>
@@ -331,7 +305,7 @@ const StudentToSubject = () => {
             </button>
             {showFilterDropdown && (
               <div className="absolute top-full mt-1 left-0 bg-white border rounded shadow-lg z-10">
-                {["name", "admission_number"].map((type) => (
+                {["name", "class"].map((type) => (
                   <button
                     key={type}
                     onClick={() => {
@@ -343,7 +317,7 @@ const StudentToSubject = () => {
                     <span>
                       <RxLetterCaseCapitalize />
                     </span>
-                    {type === "admission_number" ? "Admission Number" : "Name"}
+                    {type === "class" ? "Class" : "Name"}
                   </button>
                 ))}
               </div>
@@ -361,18 +335,14 @@ const StudentToSubject = () => {
                 type="text"
                 className="placeholder:text-[#AEAEAE] xl:placeholder:text-sm placeholder:text-xs rounded-full py-1 pl-5 pr-12 border-[1.5px] w-full "
                 placeholder={`Type here to filter by ${
-                  filterType === "admission_number"
-                    ? "admission number"
-                    : "name"
+                  filterType === "class" ? "class" : "name"
                 }`}
               />
             </div>
           </div>
         </div>
         <div className="flex items-center gap-6">
-          <label htmlFor="" className="text-sm">
-            Set Registration Control:
-          </label>
+          <label className="text-sm">Set Registration Control:</label>
           <button
             onClick={toggleRegistration}
             aria-pressed={registrationEnabled}
@@ -395,12 +365,30 @@ const StudentToSubject = () => {
             <p className="font-bold text-[#07508F]">
               Register Students Subject
             </p>
-            <button
-              type="submit"
-              className="bg-[#07508F] text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
-            >
-              {editSubjectAssignmentVisible ? "Save" : "Assign"}
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="submit"
+                className="bg-[#07508F] text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
+              >
+                {editSubjectAssignmentVisible ? "Save" : "Assign"}
+              </button>
+              {editSubjectAssignmentVisible ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEditSubjectAssignmentVisible(false);
+                    setSelectedSubjectAssignment(null);
+                    setFormData({ Student: [], Subject: [] });
+                    setEditStatus("Pending");
+                  }}
+                  className="bg-[#07508F] text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm"
+                >
+                  Cancel
+                </button>
+              ) : (
+                ""
+              )}
+            </div>
           </div>
           <div className="pl-6 pr-6">
             <div className="flex flex-col gap-3">
@@ -409,42 +397,18 @@ const StudentToSubject = () => {
                   Student:
                 </label>
                 <MultiDropdown
-                  label="Select Student (s)"
-                  selectedItems={
-                    editSubjectAssignmentVisible
-                      ? [selectedSubjectAssignment.student_name] || []
-                      : formData.Student.map((id) => {
-                          const student = allStudents.find(
-                            (s) => s.student_id === id
-                          );
-                          return student
-                            ? `${student.first_name} ${student.last_name}`
-                            : "";
-                        })
-                  }
-                  onSelect={(selected) => {
-                    if (editSubjectAssignmentVisible) {
-                      // For editing, we need to handle this differently
-                      // You might want to implement student selection in edit mode if needed
-                    } else {
-                      const selectedIds = selected
-                        .map((name) => {
-                          const student = allStudents.find(
-                            (s) => `${s.first_name} ${s.last_name}` === name
-                          );
-                          return student ? student.student_id : null;
-                        })
-                        .filter((id) => id !== null);
-
-                      setFormData((prev) => ({
-                        ...prev,
-                        Student: selectedIds,
-                      }));
-                    }
-                  }}
-                  items={filteredStudents.map((student) => ({
-                    label: student.name,
+                  label="Select Student(s)"
+                  items={(editSubjectAssignmentVisible
+                    ? allStudents
+                    : filteredStudents
+                  ).map((s) => ({
+                    label: `${s.student_name} - ${s.class_year_name} ${s.class_arm_name}`,
+                    value: s.student_class_id,
                   }))}
+                  selectedValues={formData.Student}
+                  onChange={(values) =>
+                    setFormData((prev) => ({ ...prev, Student: values }))
+                  }
                 />
               </div>
               <div className="flex flex-col gap-x-2 ">
@@ -452,52 +416,50 @@ const StudentToSubject = () => {
                   Subject:
                 </label>
                 <MultiDropdown
-                  label="Select Subject (s)"
-                  selectedItems={
-                    editSubjectAssignmentVisible
-                      ? [selectedSubjectAssignment.subject_name] || []
-                      : formData.Subject.map((id) => {
-                          const subject = allSubjects.find(
-                            (s) => s.subject_id === id
-                          );
-                          return subject ? subject.name : "";
-                        })
-                  }
-                  onSelect={(selected) => {
-                    if (editSubjectAssignmentVisible) {
-                      // For editing, update the selected subject
-                      const subject = allSubjects.find(
-                        (s) => s.name === selected[0]
-                      );
-                      if (subject) {
-                        setSelectedSubjectAssignment((prev) => ({
-                          ...prev,
-                          subject_name: subject.name,
-                          subject_class_id: subject.subject_id, // This might need adjustment based on your API
-                        }));
-                      }
-                    } else {
-                      const selectedIds = selected
-                        .map((name) => {
-                          const subject = allSubjects.find(
-                            (s) => s.name === name
-                          );
-                          return subject ? subject.subject_id : null;
-                        })
-                        .filter((id) => id !== null);
-
-                      setFormData((prev) => ({
-                        ...prev,
-                        Subject: selectedIds,
-                      }));
-                    }
-                  }}
-                  items={allSubjects.map((subject) => ({
-                    label: subject.name,
+                  label="Select Subject(s)"
+                  items={allSubjects.map((s) => ({
+                    label: s.subject_name,
+                    value: s.subject_class_id,
                   }))}
+                  selectedValues={formData.Subject}
+                  onChange={(values) =>
+                    setFormData((prev) => ({ ...prev, Subject: values }))
+                  }
                 />
               </div>
             </div>
+
+            {editSubjectAssignmentVisible && (
+              <div className="mt-3 flex items-center gap-4">
+                <label className="text-[0.88rem] text-[#5E6A72]">Status:</label>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setEditStatus((prev) =>
+                      prev === "Approved" ? "Pending" : "Approved"
+                    )
+                  }
+                  aria-pressed={editStatus === "Approved"}
+                  className={`relative inline-flex h-6 w-12 items-center  rounded-full transition-colors duration-300 focus:outline-none ${
+                    editStatus === "Approved" ? "bg-[#1BB66E]" : "bg-yellow-500"
+                  }`}
+                  title="Toggle Approved / Pending"
+                >
+                  <span
+                    className={`inline-block h-5 w-5 transform rounded-full  bg-white transition-transform duration-300 ${
+                      editStatus === "Approved"
+                        ? "translate-x-6"
+                        : "translate-x-1"
+                    }`}
+                  />
+                </button>
+
+                <span className="text-sm font-medium">
+                  {editStatus === "Approved" ? "Approved" : "Pending"}
+                </span>
+              </div>
+            )}
           </div>
         </form>
       )}
@@ -508,6 +470,7 @@ const StudentToSubject = () => {
           Existing Assigned Students to Subjects.
         </p>
       </div>
+
       <div className="px-0 overflow-y-auto h-full">
         <div>
           <table className="min-w-full table-auto">
@@ -517,9 +480,8 @@ const StudentToSubject = () => {
                   <th className="p-2 pl-16 bg-[#EDF0F3]">Student</th>
                   <th className="p-2 bg-[#EDF0F3]">Admission Number</th>
                   <th className="p-2 bg-[#EDF0F3]">Class</th>
-                  <th className="p-2 bg-[#EDF0F3]">Subject</th>
+                  <th className="p-2 bg-[#EDF0F3]">Subjects</th>
                   <th className="p-2 bg-[#EDF0F3]">Status</th>
-                  <th className="p-2 bg-[#EDF0F3]">Actions</th>
                 </tr>
               </thead>
             )}
@@ -534,41 +496,109 @@ const StudentToSubject = () => {
                   </td>
                 </tr>
               ) : (
-                paginatedData.map((item, index) => (
-                  <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-16">{item.student_name}</td>
-                    <td className="p-2">{item.student_admission_number}</td>
-                    <td className="p-2">{item.class_arm}</td>
-                    <td className="p-2">{item.subject_name}</td>
-                    <td className="p-2">
-                      <span
-                        className={`px-2 py-1 rounded-full text-xs ${
-                          item.status === "Approved"
-                            ? "bg-green-100 text-green-800"
-                            : item.status === "Rejected"
-                            ? "bg-red-100 text-red-800"
-                            : "bg-yellow-100 text-yellow-800"
-                        }`}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="p-2">
-                      <div className="flex gap-4">
-                        <FiEdit3
-                          onClick={() => handleEdit(item)}
-                          className="text-[#80ADCB] cursor-pointer"
-                          size={15}
-                        />
-                        <FiTrash2
-                          onClick={() => handleDelete(item.registration_id)}
-                          className="text-[#F94144] cursor-pointer"
-                          size={15}
-                        />
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                paginatedData.map((row, index) => {
+                  const isExpanded = !!expandedRows[row.student_id];
+                  const subjects = row.subjects;
+                  const displaySubjects = isExpanded
+                    ? subjects
+                    : subjects.slice(0, MAX_CHIPS);
+                  const remaining = subjects.length - displaySubjects.length;
+
+                  const allSame = row.subjects.every(
+                    (s) => s.status === row.subjects[0].status
+                  );
+                  const groupStatus = allSame
+                    ? row.subjects[0].status
+                    : "Mixed";
+
+                  return (
+                    <tr
+                      className="border-b-[#D0D0D0] border-b"
+                      key={row.key ?? index}
+                    >
+                      <td className="p-2 pl-16">{row.student_name}</td>
+                      <td className="p-2">{row.student_admission_number}</td>
+                      <td className="p-2">{row.class_arm}</td>
+
+                      {/* Subjects with collapse/expand */}
+                      <td className="p-2">
+                        <div className="flex flex-wrap gap-2">
+                          {displaySubjects.map((s) => (
+                            <div
+                              key={s.registration_id}
+                              className={`group inline-flex items-center gap-1 rounded-full px-2 py-0.5 border text-[11px]
+                                ${
+                                  s.status === "Approved"
+                                    ? "bg-green-50 border-green-200 text-green-700"
+                                    : s.status === "Rejected"
+                                    ? "bg-red-50 border-red-200 text-red-700"
+                                    : "bg-yellow-50 border-yellow-200 text-yellow-700"
+                                }`}
+                            >
+                              <button type="button" className="outline-none">
+                                {s.subject_name}
+                              </button>
+                              <FiEdit2
+                                size={12}
+                                onClick={() => handleEdit(s.raw)}
+                                className="cursor-pointer opacity-60 hover:opacity-100"
+                                title="Edit subject registration"
+                              />
+                              <FiTrash2
+                                size={12}
+                                className="cursor-pointer opacity-60 hover:opacity-100"
+                                title="Delete this subject registration"
+                                onClick={() => handleDelete(s.registration_id)}
+                              />
+                            </div>
+                          ))}
+
+                          {remaining > 0 && !isExpanded && (
+                            <button
+                              type="button"
+                              onClick={() => toggleRowExpand(row.student_id)}
+                              className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200"
+                              title="Show more subjects"
+                            >
+                              +{remaining} more
+                            </button>
+                          )}
+
+                          {isExpanded && subjects.length > MAX_CHIPS && (
+                            <button
+                              type="button"
+                              onClick={() => toggleRowExpand(row.student_id)}
+                              className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200"
+                              title="Show fewer subjects"
+                            >
+                              Show less
+                            </button>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Group-level status (or Mixed) */}
+                      <td className="p-2">
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs ${
+                            groupStatus === "Approved"
+                              ? "bg-green-100 text-green-800"
+                              : groupStatus === "Rejected"
+                              ? "bg-red-100 text-red-800"
+                              : groupStatus === "Mixed"
+                              ? "bg-gray-100 text-gray-800"
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}
+                        >
+                          {groupStatus}
+                        </span>
+                      </td>
+
+                      {/* Placeholder for future bulk actions if needed */}
+                      <td className="p-2"></td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>

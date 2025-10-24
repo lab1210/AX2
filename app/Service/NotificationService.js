@@ -114,7 +114,7 @@ export const DeleteNotification = async (id) => {
       return { error: "Unauthorized: No authentication token provided." };
     }
 
-    const url = `${BASE_URL}/notifications/${id}`;
+    const url = `${BASE_URL}/notifications/${id}/`;
     const response = await axios.delete(url, { headers });
     return response.data;
   } catch (error) {
@@ -134,15 +134,12 @@ export const getTeacherNotifications = async () => {
       return { error: "Unauthorized: No authentication token provided." };
     }
 
-    const url = `${BASE_URL}/notifications/`;
+    const url = `${BASE_URL}/notifications/teacher-and-everyone/`;
     const response = await axios.get(url, { headers });
 
     // Filter notifications for teachers only
-    const teacherNotifications = response.data.filter(
-      (notification) => notification.recipient_group === "Teacher"
-    );
 
-    return teacherNotifications;
+    return response.data;
   } catch (error) {
     console.error("Failed to get teacher notifications:", error);
     return { error: error.response?.data || error.message || "Unknown error" };

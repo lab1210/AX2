@@ -13,8 +13,7 @@ import { getClass, getClassArm } from "../../Service/schoolConfig";
 import toast from "react-hot-toast";
 
 const StudentAssignPage = () => {
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState("");
+  const [filteredArms, setFilteredArms] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [filterType, setFilterType] = useState("student_name");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
@@ -36,6 +35,24 @@ const StudentAssignPage = () => {
   useEffect(() => {
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (!formData.class_year) {
+      setFilteredArms([]);
+      return;
+    }
+    const arms = (classArms || []).filter(
+      (a) => a.class_year === formData.class_year
+    );
+    setFilteredArms(arms);
+
+    if (
+      formData.class_arm &&
+      !arms.some((a) => a.class_id === formData.class_arm)
+    ) {
+      setFormData((prev) => ({ ...prev, class_arm: "" }));
+    }
+  }, [formData.class_year, classArms]);
 
   const fetchData = async () => {
     try {
@@ -67,11 +84,9 @@ const StudentAssignPage = () => {
       case "student_name":
         return assignment.student_name?.toLowerCase().includes(searchValue);
       case "class_year":
-        return assignment.class_year?.toLowerCase().includes(searchValue);
+        return assignment.class_year_name?.toLowerCase().includes(searchValue);
       case "class_arm":
-        return assignment.class_arm?.toLowerCase().includes(searchValue);
-      case "class_name":
-        return assignment.class_name?.toLowerCase().includes(searchValue);
+        return assignment.class_arm_name?.toLowerCase().includes(searchValue);
       default:
         return true;
     }
@@ -97,8 +112,8 @@ const StudentAssignPage = () => {
     setEditingId(assignment.student_class_id);
     setFormData({
       student: assignment.student,
-      class_year: assignment.class_year,
-      class_arm: assignment.class_arm,
+      class_year: assignment.class_year_name,
+      class_arm: assignment.class_arm_name,
     });
   };
 
@@ -130,32 +145,18 @@ const StudentAssignPage = () => {
   };
 
   const handleInputChange = (field, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
-
-  const getStudentName = (studentId) => {
-    const student = students.find((s) => s.student_id === studentId);
-    return student ? `${student.surname} ${student.first_name}` : "Unknown";
-  };
-
-  const getClassYearName = (classYearId) => {
-    const classYear = classYears.find((c) => c.class_id === classYearId);
-    return classYear ? classYear.class_year_name : "Unknown";
-  };
-
-  const getClassArmName = (classArmId) => {
-    const classArm = classArms.find((c) => c.class_id === classArmId);
-    return classArm ? classArm.arm_name : "Unknown";
+    setFormData((prev) => {
+      if (field === "class_year") {
+        return { ...prev, class_year: value, class_arm: "" };
+      }
+      return { ...prev, [field]: value };
+    });
   };
 
   const filterOptions = [
     { value: "student_name", label: "Student Name" },
     { value: "class_year", label: "Class Year" },
     { value: "class_arm", label: "Class Arm" },
-    { value: "class_name", label: "Class Name" },
   ];
 
   const getCurrentFilterLabel = () => {
@@ -163,21 +164,56 @@ const StudentAssignPage = () => {
     return option ? option.label : filterType;
   };
 
+  const toCSV = (rows) => {
+    const headers = ["Student Name", "Class Year", "Class Arm"];
+    const escapeCell = (val) => {
+      const s = (val ?? "").toString();
+      const needsQuotes = /[",\n]/.test(s);
+      const escaped = s.replace(/"/g, '""');
+      return needsQuotes ? `"${escaped}"` : escaped;
+    };
+
+    const lines = [
+      headers.join(","),
+      ...rows.map((r) =>
+        [
+          escapeCell(r.student_name),
+          escapeCell(r.class_year_name),
+          escapeCell(r.class_arm_name),
+        ].join(",")
+      ),
+    ];
+
+    return "\uFEFF" + lines.join("\n");
+  };
+
+  const handleDownload = () => {
+    if (!filteredResults.length) {
+      toast.error("No records to download");
+      return;
+    }
+
+    const csv = toCSV(filteredResults);
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 8); // yyyymmddhhmmss
+    const filename = `student_class_assignments_${ts}.csv`;
+
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+
+    toast.success("Download started");
+  };
+
   return (
     <div>
       <div className="overflow-y-auto no-scrollbar h-full">
-        {message && (
-          <div
-            className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-              messageType === "success"
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}
-          >
-            {message}
-          </div>
-        )}
-
         <div className="flex justify-between items-center gap-5 pt-5 pl-6 pr-6">
           <div className="flex items-center gap-10 relative">
             <div>
@@ -227,7 +263,10 @@ const StudentAssignPage = () => {
             </div>
           </div>
           <div className="flex items-center gap-6">
-            <button className="bg-[#07508F] cursor-pointer hover:opacity-90 transition-all ease-in-out duration-300 text-white flex items-center py-1.5 px-4 rounded-sm gap-2">
+            <button
+              onClick={handleDownload}
+              className="bg-[#07508F] cursor-pointer hover:opacity-90 transition-all ease-in-out duration-300 text-white flex items-center py-1.5 px-4 rounded-sm gap-2"
+            >
               Download List
               <FiDownload />
             </button>
@@ -243,7 +282,6 @@ const StudentAssignPage = () => {
                     <th className="p-2 bg-[#EDF0F3]">Student Name</th>
                     <th className="p-2 bg-[#EDF0F3]">Class Year</th>
                     <th className="p-2 bg-[#EDF0F3]">Class Arm</th>
-                    <th className="p-2 bg-[#EDF0F3]">Class Name</th>
                     <th className="p-2 bg-[#EDF0F3]">Actions</th>
                   </tr>
                 </thead>
@@ -265,65 +303,55 @@ const StudentAssignPage = () => {
                       key={assignment.student_class_id}
                     >
                       <td className="p-2 text-center">
-                        {editingId === assignment.student_class_id ? (
-                          <Dropdown
-                            label={getStudentName(formData.student)}
-                            items={students.map((student) => ({
-                              label: `${student.surname} ${student.first_name}`,
-                              onClick: () =>
-                                handleInputChange(
-                                  "student",
-                                  student.student_id
-                                ),
-                            }))}
-                          />
-                        ) : (
-                          assignment.student_name
-                        )}
+                        {assignment.student_name}
                       </td>
                       <td className="p-2 text-center">
                         {editingId === assignment.student_class_id ? (
                           <Dropdown
-                            label={
-                              getClassYearName(formData.class_year) ||
-                              "Select Class Year"
-                            }
+                            label={formData.class_year || "Select Class Year"}
                             items={classYears.map((classYear) => ({
-                              label: classYear.class_year_name,
+                              label: classYear.class_name,
                               onClick: () =>
                                 handleInputChange(
                                   "class_year",
-                                  classYear.class_id
+                                  classYear.class_year_id
                                 ),
                             }))}
                           />
                         ) : (
-                          assignment.class_year
+                          assignment.class_year_name
                         )}
                       </td>
                       <td className="p-2 text-center">
                         {editingId === assignment.student_class_id ? (
                           <Dropdown
-                            label={
-                              getClassArmName(formData.class_arm) ||
-                              "Select Class Arm"
-                            }
-                            items={classArms.map((classArm) => ({
-                              label: classArm.arm_name,
-                              onClick: () =>
-                                handleInputChange(
-                                  "class_arm",
-                                  classArm.class_id
-                                ),
+                            label={formData.class_arm || "Select Class Arm"}
+                            items={(filteredArms.length
+                              ? filteredArms
+                              : [
+                                  {
+                                    arm_name: "No arms for selected class",
+                                    class_id: null,
+                                  },
+                                ]
+                            ).map((classArm) => ({
+                              label: classArm.class_id
+                                ? classArm.arm_name
+                                : "No arms for selected class",
+                              onClick: classArm.class_id
+                                ? () =>
+                                    handleInputChange(
+                                      "class_arm",
+                                      classArm.class_id
+                                    )
+                                : undefined,
                             }))}
                           />
                         ) : (
-                          assignment.class_arm
+                          assignment.class_arm_name
                         )}
                       </td>
-                      <td className="p-2 text-center">
-                        {assignment.class_name}
-                      </td>
+
                       <td className="p-2 text-center">
                         {editingId === assignment.student_class_id ? (
                           <div className="flex gap-2 justify-center">

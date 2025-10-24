@@ -9,6 +9,7 @@ import UploadProgress from "./UploadProgress";
 import { createComplianceDoc } from "../../../Service/complianceDocService";
 import { getSchools } from "@/Service/schoolService";
 import Dropdown2 from "@/Components/SchoolAdminDashBoard/DropDown2";
+import toast from "react-hot-toast";
 const ComplianceDocumentUploadItem = () => {
   const searchParams = useSearchParams();
   const adminId = searchParams.get("adminId");
@@ -19,7 +20,6 @@ const ComplianceDocumentUploadItem = () => {
   const [proofPreview, setProofPreview] = useState("/note.svg");
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [uploadError, setUploadError] = useState(null);
   const [schools, setSchools] = useState([]); // State for schools list
   const [selectedSchool, setSelectedSchool] = useState(null); // State for selected school
   const [loadingSchools, setLoadingSchools] = useState(false); // Loading state for schools
@@ -40,7 +40,7 @@ const ComplianceDocumentUploadItem = () => {
         }
       } catch (error) {
         console.error("Error fetching schools:", error);
-        setUploadError("Failed to load schools");
+        toast.error("Failed to load schools");
       } finally {
         setLoadingSchools(false);
       }
@@ -77,13 +77,10 @@ const ComplianceDocumentUploadItem = () => {
 
   const handleSave = async () => {
     if (!taxIdNumber || !certificateFile || !proofFile || !selectedSchool) {
-      setUploadError(
-        "Please fill all required fields including school selection"
-      );
+      toast.error("Please fill all required fields including school selection");
       return;
     }
     setUploading(true);
-    setUploadError(null);
 
     const formData = new FormData();
     formData.append("tax_identification_number", taxIdNumber);
@@ -95,8 +92,18 @@ const ComplianceDocumentUploadItem = () => {
       const response = await createComplianceDoc(formData);
       console.log(response);
       setSaved(true);
+      toast.success("Compliance document uploaded successfully");
     } catch (error) {
-      setUploadError(error.message || "Failed to upload compliance document");
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Failed to upload compliance document";
+
+      if (errorMessage.includes("invalid syntax")) {
+        toast.error("School already exists");
+      } else {
+        toast.error(errorMessage);
+      }
     } finally {
       setUploading(false);
     }
@@ -117,12 +124,6 @@ const ComplianceDocumentUploadItem = () => {
       {uploading && (
         <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
           <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
-        </div>
-      )}
-
-      {uploadError && (
-        <div className="fixed top-4 left-4 bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
-          Error: {uploadError}
         </div>
       )}
 
