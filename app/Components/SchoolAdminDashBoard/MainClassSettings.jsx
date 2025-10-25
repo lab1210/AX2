@@ -17,7 +17,7 @@ const MainClassSettings = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [editClassVisible, setEditClassVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 10;
   const [years, setYears] = useState([]);
   const [classList, setClassList] = useState([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
@@ -131,6 +131,10 @@ const MainClassSettings = () => {
           setMessageType("error");
         } else {
           setClassList((prev) => [...prev, data]);
+          setFormData({
+            year: "",
+            class_name: "",
+          });
           setMessage("Class added successfully.");
           setMessageType("success");
         }
