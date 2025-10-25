@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { IoFilter, IoSearch } from "react-icons/io5";
 import MultiDropdown from "./Multidropdownbyid";
-import { FiEdit, FiEdit2, FiEdit3, FiTrash2 } from "react-icons/fi";
+import { FiEdit2, FiTrash2 } from "react-icons/fi";
 import RegControlModal from "./RegControlModal";
 import { RxLetterCaseCapitalize } from "react-icons/rx";
 import {
@@ -17,7 +17,7 @@ import {
 } from "@/Service/SchoolAdminAssignmentService";
 import toast from "react-hot-toast";
 
-const MAX_CHIPS = 5; // show this many chips before collapsing
+const MAX_CHIPS = 2; // show this many chips before collapsing
 
 const StudentToSubject = () => {
   const [allStudents, setAllStudents] = useState([]);
@@ -37,6 +37,8 @@ const StudentToSubject = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [editStatus, setEditStatus] = useState("Pending");
   const [expandedRows, setExpandedRows] = useState({}); // { [student_id]: boolean }
+  const [selectedItemDelete, setSelectedItemDelete] = useState(null);
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const itemsPerPage = 10;
 
@@ -56,7 +58,10 @@ const StudentToSubject = () => {
           getRegistrationControl(),
         ]);
 
-      if (!studentsRes.error) setAllStudents(studentsRes);
+      if (!studentsRes.error) {
+        setAllStudents(studentsRes);
+        console.log(allStudents);
+      }
       if (!subjectsRes.error) setAllSubjects(subjectsRes);
       if (!registrationsRes.error) setStudentSubjectList(registrationsRes);
       if (!controlRes.error) {
@@ -71,19 +76,16 @@ const StudentToSubject = () => {
     }
   };
 
-  const filteredStudents =
-    searchText.trim() === ""
-      ? allStudents
-      : allStudents.filter((student) => {
-          const fullName = student.student_name.toLowerCase();
-          const className = student.class_year_name?.toLowerCase() || "";
+  const openDeleteModal = (term) => {
+    setSelectedItemDelete(term);
+    setDeleteModalVisible(true);
+  };
 
-          return filterType === "name"
-            ? fullName.includes(searchText.toLowerCase())
-            : className.includes(searchText.toLowerCase());
-        });
-
-  // Group raw registration rows by student_id
+  // Function to close delete modal
+  const closeDeleteModal = () => {
+    setSelectedItemDelete(null);
+    setDeleteModalVisible(false);
+  };
   const groupedByStudent = useMemo(() => {
     const map = new Map();
     StudentSubjectList.forEach((item) => {
@@ -95,6 +97,7 @@ const StudentToSubject = () => {
           student_name: item.student_name,
           student_admission_number: item.student_admission_number,
           class_arm: item.class_arm,
+          class_year: item.class_year, // <— add this
           subjects: [],
         });
       }
@@ -110,12 +113,41 @@ const StudentToSubject = () => {
     return Array.from(map.values());
   }, [StudentSubjectList]);
 
+  const filteredGrouped = useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return groupedByStudent;
+
+    return groupedByStudent.filter((row) => {
+      const byName = (row.student_name || "").toLowerCase().includes(q);
+      const byClass = ((row.class_year || "") + " " + (row.class_arm || ""))
+        .toLowerCase()
+        .includes(q);
+
+      return filterType === "name" ? byName : byClass;
+    });
+  }, [groupedByStudent, searchText, filterType]);
+
+  const filteredStudents = useMemo(() => {
+    const q = searchText.trim().toLowerCase();
+    if (!q) return allStudents;
+
+    return allStudents.filter((s) => {
+      const name = `${s.student_name || ""}`.toLowerCase();
+      const klass = `${s.class_year || ""} ${s.class_arm || ""}`.toLowerCase();
+      return filterType === "name" ? name.includes(q) : klass.includes(q);
+    });
+  }, [allStudents, searchText, filterType]);
+
   // Paginate the grouped rows
-  const paginatedData = groupedByStudent.slice(
+  const paginatedData = filteredGrouped.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
   );
-  const totalPages = Math.ceil(groupedByStudent.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredGrouped.length / itemsPerPage);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchText, filterType]);
 
   const handlePrevious = () => setCurrentPage((p) => Math.max(p - 1, 1));
   const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
@@ -150,16 +182,43 @@ const StudentToSubject = () => {
         fetchData();
         return;
       } else {
-        const registrations = formData.Student.map((studentClassId) => ({
-          student_class: studentClassId,
-          subject_class: formData.Subject[0],
-        }));
+        if (formData.Student.length === 0 || formData.Subject.length === 0) {
+          toast.error("Pick at least one student and one subject.");
+          return;
+        }
+        const existingPairs = new Set(
+          StudentSubjectList.map(
+            (r) => `${String(r.student_class)}::${String(r.subject_class)}`
+          )
+        );
+
+        const registrations = [];
+        for (const studentClassId of formData.Student) {
+          for (const subjectClassId of formData.Subject) {
+            const key = `${String(studentClassId)}::${String(subjectClassId)}`;
+            if (!existingPairs.has(key)) {
+              registrations.push({
+                student_class: studentClassId,
+                subject_class: subjectClassId,
+              });
+            }
+          }
+        }
+
+        if (registrations.length === 0) {
+          toast("Nothing to add (all selected pairs already exist).");
+          return;
+        }
 
         await Promise.all(
           registrations.map((reg) => registerStudentSubject(reg))
         );
 
-        toast.success("Student Subject Registration successful.");
+        toast.success(
+          `Registered ${registrations.length} subject${
+            registrations.length > 1 ? "s" : ""
+          } successfully.`
+        );
         fetchData();
         setFormData({ Student: [], Subject: [] });
       }
@@ -184,20 +243,24 @@ const StudentToSubject = () => {
     setEditStatus(assignment.status || "Pending");
   };
 
-  const handleDelete = async (registrationId) => {
-    if (!window.confirm("Are you sure you want to delete this registration?"))
-      return;
-    try {
-      const response = await deleteStudentSubjectRegistration(registrationId);
-      if (!response.error) {
-        toast.success("Registration deleted successfully.");
-        fetchData();
-      } else {
-        throw new Error(response.error);
+  const handleDelete = async () => {
+    if (selectedItemDelete?.registration_id) {
+      try {
+        const response = await deleteStudentSubjectRegistration(
+          selectedItemDelete.registration_id
+        );
+        if (!response.error) {
+          toast.success("Registration deleted successfully.");
+          closeDeleteModal();
+          fetchData();
+        } else {
+          toast.error(response.error);
+          closeDeleteModal();
+        }
+      } catch (error) {
+        console.error("Deletion failed:", error);
+        toast.error("Failed to delete registration");
       }
-    } catch (error) {
-      console.error("Deletion failed:", error);
-      toast.error("Failed to delete registration");
     }
   };
 
@@ -267,7 +330,46 @@ const StudentToSubject = () => {
   }
 
   return (
-    <div className="overflow-y-auto no-scrollbar h-full ">
+    <div className="overflow-y-auto no-scrollbar min-h-full ">
+      {deleteModalVisible && selectedItemDelete && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
+            <p className="font-bold text-center text-lg">
+              Delete Subject Registration
+            </p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure want to delete
+              </p>
+              <p className="text-base text-[#858383]">
+                <span className="font-bold">
+                  {selectedItemDelete.subject_name} for{" "}
+                  {selectedItemDelete.student_name}
+                </span>
+                ?
+              </p>
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+              <button
+                onClick={handleDelete}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+              >
+                Yes, Delete
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       {registrationControl && (
         <div className="mx-6 mb-3 p-3 bg-blue-50 border border-blue-200 rounded">
           <p className="text-sm font-semibold">Registration Period:</p>
@@ -398,10 +500,7 @@ const StudentToSubject = () => {
                 </label>
                 <MultiDropdown
                   label="Select Student(s)"
-                  items={(editSubjectAssignmentVisible
-                    ? allStudents
-                    : filteredStudents
-                  ).map((s) => ({
+                  items={filteredStudents.map((s) => ({
                     label: `${s.student_name} - ${s.class_year_name} ${s.class_arm_name}`,
                     value: s.student_class_id,
                   }))}
@@ -471,62 +570,59 @@ const StudentToSubject = () => {
         </p>
       </div>
 
-      <div className="px-0 overflow-y-auto h-full">
-        <div>
-          <table className="min-w-full table-auto">
-            {paginatedData.length > 0 && (
-              <thead className="bg-[#EDF0F3] text-left lg:text-base text-xs">
-                <tr>
-                  <th className="p-2 pl-16 bg-[#EDF0F3]">Student</th>
-                  <th className="p-2 bg-[#EDF0F3]">Admission Number</th>
-                  <th className="p-2 bg-[#EDF0F3]">Class</th>
-                  <th className="p-2 bg-[#EDF0F3]">Subjects</th>
-                  <th className="p-2 bg-[#EDF0F3]">Status</th>
-                </tr>
-              </thead>
-            )}
-            <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
-              {paginatedData.length === 0 ? (
-                <tr>
-                  <td
-                    colSpan="6"
-                    className="p-5 text-center border text-gray-500"
+      <div className="px-0 ">
+        <table className="min-w-full table-auto">
+          {paginatedData.length > 0 && (
+            <thead className="bg-[#EDF0F3] text-left lg:text-base text-xs">
+              <tr>
+                <th className="p-2 pl-10 bg-[#EDF0F3]">Student</th>
+                <th className="p-2 bg-[#EDF0F3]">Admission Number</th>
+                <th className="p-2 bg-[#EDF0F3]">Class</th>
+                <th className="p-2 bg-[#EDF0F3]">Subjects</th>
+                <th className="p-2 bg-[#EDF0F3]">Status</th>
+              </tr>
+            </thead>
+          )}
+          <tbody className="xl:text-sm text-center text-xs text-[#333333] font-medium">
+            {paginatedData.length === 0 ? (
+              <tr>
+                <td
+                  colSpan="6"
+                  className="p-5 text-center border text-gray-500"
+                >
+                  No Data Available
+                </td>
+              </tr>
+            ) : (
+              paginatedData.map((row, index) => {
+                const isExpanded = !!expandedRows[row.student_id];
+                const subjects = row.subjects;
+                const displaySubjects = isExpanded
+                  ? subjects
+                  : subjects.slice(0, MAX_CHIPS);
+                const remaining = subjects.length - displaySubjects.length;
+
+                const allSame = row.subjects.every(
+                  (s) => s.status === row.subjects[0].status
+                );
+                const groupStatus = allSame ? row.subjects[0].status : "Mixed";
+
+                return (
+                  <tr
+                    className="border-b-[#D0D0D0] border-b"
+                    key={row.key ?? index}
                   >
-                    No Data Available
-                  </td>
-                </tr>
-              ) : (
-                paginatedData.map((row, index) => {
-                  const isExpanded = !!expandedRows[row.student_id];
-                  const subjects = row.subjects;
-                  const displaySubjects = isExpanded
-                    ? subjects
-                    : subjects.slice(0, MAX_CHIPS);
-                  const remaining = subjects.length - displaySubjects.length;
+                    <td className="p-2 pl-10">{row.student_name}</td>
+                    <td className="p-2">{row.student_admission_number}</td>
+                    <td className="p-2">{row.class_arm}</td>
 
-                  const allSame = row.subjects.every(
-                    (s) => s.status === row.subjects[0].status
-                  );
-                  const groupStatus = allSame
-                    ? row.subjects[0].status
-                    : "Mixed";
-
-                  return (
-                    <tr
-                      className="border-b-[#D0D0D0] border-b"
-                      key={row.key ?? index}
-                    >
-                      <td className="p-2 pl-16">{row.student_name}</td>
-                      <td className="p-2">{row.student_admission_number}</td>
-                      <td className="p-2">{row.class_arm}</td>
-
-                      {/* Subjects with collapse/expand */}
-                      <td className="p-2">
-                        <div className="flex flex-wrap gap-2">
-                          {displaySubjects.map((s) => (
-                            <div
-                              key={s.registration_id}
-                              className={`group inline-flex items-center gap-1 rounded-full px-2 py-0.5 border text-[11px]
+                    {/* Subjects with collapse/expand */}
+                    <td className="p-2">
+                      <div className="flex flex-wrap gap-2">
+                        {displaySubjects.map((s) => (
+                          <div
+                            key={s.registration_id}
+                            className={`group inline-flex items-center gap-1 rounded-full px-2 py-0.5 border text-[11px]
                                 ${
                                   s.status === "Approved"
                                     ? "bg-green-50 border-green-200 text-green-700"
@@ -534,75 +630,71 @@ const StudentToSubject = () => {
                                     ? "bg-red-50 border-red-200 text-red-700"
                                     : "bg-yellow-50 border-yellow-200 text-yellow-700"
                                 }`}
-                            >
-                              <button type="button" className="outline-none">
-                                {s.subject_name}
-                              </button>
-                              <FiEdit2
-                                size={12}
-                                onClick={() => handleEdit(s.raw)}
-                                className="cursor-pointer opacity-60 hover:opacity-100"
-                                title="Edit subject registration"
-                              />
-                              <FiTrash2
-                                size={12}
-                                className="cursor-pointer opacity-60 hover:opacity-100"
-                                title="Delete this subject registration"
-                                onClick={() => handleDelete(s.registration_id)}
-                              />
-                            </div>
-                          ))}
-
-                          {remaining > 0 && !isExpanded && (
-                            <button
-                              type="button"
-                              onClick={() => toggleRowExpand(row.student_id)}
-                              className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200"
-                              title="Show more subjects"
-                            >
-                              +{remaining} more
+                          >
+                            <button type="button" className="outline-none">
+                              {s.subject_name}
                             </button>
-                          )}
+                            <FiEdit2
+                              size={13}
+                              onClick={() => handleEdit(s.raw)}
+                              className="cursor-pointer opacity-60 hover:opacity-100 "
+                              title="Edit subject registration"
+                            />
+                            <FiTrash2
+                              size={13}
+                              className="cursor-pointer opacity-60 hover:opacity-100"
+                              title="Delete this subject registration"
+                              onClick={() => openDeleteModal(s)}
+                            />
+                          </div>
+                        ))}
 
-                          {isExpanded && subjects.length > MAX_CHIPS && (
-                            <button
-                              type="button"
-                              onClick={() => toggleRowExpand(row.student_id)}
-                              className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200"
-                              title="Show fewer subjects"
-                            >
-                              Show less
-                            </button>
-                          )}
-                        </div>
-                      </td>
+                        {remaining > 0 && !isExpanded && (
+                          <button
+                            type="button"
+                            onClick={() => toggleRowExpand(row.student_id)}
+                            className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200"
+                            title="Show more subjects"
+                          >
+                            +{remaining} more
+                          </button>
+                        )}
 
-                      {/* Group-level status (or Mixed) */}
-                      <td className="p-2">
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs ${
-                            groupStatus === "Approved"
-                              ? "bg-green-100 text-green-800"
-                              : groupStatus === "Rejected"
-                              ? "bg-red-100 text-red-800"
-                              : groupStatus === "Mixed"
-                              ? "bg-gray-100 text-gray-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}
-                        >
-                          {groupStatus}
-                        </span>
-                      </td>
+                        {isExpanded && subjects.length > MAX_CHIPS && (
+                          <button
+                            type="button"
+                            onClick={() => toggleRowExpand(row.student_id)}
+                            className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200"
+                            title="Show fewer subjects"
+                          >
+                            Show less
+                          </button>
+                        )}
+                      </div>
+                    </td>
 
-                      {/* Placeholder for future bulk actions if needed */}
-                      <td className="p-2"></td>
-                    </tr>
-                  );
-                })
-              )}
-            </tbody>
-          </table>
-        </div>
+                    {/* Group-level status (or Mixed) */}
+                    <td className="p-2">
+                      <span
+                        className={`px-2 py-1 rounded-full text-xs ${
+                          groupStatus === "Approved"
+                            ? "bg-green-100 text-green-800"
+                            : groupStatus === "Rejected"
+                            ? "bg-red-100 text-red-800"
+                            : groupStatus === "Mixed"
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}
+                      >
+                        {groupStatus}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })
+            )}
+          </tbody>
+        </table>
 
         {/* Pagination controls */}
         {totalPages > 1 && (
