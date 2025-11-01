@@ -66,13 +66,11 @@ const EditSchoolAdminItem = () => {
           console.log("Fetched Admin Data:", adminData);
           setFormData({
             user: {
-              username: adminData.user?.username || "",
-              password: "", // Do not populate password for security
               email: adminData.user?.email || "",
-              id: adminData.user || null, // Store the user ID
+              id: adminData.user?.schooladmin_id || null, // Store the user ID
             },
             user_role: adminData.user_role || "",
-            school: adminData.school?.id || "",
+            school: adminData.school || "",
             surname: adminData.surname || "",
             first_name: adminData.first_name || "",
             email: adminData.email || "",
@@ -122,6 +120,7 @@ const EditSchoolAdminItem = () => {
       const response = await getSchools();
       if (response?.status === 200) {
         setSchoolsData(response.data.results || response.data);
+        console.log("Fetched schools data:", response.data.results);
       } else {
         setErrorSchools("Failed to fetch schools.");
       }
@@ -303,7 +302,11 @@ const EditSchoolAdminItem = () => {
               </p>
               <hr className="w-full border-t border-[#978F8F]" />
             </div>
-            <form onSubmit={handleSubmit} className="flex-grow flex flex-col  ">
+            <form
+              id="edit-admin"
+              onSubmit={handleSubmit}
+              className="flex-grow flex flex-col  "
+            >
               <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0 ">
                 <div className="flex flex-col gap-1 mb-2">
                   <label
@@ -317,26 +320,15 @@ const EditSchoolAdminItem = () => {
                     type="text"
                     id="first_name"
                     name="first_name"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className={`text-base  ${
+                      formData.first_name !== ""
+                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter First Name"
                     value={formData.first_name}
                     onChange={handleInputChange}
                     required
-                  />
-                </div>
-
-                <div className="flex flex-col gap-1 mb-2 ">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor=""
-                  >
-                    Middle Name
-                  </label>
-
-                  <input
-                    type="text"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
-                    placeholder="Enter Middle Name"
                   />
                 </div>
                 <div className="flex flex-col gap-1 mb-2 ">
@@ -351,7 +343,11 @@ const EditSchoolAdminItem = () => {
                     type="text"
                     id="surname"
                     name="surname"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className={`text-base  ${
+                      formData.surname !== ""
+                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter Last Name"
                     value={formData.surname}
                     onChange={handleInputChange}
@@ -370,7 +366,11 @@ const EditSchoolAdminItem = () => {
                     type="text"
                     id="phone_number"
                     name="phone_number"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className={`text-base  ${
+                      formData.phone_number !== ""
+                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter Phone Number"
                     value={formData.phone_number}
                     onChange={handleInputChange}
@@ -389,7 +389,11 @@ const EditSchoolAdminItem = () => {
                     type="email"
                     id="email"
                     name="email"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className={`text-base  ${
+                      formData.email !== ""
+                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter Email"
                     value={formData.email}
                     onChange={handleInputChange}
@@ -408,49 +412,18 @@ const EditSchoolAdminItem = () => {
                     type="text"
                     id="designation"
                     name="designation"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className={`text-base  ${
+                      formData.designation !== ""
+                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter Designation"
                     value={formData.designation}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
-                <div className="flex flex-col gap-1 mb-2 ">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor="user.username"
-                  >
-                    Create Username
-                  </label>
 
-                  <input
-                    type="text"
-                    id="user.username"
-                    name="user.username"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
-                    placeholder="Enter Username"
-                    value={formData.user.username}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1 mb-2 ">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor=""
-                  >
-                    Create Password
-                  </label>
-
-                  <input
-                    type="text"
-                    id="user.password"
-                    name="user.password"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
-                    placeholder="Enter Password"
-                    onChange={handleInputChange}
-                  />
-                </div>
                 <div className="flex flex-col gap-1 mb-2">
                   <label
                     className="text-[#808080] font-semibold text-sm "
@@ -540,8 +513,8 @@ const EditSchoolAdminItem = () => {
                 LOGO
               </p>
               <div className="flex flex-col items-center justify-center mt-2">
-                <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] border-[#333333] flex items-center relative  justify-center w-48 h-45">
-                  <div className="w-28 h-28">
+                <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] p-1 border-[#333333] flex items-center relative  justify-center w-48 h-45">
+                  <div className="w-full h-full">
                     <img
                       className="w-full h-full"
                       src={schoolLogo}
@@ -582,9 +555,16 @@ const EditSchoolAdminItem = () => {
                 </div>
               </div>
 
-              <div className="flex justify-center pt-4 ">
-                <button className="bg-[#4084B1] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer ">
-                  Activate
+              <div
+                onClick={() => handleSubmit()}
+                className="flex justify-center pt-4 "
+              >
+                <button
+                  type="submit"
+                  form="edit-admin"
+                  className="bg-[#4084B1] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer "
+                >
+                  Save
                 </button>
               </div>
             </div>

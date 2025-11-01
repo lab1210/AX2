@@ -84,10 +84,14 @@ const SchoolAdminLeft = () => {
     <div className="h-full w-full grid grid-rows-[100px_1fr_auto] pt-8">
       <div className="flex flex-col items-center gap-2 w-full">
         <div className="object-contain max-w-[50px] max-h-[50px]">
-          <img className="w-full h-full" src={"/logo.svg"} alt="logo" />
+          <img
+            className="w-full h-full"
+            src={user?.school_admin?.school_logo}
+            alt="logo"
+          />
         </div>
-        <div className="text-white">
-          <p className="font-bold lg:text-base text-sm">
+        <div className="text-white text-center">
+          <p className="font-bold lg:text-base text-sm ">
             {user?.school_admin?.school_name}
           </p>
           <p className="font-bold text-center">Student Portal</p>

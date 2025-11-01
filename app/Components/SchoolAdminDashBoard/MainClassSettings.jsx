@@ -10,10 +10,9 @@ import {
   getClass,
   UpdateClass,
 } from "@/Service/schoolConfig";
+import toast from "react-hot-toast";
 
 const MainClassSettings = () => {
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [selectedClass, setSelectedClass] = useState(null);
   const [editClassVisible, setEditClassVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,11 +42,6 @@ const MainClassSettings = () => {
   };
 
   useEffect(() => {
-    const fetchClass = async () => {
-      const { data, error } = await getClass();
-      if (data) setClassList(data);
-      else setMessage(error || "Failed to load classes");
-    };
     fetchClass();
     fetchYears();
   }, []);
@@ -57,10 +51,15 @@ const MainClassSettings = () => {
     if (data) {
       setYears(data);
     } else {
-      setMessage(error || "Failed to load academic years");
+      toast.error(error || "Failed to load academic years");
     }
   };
 
+  const fetchClass = async () => {
+    const { data, error } = await getClass();
+    if (data) setClassList(data);
+    else toast.error(error || "Failed to load classes");
+  };
   const getYearName = (yearid) => {
     const year = years.find((item) => item.year_id === yearid);
     return year?.name;
@@ -74,8 +73,7 @@ const MainClassSettings = () => {
       : formData.class_name?.trim();
 
     if (!trimmedName) {
-      setMessage("Class name is required.");
-      setMessageType("error");
+      toast.error("Class name is required.");
       return;
     }
 
@@ -84,8 +82,7 @@ const MainClassSettings = () => {
     );
 
     if (!editClassVisible && existingClass) {
-      setMessage("Class already exists.");
-      setMessageType("error");
+      toast.error("Class already exists.");
       return;
     }
 
@@ -101,21 +98,18 @@ const MainClassSettings = () => {
           updatedClass
         );
         if (error) {
-          setMessage(error || "Failed to update class.");
-          setMessageType("error");
+          toast.error(error || "Failed to update class.");
           return;
         }
         const updatedList = classList.map((item) =>
           item.class_year_id === selectedClass.class_year_id ? data : item
         );
         setClassList(updatedList);
-        setMessage("Class updated successfully.");
-        setMessageType("success");
+        toast.success("Class updated successfully.");
         setEditClassVisible(false);
         setSelectedClass(null);
       } catch (error) {
-        setMessage("An error occurred while updating.");
-        setMessageType("error");
+        toast.error("An error occurred while updating.");
       }
     } else {
       try {
@@ -127,31 +121,23 @@ const MainClassSettings = () => {
         const { data, error } = await createClass(createPayload);
 
         if (error) {
-          setMessage(error || "Failed to add class.");
-          setMessageType("error");
+          toast.error(error || "Failed to add class.");
         } else {
           setClassList((prev) => [...prev, data]);
           setFormData({
             year: "",
             class_name: "",
           });
-          setMessage("Class added successfully.");
-          setMessageType("success");
+          toast.success("Class added successfully.");
         }
       } catch (err) {
-        setMessage("An error occurred while adding.");
-        setMessageType("error");
+        toast.error("An error occurred while adding.");
       }
     }
     setFormData({
       year: "",
       class_name: "",
     });
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const handleEdit = (Class) => {
@@ -173,36 +159,17 @@ const MainClassSettings = () => {
     if (selectedClassDelete?.class_year_id) {
       try {
         const response = await deleteClass(selectedClassDelete.class_year_id);
-        if (response?.status === 204) {
-          setMessage("Class deleted successfully.");
-          setMessageType("success");
-          closeDeleteModal();
-        } else {
-          setMessage("Failed to delete Class.");
-          setMessageType("error");
-          closeDeleteModal();
-        }
+        fetchClass();
+        toast.success("Class deleted successfully.");
+        closeDeleteModal();
       } catch (error) {
-        setMessageType("error");
-        setMessage("Failed to delete Class.");
+        toast.error("Failed to delete Class.");
       }
     }
   };
 
   return (
     <div>
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
-
       {deleteModalVisible && selectedClassDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -277,7 +244,11 @@ const MainClassSettings = () => {
                         class_name: value,
                       }));
                 }}
-                className="focus:outline-[#0071E3] sm:placeholder:text-xs sm:text-xs lg:placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 lg:text-sm rounded-sm border-[#B6B6B6]"
+                className={`text-base  ${
+                  formData.class_name !== ""
+                    ? "border-[#0071E3]  border-2"
+                    : "border-[#AEAEAE] border-[1.5px]"
+                }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                 required
               />
             </div>
@@ -316,7 +287,7 @@ const MainClassSettings = () => {
         </p>
       </div>
       <div className="px-0">
-        <div className="overflow-y-auto max-h-[200px] no-scrollbar">
+        <div className="overflow-y-auto max-h-[300px] no-scrollbar">
           <table className="min-w-full table-auto">
             {paginatedData.length > 0 && (
               <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">

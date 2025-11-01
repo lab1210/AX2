@@ -4,7 +4,15 @@ import { Country, State, City } from "country-state-city";
 import { BiChevronDown } from "react-icons/bi";
 import BlueDropdown from "@/Components/BlueDropDown";
 
-const EditUser = () => {
+const EditUser = ({
+  onClose,
+  user,
+  onUserUpdated,
+  loading,
+  error,
+  success,
+  onSave,
+}) => {
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedState, setSelectedState] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);

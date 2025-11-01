@@ -1,13 +1,15 @@
 "use client";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import SuperAdminLayout from "../SuperAdminLayout";
 import DashboardHeader from "../DashboardHeader";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Country, State, City } from "country-state-city";
 import { LuUpload } from "react-icons/lu";
-import { createSchool } from "../../../Service/schoolService"; // Ensure this path is correct
+import { createSchool } from "../../../Service/schoolService";
+import Dropdown2 from "../../../Components/SchoolAdminDashBoard/DropdownwithonChange";
 import Dropdown from "../../../Components/SchoolAdminDashBoard/DropDown2";
+
 import { getUserDetails } from "@/Service/AuthService";
 import toast from "react-hot-toast";
 
@@ -15,25 +17,34 @@ const AddSchoolItem = () => {
   const searchParams = useSearchParams();
   const adminId = searchParams.get("adminId");
   const username = getUserDetails();
+
   const [schoolName, setSchoolName] = useState("");
   const [shortName, setShortName] = useState("");
   const [schoolType, setSchoolType] = useState("");
   const [educationLevel, setEducationLevel] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [email, setEmail] = useState("");
-  const [selectedCountry, setSelectedCountry] = useState(null);
+
+  const countries = useMemo(() => Country.getAllCountries(), []);
+  const nigeria = useMemo(
+    () => countries.find((c) => c.isoCode === "NG"),
+    [countries]
+  );
+
+  const [selectedCountry, setSelectedCountry] = useState(nigeria || null);
   const [selectedState, setSelectedState] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
+
   const [schoolLogo, setSchoolLogo] = useState(null);
   const [logoPreview, setLogoPreview] = useState("/icons.png");
   const [loading, setLoading] = useState(false);
-  // const [error, setError] = useState(null);
-  // const [successMessage, setSuccessMessage] = useState(null);
+
   const [amountPerStudent, setAmountPerStudent] = useState("");
   const numberOfStudents = 100; // Hardcoded for now
   const expectedAmountPaid = amountPerStudent * numberOfStudents || 0;
+
   const router = useRouter();
-  const countries = Country.getAllCountries();
+
   const states = selectedCountry
     ? State.getStatesOfCountry(selectedCountry.isoCode)
     : [];
@@ -84,7 +95,6 @@ const AddSchoolItem = () => {
       !selectedCity
     ) {
       toast.error("Please fill in all required  information.");
-      // setError("Please fill in all required  information.");
       setLoading(false);
       return;
     }
@@ -92,11 +102,14 @@ const AddSchoolItem = () => {
     const formData = new FormData();
     formData.append("school_name", schoolName);
     formData.append("short_name", shortName);
-    formData.append("registered_by", {
-      id: username.id,
-      surname: username.super_admin.surname,
-      first_name: username.super_admin.first_name,
-    }); // Use the username from getUserDetails
+    formData.append(
+      "registered_by",
+      JSON.stringify({
+        id: username.id,
+        surname: username.super_admin?.surname,
+        first_name: username.super_admin?.first_name,
+      })
+    ); // if your backend expects JSON string
     formData.append("school_type", schoolType);
     formData.append("education_level", educationLevel);
     formData.append("phone_number", phoneNumber);
@@ -107,7 +120,7 @@ const AddSchoolItem = () => {
     formData.append("status", "Active");
     formData.append("region", "South West"); // Adjust as needed
     if (schoolLogo) {
-      formData.append("logo", schoolLogo); // Logo is correctly appended as File object
+      formData.append("logo", schoolLogo);
     }
 
     try {
@@ -153,12 +166,6 @@ const AddSchoolItem = () => {
               <hr className="w-full border-t border-[#978F8F]" />
             </div>
             <div className="flex-grow flex flex-col ">
-              {/* {error && <p className="pl-6 font-bold text-red-500">{error}</p>}
-              {successMessage && (
-                <p className="pl-6 font-bold text-green-500">
-                  {successMessage}
-                </p>
-              )} */}
               <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0 ">
                 <div className="flex flex-col gap-1 mb-2">
                   <label
@@ -248,6 +255,11 @@ const AddSchoolItem = () => {
                           onClick: () => setEducationLevel("Secondary"),
                         },
                         {
+                          label: "Primary & Secondary",
+                          onClick: () =>
+                            setEducationLevel("Primary & Secondary"),
+                        },
+                        {
                           label: "Tertiary",
                           onClick: () => setEducationLevel("Tertiary"),
                         },
@@ -255,6 +267,7 @@ const AddSchoolItem = () => {
                     />
                   </div>
                 </div>
+
                 <div className="flex flex-col gap-1 mb-2 ">
                   <label
                     className="text-[#808080] font-semibold text-sm"
@@ -299,6 +312,7 @@ const AddSchoolItem = () => {
                   />
                 </div>
               </div>
+
               <div className="pt-4 pl-6 pr-6 pb-0">
                 <label
                   className="text-[#808080] font-semibold text-sm"
@@ -308,14 +322,17 @@ const AddSchoolItem = () => {
                 </label>
                 <div className="grid grid-cols-2 gap-3 mt-1 ">
                   <div className="grid grid-cols-1 mb-2">
-                    <Dropdown
-                      label={selectedCountry?.name || "Select Country"}
-                      items={countries.map((country) => ({
-                        label: country.name,
-                        onClick: () => handleCountryChange(country),
+                    <Dropdown2
+                      label="Select Country"
+                      value={selectedCountry?.name}
+                      onChange={(item) => handleCountryChange(item)}
+                      items={countries.map((c) => ({
+                        label: c.name,
+                        onClick: () => handleCountryChange(c),
                       }))}
                     />
                   </div>
+
                   <div className="grid grid-cols-1 mb-2">
                     <Dropdown
                       label={selectedState?.name || "Select State"}
@@ -337,6 +354,7 @@ const AddSchoolItem = () => {
                   </div>
                 </div>
               </div>
+
               <div className="flex justify-end px-4">
                 <button
                   type="submit"
@@ -350,6 +368,7 @@ const AddSchoolItem = () => {
               </div>
             </div>
           </div>
+
           <div className="flex flex-col gap-2 h-screen  ">
             <div className="bg-[#ffffff] rounded-lg drop-shadow-lg p-4  flex flex-col">
               <p className="font-bold sm:text-lg xl:text-xl xl:mb-2 sm:mb-4 ">
@@ -372,7 +391,7 @@ const AddSchoolItem = () => {
                     accept="image/*"
                   />
                 </div>
-                <button
+                <div
                   onClick={() => document.getElementById("logo-upload").click()}
                   className="text-[#07508F] border-[#07508F] border-[1.5px] rounded-lg cursor-pointer  border-dashed  w-48 p-2 flex items-center justify-between"
                 >
@@ -380,57 +399,11 @@ const AddSchoolItem = () => {
                   <span>
                     <LuUpload size={20} />
                   </span>
-                </button>
+                </div>
               </div>
             </div>
-            {/* <div className="bg-[#ffffff] xl:gap-0 lg:gap-2 h-auto rounded-lg pt-5 pl-5 pr-5 xl:pb-2 pb-8 drop-shadow-lg flex flex-col">
-              <p className="font-bold sm:text-lg xl:text-xl mb-4 ">
-                SUBSCRIPTION PLAN
-              </p>
-              <div>
-                <div className="flex justify-between items-center ">
-                  <p className="font-semibold text-xs text-[#9C9B9B]">
-                    Amount Per Student:
-                  </p>
-                  <div className="w-24">
-                    <input
-                      type="number"
-                      id="amountPerStudent"
-                      className="w-full text-right text-sm text-[#333] rounded-md focus:outline-accent-foreground border-[1px]  border-[#d4d4d4]"
-                      value={amountPerStudent}
-                      onChange={(e) => setAmountPerStudent(e.target.value)}
-                      required
-                    />
-                  </div>
-                </div>
 
-                <div className="flex justify-between">
-                  <p className="font-semibold text-xs ">No of Students:</p>
-                  <p className="font-semibold text-xs ">{numberOfStudents}</p>
-                </div>
-
-                <div className="flex justify-between">
-                  <p className="font-semibold text-xs ">
-                    Amount Expected to be paid:
-                  </p>
-                  <p className="font-semibold text-xs ">
-                    ₦{expectedAmountPaid.toLocaleString()}
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex justify-center pt-4 ">
-                <button
-                  type="submit"
-                  className={`bg-[#07508F] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer ${
-                    loading ? "opacity-50 cursor-not-allowed" : ""
-                  }`}
-                  disabled={loading}
-                >
-                  {loading ? "Saving..." : "Save"}
-                </button>
-              </div>
-            </div> */}
+            {/* Subscription card omitted as in your code */}
           </div>
         </div>
       </form>

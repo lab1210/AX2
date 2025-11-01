@@ -5,6 +5,7 @@ import { BiChevronDown } from "react-icons/bi";
 import { getAllRoles } from "../../../Service/RoleService";
 import { createSuperAdmin } from "../../../Service/userService";
 import Dropdown from "@/Components/SchoolAdminDashBoard/DropDown2";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const AddUser = ({ onClose, onUserAdded }) => {
   const [formData, setFormData] = useState({
@@ -25,6 +26,7 @@ const AddUser = ({ onClose, onUserAdded }) => {
   const [errorMessage, setErrorMessage] = useState("");
   const [roles, setRoles] = useState([]);
   const [superAdminRoleId, setSuperAdminRoleId] = useState(""); // State to hold the Super Admin role ID
+  const [showPassword, setShowPassword] = useState(false);
 
   const countries = Country.getAllCountries();
   const states = selectedCountry
@@ -270,19 +272,39 @@ const AddUser = ({ onClose, onUserAdded }) => {
           >
             Create Password
           </label>
-          <input
-            type="password"
-            name="password"
-            value={formData.password}
-            onChange={handleInputChange}
-            className={`text-base  ${
-              formData.password !== ""
-                ? "border-[#0071E3]  border-2"
-                : "border-[#AEAEAE] border-[1.5px]"
-            }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
-            placeholder="Enter Password"
-            required
-          />
+          <div className="relative">
+            <input
+              type={showPassword ? "text" : "password"}
+              id="password"
+              name="password"
+              value={formData.password}
+              autoComplete="new-password"
+              onChange={handleInputChange}
+              spellCheck={false}
+              className={`text-base  ${
+                formData.password !== ""
+                  ? "border-[#0071E3]  border-2"
+                  : "border-[#AEAEAE] border-[1.5px]"
+              }  w-full pr-10 rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+              placeholder="Enter Password"
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((s) => !s)}
+              aria-label={showPassword ? "Hide password" : "Show password"}
+              aria-pressed={showPassword}
+              className="absolute inset-y-0 right-0 flex items-center justify-center px-2
+                             text-[#808080] hover:text-[#01427A] focus:outline-none"
+              tabIndex={0}
+            >
+              {showPassword ? (
+                <FiEyeOff className="w-5 h-5" />
+              ) : (
+                <FiEye className="w-5 h-5" />
+              )}
+            </button>
+          </div>
         </div>
 
         <div className="flex flex-col gap-1 mb-2">

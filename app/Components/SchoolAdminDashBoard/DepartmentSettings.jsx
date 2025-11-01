@@ -1,6 +1,7 @@
 "use client";
 import {
   createDepartment,
+  deleteDepartment,
   getDepartment,
   UpdateDepartment,
 } from "@/Service/schoolConfig";
@@ -10,8 +11,6 @@ import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
 const DepartmentSettings = () => {
   const [departmentList, setDepartmentList] = useState([]);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [editDepartmentVisible, setEditDepartmentVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -25,17 +24,16 @@ const DepartmentSettings = () => {
   });
 
   useEffect(() => {
-    const fetchDepartments = async () => {
-      try {
-        const data = await getDepartment();
-        setDepartmentList(data);
-      } catch (error) {
-        toast.error(error || "Failed to fetch departments");
-      }
-    };
     fetchDepartments();
   }, []);
-
+  const fetchDepartments = async () => {
+    try {
+      const data = await getDepartment();
+      setDepartmentList(data);
+    } catch (error) {
+      toast.error(error || "Failed to fetch departments");
+    }
+  };
   const paginatedData = departmentList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -58,8 +56,7 @@ const DepartmentSettings = () => {
       : formData.name?.trim();
 
     if (!trimmedName) {
-      setMessage("Department Name is required.");
-      setMessageType("error");
+      toast.error("Department Name is required.");
       return;
     }
 
@@ -68,8 +65,7 @@ const DepartmentSettings = () => {
     );
 
     if (!editDepartmentVisible && existingdepartment) {
-      setMessage("Department already exists.");
-      setMessageType("error");
+      toast.error("Department already exists.");
       return;
     }
 
@@ -84,21 +80,18 @@ const DepartmentSettings = () => {
           updatedClass
         );
         if (error) {
-          setMessage(error || "Failed to update department.");
-          setMessageType("error");
+          toast.error(error || "Failed to update department.");
           return;
         }
         const updatedList = departmentList.map((item) =>
           item.department_id === selectedDepartment.department_id ? data : item
         );
         setDepartmentList(updatedList);
-        setMessage("Department updated successfully.");
-        setMessageType("success");
+        toast.success("Department updated successfully.");
         setEditDepartmentVisible(false);
         setSelectedDepartment(null);
       } catch (error) {
-        setMessage("An error occurred while updating.");
-        setMessageType("error");
+        toast.error("An error occurred while updating.");
       }
     } else {
       try {
@@ -109,26 +102,18 @@ const DepartmentSettings = () => {
         const { data, error } = await createDepartment(createPayload);
 
         if (error) {
-          setMessage(error || "Failed to add department.");
-          setMessageType("error");
+          toast.error(error || "Failed to add department.");
         } else {
           setDepartmentList((prev) => [...prev, data]);
-          setMessage("Department added successfully.");
-          setMessageType("success");
+          toast.success("Department added successfully.");
         }
       } catch (err) {
-        setMessage("An error occurred while adding.");
-        setMessageType("error");
+        toast.error("An error occurred while adding.");
       }
     }
     setFormData({
       name: "",
     });
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const handleEdit = (term) => {
@@ -150,38 +135,19 @@ const DepartmentSettings = () => {
   const handleDelete = async () => {
     if (selectedDepartmentDelete?.department_id) {
       try {
-        const response = await deleteClassArm(
+        const response = await deleteDepartment(
           selectedDepartmentDelete.department_id
         );
-        if (response?.status === 204) {
-          setMessage("Department deleted successfully.");
-          setMessageType("success");
-          closeDeleteModal();
-        } else {
-          setMessage("Failed to delete Department.");
-          setMessageType("error");
-          closeDeleteModal();
-        }
+        toast.success("Department deleted successfully.");
+        fetchDepartments();
+        closeDeleteModal();
       } catch (error) {
-        setMessageType("error");
-        setMessage("Failed to delete Department.");
+        toast.error("Failed to delete Department.");
       }
     }
   };
   return (
     <div>
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
-
       {deleteModalVisible && selectedDepartmentDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -255,7 +221,11 @@ const DepartmentSettings = () => {
                       name: value,
                     }));
               }}
-              className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+              className={`text-base  ${
+                formData.name !== ""
+                  ? "border-[#0071E3]  border-2"
+                  : "border-[#AEAEAE] border-[1.5px]"
+              }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
               required
             />
           </div>

@@ -14,12 +14,10 @@ import toast from "react-hot-toast";
 const ClassArm = () => {
   const [classList, setClassList] = useState([]);
   const [ClassYear, setClassYear] = useState([]);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [selectedClass, setSelectedClass] = useState(null);
   const [editClassVisible, setEditClassVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
   const [selectedClassDelete, setSelectedClassDelete] = useState(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
@@ -29,11 +27,6 @@ const ClassArm = () => {
   });
 
   useEffect(() => {
-    const fetchClassArms = async () => {
-      const { data, error } = await getClassArm();
-      if (data) setClassList(data);
-      else setMessage(error || "Failed to load class arms");
-    };
     fetchClassArms();
     fetchClass();
   }, []);
@@ -43,10 +36,15 @@ const ClassArm = () => {
     if (data) {
       setClassYear(data);
     } else {
-      setMessage(error || "Failed to load Class years");
+      toast.error(error || "Failed to load Class years");
     }
   };
 
+  const fetchClassArms = async () => {
+    const { data, error } = await getClassArm();
+    if (data) setClassList(data);
+    else toast.error(error || "Failed to load class arms");
+  };
   const getClassYearName = (yearid) => {
     const year = ClassYear.find((item) => item.class_year_id === yearid);
     return year?.class_name;
@@ -81,21 +79,18 @@ const ClassArm = () => {
           updatedClass
         );
         if (error) {
-          setMessage(error || "Failed to update class arm.");
-          setMessageType("error");
+          toast.error(error || "Failed to update class arm.");
           return;
         }
         const updatedList = classList.map((item) =>
           item.class_id === selectedClass.class_id ? data : item
         );
         setClassList(updatedList);
-        setMessage("Class Arm updated successfully.");
-        setMessageType("success");
+        toast.success("Class Arm updated successfully.");
         setEditClassVisible(false);
         setSelectedClass(null);
       } catch (error) {
-        setMessage("An error occurred while updating.");
-        setMessageType("error");
+        toast.error("An error occurred while updating.");
       }
     } else {
       try {
@@ -107,27 +102,19 @@ const ClassArm = () => {
         const { data, error } = await createArm(createPayload);
 
         if (error) {
-          setMessage(error || "Failed to add class arm.");
-          setMessageType("error");
+          toast.error(error || "Failed to add class arm.");
         } else {
           setClassList((prev) => [...prev, data]);
-          setMessage("Class Arm added successfully.");
-          setMessageType("success");
+          toast.success("Class Arm added successfully.");
         }
       } catch (err) {
-        setMessage("An error occurred while adding.");
-        setMessageType("error");
+        toast.error("An error occurred while adding.");
       }
     }
     setFormData({
       arm_name: "",
       class_year: "",
     });
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const handleEdit = (Class) => {
@@ -152,6 +139,7 @@ const ClassArm = () => {
         const response = await deleteClassArm(selectedClassDelete.class_id);
         if (response?.status === 204) {
           toast.success("Class Arm deleted successfully.");
+          fetchClassArms();
           closeDeleteModal();
         } else {
           toast.error("Failed to delete Class Arm.");
@@ -262,7 +250,11 @@ const ClassArm = () => {
                         arm_name: value,
                       }));
                 }}
-                className="focus:outline-[#0071E3] sm:placeholder:text-xs sm:text-xs lg:placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 lg:text-sm rounded-sm border-[#B6B6B6]"
+                className={`text-base  ${
+                  formData.arm_name !== ""
+                    ? "border-[#0071E3]  border-2"
+                    : "border-[#AEAEAE] border-[1.5px]"
+                }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                 required
               />
             </div>

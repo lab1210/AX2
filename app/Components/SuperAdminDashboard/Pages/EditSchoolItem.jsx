@@ -35,11 +35,6 @@ const EditSchoolItem = () => {
   const [schoolLogo, setSchoolLogo] = useState(null);
   const [logoPreview, setLogoPreview] = useState("/icons.png");
   const [loading, setLoading] = useState(false);
-  const [amountPerStudent, setAmountPerStudent] = useState("");
-  const [numberOfStudents, setNumberOfStudents] = useState(100);
-  const [subscriptionId, setSubscriptionId] = useState(null);
-
-  const expectedAmountPaid = amountPerStudent * numberOfStudents || 0;
 
   const countries = Country.getAllCountries();
   const states = selectedCountry
@@ -202,6 +197,7 @@ const EditSchoolItem = () => {
 
       if (schoolUpdateResponse?.status === 200) {
         toast.success("School details updated successfully!");
+        router.push("/Super-Admin/Manage-Existing-Schools");
       } else {
         toast.error(
           `Failed to update school details: ${
@@ -258,7 +254,11 @@ const EditSchoolItem = () => {
                   <input
                     type="text"
                     id="schoolName"
-                    className="text-base font-bold focus:outline-accent-foreground text-[#01427A] rounded-sm  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className={`text-base  ${
+                      schoolName !== ""
+                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter School Name"
                     value={schoolName}
                     onChange={(e) => setSchoolName(e.target.value)}
@@ -276,7 +276,11 @@ const EditSchoolItem = () => {
                   <input
                     type="text"
                     id="shortName"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-sm  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className={`text-base  ${
+                      shortName !== ""
+                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter School Short Name"
                     value={shortName}
                     onChange={(e) => setShortName(e.target.value)}
@@ -328,6 +332,11 @@ const EditSchoolItem = () => {
                           onClick: () => setEducationLevel("Secondary"),
                         },
                         {
+                          label: "Primary & Secondary",
+                          onClick: () =>
+                            setEducationLevel("Primary & Secondary"),
+                        },
+                        {
                           label: "Tertiary",
                           onClick: () => setEducationLevel("Tertiary"),
                         },
@@ -345,7 +354,12 @@ const EditSchoolItem = () => {
                   <input
                     type="tel"
                     id="phoneNumber"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className={`text-base  ${
+                      phoneNumber !== ""
+                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                    s
                     placeholder="Enter Phone Number"
                     value={phoneNumber}
                     onChange={(e) => setPhoneNumber(e.target.value)}
@@ -363,7 +377,11 @@ const EditSchoolItem = () => {
                   <input
                     type="email"
                     id="email"
-                    className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+                    className={`text-base  ${
+                      email !== ""
+                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter School Email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
@@ -429,9 +447,9 @@ const EditSchoolItem = () => {
               </p>
               <div className="flex flex-col items-center justify-center mt-2">
                 <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] border-[#333333] flex items-center relative justify-center w-48 h-35">
-                  <div className="w-full h-full flex items-center justify-center">
+                  <div className="w-full h-full flex items-center justify-center object-cover">
                     <img
-                      className="max-w-full max-h-full object-contain"
+                      className="w-full h-full "
                       src={logoPreview}
                       alt="school-logo-preview"
                       onError={(e) => {

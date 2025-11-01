@@ -260,7 +260,7 @@ export const deleteSubjectTeacherAssignment = async (
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/assignments/teacher_assignments/${subjectTeacherAssignmentId}`;
+    const url = `${BASE_URL}/assignments/teacher_assignments/${subjectTeacherAssignmentId}/`;
     const response = await axios.delete(url, {
       headers,
     });

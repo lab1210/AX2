@@ -277,7 +277,8 @@ const ClasstoDept = () => {
             {paginatedData.length > 0 && (
               <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">
                 <tr>
-                  <th className="p-2 pl-12 bg-[#EDF0F3]">Class</th>
+                  <th className="p-2 pl-12 bg-[#EDF0F3]">Class Year</th>
+                  <th className="p-2 bg-[#EDF0F3]">Class Arm</th>
                   <th className="p-2 bg-[#EDF0F3]">Department</th>
                   <th className="p-2 bg-[#EDF0F3]">School</th>
                   <th className="p-2 bg-[#EDF0F3]">Actions</th>
@@ -297,13 +298,9 @@ const ClasstoDept = () => {
               ) : (
                 paginatedData.map((item, index) => (
                   <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-12">
-                      {item.class_name || getClassName(item.classes)}
-                    </td>
-                    <td className="p-2">
-                      {item.department_name ||
-                        getDepartmentName(item.department)}
-                    </td>
+                    <td className="p-2 pl-12">{item.class_year_name}</td>
+                    <td className="p-2">{item.class_arm_name}</td>
+                    <td className="p-2">{item.department_name}</td>
                     <td className="p-2">{item.school_name || "N/A"}</td>
                     <td className="p-2">
                       <div className="flex gap-4">

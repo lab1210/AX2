@@ -16,8 +16,10 @@ const Dropdown = ({ label = "Options", items = [] }) => {
         <MenuButton
           className={`border-2 p-1.5 inline-flex w-full justify-between rounded-sm bg-white sm:text-xs lg:text-sm
             ${
-              selected ? "border-[#0071E3]" : "border-[#B6B6B6]"
-            } text-[#808080]`}
+              selected
+                ? "border-[#0071E3] font-bold"
+                : "border-[#B6B6B6] text-[#808080]"
+            } `}
         >
           {selected || label}
           <HiOutlineChevronDown

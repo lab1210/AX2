@@ -126,8 +126,8 @@ const ClassTeacherAssign = () => {
         );
 
         if (response.error) throw new Error(response.error);
+        fetchData();
         toast.success("Assignment updated successfully");
-        await fetchData();
         resetForm();
       } catch (error) {
         toast.error(error.message || "Failed to update assignment");
@@ -279,7 +279,11 @@ const ClassTeacherAssign = () => {
                   onChange={(e) =>
                     updateEditFormData("teacher_id", e.target.value)
                   }
-                  className=" border-[1.5px] sm:text-xs lg:text-sm text-[#808080] border-[#B6B6B6] rounded-sm p-1.5 focus:outline-none  focus:border-[#1F619A] focus:border-2"
+                  className={`text-base  ${
+                    editFormData.teacher_id !== ""
+                      ? "border-[#0071E3]  border-2 font-bold"
+                      : "border-[#AEAEAE] border-[1.5px] text-[#808080]"
+                  }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal  `}
                 >
                   <option value="">Select Teacher</option>
                   {teachers.map((teacher) => (
@@ -298,7 +302,11 @@ const ClassTeacherAssign = () => {
                   onChange={(e) =>
                     updateEditFormData("class_id", e.target.value)
                   }
-                  className="border-[1.5px] sm:text-xs lg:text-sm   text-[#808080] border-[#B6B6B6] rounded-sm p-1.5 focus:outline-none  focus:border-[#1F619A] focus:border-2"
+                  className={`text-base  ${
+                    editFormData.class_id !== ""
+                      ? "border-[#0071E3]  border-2 font-bold"
+                      : "border-[#AEAEAE] border-[1.5px] text-[#808080]"
+                  }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal  `}
                 >
                   <option value="">Select Class Arm</option>
                   {classArms.map((classArm) => (
@@ -339,7 +347,11 @@ const ClassTeacherAssign = () => {
                           e.target.value
                         )
                       }
-                      className=" border-[1.5px] sm:text-xs lg:text-sm  text-[#808080] border-[#B6B6B6] rounded-sm p-1.5 focus:outline-none  focus:border-[#1F619A] focus:border-2"
+                      className={`text-base  ${
+                        createFormData.assignments[index].teacher_id !== ""
+                          ? "border-[#0071E3]  border-2 font-bold"
+                          : "border-[#AEAEAE] border-[1.5px] text-[#808080]"
+                      }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal  `}
                     >
                       <option value="">Select Teacher</option>
                       {teachers.map((teacher) => (
@@ -365,7 +377,11 @@ const ClassTeacherAssign = () => {
                           e.target.value
                         )
                       }
-                      className=" border-[1.5px] sm:text-xs lg:text-sm  text-[#808080] border-[#B6B6B6] rounded-sm p-1.5 focus:outline-none  focus:border-[#1F619A] focus:border-2"
+                      className={`text-base  ${
+                        createFormData.assignments[index].class_id !== ""
+                          ? "border-[#0071E3]  border-2 font-bold"
+                          : "border-[#AEAEAE] border-[1.5px] text-[#808080]"
+                      }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal  `}
                     >
                       <option value="">Select Class Arm</option>
                       {classArms.map((classArm) => (
@@ -385,7 +401,7 @@ const ClassTeacherAssign = () => {
                 onClick={addAssignmentField}
                 className="flex items-center gap-2 text-[#07508F] text-sm font-medium mb-4"
               >
-                <FiPlus /> Add Another Assignment
+                <FiPlus /> Assign a new teacher
               </button>
             </>
           )}
