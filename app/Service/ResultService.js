@@ -251,7 +251,7 @@ export const UpdateResultVisibility = async (resultID, result) => {
       );
       return { error: "Unauthorized: No authentication token provided." };
     }
-    const url = `${BASE_URL}/result/result-visibility/${resultID}`;
+    const url = `${BASE_URL}/result/result-visibility/${resultID}/`;
 
     const response = await axios.patch(url, result, { headers });
     return { data: response.data };
@@ -347,11 +347,11 @@ export const getStudentResult = async (studentId, academicYearId, termId) => {
 
     let url = `${BASE_URL}/result/student-results/`;
     const params = new URLSearchParams();
-    
-    if (studentId) params.append('student_id', studentId);
-    if (academicYearId) params.append('academic_year_id', academicYearId);
-    if (termId) params.append('term_id', termId);
-    
+
+    if (studentId) params.append("student_id", studentId);
+    if (academicYearId) params.append("academic_year_id", academicYearId);
+    if (termId) params.append("term_id", termId);
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
@@ -377,11 +377,11 @@ export const getStudentSubjects = async (studentId, academicYearId, termId) => {
 
     let url = `${BASE_URL}/result/student-subjects/`;
     const params = new URLSearchParams();
-    
-    if (studentId) params.append('student_id', studentId);
-    if (academicYearId) params.append('academic_year_id', academicYearId);
-    if (termId) params.append('term_id', termId);
-    
+
+    if (studentId) params.append("student_id", studentId);
+    if (academicYearId) params.append("academic_year_id", academicYearId);
+    if (termId) params.append("term_id", termId);
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }
@@ -407,11 +407,11 @@ export const getStudentGrades = async (studentId, academicYearId, termId) => {
 
     let url = `${BASE_URL}/result/student-grades/`;
     const params = new URLSearchParams();
-    
-    if (studentId) params.append('student_id', studentId);
-    if (academicYearId) params.append('academic_year_id', academicYearId);
-    if (termId) params.append('term_id', termId);
-    
+
+    if (studentId) params.append("student_id", studentId);
+    if (academicYearId) params.append("academic_year_id", academicYearId);
+    if (termId) params.append("term_id", termId);
+
     if (params.toString()) {
       url += `?${params.toString()}`;
     }

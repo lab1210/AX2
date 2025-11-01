@@ -11,6 +11,7 @@ import { getSchools } from "../../../Service/schoolService";
 import { getAllRoles } from "../../../Service/RoleService";
 import Dropdown from "../../../Components/SchoolAdminDashBoard/DropDown2";
 import toast from "react-hot-toast";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const AddSchoolAdminItem = () => {
   const searchParams = useSearchParams();
@@ -46,6 +47,7 @@ const AddSchoolAdminItem = () => {
   const [selectedCity, setSelectedCity] = useState(null);
   const [schoolLogo, setSchoolLogo] = useState("/icons.png");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const fetchSchools = useCallback(async () => {
     setLoadingSchools(true);
@@ -267,9 +269,9 @@ const AddSchoolAdminItem = () => {
                     name="first_name"
                     className={`text-base  ${
                       formData.first_name !== ""
-                        ? "border-[#0071E3]  border-2"
+                        ? "border-[#01427A]  border-2"
                         : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter First Name"
                     value={formData.first_name}
                     onChange={handleInputChange}
@@ -277,22 +279,6 @@ const AddSchoolAdminItem = () => {
                   />
                 </div>
 
-                <div className="flex flex-col gap-1 mb-2 ">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor="middle_name"
-                  >
-                    Middle Name
-                  </label>
-                  <input
-                    type="text"
-                    id="middle_name"
-                    name="middle_name"
-                    className="text-base text-[#07508F]  rounded-sm focus:outline-accent-foreground sm:text-sm border-[1.5px] p-2 border-[#AEAEAE] placeholder:text-[#d4d4d4] placeholder:font-normal font-bold "
-                    placeholder="Enter Middle Name"
-                    onChange={handleInputChange}
-                  />
-                </div>
                 <div className="flex flex-col gap-1 mb-2 ">
                   <label
                     className="text-[#808080] font-semibold text-sm "
@@ -306,9 +292,9 @@ const AddSchoolAdminItem = () => {
                     name="surname"
                     className={`text-base  ${
                       formData.surname !== ""
-                        ? "border-[#0071E3]  border-2"
+                        ? "border-[#01427A]  border-2"
                         : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter Last Name"
                     value={formData.surname}
                     onChange={handleInputChange}
@@ -328,9 +314,9 @@ const AddSchoolAdminItem = () => {
                     name="phone_number"
                     className={`text-base  ${
                       formData.phone_number !== ""
-                        ? "border-[#0071E3]  border-2"
+                        ? "border-[#01427A]  border-2"
                         : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter Phone Number"
                     value={formData.phone_number}
                     onChange={handleInputChange}
@@ -350,9 +336,9 @@ const AddSchoolAdminItem = () => {
                     name="email"
                     className={`text-base  ${
                       formData.email !== ""
-                        ? "border-[#0071E3]  border-2"
+                        ? "border-[#01427A]  border-2"
                         : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter Email"
                     value={formData.email}
                     onChange={handleInputChange}
@@ -372,9 +358,9 @@ const AddSchoolAdminItem = () => {
                     name="designation"
                     className={`text-base  ${
                       formData.designation !== ""
-                        ? "border-[#0071E3]  border-2"
+                        ? "border-[#01427A]  border-2"
                         : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter Designation"
                     value={formData.designation}
                     onChange={handleInputChange}
@@ -394,37 +380,65 @@ const AddSchoolAdminItem = () => {
                     name="user.username"
                     className={`text-base  ${
                       formData.user.username !== ""
-                        ? "border-[#0071E3]  border-2"
+                        ? "border-[#01427A]  border-2"
                         : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                     placeholder="Enter Username"
                     value={formData.user.username}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
-                <div className="flex flex-col gap-1 mb-2 ">
+                <div className="flex flex-col gap-1 mb-2">
                   <label
-                    className="text-[#808080] font-semibold text-sm "
+                    className="text-[#808080] font-semibold text-sm"
                     htmlFor="password"
                   >
                     Create Password
                   </label>
-                  <input
-                    type="password"
-                    id="password"
-                    name="user.password"
-                    className={`text-base  ${
-                      formData.user.password !== ""
-                        ? "border-[#0071E3]  border-2"
-                        : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
-                    placeholder="Enter Password"
-                    value={formData.user.password}
-                    onChange={handleInputChange}
-                    required
-                  />
+
+                  <div className="relative">
+                    <input
+                      type={showPassword ? "text" : "password"}
+                      id="password"
+                      name="user.password"
+                      autoComplete="new-password"
+                      spellCheck={false}
+                      className={`h-10 w-full text-base pr-10
+        ${
+          formData.user.password
+            ? "border-[#01427A] border-2"
+            : "border-[#AEAEAE] border-[1.5px]"
+        }
+        rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm p-2
+        placeholder:text-[#d4d4d4] placeholder:font-normal font-bold`}
+                      placeholder="Enter Password"
+                      value={formData.user.password}
+                      onChange={handleInputChange}
+                      required
+                    />
+
+                    {/* Icon button INSIDE the input */}
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword((s) => !s)}
+                      aria-label={
+                        showPassword ? "Hide password" : "Show password"
+                      }
+                      aria-pressed={showPassword}
+                      className="absolute inset-y-0 right-0 flex items-center justify-center px-2
+                 text-[#808080] hover:text-[#01427A] focus:outline-none"
+                      tabIndex={0}
+                    >
+                      {showPassword ? (
+                        <FiEyeOff className="w-5 h-5" />
+                      ) : (
+                        <FiEye className="w-5 h-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
+
                 <div className="flex flex-col gap-1 mb-2">
                   <label
                     className="text-[#808080] font-semibold text-sm "
@@ -461,12 +475,11 @@ const AddSchoolAdminItem = () => {
                   <input
                     type="text"
                     id="role"
-                    name="role" // Or "display_role" if you prefer
-                    value="School Admin" // Directly set the displayed value
+                    name="role"
+                    value="School Admin"
                     readOnly
-                    className="text-base text-[#07508F] rounded-sm focus:outline-none sm:text-sm border-[1.5px] p-2 border-[#AEAEAE] font-bold "
+                    className="text-base text-[#07508F] rounded-sm focus:outline-none sm:text-sm border-2 p-2 border-[#01427A] font-bold "
                   />
-                  {/* The actual user_role ID is already in formData.user_role */}
                 </div>
               </div>
               <div className="pt-4 pl-6 pr-6 pb-10">
@@ -507,6 +520,17 @@ const AddSchoolAdminItem = () => {
                   </div>
                 </div>
               </div>
+              <div className="flex justify-end p-4">
+                <button
+                  type="submit"
+                  className={`bg-[#07508F] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
+                  disabled={loading}
+                >
+                  {loading ? "Saving..." : "Save"}
+                </button>
+              </div>
             </div>
           </div>
           <div className="flex flex-col gap-2 h-screen  ">
@@ -532,7 +556,7 @@ const AddSchoolAdminItem = () => {
                 </div>
               </div>
             </div>
-            <div className="bg-[#ffffff] xl:gap-0 lg:gap-2 h-auto rounded-lg pt-5 pl-5 pr-5 xl:pb-2 pb-8 drop-shadow-lg flex flex-col">
+            {/* <div className="bg-[#ffffff] xl:gap-0 lg:gap-2 h-auto rounded-lg pt-5 pl-5 pr-5 xl:pb-2 pb-8 drop-shadow-lg flex flex-col">
               <p className="font-bold sm:text-lg xl:text-xl mb-4 ">
                 SUBSCRIPTION PLAN
               </p>
@@ -568,7 +592,7 @@ const AddSchoolAdminItem = () => {
                   {loading ? "Saving..." : "Save"}
                 </button>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </form>

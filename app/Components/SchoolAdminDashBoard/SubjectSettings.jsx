@@ -1,6 +1,7 @@
 "use client";
 import {
   createSubject,
+  deleteSubject,
   getSubject,
   UpdateSubject,
 } from "@/Service/schoolConfig";
@@ -11,13 +12,10 @@ import { FiEdit3, FiTrash2 } from "react-icons/fi";
 const SubjectSettings = () => {
   const [subjectList, setsubjectList] = useState([]);
 
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
-
   const [selectedSubject, setselectedSubject] = useState(null);
   const [editsubjectVisible, setEditsubjectVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 5;
   const [selectedSubjectDelete, setSelectedSubjectDelete] = useState(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
@@ -26,17 +24,17 @@ const SubjectSettings = () => {
   });
 
   useEffect(() => {
-    const fetchSubjects = async () => {
-      try {
-        const data = await getSubject();
-        setsubjectList(data);
-      } catch (error) {
-        toast.error("Failed to fetch subjects.");
-      }
-    };
     fetchSubjects();
   }, []);
 
+  const fetchSubjects = async () => {
+    try {
+      const data = await getSubject();
+      setsubjectList(data);
+    } catch (error) {
+      toast.error("Failed to fetch subjects.");
+    }
+  };
   const paginatedData = subjectList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -59,8 +57,7 @@ const SubjectSettings = () => {
       : formData.name?.trim();
 
     if (!trimmedName) {
-      setMessage("Subject Name is required.");
-      setMessageType("error");
+      toast.error("Subject Name is required.");
       return;
     }
 
@@ -69,8 +66,7 @@ const SubjectSettings = () => {
     );
 
     if (!editsubjectVisible && existingSubject) {
-      setMessage("Subject already exists.");
-      setMessageType("error");
+      toast.error("Subject already exists.");
       return;
     }
 
@@ -85,21 +81,18 @@ const SubjectSettings = () => {
           updatedSubject
         );
         if (error) {
-          setMessage(error || "Failed to update subject.");
-          setMessageType("error");
+          toast.error(error || "Failed to update subject.");
           return;
         }
         const updatedList = subjectList.map((item) =>
           item.subject_id === selectedSubject.subject_id ? data : item
         );
         setsubjectList(updatedList);
-        setMessage("Subject updated successfully.");
-        setMessageType("success");
+        toast.success("Subject updated successfully.");
         setEditsubjectVisible(false);
         setselectedSubject(null);
       } catch (error) {
-        setMessage("An error occurred while updating.");
-        setMessageType("error");
+        toast.error("An error occurred while updating.");
       }
     } else {
       try {
@@ -110,26 +103,18 @@ const SubjectSettings = () => {
         const { data, error } = await createSubject(createPayload);
 
         if (error) {
-          setMessage(error || "Failed to add subject.");
-          setMessageType("error");
+          toast.error(error || "Failed to add subject.");
         } else {
           setsubjectList((prev) => [...prev, data]);
-          setMessage("Subject added successfully.");
-          setMessageType("success");
+          toast.success("Subject added successfully.");
         }
       } catch (err) {
-        setMessage("An error occurred while adding.");
-        setMessageType("error");
+        toast.error("An error occurred while adding.");
       }
     }
     setFormData({
       name: "",
     });
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const handleEdit = (term) => {
@@ -151,35 +136,17 @@ const SubjectSettings = () => {
   const handleDelete = async () => {
     if (selectedSubjectDelete?.subject_id) {
       try {
-        const response = await deleteClassArm(selectedSubjectDelete.subject_id);
-        if (response?.status === 204) {
-          setMessage("Subject deleted successfully.");
-          setMessageType("success");
-          closeDeleteModal();
-        } else {
-          setMessage("Failed to delete Subject.");
-          setMessageType("error");
-          closeDeleteModal();
-        }
+        const response = await deleteSubject(selectedSubjectDelete.subject_id);
+        toast.success("Subject deleted successfully.");
+        fetchSubjects();
+        closeDeleteModal();
       } catch (error) {
-        setMessageType("error");
-        setMessage("Failed to delete Subject.");
+        toast.error("Failed to delete Subject.");
       }
     }
   };
   return (
     <div>
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
       {deleteModalVisible && selectedSubjectDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -247,7 +214,11 @@ const SubjectSettings = () => {
                       name: value,
                     }));
               }}
-              className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-2 p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+              className={`text-base  ${
+                formData.name !== ""
+                  ? "border-[#0071E3]  border-2"
+                  : "border-[#AEAEAE] border-[1.5px]"
+              }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
               required
             />
           </div>
@@ -260,7 +231,7 @@ const SubjectSettings = () => {
         </p>
       </div>
       <div className="px-0">
-        <div className="overflow-y-auto max-h-[200px] no-scrollbar">
+        <div className="overflow-y-auto  no-scrollbar">
           <table className="min-w-full table-auto">
             {paginatedData.length > 0 && (
               <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">

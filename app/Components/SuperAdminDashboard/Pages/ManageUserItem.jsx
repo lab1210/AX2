@@ -13,7 +13,7 @@ import {
   updateSuperAdmin,
 } from "../../../Service/userService";
 
-const ITEMS_PER_PAGE = 7;
+const ITEMS_PER_PAGE = 10;
 const ManageUserItem = () => {
   const [modalTransform, setModalTransform] = useState("translateX(-100%)");
   const [modalOpacity, setModalOpacity] = useState(0);
@@ -187,7 +187,9 @@ const ManageUserItem = () => {
           surname: userData.surname,
           first_name: userData.first_name,
           phone_number: userData.phone_number,
-          address: userData.address,
+          country: userData.country,
+          state: userData.state,
+          city: userData.city,
         };
         const response = await updateSuperAdmin(
           selectedUserEdit.id,

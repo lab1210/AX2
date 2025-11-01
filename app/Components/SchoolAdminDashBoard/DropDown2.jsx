@@ -14,9 +14,11 @@ const Dropdown2 = ({ label = "Options", items = [] }) => {
     <Menu as="div" className="relative inline-block text-left">
       <div>
         <MenuButton
-          className={`border-[1.5px] p-1.5 inline-flex w-full justify-between rounded-sm bg-white sm:text-xs lg:text-sm
+          className={` p-1.5 inline-flex w-full justify-between rounded-sm bg-white sm:text-xs lg:text-sm
             ${
-              selected ? "border-[#0071E3]" : "border-[#B6B6B6]"
+              selected
+                ? "border-[#0071E3] border-2 font-bold text-black"
+                : "border-[#B6B6B6] border-[1.5px]"
             } text-[#808080]`}
         >
           {selected || label}

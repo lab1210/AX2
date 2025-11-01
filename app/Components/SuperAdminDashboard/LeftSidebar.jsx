@@ -67,7 +67,7 @@ const LeftSidebar = () => {
         <div className="object-contain max-w-[50px] max-h-[50px]">
           <img className="w-full h-full" src={"/logo.svg"} alt="logo" />
         </div>
-        <div className="text-white ">
+        <div className="text-white text-center ">
           <p className="font-bold">Foursquare</p>
           <p className="font-bold">Student Portal</p>
         </div>

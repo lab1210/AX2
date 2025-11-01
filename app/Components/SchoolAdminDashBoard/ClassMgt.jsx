@@ -5,12 +5,11 @@ import {
   UpdateClassroom,
 } from "@/Service/schoolConfig";
 import React, { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
 const ClassMgt = () => {
   const [classList, setClassList] = useState([]);
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [selectedClass, setSelectedClass] = useState(null);
   const [editClassVisible, setEditClassVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -26,14 +25,14 @@ const ClassMgt = () => {
 
   //GET LIST
   useEffect(() => {
-    const fetchClassRooms = async () => {
-      const { data, error } = await getClassroom();
-      if (data) setClassList(data);
-      else setMessage(error || "Failed to load Classrooms.");
-    };
     fetchClassRooms();
   }, []);
 
+  const fetchClassRooms = async () => {
+    const { data, error } = await getClassroom();
+    if (data) setClassList(data);
+    else toast.error(error || "Failed to load Classrooms.");
+  };
   const paginatedData = Array.isArray(classList)
     ? classList.slice(
         (currentPage - 1) * itemsPerPage,
@@ -58,8 +57,7 @@ const ClassMgt = () => {
       : formData.room_number?.trim();
 
     if (!trimmedName) {
-      setMessage("Room Number is required.");
-      setMessageType("error");
+      toast.error("Room Number is required.");
       return;
     }
 
@@ -68,8 +66,7 @@ const ClassMgt = () => {
     );
 
     if (!editClassVisible && existingClass) {
-      setMessage("Room number already exists.");
-      setMessageType("error");
+      toast.err("Room number already exists.");
       return;
     }
 
@@ -88,8 +85,7 @@ const ClassMgt = () => {
         );
 
         if (error) {
-          setMessage(error || "Failed to update classroom.");
-          setMessageType("error");
+          toast.err(error || "Failed to update classroom.");
           return;
         }
 
@@ -97,13 +93,11 @@ const ClassMgt = () => {
           item.classroom_id === selectedClass.classroom_id ? data : item
         );
         setClassList(updatedList);
-        setMessage("Classroom updated successfully.");
-        setMessageType("success");
+        toast.success("Classroom updated successfully.");
         setEditClassVisible(false);
         setSelectedClass(null);
       } catch (err) {
-        setMessage("An error occurred while updating.");
-        setMessageType("error");
+        toast.error("An error occurred while updating.");
       }
     } else {
       try {
@@ -115,16 +109,13 @@ const ClassMgt = () => {
         const { data, error } = await createClassroom(createPayload);
 
         if (error) {
-          setMessage(error || "Failed to add classroom.");
-          setMessageType("error");
+          toast.error(error || "Failed to add classroom.");
         } else {
           setClassList((prev) => [...prev, data]);
-          setMessage("Classroom added successfully.");
-          setMessageType("success");
+          toast.success("Classroom added successfully.");
         }
       } catch (err) {
-        setMessage("An error occurred while adding.");
-        setMessageType("error");
+        toast.error("An error occurred while adding.");
       }
     }
     setFormData({
@@ -132,11 +123,6 @@ const ClassMgt = () => {
       room_number: "",
       capacity: "",
     });
-
-    setTimeout(() => {
-      setMessage("");
-      setMessageType("");
-    }, 3000);
   };
 
   const handleEdit = (Class) => {
@@ -161,36 +147,17 @@ const ClassMgt = () => {
         const response = await deleteClassroom(
           setSelectedClassroomDelete.classroom_id
         );
-        if (response?.status === 204) {
-          setMessage("Classroom deleted successfully.");
-          setMessageType("success");
-          closeDeleteModal();
-        } else {
-          setMessage("Failed to delete Classroom.");
-          setMessageType("error");
-          closeDeleteModal();
-        }
+        toast.success("Classroom deleted successfully.");
+        fetchClassRooms();
+        closeDeleteModal();
       } catch (error) {
-        setMessageType("error");
-        setMessage("Failed to delete Classroom.");
+        toast.error("Failed to delete Classroom.");
       }
     }
   };
 
   return (
     <div>
-      {message && (
-        <div
-          className={`mx-6 mb-3 text-sm px-4 py-2 rounded-sm font-semibold ${
-            messageType === "success"
-              ? "bg-green-100 text-green-700"
-              : "bg-red-100 text-red-700"
-          }`}
-        >
-          {message}
-        </div>
-      )}
-
       {deleteModalVisible && setSelectedClassroomDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div

@@ -10,8 +10,6 @@ import {
 } from "../../Service/schoolConfig";
 import toast from "react-hot-toast";
 const SchoolYearSettings = () => {
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
   const [academicYears, setAcademicYears] = useState([]);
   const [selectedYear, setSelectedYear] = useState(null);
   const [editYearVisible, setEditYearVisible] = useState(false);
@@ -26,13 +24,13 @@ const SchoolYearSettings = () => {
     end_date: "",
   });
 
+  const fetchYears = async () => {
+    const { data, error } = await getAcademicYears();
+    if (data) setAcademicYears(data);
+    else toast.error(error || "Failed to load academic years");
+  };
   //GET LIST
   useEffect(() => {
-    const fetchYears = async () => {
-      const { data, error } = await getAcademicYears();
-      if (data) setAcademicYears(data);
-      else toast.error(error || "Failed to load academic years");
-    };
     fetchYears();
   }, []);
 
@@ -147,13 +145,9 @@ const SchoolYearSettings = () => {
     if (selectedYearDelete?.year_id) {
       try {
         const response = await deleteAcademicYear(selectedYearDelete.year_id);
-        if (response?.status === 204) {
-          toast.success("Academic year deleted successfully.");
-          closeDeleteModal();
-        } else {
-          toast.error(response || "Failed to delete academic year.");
-          closeDeleteModal();
-        }
+        toast.success("Academic year deleted successfully.");
+        fetchYears();
+        closeDeleteModal();
       } catch (error) {
         toast.error("Failed to delete academic year.");
       }
@@ -234,7 +228,11 @@ const SchoolYearSettings = () => {
                         name: value,
                       }));
                 }}
-                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm border-[#B6B6B6]"
+                className={`text-base  ${
+                  formData.name !== ""
+                    ? "border-[#0071E3]  border-2"
+                    : "border-[#AEAEAE] border-[1.5px]"
+                }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
                 required
               />
             </div>
@@ -296,7 +294,11 @@ const SchoolYearSettings = () => {
                       }))
                     : setFormData((prev) => ({ ...prev, start_date: value }));
                 }}
-                className="text-sm text-[#B6B6B6] border-[1.5px] p-1.5 rounded-sm border-[#B6B6B6] focus:outline-[#0071E3]"
+                className={`text-base  ${
+                  formData.start_date !== ""
+                    ? "border-[#0071E3]  border-2 font-bold"
+                    : "border-[#AEAEAE] border-[1.5px] placeholder: text-[#B6B6B6] "
+                }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2   placeholder:font-normal  `}
                 required
               />
             </div>
@@ -317,7 +319,11 @@ const SchoolYearSettings = () => {
                       }))
                     : setFormData((prev) => ({ ...prev, end_date: value }));
                 }}
-                className="text-sm text-[#B6B6B6] border-[1.5px] p-1.5 rounded-sm border-[#B6B6B6] focus:outline-[#0071E3]"
+                className={`text-base  ${
+                  formData.end_date !== ""
+                    ? "border-[#0071E3]  border-2 font-bold"
+                    : "border-[#AEAEAE] border-[1.5px] placeholder: text-[#B6B6B6] "
+                }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2   placeholder:font-normal  `}
                 required
               />
             </div>
