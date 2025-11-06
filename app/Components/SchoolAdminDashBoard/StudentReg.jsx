@@ -5,9 +5,9 @@ import React, { useEffect, useState } from "react";
 import { SchoolAdminRegisterStudent } from "@/Service/StudentRegService";
 import DropDownLight from "./DropDownwithlightborder";
 import { getClass, getClassArm } from "@/Service/schoolConfig";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const StudentReg = () => {
-  const [Student, setStudent] = useState([]);
   const [filteredClassArms, setFilteredClassArms] = useState([]);
   const [countries, setCountries] = useState([]);
   const [states, setStates] = useState([]);
@@ -16,6 +16,7 @@ const StudentReg = () => {
   const [classYears, setClassYears] = useState([]);
   const [classArms, setClassArms] = useState([]);
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
   const nigeria = Country.getAllCountries().find(
     (country) => country.name === "Nigeria"
@@ -318,27 +319,45 @@ const StudentReg = () => {
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">Password:</label>
-              <input
-                type="password"
-                placeholder="Create Password"
-                value={formData.user.password || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    user: {
-                      ...prev.user,
-                      password: value,
-                    },
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.user.password !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
-                required
-              />
+              <div className="relative">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  id="password"
+                  placeholder="Create Password"
+                  value={formData.user.password || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFormData((prev) => ({
+                      ...prev,
+                      user: {
+                        ...prev.user,
+                        password: value,
+                      },
+                    }));
+                  }}
+                  className={`w-full focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
+                    formData.user.password !== ""
+                      ? "border-2 border-[#0071E3]"
+                      : "border border-[#B6B6B6]"
+                  }`}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                  aria-pressed={showPassword}
+                  className="absolute inset-y-0 right-0 flex items-center justify-center px-2
+                                           text-[#808080] hover:text-[#01427A] focus:outline-none"
+                  tabIndex={0}
+                >
+                  {showPassword ? (
+                    <FiEyeOff className="w-5 h-5" />
+                  ) : (
+                    <FiEye className="w-5 h-5" />
+                  )}
+                </button>
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-3">

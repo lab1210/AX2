@@ -110,13 +110,9 @@ const ClasstoDept = () => {
   const handleDelete = async (assignmentId) => {
     try {
       const response = await deleteClassDepartmentAssignment(assignmentId);
-      if (response?.status === 204) {
-        toast.success("Assignment deleted successfully");
-        fetchData();
-        closeDeleteModal();
-      } else {
-        toast.error("Failed to delete assignment");
-      }
+      toast.success("Assignment deleted successfully");
+      fetchData();
+      closeDeleteModal();
     } catch (error) {
       toast.error("Failed to delete assignment");
     }
