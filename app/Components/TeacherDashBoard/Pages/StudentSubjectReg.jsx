@@ -13,10 +13,12 @@ import {
   updateStudentSubject,
 } from "@/Service/StudentSubjectReg";
 import toast from "react-hot-toast";
+import { getClassDepartmentAssignments } from "@/Service/SchoolAdminAssignmentService";
 
 const StudentToSubject = () => {
   const [allStudents, setAllStudents] = useState([]);
   const [allSubjects, setAllSubjects] = useState([]);
+  const [allclassdept, setAllclassdept] = useState([]);
   const [studentSubjectList, setStudentSubjectList] = useState([]);
   const [selectedSubjectAssignment, setSelectedSubjectAssignment] =
     useState(null);
@@ -42,17 +44,24 @@ const StudentToSubject = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [studentsRes, subjectsRes, registrationsRes] = await Promise.all([
-        getStudents(),
-        getSubject(),
-        getStudentSubjectRegistrations(),
-      ]);
+      const [studentsRes, subjectsRes, registrationsRes, classdept] =
+        await Promise.all([
+          getStudents(),
+          getSubject(),
+          getStudentSubjectRegistrations(),
+          getClassDepartmentAssignments(),
+        ]);
+
+      console.log("Students data:", studentsRes);
+      console.log("Subjects data:", subjectsRes);
+      console.log("Class Dept data:", classdept);
 
       if (!studentsRes.error) setAllStudents(studentsRes);
       if (!subjectsRes.error)
         setAllSubjects(subjectsRes.results || subjectsRes);
       if (!registrationsRes.error)
         setStudentSubjectList(registrationsRes.results || registrationsRes);
+      if (!classdept.error) setAllclassdept(classdept.results || classdept);
     } catch (error) {
       console.error("Failed to fetch data:", error);
       toast.error("Failed to load data");
@@ -61,19 +70,86 @@ const StudentToSubject = () => {
     }
   };
 
-  // Format students for MultiDropdown
-  const studentOptions = allStudents.map((student) => ({
-    label: `${student.first_name} ${student.last_name}`,
-    value: student.id,
-    original: student,
-  }));
+  // Get filtered subjects based on selected student's class
+  const getFilteredSubjects = () => {
+    if (formData.student_classes.length === 0) {
+      // If no student selected, return empty array or all subjects based on your preference
+      return [];
+    }
 
-  // Format subjects for MultiDropdown
-  const subjectOptions = allSubjects.map((subject) => ({
-    label: subject.name,
-    value: subject.id,
-    original: subject,
-  }));
+    // Get the selected student
+    const selectedStudent = formData.student_classes[0];
+    console.log("Selected student:", selectedStudent);
+
+    // Find the complete student data
+    const studentData = allStudents.find(
+      (s) => s.id === (selectedStudent.value || selectedStudent)
+    );
+
+    console.log("Found student data:", studentData);
+
+    if (!studentData) {
+      console.log("Student data not found");
+      return [];
+    }
+
+    // The classes are directly in the student object as an array
+    // Find the student's current active class
+    const studentActiveClass = Array.isArray(studentData)
+      ? studentData.find((cls) => cls.is_active)
+      : studentData;
+
+    console.log("Student active class:", studentActiveClass);
+
+    if (!studentActiveClass) {
+      console.log("No active class found for student");
+      return [];
+    }
+
+    const studentClassArmId = studentActiveClass.class_arm_id;
+    console.log("Student class arm ID:", studentClassArmId);
+
+    // Find the department for this class arm
+    const classDept = allclassdept.find(
+      (cd) => cd.class_id === studentClassArmId
+    );
+
+    console.log("Found class department:", classDept);
+
+    if (!classDept) {
+      console.log("No department found for class arm");
+      return [];
+    }
+
+    const departmentId = classDept.department;
+    console.log("Department ID:", departmentId);
+
+    // Filter subjects that belong to this department
+    const filteredSubjects = allSubjects.filter(
+      (subject) => subject.department === departmentId
+    );
+
+    console.log("Filtered subjects:", filteredSubjects);
+
+    return filteredSubjects.map((subject) => ({
+      label: subject.subject_name || subject.name,
+      value: subject.id,
+      original: subject,
+    }));
+  };
+
+  // Format students for MultiDropdown - FIXED based on your student data structure
+  const studentOptions = allStudents.map((student) => {
+    // Handle both cases: student might be the class object or have classes array
+    const studentName =
+      student.student_name || `${student.first_name} ${student.last_name}`;
+
+    return {
+      label: studentName,
+      value: student.student || student.id, // Use student field if it exists, otherwise id
+      original: student,
+    };
+  });
 
   const filteredStudents =
     searchText.trim() === ""
@@ -91,6 +167,15 @@ const StudentToSubject = () => {
   const handlePrevious = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
   const handleNext = () =>
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+
+  // Handle student selection - reset subjects when student changes
+  const handleStudentSelect = (selectedStudents) => {
+    console.log("Student selected:", selectedStudents);
+    setFormData({
+      student_classes: selectedStudents,
+      subject_classes: [], // Reset subjects when student changes
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -163,7 +248,6 @@ const StudentToSubject = () => {
           toast.error(
             "All selected student-subject combinations already exist"
           );
-
           return;
         }
 
@@ -327,9 +411,7 @@ const StudentToSubject = () => {
                     label="Select Student(s)"
                     items={filteredStudents}
                     selectedItems={formData.student_classes}
-                    onSelect={(selected) =>
-                      setFormData({ ...formData, student_classes: selected })
-                    }
+                    onSelect={handleStudentSelect}
                   />
                 </div>
                 <div>
@@ -338,12 +420,24 @@ const StudentToSubject = () => {
                   </label>
                   <MultiDropdown
                     label="Select Subject(s)"
-                    items={subjectOptions}
+                    items={getFilteredSubjects()}
                     selectedItems={formData.subject_classes}
                     onSelect={(selected) =>
                       setFormData({ ...formData, subject_classes: selected })
                     }
+                    disabled={formData.student_classes.length === 0}
                   />
+                  {formData.student_classes.length === 0 && (
+                    <p className="text-xs text-gray-500 mt-1">
+                      Please select a student first to see available subjects
+                    </p>
+                  )}
+                  {formData.student_classes.length > 0 &&
+                    getFilteredSubjects().length === 0 && (
+                      <p className="text-xs text-orange-500 mt-1">
+                        No subjects found for this student's class department
+                      </p>
+                    )}
                 </div>
               </div>
             </form>
