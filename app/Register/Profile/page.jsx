@@ -24,7 +24,6 @@ const extractFirstErrorMessage = (obj) => {
 };
 
 const Profile = () => {
-  const searchParams = useSearchParams();
   const registrationFormPath = "/Register/student/Registration-Form";
   const router = useRouter();
   const [Username, setUsername] = useState("");
