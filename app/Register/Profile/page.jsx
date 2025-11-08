@@ -4,8 +4,7 @@ import { IoIosCloseCircleOutline } from "react-icons/io";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useRouter } from "next/navigation";
-import { RegisterTeacher } from "../../../Service/TeacherRegService";
-import { RegisterStudent } from "../../../Service/StudentRegService";
+import { RegisterStudent } from "../../Service/StudentRegService";
 import toast from "react-hot-toast";
 
 const extractFirstErrorMessage = (obj) => {
@@ -26,9 +25,7 @@ const extractFirstErrorMessage = (obj) => {
 
 const Profile = () => {
   const searchParams = useSearchParams();
-  const role = searchParams.get("role");
-  const registrationFormPath =
-    role === "teacher" ? `/Register/Teacher` : `/Register/Student`;
+  const registrationFormPath = "/Register/student/Registration-Form";
   const router = useRouter();
   const [Username, setUsername] = useState("");
   const [Password, setPassword] = useState("");
@@ -109,9 +106,7 @@ const Profile = () => {
       try {
         let response;
 
-        role === "teacher"
-          ? (response = await RegisterTeacher(formData))
-          : (response = await RegisterStudent(formData));
+        response = await RegisterStudent(formData);
 
         console.log("Registration successful:", response);
         toast.success("Registration successful, you can now log in ");
@@ -158,7 +153,7 @@ const Profile = () => {
       <form className="bg-[#23303c] flex flex-col" onSubmit={handleSubmit}>
         <div className="bg-[#01427a] text-white flex justify-between items-center px-8 py-5 font-bold">
           <h2 className="text-xl">Profile Update</h2>
-          <Link href={`${registrationFormPath}/Registration-Form`}>
+          <Link href={registrationFormPath}>
             <IoIosCloseCircleOutline className="w-6 h-6 cursor-pointer" />
           </Link>
         </div>

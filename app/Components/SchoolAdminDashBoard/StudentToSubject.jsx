@@ -119,7 +119,11 @@ const StudentToSubject = () => {
 
     return groupedByStudent.filter((row) => {
       const byName = (row.student_name || "").toLowerCase().includes(q);
-      const byClass = ((row.class_year || "") + " " + (row.class_arm || ""))
+      const byClass = (
+        (row.class_year_name || "") +
+        " " +
+        (row.class_arm_name || "")
+      )
         .toLowerCase()
         .includes(q);
 
@@ -133,7 +137,9 @@ const StudentToSubject = () => {
 
     return allStudents.filter((s) => {
       const name = `${s.student_name || ""}`.toLowerCase();
-      const klass = `${s.class_year || ""} ${s.class_arm || ""}`.toLowerCase();
+      const klass = `${s.class_year_name || ""} ${
+        s.class_arm_name || ""
+      }`.toLowerCase();
       return filterType === "name" ? name.includes(q) : klass.includes(q);
     });
   }, [allStudents, searchText, filterType]);
@@ -214,12 +220,12 @@ const StudentToSubject = () => {
           registrations.map((reg) => registerStudentSubject(reg))
         );
 
+        fetchData();
         toast.success(
           `Registered ${registrations.length} subject${
             registrations.length > 1 ? "s" : ""
           } successfully.`
         );
-        fetchData();
         setFormData({ Student: [], Subject: [] });
       }
     } catch (error) {
