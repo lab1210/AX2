@@ -214,7 +214,7 @@ const StudentForm = () => {
     try {
       toast.success("Registration successful! Redirecting to Profile page...");
       localStorage.setItem("studentInfo", JSON.stringify(studentData));
-      router.push(`${registrationFormPath}Profile`);
+      router.push("/Register/Profile");
     } catch (err) {
       toast.error("An error occurred during registration.");
       console.error(err);

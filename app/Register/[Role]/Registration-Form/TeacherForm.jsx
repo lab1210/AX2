@@ -128,15 +128,15 @@ const TeacherForm = () => {
 
   const handleNext = (e) => {
     e.preventDefault(); // Prevent the default form submission behavior
-    const studentInfo = {
+    const teacherInfo = {
       ...formData,
       country: selectedCountry?.isoCode || "", // Or name, depending on your backend
       state: selectedState?.isoCode || "", // Or name
       city: selectedCity?.name || "",
     };
-    localStorage.setItem("studentInfo", JSON.stringify(studentInfo));
-    console.log("Teacher Info:", studentInfo);
-    router.push(`${registrationFormPath}Profile`);
+    localStorage.setItem("teacherInfo", JSON.stringify(teacherInfo));
+    console.log("Teacher Info:", teacherInfo);
+    router.push(`/Register/TeacherProfile`);
   };
 
   return (
@@ -397,6 +397,28 @@ const TeacherForm = () => {
             </div>
             <div>
               <label
+                htmlFor={"last_name"}
+                className="font-bold text-gray-500 text-sm block mb-1"
+              >
+                Specialization
+              </label>
+              <input
+                name={"specialization"}
+                type="text"
+                value={formData.specialization}
+                placeholder="Enter specialization"
+                required
+                onChange={handleInputChange}
+                className="px-5 py-2 rounded border-2 border-gray-300 text-gray-500 outline-none text-sm bg-white w-full"
+              />
+              {error.specialization && (
+                <p className="text-[#f2645c] text-sm mt-1">
+                  {error.specialization}
+                </p>
+              )}
+            </div>
+            <div>
+              <label
                 htmlFor={"date_hire"}
                 className="font-bold text-gray-500 text-sm block mb-1"
               >
@@ -414,7 +436,6 @@ const TeacherForm = () => {
                 <p className="text-[#f2645c] text-sm mt-1">{error.date_hire}</p>
               )}
             </div>
-            <div></div>
             <div>
               <label
                 htmlFor="Status"
