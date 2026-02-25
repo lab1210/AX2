@@ -310,7 +310,6 @@ export const getClassDepartmentAssignments = async () => {
     }
     const url = `${BASE_URL}/assignments/class_departments/`;
     const response = await axios.get(url, { headers });
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Failed to get class department Assignments:", error);
@@ -404,7 +403,6 @@ export const getStudenttoClassRelationship = async () => {
     }
     const url = `${BASE_URL}/assignments/student-classes/`;
     const response = await axios.get(url, { headers });
-    console.log(response.data);
     return response.data;
   } catch (error) {
     console.error("Failed to get Student to Class Relationships:", error);

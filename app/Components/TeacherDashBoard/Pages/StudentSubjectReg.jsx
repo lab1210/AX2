@@ -5,7 +5,6 @@ import MultiDropdown from "@/Components/SchoolAdminDashBoard/MultiDropDown";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import { Bell } from "lucide-react";
 import Layout from "../TeacherWrapper";
-import { getStudents } from "@/Service/studentService";
 import { getSubject } from "@/Service/schoolConfig";
 import {
   getStudentSubjectRegistrations,
@@ -13,7 +12,10 @@ import {
   updateStudentSubject,
 } from "@/Service/StudentSubjectReg";
 import toast from "react-hot-toast";
-import { getClassDepartmentAssignments } from "@/Service/SchoolAdminAssignmentService";
+import {
+  getClassDepartmentAssignments,
+  getStudenttoClassRelationship,
+} from "@/Service/SchoolAdminAssignmentService";
 
 const StudentToSubject = () => {
   const [allStudents, setAllStudents] = useState([]);
@@ -36,7 +38,6 @@ const StudentToSubject = () => {
     subject_classes: [],
   });
 
-  // Fetch data on component mount
   useEffect(() => {
     fetchData();
   }, []);
@@ -44,109 +45,117 @@ const StudentToSubject = () => {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [studentsRes, subjectsRes, registrationsRes, classdept] =
-        await Promise.all([
-          getStudents(),
-          getSubject(),
-          getStudentSubjectRegistrations(),
-          getClassDepartmentAssignments(),
-        ]);
 
-      console.log("Students data:", studentsRes);
-      console.log("Subjects data:", subjectsRes);
-      console.log("Class Dept data:", classdept);
+      let studentsRes, subjectsRes, registrationsRes, classdept;
 
-      if (!studentsRes.error) setAllStudents(studentsRes);
-      if (!subjectsRes.error)
-        setAllSubjects(subjectsRes.results || subjectsRes);
-      if (!registrationsRes.error)
-        setStudentSubjectList(registrationsRes.results || registrationsRes);
-      if (!classdept.error) setAllclassdept(classdept.results || classdept);
+      try {
+        studentsRes = await getStudenttoClassRelationship();
+      } catch (error) {
+        console.error("❌ getStudenttoClassRelationship failed:", error);
+        console.error("❌ Error message:", error.message);
+        console.error("❌ Error stack:", error.stack);
+        studentsRes = { error: error.message };
+      }
+
+      try {
+        console.log("📡 Calling getSubject...");
+        subjectsRes = await getSubject();
+        console.log("✅ Subjects data:", subjectsRes);
+        console.log("✅ Subjects data type:", typeof subjectsRes);
+        console.log("✅ Subjects results:", subjectsRes?.results);
+      } catch (error) {
+        console.error("❌ getSubject failed:", error);
+        console.error("❌ Error message:", error.message);
+        subjectsRes = { error: error.message };
+      }
+
+      try {
+        console.log("📡 Calling getClassDepartmentAssignments...");
+        classdept = await getClassDepartmentAssignments();
+        console.log("✅ Class Dept data:", classdept);
+        console.log("✅ Class Dept data type:", typeof classdept);
+        console.log("✅ Class Dept results:", classdept?.results);
+      } catch (error) {
+        console.error("❌ getClassDepartmentAssignments failed:", error);
+        console.error("❌ Error message:", error.message);
+        classdept = { error: error.message };
+      }
+
+      try {
+        console.log("📡 Calling getStudentSubjectRegistrations...");
+        registrationsRes = await getStudentSubjectRegistrations();
+        console.log("✅ Registrations data:", registrationsRes);
+        console.log("✅ Registrations data type:", typeof registrationsRes);
+        console.log("✅ Registrations results:", registrationsRes?.results);
+      } catch (error) {
+        console.error("❌ getStudentSubjectRegistrations failed:", error);
+        console.error("❌ Error message:", error.message);
+        registrationsRes = { error: error.message };
+      }
+
+      // Process responses
+      console.log("🔄 Processing responses...");
+
+      if (!studentsRes?.error) {
+        setAllStudents(studentsRes);
+        console.log(`📊 Set ${studentsRes?.length} students`);
+      } else {
+        console.log("❌ Students data has error:", studentsRes.error);
+        setAllStudents([]);
+      }
+
+      if (!subjectsRes?.error) {
+        const subjectsData = subjectsRes.results || subjectsRes;
+        setAllSubjects(subjectsData);
+        console.log(`📚 Set ${subjectsData?.length} subjects`);
+      } else {
+        console.log("❌ Subjects data has error:", subjectsRes.error);
+        setAllSubjects([]);
+      }
+
+      if (!registrationsRes?.error) {
+        const registrationsData = registrationsRes.results || registrationsRes;
+        setStudentSubjectList(registrationsData);
+        console.log(`📋 Set ${registrationsData?.length} registrations`);
+      } else {
+        console.log("❌ Registrations data has error:", registrationsRes.error);
+        setStudentSubjectList([]);
+      }
+
+      if (!classdept?.error) {
+        const classdeptData = classdept.results || classdept;
+        setAllclassdept(classdeptData);
+        console.log(`🏫 Set ${classdeptData?.length} class departments`);
+      } else {
+        console.log("❌ Class dept data has error:", classdept.error);
+        setAllclassdept([]);
+      }
+
+      console.log("✅ All data processing completed");
     } catch (error) {
-      console.error("Failed to fetch data:", error);
+      console.error("❌ Outer catch block - Unexpected error:", error);
+      console.error("Error stack:", error.stack);
       toast.error("Failed to load data");
     } finally {
+      console.log("🏁 fetchData completed - setting loading to false");
       setLoading(false);
     }
   };
 
-  // Get filtered subjects based on selected student's class
   const getFilteredSubjects = () => {
-    if (formData.student_classes.length === 0) {
-      // If no student selected, return empty array or all subjects based on your preference
-      return [];
-    }
-
-    // Get the selected student
-    const selectedStudent = formData.student_classes[0];
-    console.log("Selected student:", selectedStudent);
-
-    // Find the complete student data
-    const studentData = allStudents.find(
-      (s) => s.id === (selectedStudent.value || selectedStudent)
-    );
-
-    console.log("Found student data:", studentData);
-
-    if (!studentData) {
-      console.log("Student data not found");
-      return [];
-    }
-
-    // The classes are directly in the student object as an array
-    // Find the student's current active class
-    const studentActiveClass = Array.isArray(studentData)
-      ? studentData.find((cls) => cls.is_active)
-      : studentData;
-
-    console.log("Student active class:", studentActiveClass);
-
-    if (!studentActiveClass) {
-      console.log("No active class found for student");
-      return [];
-    }
-
-    const studentClassArmId = studentActiveClass.class_arm_id;
-    console.log("Student class arm ID:", studentClassArmId);
-
-    // Find the department for this class arm
-    const classDept = allclassdept.find(
-      (cd) => cd.class_id === studentClassArmId
-    );
-
-    console.log("Found class department:", classDept);
-
-    if (!classDept) {
-      console.log("No department found for class arm");
-      return [];
-    }
-
-    const departmentId = classDept.department;
-    console.log("Department ID:", departmentId);
-
-    // Filter subjects that belong to this department
-    const filteredSubjects = allSubjects.filter(
-      (subject) => subject.department === departmentId
-    );
-
-    console.log("Filtered subjects:", filteredSubjects);
-
-    return filteredSubjects.map((subject) => ({
-      label: subject.subject_name || subject.name,
-      value: subject.id,
+    // Return all subjects without any filtering
+    return allSubjects.map((subject) => ({
+      label: subject.name,
+      value: subject.subject_id,
       original: subject,
     }));
   };
 
-  // Format students for MultiDropdown - FIXED based on your student data structure
   const studentOptions = allStudents.map((student) => {
-    // Handle both cases: student might be the class object or have classes array
-    const studentName =
-      student.student_name || `${student.first_name} ${student.last_name}`;
-
+    const studentName = student.student_name;
     return {
       label: studentName,
-      value: student.student || student.id, // Use student field if it exists, otherwise id
+      value: student.student_class_id,
       original: student,
     };
   });
@@ -294,13 +303,13 @@ const StudentToSubject = () => {
         student_classes: [
           {
             label: `${response.student_class?.student?.first_name} ${response.student_class?.student?.last_name}`,
-            value: response.student_class?.id,
+            value: response.student_class?.student_class_id,
           },
         ],
         subject_classes: [
           {
             label: response.subject_class?.subject?.name,
-            value: response.subject_class?.id,
+            value: response.subject_class?.subject_id,
           },
         ],
       });
@@ -432,12 +441,6 @@ const StudentToSubject = () => {
                       Please select a student first to see available subjects
                     </p>
                   )}
-                  {formData.student_classes.length > 0 &&
-                    getFilteredSubjects().length === 0 && (
-                      <p className="text-xs text-orange-500 mt-1">
-                        No subjects found for this student's class department
-                      </p>
-                    )}
                 </div>
               </div>
             </form>
