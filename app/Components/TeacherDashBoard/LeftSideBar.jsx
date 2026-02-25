@@ -92,11 +92,14 @@ const LeftSidebar = ({ user }) => {
     <div className=" flex flex-col h-screen bg-white shadow-lg border-r border-gray-200 overflow-hidden no-scrollbar">
       {/* Top section with logo */}
       <div className="flex items-center justify-center p-2 flex-col text-white">
-        <img src="/logo.svg" alt="Foursquare Logo" className="h-13 w-13" />
+        <img
+          src={user?.teacher?.school_logo}
+          alt="SchoolLogo"
+          className="h-13 w-13"
+        />
         <div className="xl:text-lg text-base">
           <p className="text-[#004080]  font-bold text-center ">
-            {/* {school?.school_name} */}
-            Foursquare
+            {user?.teacher?.school_name}
           </p>
           <p className="text-[#004080]  font-bold text-center ">
             Student Portal
