@@ -5,8 +5,8 @@ import Link from "next/link";
 import { PiEyeLight } from "react-icons/pi";
 import { IoEyeOffOutline, IoChevronBackSharp } from "react-icons/io5";
 import { useRouter } from "next/navigation";
-import { getUserDetails, Login as LoginService } from "./Service/AuthService";
-
+import toast from "react-hot-toast";
+import authService from "@/Service/AuthService"
 export default function Login() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +17,25 @@ export default function Login() {
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  // Function to determine dashboard path based on user roles with your existing paths
+  const getDashboardPath = (user) => {
+    const roles = user.roles || [];
+    
+    if (roles.includes("Teacher")) {
+      return `/Teacher/DashBoard/?teacherID=${user.teacherId || user.id}`;
+    }
+    if (roles.includes("Student")) {
+      return `/Student/DashBoard/?studentId=${user.studentId || user.id}`;
+    }
+    if (roles.includes("SuperAdmin")) {
+      return `/Super-Admin/DashBoard?adminId=${user.superAdminId || user.id}`;
+    }
+    if (roles.includes("SchoolAdmin")) {
+      return `/School-Admin/DashBoard?schooladminId=${user.schoolAdminId || user.id}`;
+    }
+    return "/dashboard";
   };
 
   const handleSubmit = async (e) => {
@@ -31,29 +50,23 @@ export default function Login() {
     }
 
     try {
-      await LoginService(username, password);
-      const { roles, teacher, student, super_admin, school_admin } =
-        getUserDetails();
-      const roleName = roles[0]?.role?.name;
-
-      switch (roleName) {
-        case "Teacher":
-          router.push(`/Teacher/DashBoard/?teacherID=${teacher?.teacher_id}`);
-          break;
-        case "Student":
-          router.push(`/Student/DashBoard/?studentId=${student?.student_id}`);
-          break;
-        case "Super Admin":
-          router.push(`/Super-Admin/DashBoard?adminId=${super_admin?.id}`);
-          break;
-        case "School Admin":
-          router.push(
-            `/School-Admin/DashBoard?schooladminId=${school_admin?.schooladmin_id}`
-          );
-          break;
-        default:
-          console.warn("Unknown user role", roleName);
-          router.push("/");
+      const result = await authService.login(username, password);
+      
+      if (result.success) {
+        const user = result.data.user;
+        
+        if (result.data.mustChangePassword) {
+          toast.success("Please change your password to continue");
+          localStorage.setItem("tempUserId", user.id);
+          router.push("/set-password");
+          return;
+        }
+        
+        const dashboardPath = getDashboardPath(user);
+        router.push(dashboardPath);
+        toast.success(`Welcome back, ${user.fullName || user.username}!`);
+      } else {
+        setError(result.message || "Invalid username or password");
       }
     } catch (err) {
       console.error("Login failed", err);
@@ -82,13 +95,13 @@ export default function Login() {
               <form onSubmit={handleSubmit}>
                 <div className="flex flex-col mb-4">
                   <label className="text-sm font-bold" htmlFor="Username">
-                    Username
+                    Username or Email
                   </label>
                   <input
                     className="bg-[#f0eeed] rounded mt-1 px-4 py-2 text-xs placeholder:text-[rgba(0,0,0,0.2)]"
                     type="text"
                     value={username}
-                    placeholder="Enter Username"
+                    placeholder="Enter Username or Email"
                     onChange={(e) => setUsername(e.target.value)}
                     required
                   />
@@ -98,6 +111,12 @@ export default function Login() {
                     <label className="text-sm font-bold" htmlFor="Password">
                       Password
                     </label>
+                    <Link 
+                      href="/forgot-password" 
+                      className="text-xs text-[#F47458] hover:underline"
+                    >
+                      Forgot Password?
+                    </Link>
                   </div>
                   <div className="relative">
                     <input
@@ -177,12 +196,14 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="w-full space-y-4 p-6">
           <div>
-            <label className="block text-sm font-bold mb-1">Username</label>
+            <label className="block text-sm font-bold mb-1">
+              Username or Email
+            </label>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="Enter Username"
+              placeholder="Enter Username or Email"
               required
               className="w-full bg-[#f0eeed] rounded px-4 py-2 text-sm placeholder:text-[rgba(0,0,0,0.2)]"
             />
@@ -214,6 +235,12 @@ export default function Login() {
             {error && (
               <p className="text-[#f2645c] text-xs font-bold mt-1">{error}</p>
             )}
+          </div>
+
+          <div className="flex justify-end">
+            <Link href="/forgot-password" className="text-xs text-[#F47458] hover:underline">
+              Forgot Password?
+            </Link>
           </div>
 
           <button
