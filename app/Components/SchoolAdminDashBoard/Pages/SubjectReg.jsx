@@ -3,14 +3,22 @@ import React, { useState } from "react";
 import SchoolAdminLayout from "../SchoolAdminLayout";
 import RightSide from "../RightSide";
 import StudentToSubject from "../StudentToSubject";
+import SubjectRulesManagement from "../SubjectRuleMgt";
+
 const SubjectReg = () => {
   const [activeTab, setActiveTab] = useState("Student Subject Assignment");
+  
+  const tabs = [
+    "Student Subject Assignment",
+    "Subject Rules Config"
+  ];
+
   return (
     <SchoolAdminLayout>
       <div className="lg:grid lg:grid-cols-[1fr_270px] flex flex-col sm:gap-6 lg:gap-0 bg-[#F9FAFE] lg:h-full pt-3 pl-2 pr-1 lg:pb-0 pb-3 overflow-y-auto">
-        <div className="bg-white h-full mr-2 overflow-hidden sm:pb-3 lg:pb-0 z-[1000]">
-          <div className="pt-3 text-sm flex items-center gap-28 pl-10 ">
-            {["Student Subject Assignment"].map((tab) => (
+        <div className="bg-white h-full mr-2 overflow-y-auto no-scrollbar sm:pb-3 lg:pb-0 z-[1000]">
+          <div className="pt-3 text-sm flex items-center gap-28 pl-10">
+            {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -30,7 +38,9 @@ const SubjectReg = () => {
             ))}
           </div>
           <hr className="mt-1.5" />
+          
           {activeTab === "Student Subject Assignment" && <StudentToSubject />}
+          {activeTab === "Subject Rules Config" && <SubjectRulesManagement />}
         </div>
         <div className="h-full overflow-hidden">
           <RightSide />

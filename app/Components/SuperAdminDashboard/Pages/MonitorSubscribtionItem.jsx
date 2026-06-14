@@ -6,15 +6,14 @@ import { RiEqualizerLine } from "react-icons/ri";
 import { FiEdit3 } from "react-icons/fi";
 import { FaCheck } from "react-icons/fa6";
 import { IoClose } from "react-icons/io5";
-import {
-  getSchoolSubscriptions,
-  updateSchoolSubscription,
-} from "../../../Service/schoolService";
+import subscriptionService from "@/Service/SubscribtionService";
+import toast from "react-hot-toast";
 
-const itemsPerPage = 7; // You can adjust this value
+const itemsPerPage = 7;
 
 const MonitorSubscribtionItem = () => {
   const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
     return new Date(dateString).toLocaleDateString("en-GB");
   };
 
@@ -29,9 +28,11 @@ const MonitorSubscribtionItem = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editAmountPerStudent, setEditAmountPerStudent] = useState("");
   const [editAmountPaid, setEditAmountPaid] = useState("");
-  const [editExpireDate, setEditExpireDate] = useState("");
   const [updateLoading, setUpdateLoading] = useState(false);
   const [updateApiError, setUpdateApiError] = useState(null);
+
+  // State for activate/deactivate toggle
+  const [togglingSubscription, setTogglingSubscription] = useState(null);
 
   // Function to format currency
   const formatCurrency = (amount) => {
@@ -44,20 +45,24 @@ const MonitorSubscribtionItem = () => {
     return "N/A";
   };
 
-  // Function to fetch school subscriptions
+  // Function to fetch all subscriptions
   const fetchSubscriptions = useCallback(async () => {
     setLoading(true);
     setApiError(null);
     try {
-      const response = await getSchoolSubscriptions();
-      if (response?.status === 200 && response.data) {
-        setSubscriptions(response.data);
+      const response = await subscriptionService.getAllSubscriptions();
+      console.log("Subscriptions response:", response);
+      
+      if (response.success) {
+        setSubscriptions(response.data || []);
       } else {
-        setApiError("Failed to fetch school subscriptions.");
+        setApiError(response.message || "Failed to fetch subscriptions.");
+        toast.error(response.message || "Failed to fetch subscriptions.");
       }
     } catch (error) {
-      console.error("Error fetching school subscriptions:", error);
+      console.error("Error fetching subscriptions:", error);
       setApiError("An error occurred while fetching subscriptions.");
+      toast.error("An error occurred while fetching subscriptions.");
     } finally {
       setLoading(false);
     }
@@ -70,9 +75,8 @@ const MonitorSubscribtionItem = () => {
   // Function to open the edit modal
   const openModal = (subscription) => {
     setSelectedSubscription(subscription);
-    setEditAmountPerStudent(String(subscription.amount_per_student));
-    setEditAmountPaid(String(subscription.amount_paid));
-    setEditExpireDate(subscription.expired_date);
+    setEditAmountPerStudent(String(subscription.amountPerStudent || ""));
+    setEditAmountPaid(String(subscription.amountPaid || ""));
     setIsModalOpen(true);
   };
 
@@ -85,8 +89,9 @@ const MonitorSubscribtionItem = () => {
 
   // Function to handle saving the edited subscription data
   const handleSaveSubscription = async () => {
-    if (!selectedSubscription?.subscription_id) {
+    if (!selectedSubscription?.subscriptionId) {
       console.error("No subscription ID found for the selected subscription.");
+      toast.error("No subscription ID found.");
       return;
     }
 
@@ -94,37 +99,62 @@ const MonitorSubscribtionItem = () => {
     setUpdateApiError(null);
 
     const updatedSubscriptionData = {
-      amount_per_student: parseFloat(editAmountPerStudent),
-      amount_paid: parseFloat(editAmountPaid),
-      expired_date: editExpireDate,
+      amountPerStudent: parseFloat(editAmountPerStudent),
+      amountPaid: parseFloat(editAmountPaid),
     };
 
     try {
-      const response = await updateSchoolSubscription(
-        selectedSubscription.subscription_id,
+      const response = await subscriptionService.patchSubscriptionAmount(
+        selectedSubscription.subscriptionId,
         updatedSubscriptionData
       );
 
-      if (response?.status === 200) {
+      if (response.success) {
         console.log("Subscription updated successfully:", response.data);
+        toast.success(response.message || "Subscription updated successfully!");
         closeModal();
-        fetchSubscriptions(); // Refetch subscriptions to update the list
+        fetchSubscriptions();
       } else {
-        setUpdateApiError(
-          response?.data?.message || "Failed to update subscription."
-        );
+        setUpdateApiError(response.message || "Failed to update subscription.");
+        toast.error(response.message || "Failed to update subscription.");
       }
     } catch (error) {
       console.error("Error updating subscription:", error);
       setUpdateApiError("An error occurred while updating the subscription.");
+      toast.error("An error occurred while updating the subscription.");
     } finally {
       setUpdateLoading(false);
     }
   };
 
+  // Function to handle activate/deactivate subscription
+  const handleToggleStatus = async (subscription) => {
+    setTogglingSubscription(subscription.subscriptionId);
+    try {
+      let response;
+      if (subscription.liveIsActive) {
+        response = await subscriptionService.deactivateSubscription(subscription.subscriptionId);
+      } else {
+        response = await subscriptionService.activateSubscription(subscription.subscriptionId);
+      }
+
+      if (response.success) {
+        toast.success(response.message || `Subscription ${subscription.liveIsActive ? "deactivated" : "activated"} successfully!`);
+        fetchSubscriptions();
+      } else {
+        toast.error(response.message || `Failed to ${subscription.liveIsActive ? "deactivate" : "activate"} subscription.`);
+      }
+    } catch (error) {
+      console.error("Error toggling subscription status:", error);
+      toast.error("An error occurred while updating subscription status.");
+    } finally {
+      setTogglingSubscription(null);
+    }
+  };
+
   // Filter subscriptions based on search query
   const filteredSubscriptions = subscriptions.filter((sub) =>
-    sub.school_name.toLowerCase().includes(searchQuery.toLowerCase())
+    sub.schoolName?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   // Pagination logic
@@ -141,7 +171,7 @@ const MonitorSubscribtionItem = () => {
 
   const handleSearch = (e) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to the first page on search
+    setCurrentPage(1);
   };
 
   if (loading) {
@@ -153,7 +183,18 @@ const MonitorSubscribtionItem = () => {
   }
 
   if (apiError) {
-    return <div>Error: {apiError}</div>;
+    return (
+      <SuperAdminLayout>
+        <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
+          <DashboardHeader />
+        </div>
+        <div className="bg-[#D4D4D4] overflow-auto flex-1 p-4">
+          <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md">
+            {apiError}
+          </div>
+        </div>
+      </SuperAdminLayout>
+    );
   }
 
   return (
@@ -170,36 +211,26 @@ const MonitorSubscribtionItem = () => {
                 <IoClose size={20} />
               </span>
             </div>
-            <div className="text-center font-bold text-gray-400]">
+            <div className="text-center font-bold text-gray-400">
               <p>SUBSCRIPTION PLAN</p>
             </div>
             <form className="flex flex-col mt-5 pl-10 pr-10 gap-2">
               <div className="flex justify-between font-semibold text-[#AEAEAE]">
                 <p>Amount Per Student:</p>
                 <input
-                  type="text"
-                  className="text-sm text-center pl-2 max-w-36 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
+                  type="number"
+                  className="text-sm text-center pl-2 max-w-36 pr-2 focus:outline-none border-[2px] border-[#d4d4d4]"
                   value={editAmountPerStudent}
                   onChange={(e) => setEditAmountPerStudent(e.target.value)}
                 />
               </div>
-              <div className="flex justify-between font-semibold ">
+              <div className="flex justify-between font-semibold">
                 <p className="text-[#01427A]">Amount Paid:</p>
                 <input
-                  type="text"
-                  className="text-[#AEAEAE] max-w-36 text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
+                  type="number"
+                  className="text-[#AEAEAE] max-w-36 text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4]"
                   value={editAmountPaid}
                   onChange={(e) => setEditAmountPaid(e.target.value)}
-                />
-              </div>
-
-              <div className="flex justify-between font-semibold ">
-                <p className="text-[#01427A]">Expired Date:</p>
-                <input
-                  type="text"
-                  className="text-[#AEAEAE] max-w-36 text-sm text-center pl-2 pr-2 focus:outline-none border-[2px] border-[#d4d4d4] "
-                  value={editExpireDate}
-                  onChange={(e) => setEditExpireDate(e.target.value)}
                 />
               </div>
               {updateApiError && (
@@ -207,6 +238,7 @@ const MonitorSubscribtionItem = () => {
               )}
               <div className="pb-10 pt-5">
                 <button
+                  type="button"
                   onClick={handleSaveSubscription}
                   disabled={updateLoading}
                   className={`text-white rounded-md pt-1 cursor-pointer pb-1 w-full ${
@@ -223,8 +255,8 @@ const MonitorSubscribtionItem = () => {
       <div className="bg-[#ffffff] pl-4 pt-4 pb-3 sm:pr-4 lg:pr-9 sticky top-0 z-10 shadow-md flex justify-between items-center">
         <DashboardHeader />
 
-        <div className="flex items-center gap-4 ">
-          <div className="flex items-center rounded-4xl border lg:min-w-[350px]  border-[#D0D0D0] ">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center rounded-4xl border lg:min-w-[350px] border-[#D0D0D0]">
             <input
               type="text"
               placeholder="Search School"
@@ -251,7 +283,7 @@ const MonitorSubscribtionItem = () => {
           <table className="min-w-full table-auto border-collapse">
             <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
               <tr className="border-b-[#D0D0D0] border-b">
-                <th className="pt-3 pb-3 px-5 pl-10  text-left font-bold text-[#333333]">
+                <th className="pt-3 pb-3 px-5 pl-10 text-left font-bold text-[#333333]">
                   School Name
                 </th>
                 <th className="pt-3 pb-3 px-5 text-center font-bold text-[#333333]">
@@ -276,63 +308,69 @@ const MonitorSubscribtionItem = () => {
                   Status
                 </th>
                 <th className="pt-3 pb-3 px-5 text-center pr-10 font-bold text-[#333333]">
-                  Edit
+                  Actions
                 </th>
               </tr>
             </thead>
             <tbody>
               {currentItems.map((item) => (
                 <tr
-                  key={item.subscription_id}
-                  className="border-b-[#D0D0D0] border-b font-semibold text-xs cursor-pointer "
+                  key={item.subscriptionId}
+                  className="border-b-[#D0D0D0] border-b font-semibold text-xs"
                 >
                   <td className="pt-3 pb-3 px-5 pl-10 text-left text-[#333333]">
-                    {item.school_name}
+                    {item.schoolName}
                   </td>
                   <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
-                    {item.live_number_students}
+                    {item.liveNumberStudents}
                   </td>
                   <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
-                    {formatCurrency(item.amount_per_student)}
+                    {formatCurrency(item.amountPerStudent)}
                   </td>
                   <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
-                    {formatCurrency(item.live_expected_fee)}
+                    {formatCurrency(item.liveExpectedFee)}
                   </td>
                   <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
-                    {formatCurrency(item.amount_paid)}
+                    {formatCurrency(item.amountPaid)}
                   </td>
                   <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
-                    {formatDate(item.active_date)}
+                    {formatDate(item.activeDate)}
                   </td>
                   <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
-                    {formatDate(item.expired_date)}
+                    {formatDate(item.expiredDate)}
                   </td>
-                  <td className="pt-3 pb-3 px-5 text-center ">
-                    <div className="flex items-center justify-center gap-2 ">
+                  <td className="pt-3 pb-3 px-5 text-center">
+                    <div className="flex items-center justify-center gap-2">
                       <span
                         className={`${
-                          item.live_is_active
-                            ? " text-[#1BB66E] "
-                            : " text-[#F94144] "
-                        } font-bold `}
+                          item.liveIsActive
+                            ? "text-[#1BB66E]"
+                            : "text-[#F94144]"
+                        } font-bold`}
                       >
-                        {item.live_is_active ? "Active" : "Inactive"}
+                        {item.liveIsActive ? "Active" : "Inactive"}
                       </span>
-                      <span
+                      <button
+                        onClick={() => handleToggleStatus(item)}
+                        disabled={togglingSubscription === item.subscriptionId}
                         className={`${
-                          item.live_is_active
-                            ? " bg-[#1BB66E]"
-                            : " bg-[#F94144]"
-                        } font-bold text-white text-center rounded-xs`}
+                          item.liveIsActive ? "bg-[#1BB66E]" : "bg-[#F94144]"
+                        } font-bold text-white text-center rounded-full w-5 h-5 flex items-center justify-center cursor-pointer hover:opacity-80 transition-opacity disabled:opacity-50 disabled:cursor-not-allowed`}
                       >
-                        {item.live_is_active ? <FaCheck /> : <IoClose />}
-                      </span>
+                        {togglingSubscription === item.subscriptionId ? (
+                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                        ) : item.liveIsActive ? (
+                          <FaCheck size={12} />
+                        ) : (
+                          <IoClose size={12} />
+                        )}
+                      </button>
                     </div>
                   </td>
-                  <td className="pt-3 pb-3 px-5 text-center  text-[#333333]">
-                    <div className="flex gap-4">
+                  <td className="pt-3 pb-3 px-5 text-center text-[#333333]">
+                    <div className="flex gap-4 justify-center">
                       <FiEdit3
-                        className="text-[#80ADCB] cursor-pointer"
+                        className="text-[#80ADCB] cursor-pointer hover:text-[#01427A] transition-colors"
                         size={15}
                         onClick={() => openModal(item)}
                       />

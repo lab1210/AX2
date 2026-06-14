@@ -7,6 +7,7 @@ import StudentReg from "../StudentReg";
 import TeacherList from "../TeacherList";
 import StudentList from "../StudentList";
 import PinGen from "../PinGen";
+import TokenManagement from "../PinGen";
 const Registration = () => {
   const [activeTab, setActiveTab] = useState("OTP Generation");
 
@@ -45,7 +46,7 @@ const Registration = () => {
           {activeTab === "Teacher's List" && <TeacherList />}
           {activeTab === "Student's List" && <StudentList />}
           {activeTab === "Student Registration" && <StudentReg />}
-          {activeTab === "OTP Generation" && <PinGen />}
+          {activeTab === "OTP Generation" && <TokenManagement />}
         </div>
         <div className="h-full lg:overflow-hidden">
           <RightSide />

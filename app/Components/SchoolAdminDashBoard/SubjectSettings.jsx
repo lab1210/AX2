@@ -1,19 +1,13 @@
 "use client";
-import {
-  createSubject,
-  deleteSubject,
-  getSubject,
-  UpdateSubject,
-} from "@/Service/schoolConfig";
+import academicEntityService from "@/Service/AcademicEntityService";
 import React, { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 
 const SubjectSettings = () => {
-  const [subjectList, setsubjectList] = useState([]);
-
-  const [selectedSubject, setselectedSubject] = useState(null);
-  const [editsubjectVisible, setEditsubjectVisible] = useState(false);
+  const [subjectList, setSubjectList] = useState([]);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [editSubjectVisible, setEditSubjectVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [selectedSubjectDelete, setSelectedSubjectDelete] = useState(null);
@@ -29,12 +23,17 @@ const SubjectSettings = () => {
 
   const fetchSubjects = async () => {
     try {
-      const data = await getSubject();
-      setsubjectList(data);
+      const result = await academicEntityService.getAllSubjects();
+      if (result.success) {
+        setSubjectList(result.data);
+      } else {
+        toast.error(result.message || "Failed to fetch subjects.");
+      }
     } catch (error) {
       toast.error("Failed to fetch subjects.");
     }
   };
+
   const paginatedData = subjectList.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -52,7 +51,7 @@ const SubjectSettings = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const trimmedName = editsubjectVisible
+    const trimmedName = editSubjectVisible
       ? selectedSubject?.name?.trim()
       : formData.name?.trim();
 
@@ -65,86 +64,82 @@ const SubjectSettings = () => {
       (item) => item.name?.toLowerCase() === trimmedName.toLowerCase()
     );
 
-    if (!editsubjectVisible && existingSubject) {
+    if (!editSubjectVisible && existingSubject) {
       toast.error("Subject already exists.");
       return;
     }
 
-    if (editsubjectVisible && selectedSubject) {
+    if (editSubjectVisible && selectedSubject) {
       try {
-        const updatedSubject = {
-          ...selectedSubject,
+        const updateData = {
           name: selectedSubject.name,
         };
-        const { data, error } = await UpdateSubject(
-          selectedSubject.subject_id,
-          updatedSubject
-        );
-        if (error) {
-          toast.error(error || "Failed to update subject.");
-          return;
+        const result = await academicEntityService.updateSubject(selectedSubject.id, updateData);
+        
+        if (result.success) {
+          await fetchSubjects();
+          toast.success("Subject updated successfully.");
+          setEditSubjectVisible(false);
+          setSelectedSubject(null);
+          setFormData({ name: "" });
+        } else {
+          toast.error(result.message || "Failed to update subject.");
         }
-        const updatedList = subjectList.map((item) =>
-          item.subject_id === selectedSubject.subject_id ? data : item
-        );
-        setsubjectList(updatedList);
-        toast.success("Subject updated successfully.");
-        setEditsubjectVisible(false);
-        setselectedSubject(null);
       } catch (error) {
         toast.error("An error occurred while updating.");
       }
     } else {
       try {
-        const createPayload = {
+        const createData = {
           name: formData.name,
         };
+        const result = await academicEntityService.createSubject(createData);
 
-        const { data, error } = await createSubject(createPayload);
-
-        if (error) {
-          toast.error(error || "Failed to add subject.");
-        } else {
-          setsubjectList((prev) => [...prev, data]);
+        if (result.success) {
+          await fetchSubjects();
+          setFormData({ name: "" });
           toast.success("Subject added successfully.");
+        } else {
+          toast.error(result.message || "Failed to add subject.");
         }
       } catch (err) {
         toast.error("An error occurred while adding.");
       }
     }
-    setFormData({
-      name: "",
-    });
   };
 
-  const handleEdit = (term) => {
-    setEditsubjectVisible(true);
-    setselectedSubject({ ...term });
+  const handleEdit = (subject) => {
+    setEditSubjectVisible(true);
+    setSelectedSubject({ ...subject });
   };
 
-  const openDeleteModal = (term) => {
-    setSelectedSubjectDelete(term);
+  const openDeleteModal = (subject) => {
+    setSelectedSubjectDelete(subject);
     setDeleteModalVisible(true);
   };
 
-  // Function to close delete modal
   const closeDeleteModal = () => {
     setSelectedSubjectDelete(null);
     setDeleteModalVisible(false);
   };
 
   const handleDelete = async () => {
-    if (selectedSubjectDelete?.subject_id) {
+    if (selectedSubjectDelete?.id) {
       try {
-        const response = await deleteSubject(selectedSubjectDelete.subject_id);
-        toast.success("Subject deleted successfully.");
-        fetchSubjects();
-        closeDeleteModal();
+        const result = await academicEntityService.deleteSubject(selectedSubjectDelete.id);
+        if (result.success) {
+          toast.success("Subject deleted successfully.");
+          await fetchSubjects();
+          closeDeleteModal();
+        } else {
+          toast.error(result.message || "Failed to delete subject.");
+        }
       } catch (error) {
-        toast.error("Failed to delete Subject.");
+        toast.error("Failed to delete subject.");
       }
     }
   };
+
   return (
     <div>
       {deleteModalVisible && selectedSubjectDelete && (
@@ -160,20 +155,19 @@ const SubjectSettings = () => {
                 Are you sure want to delete the subject
               </p>
               <p className="text-base text-[#858383]">
-                <span className="font-bold">{selectedSubjectDelete?.name}</span>
-                ?
+                <span className="font-bold">{selectedSubjectDelete?.name}</span>?
               </p>
             </div>
-            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5">
               <button
                 onClick={handleDelete}
-                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4 py-2"
               >
                 Yes, Delete
               </button>
               <button
                 onClick={closeDeleteModal}
-                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4 py-2"
               >
                 No, Cancel
               </button>
@@ -181,57 +175,49 @@ const SubjectSettings = () => {
           </div>
         </div>
       )}
+
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
-        <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
+        <div className="flex pt-3 pl-6 pr-6 justify-between mb-2">
           <p className="font-bold text-[#07508F]">
-            {editsubjectVisible ? "Edit Subject" : "Register Subject"}
+            {editSubjectVisible ? "Edit Subject" : "Register Subject"}
           </p>
           <button
             type="submit"
             className="bg-[#07508F] text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
           >
-            {editsubjectVisible ? "Save" : "Set"}
+            {editSubjectVisible ? "Save" : "Set"}
           </button>
         </div>
         <div className="pl-6 pr-6">
-          <div className="flex flex-col gap-2 ">
+          <div className="flex flex-col gap-2">
             <label className="text-[0.88rem] text-[#5E6A72]">Subject:</label>
             <input
               type="text"
               placeholder="Enter Subject"
-              value={
-                editsubjectVisible ? selectedSubject.name : formData.name || ""
-              }
+              value={editSubjectVisible ? selectedSubject?.name || "" : formData.name}
               onChange={(e) => {
                 const value = e.target.value;
-                editsubjectVisible
-                  ? setselectedSubject((prev) => ({
-                      ...prev,
-                      name: value,
-                    }))
-                  : setFormData((prev) => ({
-                      ...prev,
-                      name: value,
-                    }));
+                editSubjectVisible
+                  ? setSelectedSubject((prev) => ({ ...prev, name: value }))
+                  : setFormData((prev) => ({ ...prev, name: value }));
               }}
-              className={`text-base  ${
-                formData.name !== ""
-                  ? "border-[#0071E3]  border-2"
-                  : "border-[#AEAEAE] border-[1.5px]"
-              }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+              className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
               required
             />
           </div>
         </div>
       </form>
+
       <hr className="mt-8" />
+
       <div className="flex-shrink-0">
         <p className="font-semibold flex justify-center p-3 text-[#333333]">
-          Existing Subject
+          Existing Subjects
         </p>
       </div>
+
       <div className="px-0">
-        <div className="overflow-y-auto  no-scrollbar">
+        <div className="overflow-y-auto no-scrollbar">
           <table className="min-w-full table-auto">
             {paginatedData.length > 0 && (
               <thead className="bg-[#EDF0F3] text-left sticky top-0 z-10 lg:text-base text-xs">
@@ -244,16 +230,13 @@ const SubjectSettings = () => {
             <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
               {paginatedData.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="3"
-                    className="p-5  text-center border text-gray-500"
-                  >
+                  <td colSpan="2" className="p-5 text-center border text-gray-500">
                     No Data Available
                   </td>
                 </tr>
               ) : (
                 paginatedData.map((item, index) => (
-                  <tr className="border-b-[#D0D0D0] border-b" key={index}>
+                  <tr className="border-b-[#D0D0D0] border-b" key={item.id || index}>
                     <td className="p-2 pl-20">{item.name}</td>
                     <td className="p-2">
                       <div className="flex gap-4">
@@ -275,46 +258,49 @@ const SubjectSettings = () => {
             </tbody>
           </table>
         </div>
-        {/* Pagination controls */}
-        <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
-          <button
-            onClick={handlePrevious}
-            disabled={currentPage === 1}
-            className={`px-2 py-1  bg-[#E6ECF2] border ${
-              currentPage === 1
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-[#EDF0F3]"
-            }`}
-          >
-            &lt;
-          </button>
 
-          {Array.from({ length: totalPages }, (_, index) => (
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
             <button
-              key={index}
-              onClick={() => setCurrentPage(index + 1)}
-              className={`px-2 py-1   text-xs ${
-                currentPage === index + 1
-                  ? "bg-[#07508F] text-white"
-                  : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+              onClick={handlePrevious}
+              disabled={currentPage === 1}
+              className={`px-2 py-1 bg-[#E6ECF2] border ${
+                currentPage === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#EDF0F3]"
               }`}
             >
-              {index + 1}
+              &lt;
             </button>
-          ))}
 
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className={`px-2 py-1  border bg-[#E6ECF2] ${
-              currentPage === totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-[#EDF0F3]"
-            }`}
-          >
-            &gt;
-          </button>
-        </div>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`px-2 py-1 text-xs ${
+                  currentPage === index + 1
+                    ? "bg-[#07508F] text-white"
+                    : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              className={`px-2 py-1 border bg-[#E6ECF2] ${
+                currentPage === totalPages
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#EDF0F3]"
+              }`}
+            >
+              &gt;
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -7,11 +7,9 @@ import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import { IoClose } from "react-icons/io5";
 import AddUser from "../Modals/AddUser";
 import EditUser from "../Modals/EditUser";
-import {
-  deleteSuperAdmin,
-  getSuperAdmins,
-  updateSuperAdmin,
-} from "../../../Service/userService";
+// Import from the new service
+import superAdminMetricsService from "@/Service/SuperAdminService";
+import toast from "react-hot-toast";
 
 const ITEMS_PER_PAGE = 10;
 const ManageUserItem = () => {
@@ -29,9 +27,9 @@ const ManageUserItem = () => {
   const [deleteError, setDeleteError] = useState(null);
   const [deleteSuccess, setDeleteSuccess] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
-  const [editLoading, setEditLoading] = useState(false); // New state for edit loading
-  const [editError, setEditError] = useState(null); // New state for edit error
-  const [editSuccess, setEditSuccess] = useState(false); // New state for edit success
+  const [editLoading, setEditLoading] = useState(false);
+  const [editError, setEditError] = useState(null);
+  const [editSuccess, setEditSuccess] = useState(false);
   const [usersData, setUsersData] = useState([]);
 
   // State for pagination
@@ -40,21 +38,23 @@ const ManageUserItem = () => {
   // State for search
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Function to fetch all super admins (users)
+  // Function to fetch all super admins
   const fetchAllUsers = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getSuperAdmins();
-      if (response?.status === 200) {
-        setAllUsers(response.data.results);
+      const response = await superAdminMetricsService.getAllSuperAdmins();
+      console.log("Get all superadmins response:", response);
+      
+      if (response.success) {
+        setAllUsers(response.data || []);
       } else {
-        setError(
-          `Failed to fetch users: ${response?.statusText || "Unknown error"}`
-        );
+        setError(response.message || "Failed to fetch users");
+        toast.error(response.message || "Failed to fetch users");
       }
     } catch (err) {
       setError(`Error fetching users: ${err.message}`);
+      toast.error(`Error fetching users: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -73,9 +73,11 @@ const ManageUserItem = () => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     return allUsers.filter(
       (user) =>
-        user.first_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-        user.surname.toLowerCase().includes(lowerCaseSearchTerm) ||
-        user.phone_number.toLowerCase().includes(lowerCaseSearchTerm)
+        (user.fullName && user.fullName.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (user.firstName && user.firstName.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (user.surName && user.surName.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (user.phoneNumber && user.phoneNumber.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (user.email && user.email.toLowerCase().includes(lowerCaseSearchTerm))
     );
   }, [allUsers, searchTerm]);
 
@@ -105,13 +107,37 @@ const ManageUserItem = () => {
     });
   };
 
-  const openEditModal = (user) => {
-    setSelectedUserEdit(user);
+  // UPDATED: Fetch full user details when opening edit modal
+  const openEditModal = async (user) => {
+    setEditError(null);
+    setEditSuccess(false);
     setIsEditModalOpen(true);
-    setTimeout(() => {
-      setModalTransform("translateX(0)");
-      setModalOpacity(1);
-    }, 0);
+    
+    // Show loading in modal
+    setEditLoading(true);
+    
+    try {
+      // Fetch full user details using getSuperAdminById
+      const response = await superAdminMetricsService.getSuperAdminById(user.userId);
+      console.log("Full user details from getSuperAdminById:", response);
+      
+      if (response.success && response.data) {
+        setSelectedUserEdit(response.data);
+        setTimeout(() => {
+          setModalTransform("translateX(0)");
+          setModalOpacity(1);
+        }, 0);
+      } else {
+        toast.error(response.message || "Failed to load user details");
+        setIsEditModalOpen(false);
+      }
+    } catch (error) {
+      console.error("Error fetching user details:", error);
+      toast.error("Error loading user details");
+      setIsEditModalOpen(false);
+    } finally {
+      setEditLoading(false);
+    }
   };
 
   // Function to close modal
@@ -126,15 +152,15 @@ const ManageUserItem = () => {
     setModalTransform("translateX(-100%)");
     setModalOpacity(0);
     setTimeout(() => {
-      setSelectedUserEdit(null); // Clear the user being edited
+      setSelectedUserEdit(null);
       setEditError(null);
       setEditSuccess(false);
     }, 300);
   };
 
-  const openDeleteModal = (school) => {
+  const openDeleteModal = (user) => {
     setDeleteSuccess(false);
-    setSelectedSchoolDelete(school);
+    setSelectedSchoolDelete(user);
     setTimeout(() => {
       setModalTransform("translateX(0)");
       setModalOpacity(1);
@@ -153,63 +179,62 @@ const ManageUserItem = () => {
   const handleDeleteUser = async () => {
     console.log("handleDeleteUser called");
     console.log("selectedSchoolDelete:", selectedSchoolDelete);
-    if (selectedSchoolDelete?.id) {
+    if (selectedSchoolDelete?.userId) {
       setDeleteLoading(true);
       setDeleteError(null);
       setDeleteSuccess(false);
       try {
-        const response = await deleteSuperAdmin(selectedSchoolDelete.id);
-        if (response?.status === 204) {
-          console.log("User deleted successfully:", selectedSchoolDelete.id);
+        const response = await superAdminMetricsService.deleteSuperAdmin(selectedSchoolDelete.userId);
+        console.log("Delete response:", response);
+        
+        if (response.success) {
+          toast.success(response.message || "User deleted successfully");
           setDeleteSuccess(true);
           closeDeleteModal();
-          fetchAllUsers(); // Refresh the list after deletion
+          fetchAllUsers();
         } else {
-          setDeleteError(
-            `Failed to delete user: ${response?.statusText || "Unknown error"}`
-          );
+          setDeleteError(response.message || "Failed to delete user");
+          toast.error(response.message || "Failed to delete user");
         }
       } catch (err) {
         setDeleteError(`Error deleting user: ${err.message}`);
+        toast.error(`Error deleting user: ${err.message}`);
       } finally {
         setDeleteLoading(false);
       }
     }
   };
 
-  const handleUpdateUser = async (userData) => {
+  const handleUpdateUser = async (updateData) => {
     setEditLoading(true);
     setEditError(null);
     setEditSuccess(false);
     try {
-      if (selectedUserEdit?.id) {
-        const requestBody = {
-          surname: userData.surname,
-          first_name: userData.first_name,
-          phone_number: userData.phone_number,
-          country: userData.country,
-          state: userData.state,
-          city: userData.city,
-        };
-        const response = await updateSuperAdmin(
-          selectedUserEdit.id,
-          requestBody
+      if (selectedUserEdit?.userId) {
+        const response = await superAdminMetricsService.updateSuperAdmin(
+          selectedUserEdit.userId,
+          updateData
         );
-        if (response?.status === 200) {
-          console.log("User updated successfully:", selectedUserEdit.id);
+        console.log("Update response:", response);
+        
+        if (response.success) {
+          toast.success(response.message || "User updated successfully");
           setEditSuccess(true);
-          closeEditModal();
-          fetchAllUsers(); // Refresh the list after update
+          setTimeout(() => {
+            closeEditModal();
+            fetchAllUsers();
+          }, 1500);
         } else {
-          setEditError(
-            `Failed to update user: ${response?.statusText || "Unknown error"}`
-          );
+          setEditError(response.message || "Failed to update user");
+          toast.error(response.message || "Failed to update user");
         }
       } else {
         setEditError("No user selected for editing.");
+        toast.error("No user selected for editing.");
       }
     } catch (err) {
       setEditError(`Error updating user: ${err.message}`);
+      toast.error(`Error updating user: ${err.message}`);
     } finally {
       setEditLoading(false);
     }
@@ -221,37 +246,10 @@ const ManageUserItem = () => {
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
-    setCurrentPage(1); // Reset to the first page on search
+    setCurrentPage(1);
   };
 
   const totalPages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
-  const hasNextPage = currentPage < totalPages;
-  const hasPreviousPage = currentPage > 1;
-
-  const renderPaginationButtons = () => {
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pageNumbers.push(i);
-    }
-
-    return (
-      <div className="flex justify-center mt-4 pb-4">
-        {pageNumbers.map((number) => (
-          <button
-            key={number}
-            onClick={() => handlePageChange(number)}
-            className={`mx-1 px-3 py-1 rounded-md ${
-              currentPage === number
-                ? "bg-[#4084B1] text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
-          >
-            {number}
-          </button>
-        ))}
-      </div>
-    );
-  };
 
   if (loading) {
     return (
@@ -262,33 +260,42 @@ const ManageUserItem = () => {
   }
 
   if (error) {
-    <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
-      {error}
-    </div>;
+    return (
+      <SuperAdminLayout>
+        <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
+          <DashboardHeader />
+        </div>
+        <div className="bg-[#D4D4D4] overflow-auto flex-1 p-4">
+          <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md">
+            {error}
+          </div>
+        </div>
+      </SuperAdminLayout>
+    );
   }
 
   return (
     <SuperAdminLayout>
-      {/* Delete */}
+      {/* Delete Modal */}
       {selectedSchoolDelete && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
-          {/* Overlay */}
           <div
             className="absolute inset-0 bg-black/65"
             onClick={closeDeleteModal}
           ></div>
 
-          {/* Modal Content */}
           <div
-            className="relative  bg-white  rounded-xl shadow-lg min-w-75  z-50 transition-transform pt-10 pb-10  duration-600 ease-in-out"
+            className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 transition-transform pt-10 pb-10 duration-600 ease-in-out"
             style={{ transform: modalTransform, opacity: modalOpacity }}
           >
-            <p className="font-bold  text-center text-lg">Delete User</p>
+            <p className="font-bold text-center text-lg">Delete User</p>
             <div className="text-center pt-3">
               <p className="text-base text-[#858383]">
-                Are you sure want to delete the
+                Are you sure you want to delete
               </p>
-              <p className="text-base text-[#858383]">selected User?</p>
+              <p className="text-base text-[#858383] font-semibold">
+                {selectedSchoolDelete.fullName || selectedSchoolDelete.email}?
+              </p>
               {deleteError && (
                 <p className="text-red-500 mt-2">{deleteError}</p>
               )}
@@ -298,17 +305,17 @@ const ManageUserItem = () => {
                 </p>
               )}
             </div>
-            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5">
               <button
                 onClick={handleDeleteUser}
-                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4 py-2"
                 disabled={deleteLoading}
               >
                 {deleteLoading ? "Deleting..." : "Yes, Delete"}
               </button>
               <button
                 onClick={closeDeleteModal}
-                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4 py-2"
               >
                 No, Cancel
               </button>
@@ -317,7 +324,7 @@ const ManageUserItem = () => {
         </div>
       )}
 
-      {/* ADD USER */}
+      {/* ADD USER MODAL */}
       {isAddModalOpen && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -325,7 +332,7 @@ const ManageUserItem = () => {
             onClick={closeAddModal}
           ></div>
           <div
-            className="relative md:pl-6 md:pr-6 pt-4 pb-4 sm:pl-3 sm:pr-3  bg-white  rounded-md shadow-lg xl:w-280 lg:w-240 md:w-180 sm:w-150  z-50 transition-transform  duration-700 ease-in-out"
+            className="relative md:pl-6 md:pr-6 pt-4 pb-4 sm:pl-3 sm:pr-3 bg-white rounded-md shadow-lg xl:w-280 lg:w-240 md:w-180 sm:w-150 z-50 transition-transform duration-700 ease-in-out"
             style={{ transform: modalTransform, opacity: modalOpacity }}
           >
             <div className="flex justify-end">
@@ -334,14 +341,14 @@ const ManageUserItem = () => {
               </span>
             </div>
             <div className="flex justify-center">
-              <p className="font-bold text-lg">ADD NEW USER</p>
+              <p className="font-bold text-lg">ADD NEW SUPER ADMIN</p>
             </div>
             <AddUser onClose={closeAddModal} onUserAdded={fetchAllUsers} />
           </div>
         </div>
       )}
 
-      {/* Edit User */}
+      {/* EDIT USER MODAL */}
       {isEditModalOpen && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -349,7 +356,7 @@ const ManageUserItem = () => {
             onClick={closeEditModal}
           ></div>
           <div
-            className="relative md:pl-6 md:pr-6 pt-4 pb-4 sm:pl-3 sm:pr-3  bg-white  rounded-md  shadow-lg xl:w-280 lg:w-240 md:w-180 sm:w-150  z-50 transition-transform  duration-700 ease-in-out"
+            className="relative md:pl-6 md:pr-6 pt-4 pb-4 sm:pl-3 sm:pr-3 bg-white rounded-md shadow-lg xl:w-280 lg:w-240 md:w-180 sm:w-150 z-50 transition-transform duration-700 ease-in-out"
             style={{ transform: modalTransform, opacity: modalOpacity }}
           >
             <div className="flex justify-end">
@@ -358,7 +365,7 @@ const ManageUserItem = () => {
               </span>
             </div>
             <div className="flex justify-center">
-              <p className="font-bold text-lg ">EDIT USER</p>
+              <p className="font-bold text-lg">EDIT SUPER ADMIN</p>
             </div>
             <EditUser
               onClose={closeEditModal}
@@ -373,11 +380,12 @@ const ManageUserItem = () => {
         </div>
       )}
 
-      <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0  z-10 shadow-md  flex justify-between items-center ">
+      {/* Header */}
+      <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
         <DashboardHeader />
 
         <div className="flex items-center gap-4">
-          <div className="flex items-center rounded-4xl border lg:min-w-[300px]  border-[#D0D0D0] ">
+          <div className="flex items-center rounded-4xl border lg:min-w-[300px] border-[#D0D0D0]">
             <input
               type="text"
               placeholder="Search Super Admin"
@@ -404,85 +412,77 @@ const ManageUserItem = () => {
           </div>
         </div>
       </div>
+
+      {/* Table Content */}
       <div className="bg-[#D4D4D4] overflow-auto flex-1 p-4">
         <div className="bg-[#ffffff] rounded-lg overflow-x-auto">
-          {loading ? (
-            <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-              <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
-            </div>
-          ) : error ? (
-            <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
-              {error}
-            </div>
-          ) : (
-            <table className="min-w-full table-auto ">
-              <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs ">
-                <tr className="border-b-[#D0D0D0] border-b">
-                  <th className="pt-3 pb-3 pl-12  text-left  font-bold text-[#333333]">
-                    Name
-                  </th>
-                  <th className="pt-3 pb-3   text-left  font-bold text-[#333333]">
-                    Phone Number
-                  </th>
-                  <th className="pt-3 pb-3   text-left  font-bold text-[#333333]">
-                    Email Address
-                  </th>
-                  <th className="pt-3 pb-3   text-left  font-bold text-[#333333]">
-                    User Role
-                  </th>
-                  <th className="pt-3 pb-3   text-left  font-bold text-[#333333]">
-                    Modify
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {usersData?.length > 0 ? (
-                  usersData.map((item) => (
-                    <tr
-                      key={item.id}
-                      className="cursor-pointer border-b-[#D0D0D0] border-b font-semibold text-xs"
-                    >
-                      <td className="pt-3 pb-3 pl-12  text-[#333333]">
-                        {item.surname + " " + item.first_name}
-                      </td>
-                      <td className="pt-3 pb-3   text-[#333333]">
-                        {item.phone_number}
-                      </td>
-                      <td className="pt-3 pb-3   text-[#333333]">
-                        Default Email
-                      </td>
-                      <td className="pt-3 pb-3   text-[#333333]">
-                        Super Admin
-                      </td>
-                      <td className="pt-3 pb-3 text-[#333333]">
-                        <div className="flex gap-4">
-                          <FiEdit3
-                            className="text-[#80ADCB] cursor-pointer"
-                            size={15}
-                            onClick={() => openEditModal(item)}
-                          />
-                          <FiTrash2
-                            onClick={() => {
-                              openDeleteModal(item);
-                            }}
-                            className="text-[#F94144] cursor-pointer"
-                            size={15}
-                          />
-                        </div>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan="5" className="text-center py-4 text-gray-500">
-                      No users found.
+          <table className="min-w-full table-auto">
+            <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
+              <tr className="border-b-[#D0D0D0] border-b">
+                <th className="pt-3 pb-3 pl-12 text-left font-bold text-[#333333]">
+                  Name
+                </th>
+                <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
+                  Phone Number
+                </th>
+                <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
+                  Email Address
+                </th>
+                <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
+                  User Role
+                </th>
+                <th className="pt-3 pb-3 text-left font-bold text-[#333333]">
+                  Modify
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {usersData?.length > 0 ? (
+                usersData.map((item) => (
+                  <tr
+                    key={item.userId}
+                    className="cursor-pointer border-b-[#D0D0D0] border-b font-semibold text-xs"
+                  >
+                    <td className="pt-3 pb-3 pl-12 text-[#333333]">
+                      {item.fullName || `${item.firstName} ${item.surName}`}
+                    </td>
+                    <td className="pt-3 pb-3 text-[#333333]">
+                      {item.phoneNumber || "N/A"}
+                    </td>
+                    <td className="pt-3 pb-3 text-[#333333]">
+                      {item.email}
+                    </td>
+                    <td className="pt-3 pb-3 text-[#333333]">
+                      Super Admin
+                    </td>
+                    <td className="pt-3 pb-3 text-[#333333]">
+                      <div className="flex gap-4">
+                        <FiEdit3
+                          className="text-[#80ADCB] cursor-pointer"
+                          size={15}
+                          onClick={() => openEditModal(item)}
+                        />
+                        <FiTrash2
+                          onClick={() => openDeleteModal(item)}
+                          className="text-[#F94144] cursor-pointer"
+                          size={15}
+                        />
+                      </div>
                     </td>
                   </tr>
-                )}
-              </tbody>
-            </table>
-          )}
+                ))
+              ) : (
+                <tr>
+                  <td colSpan="5" className="text-center py-4 text-gray-500">
+                    No users found.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
+        
+        {/* Pagination */}
         {filteredUsers.length > ITEMS_PER_PAGE && (
           <div className="bg-[#ffffff] rounded-lg p-4 flex justify-center items-center gap-4 mt-2">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map(

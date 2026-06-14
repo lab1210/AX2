@@ -53,9 +53,7 @@ const DashboardHeader = () => {
         <div className="flex items-end gap-2">
           <div className="flex flex-col items-end gap-0">
             <p className="font-bold text-xs">
-              {user?.school_admin?.first_name +
-                " " +
-                user?.school_admin?.surname}
+              {user?.fullName }
             </p>
             <p className="text-[0.6rem]">School Admin</p>
           </div>

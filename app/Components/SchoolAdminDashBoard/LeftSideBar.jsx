@@ -8,8 +8,7 @@ import { CiLogout, CiSettings } from "react-icons/ci";
 import SchoolAdminSettingsPopup from "../SchoolAdminSettingsPopup";
 import { FiCalendar, FiUserPlus } from "react-icons/fi";
 import { IoDocumentTextOutline, IoNotificationsOutline } from "react-icons/io5";
-import { FaCalendar } from "react-icons/fa";
-import { logout } from "@/Service/AuthService";
+import authService from "@/Service/AuthService";
 import toast from "react-hot-toast";
 
 const SchoolAdminLeft = () => {
@@ -22,6 +21,11 @@ const SchoolAdminLeft = () => {
   useInitializeUser(setUser, setIsLoading);
 
   const [activePopup, setActivePopup] = useState(null);
+
+  // Get user details from authService for school info
+  const userDetails = authService.getUserDetails();
+  const schoolLogo = userDetails?.schoolLogo || user?.school_admin?.school_logo;
+  const schoolName = userDetails?.schoolName || user?.school_name;
 
   const DashboardLinks = [
     {
@@ -63,13 +67,15 @@ const SchoolAdminLeft = () => {
   const handleLogout = async (e) => {
     e.preventDefault();
     try {
-      const response = await logout();
-      toast.success(response.message);
+      await authService.logout();
+      toast.success("Logged out successfully");
       router.push("/");
     } catch (error) {
-      toast.error("Logout failed. Please try again." || error.message);
+      console.error("Logout error:", error);
+      toast.error("Logout failed. Please try again.");
     }
   };
+
   const isSpecialRouteActive = (name) => {
     if (name === "School Settings") {
       return pathname.includes("Configure");
@@ -86,19 +92,22 @@ const SchoolAdminLeft = () => {
         <div className="object-contain max-w-[50px] max-h-[50px]">
           <img
             className="w-full h-full"
-            src={user?.school_admin?.school_logo}
+            src={schoolLogo || "/whitelogo.png"}
             alt="logo"
+            onError={(e) => {
+              e.target.src = "/whitelogo.png";
+            }}
           />
         </div>
         <div className="text-white text-center">
-          <p className="font-bold lg:text-base text-sm ">
-            {user?.school_admin?.school_name}
+          <p className="font-bold lg:text-base text-sm">
+            {schoolName || "School"}
           </p>
-          <p className="font-bold text-center">Student Portal</p>
+          <p className="font-bold text-center">School Admin Portal</p>
         </div>
       </div>
 
-      <ul className="pt-6 text-white pl-4 pr-4 flex flex-col gap-2 w-full ">
+      <ul className="pt-6 text-white pl-4 pr-4 flex flex-col gap-2 w-full">
         {DashboardLinks.map((item, index) => {
           const isSpecial =
             item.Name === "School Settings" || item.Name === "Assignment";
@@ -109,18 +118,16 @@ const SchoolAdminLeft = () => {
           return (
             <li
               key={index}
-              className={`relative  cursor-pointer rounded-sm p-1 w-full ${
+              className={`relative cursor-pointer rounded-sm p-1 w-full ${
                 isActive
-                  ? "bg-[#f5f5f5] text-[#01427A] "
+                  ? "bg-[#f5f5f5] text-[#01427A]"
                   : "hover:bg-[#ABBED2] hover:text-[#01427A]"
               }`}
               onClick={isSpecial ? () => setActivePopup(item.Name) : undefined}
             >
               {isSpecial ? (
                 <>
-                  <div
-                    className={`flex items-center gap-4 sm:text-[0.94rem] xl:text-base  `}
-                  >
+                  <div className="flex items-center gap-4 sm:text-[0.94rem] xl:text-base">
                     <span>{item.icon}</span>
                     {item.Name}
                   </div>
@@ -146,12 +153,9 @@ const SchoolAdminLeft = () => {
         })}
         <li
           onClick={handleLogout}
-          className={`relative  cursor-pointer rounded-sm p-1 w-full bg-[#F94144] text-white]
-          `}
+          className="relative cursor-pointer rounded-sm p-1 w-full bg-[#F94144] text-white"
         >
-          <div
-            className={`flex items-center gap-4 sm:text-[0.94rem] xl:text-base  `}
-          >
+          <div className="flex items-center gap-4 sm:text-[0.94rem] xl:text-base">
             <span>
               <CiLogout size={20} />
             </span>

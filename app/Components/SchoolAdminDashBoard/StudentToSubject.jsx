@@ -1,32 +1,19 @@
 "use client";
 import React, { useState, useEffect, useMemo } from "react";
 import { IoFilter, IoSearch } from "react-icons/io5";
-import MultiDropdown from "./Multidropdownbyid";
-import { FiEdit2, FiTrash2 } from "react-icons/fi";
-import RegControlModal from "./RegControlModal";
 import { RxLetterCaseCapitalize } from "react-icons/rx";
-import {
-  deleteStudentSubjectRegistration,
-  getRegistrationControl,
-  getStudentSubjectRegistrations,
-  getStudenttoClassRelationship,
-  getSubjectDepartmentRelationships,
-  registerStudentSubject,
-  updateRegistrationControl,
-  updateStudentSubjectRegistration,
-} from "@/Service/SchoolAdminAssignmentService";
+import subjectRuleAndRegistrationService from "@/Service/StudenttoSubject";
+import studentService from "@/Service/studentService";
+import academicEntityService from "@/Service/AcademicEntityService";
+import registrationControlService from "@/Service/RegControlService";
 import toast from "react-hot-toast";
 
-const MAX_CHIPS = 2; // show this many chips before collapsing
+const MAX_CHIPS = 2;
 
 const StudentToSubject = () => {
   const [allStudents, setAllStudents] = useState([]);
   const [allSubjects, setAllSubjects] = useState([]);
-  const [StudentSubjectList, setStudentSubjectList] = useState([]);
-  const [selectedSubjectAssignment, setSelectedSubjectAssignment] =
-    useState(null);
-  const [editSubjectAssignmentVisible, setEditSubjectAssignmentVisible] =
-    useState(false);
+  const [studentSubjectList, setStudentSubjectList] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [registrationEnabled, setRegistrationEnabled] = useState(false);
   const [registrationControl, setRegistrationControl] = useState(null);
@@ -35,39 +22,24 @@ const StudentToSubject = () => {
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [searchText, setSearchText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
-  const [editStatus, setEditStatus] = useState("Pending");
-  const [expandedRows, setExpandedRows] = useState({}); // { [student_id]: boolean }
-  const [selectedItemDelete, setSelectedItemDelete] = useState(null);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [expandedRows, setExpandedRows] = useState({});
+  const [isToggling, setIsToggling] = useState(false);
 
   const itemsPerPage = 10;
 
   useEffect(() => {
-    fetchData();
+    fetchAllData();
   }, []);
 
-  const fetchData = async () => {
+  const fetchAllData = async () => {
     try {
       setIsLoading(true);
-
-      const [studentsRes, subjectsRes, registrationsRes, controlRes] =
-        await Promise.all([
-          getStudenttoClassRelationship(),
-          getSubjectDepartmentRelationships(),
-          getStudentSubjectRegistrations(),
-          getRegistrationControl(),
-        ]);
-
-      if (!studentsRes.error) {
-        setAllStudents(studentsRes);
-        console.log(allStudents);
-      }
-      if (!subjectsRes.error) setAllSubjects(subjectsRes);
-      if (!registrationsRes.error) setStudentSubjectList(registrationsRes);
-      if (!controlRes.error) {
-        setRegistrationControl(controlRes);
-        setRegistrationEnabled(controlRes.is_open);
-      }
+      await Promise.all([
+        fetchStudents(),
+        fetchSubjects(),
+        fetchRegistrations(),
+        fetchRegistrationStatus(),
+      ]);
     } catch (error) {
       console.error("Failed to fetch data:", error);
       toast.error("Failed to load data");
@@ -76,75 +48,109 @@ const StudentToSubject = () => {
     }
   };
 
-  const openDeleteModal = (term) => {
-    setSelectedItemDelete(term);
-    setDeleteModalVisible(true);
+  const fetchStudents = async () => {
+    const result = await studentService.getAllStudents();
+    if (result.success) {
+      setAllStudents(result.data);
+    }
   };
 
-  // Function to close delete modal
-  const closeDeleteModal = () => {
-    setSelectedItemDelete(null);
-    setDeleteModalVisible(false);
+  const fetchSubjects = async () => {
+    const result = await academicEntityService.getAllSubjects();
+    if (result.success) {
+      setAllSubjects(result.data);
+    }
   };
+
+  const fetchRegistrations = async () => {
+    const result = await subjectRuleAndRegistrationService.getAllRegisteredStudents();
+    if (result.success && result.data) {
+      console.log("Registrations API Response:", result.data);
+      setStudentSubjectList(result.data);
+    }
+  };
+
+  const fetchRegistrationStatus = async () => {
+    try {
+      const result = await registrationControlService.getControl();
+      console.log("Registration Control API Response:", result);
+      
+      if (result.success && result.data) {
+        setRegistrationControl(result.data);
+        const isOpen = result.data.isOpen === true;
+        setRegistrationEnabled(isOpen);
+        console.log("Setting registration enabled to:", isOpen);
+      } else {
+        console.log("No registration control data found");
+        setRegistrationEnabled(false);
+        setRegistrationControl(null);
+      }
+    } catch (error) {
+      console.error("Failed to fetch registration status:", error);
+      setRegistrationEnabled(false);
+    }
+  };
+
   const groupedByStudent = useMemo(() => {
     const map = new Map();
-    StudentSubjectList.forEach((item) => {
-      const key = item.student_id;
+    
+    const registrations = Array.isArray(studentSubjectList) ? studentSubjectList : [];
+    
+    registrations.forEach((item) => {
+      const key = item.studentId;
       if (!map.has(key)) {
         map.set(key, {
           key,
-          student_id: item.student_id,
-          student_name: item.student_name,
-          student_admission_number: item.student_admission_number,
-          class_arm: item.class_arm,
-          class_year: item.class_year, // <— add this
+          studentId: item.studentId,
+          studentName: item.studentName,
+          admissionNumber: item.admissionNumber,
+          classArmName: item.classArmName,
+          classYearName: item.classYearName,
           subjects: [],
+          status: item.status,
         });
       }
-      map.get(key).subjects.push({
-        subject_name: item.subject_name,
-        status: item.status,
-        registration_id: item.registration_id,
-        student_class: item.student_class,
-        subject_class: item.subject_class,
-        raw: item,
-      });
+      
+      if (item.subjects && Array.isArray(item.subjects)) {
+        item.subjects.forEach((subject) => {
+          map.get(key).subjects.push({
+            subjectId: subject.subjectId,
+            subjectName: subject.subjectName,
+            status: item.status || "Pending",
+            registrationId: subject.registrationId || `${item.studentId}_${subject.subjectId}`,
+          });
+        });
+      } else if (item.subjectName) {
+        map.get(key).subjects.push({
+          subjectId: item.subjectId,
+          subjectName: item.subjectName,
+          status: item.status || "Pending",
+          registrationId: item.registrationId || `${item.studentId}_${item.subjectId}`,
+        });
+      }
     });
+    
     return Array.from(map.values());
-  }, [StudentSubjectList]);
+  }, [studentSubjectList]);
 
   const filteredGrouped = useMemo(() => {
+    let filtered = groupedByStudent;
+    
     const q = searchText.trim().toLowerCase();
-    if (!q) return groupedByStudent;
+    if (q) {
+      filtered = filtered.filter((row) => {
+        const byName = (row.studentName || "").toLowerCase().includes(q);
+        const byAdmission = (row.admissionNumber || "").toLowerCase().includes(q);
+        const byClass = ((row.classYearName || "") + " " + (row.classArmName || "")).toLowerCase().includes(q);
 
-    return groupedByStudent.filter((row) => {
-      const byName = (row.student_name || "").toLowerCase().includes(q);
-      const byClass = (
-        (row.class_year_name || "") +
-        " " +
-        (row.class_arm_name || "")
-      )
-        .toLowerCase()
-        .includes(q);
+        if (filterType === "name") return byName || byAdmission;
+        return byClass;
+      });
+    }
 
-      return filterType === "name" ? byName : byClass;
-    });
+    return filtered;
   }, [groupedByStudent, searchText, filterType]);
 
-  const filteredStudents = useMemo(() => {
-    const q = searchText.trim().toLowerCase();
-    if (!q) return allStudents;
-
-    return allStudents.filter((s) => {
-      const name = `${s.student_name || ""}`.toLowerCase();
-      const klass = `${s.class_year_name || ""} ${
-        s.class_arm_name || ""
-      }`.toLowerCase();
-      return filterType === "name" ? name.includes(q) : klass.includes(q);
-    });
-  }, [allStudents, searchText, filterType]);
-
-  // Paginate the grouped rows
   const paginatedData = filteredGrouped.slice(
     (currentPage - 1) * itemsPerPage,
     currentPage * itemsPerPage
@@ -158,170 +164,72 @@ const StudentToSubject = () => {
   const handlePrevious = () => setCurrentPage((p) => Math.max(p - 1, 1));
   const handleNext = () => setCurrentPage((p) => Math.min(p + 1, totalPages));
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    try {
-      if (editSubjectAssignmentVisible && selectedSubjectAssignment) {
-        const studentId = formData.Student?.[0];
-        const subjectId = formData.Subject?.[0];
-
-        if (!studentId || !subjectId) {
-          toast.error("Please select both student and subject.");
-          return;
-        }
-
-        await updateStudentSubjectRegistration(
-          selectedSubjectAssignment.registration_id,
-          {
-            student_class: studentId,
-            subject_class: subjectId,
-            status: editStatus,
-          }
-        );
-
-        toast.success("Subject Registration updated successfully.");
-        setEditSubjectAssignmentVisible(false);
-        setSelectedSubjectAssignment(null);
-        setFormData({ Student: [], Subject: [] });
-        setEditStatus("Pending");
-        fetchData();
-        return;
-      } else {
-        if (formData.Student.length === 0 || formData.Subject.length === 0) {
-          toast.error("Pick at least one student and one subject.");
-          return;
-        }
-        const existingPairs = new Set(
-          StudentSubjectList.map(
-            (r) => `${String(r.student_class)}::${String(r.subject_class)}`
-          )
-        );
-
-        const registrations = [];
-        for (const studentClassId of formData.Student) {
-          for (const subjectClassId of formData.Subject) {
-            const key = `${String(studentClassId)}::${String(subjectClassId)}`;
-            if (!existingPairs.has(key)) {
-              registrations.push({
-                student_class: studentClassId,
-                subject_class: subjectClassId,
-              });
-            }
-          }
-        }
-
-        if (registrations.length === 0) {
-          toast("Nothing to add (all selected pairs already exist).");
-          return;
-        }
-
-        await Promise.all(
-          registrations.map((reg) => registerStudentSubject(reg))
-        );
-
-        fetchData();
-        toast.success(
-          `Registered ${registrations.length} subject${
-            registrations.length > 1 ? "s" : ""
-          } successfully.`
-        );
-        setFormData({ Student: [], Subject: [] });
-      }
-    } catch (error) {
-      console.error("Registration failed:", error);
-      toast.error(error.message || "Registration failed");
-    }
-  };
-
-  const handleEdit = (assignment) => {
-    setEditSubjectAssignmentVisible(true);
-    setSelectedSubjectAssignment(assignment);
-
-    const studentId = assignment.student_class; // from GET
-    const subjectId = assignment.subject_class;
-
-    setFormData({
-      Student: studentId ? [String(studentId)] : [],
-      Subject: subjectId ? [String(subjectId)] : [],
-    });
-
-    setEditStatus(assignment.status || "Pending");
-  };
-
-  const handleDelete = async () => {
-    if (selectedItemDelete?.registration_id) {
-      try {
-        const response = await deleteStudentSubjectRegistration(
-          selectedItemDelete.registration_id
-        );
-        if (!response.error) {
-          toast.success("Registration deleted successfully.");
-          closeDeleteModal();
-          fetchData();
-        } else {
-          toast.error(response.error);
-          closeDeleteModal();
-        }
-      } catch (error) {
-        console.error("Deletion failed:", error);
-        toast.error("Failed to delete registration");
-      }
-    }
-  };
-
   const toggleRegistration = () => {
-    if (!registrationEnabled) setShowModal(true);
-    else handleCloseRegistration();
+    if (registrationEnabled) {
+      if (window.confirm("Are you sure you want to close registration? Students will not be able to register new subjects.")) {
+        handleCloseRegistration();
+      }
+    } else {
+      setShowModal(true);
+    }
   };
 
   const handleCloseRegistration = async () => {
+    if (isToggling) return;
+    
     try {
-      const response = await updateRegistrationControl({
-        is_open: false,
-        start_date: registrationControl.start_date,
-        end_date: registrationControl.end_date,
-      });
-
-      if (!response.error) {
+      setIsToggling(true);
+      const result = await registrationControlService.toggleRegistration(false);
+      console.log("Close registration response:", result);
+      
+      if (result.success) {
+        // CRITICAL FIX: Update state based on the response
         setRegistrationEnabled(false);
-        setRegistrationControl(response);
+        setRegistrationControl(result.data);
         toast.success("Registration closed successfully.");
+        // Refresh to ensure everything is in sync
+        await fetchRegistrationStatus();
       } else {
-        throw new Error(response.error);
+        throw new Error(result.message);
       }
     } catch (error) {
       console.error("Failed to close registration:", error);
       toast.error("Failed to close registration");
+    } finally {
+      setIsToggling(false);
     }
   };
 
   const handleModalSubmit = async (formData) => {
+    if (isToggling) return;
+    
     try {
-      const response = await updateRegistrationControl({
-        is_open: true,
-        start_date: formData.startDate,
-        end_date: formData.endDate,
+      setIsToggling(true);
+      const result = await registrationControlService.createOrUpdateControl({
+        startDate: formData.startDate,
+        endDate: formData.endDate,
+        isOpen: true,
       });
-
-      if (!response.error) {
+      
+      console.log("Enable registration response:", result);
+      
+      if (result.success) {
+        // CRITICAL FIX: Update state based on the response
         setRegistrationEnabled(true);
-        setRegistrationControl(response);
+        setRegistrationControl(result.data);
         setShowModal(false);
         toast.success("Registration successfully enabled!");
+        await fetchRegistrationStatus();
       } else {
-        throw new Error(response.error);
+        throw new Error(result.message);
       }
     } catch (error) {
       console.error("Failed to enable registration:", error);
-      toast.error("Failed to enable registration");
+      toast.error(error.message || "Failed to enable registration");
+    } finally {
+      setIsToggling(false);
     }
   };
-
-  const [formData, setFormData] = useState({
-    Student: [],
-    Subject: [],
-  });
 
   const toggleRowExpand = (studentId) => {
     setExpandedRows((prev) => ({ ...prev, [studentId]: !prev[studentId] }));
@@ -336,75 +244,50 @@ const StudentToSubject = () => {
   }
 
   return (
-    <div className="overflow-y-auto no-scrollbar min-h-full ">
-      {deleteModalVisible && selectedItemDelete && (
-        <div className="fixed inset-0 flex justify-center items-center z-50">
-          <div
-            className="absolute inset-0 bg-black/65"
-            onClick={closeDeleteModal}
-          ></div>
-          <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
-            <p className="font-bold text-center text-lg">
-              Delete Subject Registration
-            </p>
-            <div className="text-center pt-3">
-              <p className="text-base text-[#858383]">
-                Are you sure want to delete
+    <div className="overflow-y-auto no-scrollbar min-h-full">
+      {/* Registration Control Status Card */}
+      {registrationControl && (
+        <div className="mx-6 mb-3 p-3 bg-blue-50 border border-blue-200 rounded">
+          <div className="flex justify-between items-center flex-wrap gap-2">
+            <div>
+              <p className="text-sm font-semibold">Registration Period:</p>
+              <p className="text-sm">
+                {new Date(registrationControl.startDate).toLocaleDateString()} -{" "}
+                {new Date(registrationControl.endDate).toLocaleDateString()}
               </p>
-              <p className="text-base text-[#858383]">
-                <span className="font-bold">
-                  {selectedItemDelete.subject_name} for{" "}
-                  {selectedItemDelete.student_name}
+            </div>
+            <div>
+              <p className="text-sm font-semibold">Status:</p>
+              <p className="text-sm">
+                <span
+                  className={
+                    registrationControl.isOpen
+                      ? "text-green-600 font-semibold"
+                      : "text-red-600 font-semibold"
+                  }
+                >
+                  {registrationControl.isOpen ? "OPEN" : "CLOSED"}
                 </span>
-                ?
               </p>
             </div>
-            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
-              <button
-                onClick={handleDelete}
-                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
-              >
-                Yes, Delete
-              </button>
-              <button
-                onClick={closeDeleteModal}
-                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
-              >
-                No, Cancel
-              </button>
-            </div>
+            {registrationControl.daysRemaining > 0 && registrationControl.isOpen && (
+              <div>
+                <p className="text-sm font-semibold">Days Remaining:</p>
+                <p className="text-sm text-orange-600 font-semibold">
+                  {registrationControl.daysRemaining} days
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}
-      {registrationControl && (
-        <div className="mx-6 mb-3 p-3 bg-blue-50 border border-blue-200 rounded">
-          <p className="text-sm font-semibold">Registration Period:</p>
-          <p className="text-sm">
-            {new Date(registrationControl.start_date).toLocaleDateString()} -{" "}
-            {new Date(registrationControl.end_date).toLocaleDateString()}
-          </p>
-          <p className="text-sm">
-            Status:{" "}
-            <span
-              className={
-                registrationControl.is_open
-                  ? "text-green-600 font-semibold"
-                  : "text-red-600 font-semibold"
-              }
-            >
-              {registrationControl.is_open ? "OPEN" : "CLOSED"}
-            </span>
-          </p>
-        </div>
-      )}
 
-      <div className="flex justify-between items-center gap-5 pt-5 pl-6 pr-6 ">
+      <div className="flex justify-between items-center gap-5 pt-5 pl-6 pr-6">
         <div className="flex items-center gap-3 relative w-1/2">
-          <div className="">
+          <div>
             <button
               onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-              className="flex items-center text-[#01427A] hover:text-white hover:bg-[#01427A] cursor-pointer text-sm gap-2 border-[1.5px]
-             rounded-full border-[#01427A] py-2 px-3 w-full "
+              className="flex items-center text-[#01427A] hover:text-white hover:bg-[#01427A] cursor-pointer text-sm gap-2 border-[1.5px] rounded-full border-[#01427A] py-2 px-3 w-full"
             >
               <span className="hidden xl:block">Filter by </span>
               <span>
@@ -434,29 +317,30 @@ const StudentToSubject = () => {
           <div>
             <div className="relative w-full">
               <IoSearch
-                className="text-[#AEAEAE] absolute right-7 top-2.5 ml-3 "
+                className="text-[#AEAEAE] absolute right-7 top-2.5 ml-3"
                 size={18}
               />
               <input
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 type="text"
-                className="placeholder:text-[#AEAEAE] xl:placeholder:text-sm placeholder:text-xs rounded-full py-1 pl-5 pr-12 border-[1.5px] w-full "
+                className="placeholder:text-[#AEAEAE] xl:placeholder:text-sm placeholder:text-xs rounded-full py-1 pl-5 pr-12 border-[1.5px] w-full"
                 placeholder={`Type here to filter by ${
-                  filterType === "class" ? "class" : "name"
+                  filterType === "class" ? "class" : "name or admission number"
                 }`}
               />
             </div>
           </div>
         </div>
         <div className="flex items-center gap-6">
-          <label className="text-sm">Set Registration Control:</label>
+          <label className="text-sm font-medium">Registration:</label>
           <button
             onClick={toggleRegistration}
+            disabled={isToggling}
             aria-pressed={registrationEnabled}
-            className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none  ${
+            className={`relative inline-flex h-6 w-12 items-center rounded-full transition-colors duration-300 focus:outline-none ${
               registrationEnabled ? "bg-[#1BB66E]" : "bg-[#F94144]"
-            }`}
+            } ${isToggling ? "opacity-50 cursor-not-allowed" : "cursor-pointer"}`}
           >
             <span
               className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform duration-300 ${
@@ -464,225 +348,106 @@ const StudentToSubject = () => {
               }`}
             />
           </button>
+          <span className="text-sm font-medium">
+            {registrationEnabled ? "Open" : "Closed"}
+          </span>
         </div>
       </div>
 
-      {registrationEnabled && (
-        <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0 mt-2">
-          <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
-            <p className="font-bold text-[#07508F]">
-              Register Students Subject
-            </p>
-            <div className="flex items-center gap-2">
-              <button
-                type="submit"
-                className="bg-[#07508F] text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
-              >
-                {editSubjectAssignmentVisible ? "Save" : "Assign"}
-              </button>
-              {editSubjectAssignmentVisible ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditSubjectAssignmentVisible(false);
-                    setSelectedSubjectAssignment(null);
-                    setFormData({ Student: [], Subject: [] });
-                    setEditStatus("Pending");
-                  }}
-                  className="bg-[#07508F] text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm"
-                >
-                  Cancel
-                </button>
-              ) : (
-                ""
-              )}
-            </div>
-          </div>
-          <div className="pl-6 pr-6">
-            <div className="flex flex-col gap-3">
-              <div className="flex flex-col gap-x-2 ">
-                <label className="text-[0.88rem] text-[#5E6A72]">
-                  Student:
-                </label>
-                <MultiDropdown
-                  label="Select Student(s)"
-                  items={filteredStudents.map((s) => ({
-                    label: `${s.student_name} - ${s.class_year_name} ${s.class_arm_name}`,
-                    value: s.student_class_id,
-                  }))}
-                  selectedValues={formData.Student}
-                  onChange={(values) =>
-                    setFormData((prev) => ({ ...prev, Student: values }))
-                  }
-                />
-              </div>
-              <div className="flex flex-col gap-x-2 ">
-                <label className="text-[0.88rem] text-[#5E6A72]">
-                  Subject:
-                </label>
-                <MultiDropdown
-                  label="Select Subject(s)"
-                  items={allSubjects.map((s) => ({
-                    label: s.subject_name,
-                    value: s.subject_class_id,
-                  }))}
-                  selectedValues={formData.Subject}
-                  onChange={(values) =>
-                    setFormData((prev) => ({ ...prev, Subject: values }))
-                  }
-                />
-              </div>
-            </div>
-
-            {editSubjectAssignmentVisible && (
-              <div className="mt-3 flex items-center gap-4">
-                <label className="text-[0.88rem] text-[#5E6A72]">Status:</label>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setEditStatus((prev) =>
-                      prev === "Approved" ? "Pending" : "Approved"
-                    )
-                  }
-                  aria-pressed={editStatus === "Approved"}
-                  className={`relative inline-flex h-6 w-12 items-center  rounded-full transition-colors duration-300 focus:outline-none ${
-                    editStatus === "Approved" ? "bg-[#1BB66E]" : "bg-yellow-500"
-                  }`}
-                  title="Toggle Approved / Pending"
-                >
-                  <span
-                    className={`inline-block h-5 w-5 transform rounded-full  bg-white transition-transform duration-300 ${
-                      editStatus === "Approved"
-                        ? "translate-x-6"
-                        : "translate-x-1"
-                    }`}
-                  />
-                </button>
-
-                <span className="text-sm font-medium">
-                  {editStatus === "Approved" ? "Approved" : "Pending"}
-                </span>
-              </div>
-            )}
-          </div>
-        </form>
-      )}
-
-      <hr />
+      <hr className="mt-4" />
+      
       <div className="flex-shrink-0">
         <p className="font-semibold flex justify-center p-3 text-[#333333]">
-          Existing Assigned Students to Subjects.
+          Existing Assigned Students to Subjects
         </p>
       </div>
 
-      <div className="px-0 ">
+      <div className="px-0 overflow-x-auto">
         <table className="min-w-full table-auto">
           {paginatedData.length > 0 && (
-            <thead className="bg-[#EDF0F3] text-left lg:text-base text-xs">
+            <thead className="bg-[#EDF0F3] text-center lg:text-base text-xs sticky top-0 z-10">
               <tr>
-                <th className="p-2 pl-10 bg-[#EDF0F3]">Student</th>
-                <th className="p-2 bg-[#EDF0F3]">Admission Number</th>
-                <th className="p-2 bg-[#EDF0F3]">Class</th>
-                <th className="p-2 bg-[#EDF0F3]">Subjects</th>
-                <th className="p-2 bg-[#EDF0F3]">Status</th>
+                <th className="p-3 bg-[#EDF0F3]">Student Name</th>
+                <th className="p-3 bg-[#EDF0F3]">Admission Number</th>
+                <th className="p-3 bg-[#EDF0F3]">Class</th>
+                <th className="p-3 bg-[#EDF0F3]">Subjects</th>
+                <th className="p-3 bg-[#EDF0F3]">Status</th>
               </tr>
             </thead>
           )}
           <tbody className="xl:text-sm text-center text-xs text-[#333333] font-medium">
             {paginatedData.length === 0 ? (
               <tr>
-                <td
-                  colSpan="6"
-                  className="p-5 text-center border text-gray-500"
-                >
+                <td colSpan="5" className="p-5 text-center border text-gray-500">
                   No Data Available
                 </td>
               </tr>
             ) : (
               paginatedData.map((row, index) => {
-                const isExpanded = !!expandedRows[row.student_id];
-                const subjects = row.subjects;
+                const isExpanded = !!expandedRows[row.studentId];
+                const subjects = row.subjects || [];
                 const displaySubjects = isExpanded
                   ? subjects
                   : subjects.slice(0, MAX_CHIPS);
                 const remaining = subjects.length - displaySubjects.length;
 
-                const allSame = row.subjects.every(
-                  (s) => s.status === row.subjects[0].status
-                );
-                const groupStatus = allSame ? row.subjects[0].status : "Mixed";
+                let groupStatus = "Pending";
+                if (subjects.length > 0) {
+                  const allSame = subjects.every(
+                    (s) => s.status === subjects[0].status
+                  );
+                  groupStatus = allSame ? subjects[0].status : "Mixed";
+                }
 
                 return (
                   <tr
-                    className="border-b-[#D0D0D0] border-b"
+                    className="border-b-[#D0D0D0] border-b hover:bg-gray-50"
                     key={row.key ?? index}
                   >
-                    <td className="p-2 pl-10">{row.student_name}</td>
-                    <td className="p-2">{row.student_admission_number}</td>
-                    <td className="p-2">{row.class_arm}</td>
-
-                    {/* Subjects with collapse/expand */}
-                    <td className="p-2">
-                      <div className="flex flex-wrap gap-2">
-                        {displaySubjects.map((s) => (
+                    <td className="p-3">{row.studentName}</td>
+                    <td className="p-3">{row.admissionNumber}</td>
+                    <td className="p-3">
+                      {row.classYearName} {row.classArmName}
+                    </td>
+                    <td className="p-3">
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {displaySubjects.map((s, idx) => (
                           <div
-                            key={s.registration_id}
-                            className={`group inline-flex items-center gap-1 rounded-full px-2 py-0.5 border text-[11px]
-                                ${
-                                  s.status === "Approved"
-                                    ? "bg-green-50 border-green-200 text-green-700"
-                                    : s.status === "Rejected"
-                                    ? "bg-red-50 border-red-200 text-red-700"
-                                    : "bg-yellow-50 border-yellow-200 text-yellow-700"
-                                }`}
+                            key={s.registrationId || idx}
+                            className={`inline-flex items-center px-2 py-1 rounded-full border text-[11px] font-medium ${
+                              s.status === "Approved"
+                                ? "bg-green-50 border-green-200 text-green-700"
+                                : s.status === "Rejected"
+                                ? "bg-red-50 border-red-200 text-red-700"
+                                : "bg-yellow-50 border-yellow-200 text-yellow-700"
+                            }`}
                           >
-                            <button type="button" className="outline-none">
-                              {s.subject_name}
-                            </button>
-                            <FiEdit2
-                              size={13}
-                              onClick={() => handleEdit(s.raw)}
-                              className="cursor-pointer opacity-60 hover:opacity-100 "
-                              title="Edit subject registration"
-                            />
-                            <FiTrash2
-                              size={13}
-                              className="cursor-pointer opacity-60 hover:opacity-100"
-                              title="Delete this subject registration"
-                              onClick={() => openDeleteModal(s)}
-                            />
+                            <span>{s.subjectName}</span>
                           </div>
                         ))}
-
                         {remaining > 0 && !isExpanded && (
                           <button
                             type="button"
-                            onClick={() => toggleRowExpand(row.student_id)}
-                            className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200"
-                            title="Show more subjects"
+                            onClick={() => toggleRowExpand(row.studentId)}
+                            className="text-[11px] px-2 py-1 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200"
                           >
                             +{remaining} more
                           </button>
                         )}
-
                         {isExpanded && subjects.length > MAX_CHIPS && (
                           <button
                             type="button"
-                            onClick={() => toggleRowExpand(row.student_id)}
-                            className="text-[11px] px-2 py-0.5 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200"
-                            title="Show fewer subjects"
+                            onClick={() => toggleRowExpand(row.studentId)}
+                            className="text-[11px] px-2 py-1 rounded-full bg-gray-100 border border-gray-200 hover:bg-gray-200"
                           >
                             Show less
                           </button>
                         )}
                       </div>
                     </td>
-
-                    {/* Group-level status (or Mixed) */}
-                    <td className="p-2">
+                    <td className="p-3">
                       <span
-                        className={`px-2 py-1 rounded-full text-xs ${
+                        className={`px-2 py-1 rounded-full text-xs font-medium ${
                           groupStatus === "Approved"
                             ? "bg-green-100 text-green-800"
                             : groupStatus === "Rejected"
@@ -702,42 +467,39 @@ const StudentToSubject = () => {
           </tbody>
         </table>
 
-        {/* Pagination controls */}
         {totalPages > 1 && (
-          <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
+          <div className="flex justify-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold pb-4">
             <button
               onClick={handlePrevious}
               disabled={currentPage === 1}
-              className={`px-2 py-1 bg-[#E6ECF2] border ${
+              className={`px-3 py-1 bg-[#E6ECF2] border rounded ${
                 currentPage === 1
                   ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-[#EDF0F3]"
+                  : "hover:bg-[#EDF0F3] cursor-pointer"
               }`}
             >
               &lt;
             </button>
-
             {Array.from({ length: totalPages }, (_, index) => (
               <button
                 key={index}
                 onClick={() => setCurrentPage(index + 1)}
-                className={`px-2 py-1 text-xs ${
+                className={`px-3 py-1 rounded text-xs ${
                   currentPage === index + 1
                     ? "bg-[#07508F] text-white"
-                    : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+                    : "hover:bg-[#EDF0F3] bg-[#FAFAFA] cursor-pointer"
                 }`}
               >
                 {index + 1}
               </button>
             ))}
-
             <button
               onClick={handleNext}
               disabled={currentPage === totalPages}
-              className={`px-2 py-1 border bg-[#E6ECF2] ${
+              className={`px-3 py-1 border bg-[#E6ECF2] rounded ${
                 currentPage === totalPages
                   ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-[#EDF0F3]"
+                  : "hover:bg-[#EDF0F3] cursor-pointer"
               }`}
             >
               &gt;
@@ -746,13 +508,57 @@ const StudentToSubject = () => {
         )}
       </div>
 
+      {/* RegControlModal */}
       {showModal && (
-        <RegControlModal
-          setRegistrationEnabled={setRegistrationEnabled}
-          setShowModal={setShowModal}
-          onClose={() => setShowModal(false)}
-          onSubmit={handleModalSubmit}
-        />
+        <div className="fixed inset-0 bg-black/75 bg-opacity-50 flex justify-center items-center z-50">
+          <div className="bg-white min-w-100 rounded-lg p-3">
+            <div className="flex justify-end text-[#333333] cursor-pointer">
+              <button onClick={() => setShowModal(false)} className="text-2xl">&times;</button>
+            </div>
+            <div className="flex justify-center font-bold text-xl mb-5">
+              <p>SET REGISTRATION PERIOD</p>
+            </div>
+            <form className="flex flex-col px-5" onSubmit={(e) => {
+              e.preventDefault();
+              const formData = {
+                startDate: e.target.startDate.value,
+                endDate: e.target.endDate.value,
+              };
+              handleModalSubmit(formData);
+            }}>
+              <div className="flex flex-col gap-1 mb-5">
+                <label className="text-sm font-semibold text-[#808080]">
+                  Start Date:
+                </label>
+                <input
+                  name="startDate"
+                  type="date"
+                  min={new Date().toISOString().split("T")[0]}
+                  defaultValue={registrationControl?.startDate?.split('T')[0] || ""}
+                  required
+                  className="focus:outline-[#0071E3] border-2 p-3 rounded-sm border-[#B6B6B6]"
+                />
+              </div>
+              <div className="flex flex-col gap-1">
+                <label className="text-sm font-semibold text-[#808080]">
+                  End Date:
+                </label>
+                <input
+                  type="date"
+                  name="endDate"
+                  defaultValue={registrationControl?.endDate?.split('T')[0] || ""}
+                  required
+                  className="focus:outline-[#0071E3] border-2 p-3 rounded-sm border-[#B6B6B6]"
+                />
+              </div>
+              <div className="w-full mt-10">
+                <button className="bg-[#07508F] hover:opacity-90 cursor-pointer w-full py-2 rounded-sm font-bold mb-5 text-white">
+                  Enable Registration
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </div>
   );

@@ -2,150 +2,121 @@
 import React, { useCallback, useEffect, useState } from "react";
 import SuperAdminLayout from "../SuperAdminLayout";
 import Link from "next/link";
-import { useSearchParams } from "next/navigation";
-import { BiChevronDown } from "react-icons/bi";
+import { useSearchParams, useRouter } from "next/navigation";
 import { Country, State, City } from "country-state-city";
 import DashboardHeader from "../DashboardHeader";
-import { useRouter } from "next/navigation";
-import {
-  getSchoolAdminById,
-  updateSchoolAdmin,
-} from "../../../Service/schoolAdminService";
-import { getAllRoles } from "../../../Service/RoleService";
-import { getSchools } from "../../../Service/schoolService";
+import schoolAdminService from "@/Service/schoolAdminService";
+import schoolService from "@/Service/schoolService";
 import BlueDropdown from "@/Components/BlueDropDown";
+import toast from "react-hot-toast";
 
 const EditSchoolAdminItem = () => {
   const searchParams = useSearchParams();
   const adminId = searchParams.get("adminId");
-  const schoolAdminfromparams = searchParams.get("schoolAdminId");
+  const schoolAdminFromParams = searchParams.get("schoolAdminId");
   const router = useRouter();
 
-  const [schoolAdminId, setSchoolAdminId] = useState(schoolAdminfromparams);
-
+  const [schoolAdminId, setSchoolAdminId] = useState(schoolAdminFromParams);
   const [formData, setFormData] = useState({
-    user: {
-      username: "",
-      password: "",
-      email: "",
-      id: null,
-    },
-    user_role: "",
-    school: "",
-    surname: "",
-    first_name: "",
     email: "",
-    phone_number: "",
+    username: "",
+    firstName: "",
+    middleName: "",
+    surname: "",
+    phoneNumber: "",
     address: "",
     city: "",
     state: "",
-    region: "southwest",
     country: "",
     designation: "",
+    schoolId: "",
   });
   const [schoolsData, setSchoolsData] = useState([]);
   const [loadingSchools, setLoadingSchools] = useState(true);
   const [errorSchools, setErrorSchools] = useState(null);
-  const [schoolAdminRole, setSchoolAdminRole] = useState(null);
   const [schoolLogo, setSchoolLogo] = useState("/icons.png");
-  const [apiError, setApiError] = useState(null);
-  const [apiSuccess, setApiSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState(null);
   const [selectedState, setSelectedState] = useState(null);
   const [selectedCity, setSelectedCity] = useState(null);
 
-  const fetchSchoolAdminDetails = useCallback(
-    async (id) => {
-      setLoading(true);
-      setApiError(null);
-      try {
-        const response = await getSchoolAdminById(id);
-        if (response?.status === 200 && response.data) {
-          const adminData = response.data;
-          console.log("Fetched Admin Data:", adminData);
-          setFormData({
-            user: {
-              email: adminData.user?.email || "",
-              id: adminData.user?.schooladmin_id || null, // Store the user ID
-            },
-            user_role: adminData.user_role || "",
-            school: adminData.school || "",
-            surname: adminData.surname || "",
-            first_name: adminData.first_name || "",
-            email: adminData.email || "",
-            phone_number: adminData.phone_number || "",
-            address: adminData.address || "",
-            city: adminData.city || "",
-            state: adminData.state || "",
-            region: adminData.region || "southwest",
-            country: adminData.country || "",
-            designation: adminData.designation || "",
-          });
-          if (adminData.country) {
-            const country = Country.getAllCountries().find(
-              (c) => c.name === adminData.country
+  const fetchSchoolAdminDetails = useCallback(async (id) => {
+    setLoading(true);
+    try {
+      const response = await schoolAdminService.getSchoolAdminById(id);
+      console.log("Fetched Admin Data:", response);
+      
+      if (response.success && response.data) {
+        const adminData = response.data;
+        setFormData({
+          email: adminData.email || "",
+          username: adminData.username || "",
+          firstName: adminData.firstName || "",
+          middleName: adminData.middleName || "",
+          surname: adminData.surname || "",
+          phoneNumber: adminData.phoneNumber || "",
+          address: adminData.address || "",
+          city: adminData.city || "",
+          state: adminData.state || "",
+          country: adminData.country || "",
+          designation: adminData.designation || "",
+          schoolId: adminData.schoolId || "",
+        });
+        
+        if (adminData.logo) {
+          setSchoolLogo(adminData.logo);
+        }
+        
+        // Parse address for dropdowns
+        if (adminData.country) {
+          const country = Country.getAllCountries().find(
+            (c) => c.name === adminData.country
+          );
+          setSelectedCountry(country);
+          if (adminData.state && country) {
+            const state = State.getStatesOfCountry(country.isoCode).find(
+              (s) => s.name === adminData.state
             );
-            setSelectedCountry(country);
-            if (adminData.state && country) {
-              const state = State.getStatesOfCountry(country.isoCode).find(
-                (s) => s.name === adminData.state
-              );
-              setSelectedState(state);
-              if (adminData.city && state) {
-                const city = City.getCitiesOfState(
-                  state.countryCode,
-                  state.isoCode
-                ).find((c) => c.name === adminData.city);
-                setSelectedCity(city);
-              }
+            setSelectedState(state);
+            if (adminData.city && state) {
+              const city = City.getCitiesOfState(
+                state.countryCode,
+                state.isoCode
+              ).find((c) => c.name === adminData.city);
+              setSelectedCity(city);
             }
           }
-        } else {
-          setApiError("Failed to fetch school admin details.");
         }
-      } catch (error) {
-        console.error("Error fetching school admin details:", error);
-        setApiError("Error fetching school admin details.");
-      } finally {
-        setLoading(false);
+      } else {
+        toast.error(response.message || "Failed to fetch school admin details.");
       }
-    },
-    [schoolAdminId]
-  );
+    } catch (error) {
+      console.error("Error fetching school admin details:", error);
+      toast.error("Error fetching school admin details.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   const fetchSchools = useCallback(async () => {
     setLoadingSchools(true);
     setErrorSchools(null);
     try {
-      const response = await getSchools();
-      if (response?.status === 200) {
-        setSchoolsData(response.data.results || response.data);
-        console.log("Fetched schools data:", response.data.results);
+      const response = await schoolService.getAllSchools();
+      console.log("Schools response:", response);
+      
+      if (response.success) {
+        setSchoolsData(response.data || []);
       } else {
-        setErrorSchools("Failed to fetch schools.");
+        setErrorSchools(response.message || "Failed to fetch schools.");
+        toast.error(response.message || "Failed to fetch schools.");
       }
     } catch (error) {
       console.error("Error fetching schools:", error);
       setErrorSchools("Error fetching schools.");
+      toast.error("Error fetching schools.");
     } finally {
       setLoadingSchools(false);
-    }
-  }, []);
-
-  const fetchSchoolAdminRole = useCallback(async () => {
-    try {
-      const response = await getAllRoles();
-      if (response?.status === 200 && response.data) {
-        const role = response.data.find((r) => r.name === "School Admin");
-        setSchoolAdminRole(role);
-        setFormData((prevData) => ({ ...prevData, user_role: role?.id || "" }));
-      } else {
-        console.error("Failed to fetch roles:", response?.data);
-        setApiError("Failed to fetch roles.");
-      }
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-      setApiError("Error fetching roles.");
     }
   }, []);
 
@@ -154,33 +125,18 @@ const EditSchoolAdminItem = () => {
       fetchSchoolAdminDetails(schoolAdminId);
     }
     fetchSchools();
-    fetchSchoolAdminRole();
-  }, [
-    schoolAdminId,
-    fetchSchoolAdminDetails,
-    fetchSchools,
-    fetchSchoolAdminRole,
-  ]);
+  }, [schoolAdminId, fetchSchoolAdminDetails, fetchSchools]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prevData) => {
-      if (name.startsWith("user.")) {
-        return {
-          ...prevData,
-          user: {
-            ...prevData.user,
-            [name.split(".")[1]]: value,
-          },
-        };
-      } else {
-        return { ...prevData, [name]: value };
-      }
-    });
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleSchoolChange = (selectedSchool) => {
-    setFormData({ ...formData, school: selectedSchool?.value });
+    setFormData({ ...formData, schoolId: selectedSchool?.value });
     const selectedSchoolData = schoolsData.find(
       (school) => school.id === selectedSchool?.value
     );
@@ -190,6 +146,7 @@ const EditSchoolAdminItem = () => {
       setSchoolLogo("/icons.png");
     }
   };
+
   const countries = Country.getAllCountries();
   const states = selectedCountry
     ? State.getStatesOfCountry(selectedCountry.isoCode)
@@ -202,56 +159,56 @@ const EditSchoolAdminItem = () => {
     setSelectedCountry(selected);
     setSelectedState(null);
     setSelectedCity(null);
-    setFormData({ ...formData, country: selected?.name, state: "", city: "" });
+    setFormData({ ...formData, country: selected?.name || "", state: "", city: "" });
   };
 
   const handleStateChange = (selected) => {
     setSelectedState(selected);
     setSelectedCity(null);
-    setFormData({ ...formData, state: selected?.name, city: "" });
+    setFormData({ ...formData, state: selected?.name || "", city: "" });
   };
 
   const handleCityChange = (selected) => {
     setSelectedCity(selected);
-    setFormData({ ...formData, city: selected?.name });
+    setFormData({ ...formData, city: selected?.name || "" });
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setApiError(null);
-    setApiSuccess(false);
     setLoading(true);
 
+    // Prepare payload matching UpdateSchoolAdminDto
     const payload = {
-      surname: formData.surname,
-      first_name: formData.first_name,
-      email: formData.email,
-      phone_number: formData.phone_number,
-      address: formData.address,
-      city: formData.city,
-      state: formData.state,
-      region: formData.region,
-      country: formData.country,
-      designation: formData.designation,
-      user: formData.user?.id,
+      email: formData.email || null,
+      username: formData.username || null,
+      firstName: formData.firstName || null,
+      middleName: formData.middleName || null,
+      surname: formData.surname || null,
+      phoneNumber: formData.phoneNumber || null,
+      address: formData.address || null,
+      city: formData.city || null,
+      state: formData.state || null,
+      country: formData.country || null,
+      designation: formData.designation || null,
     };
 
+    console.log("Updating school admin with payload:", payload);
+
     try {
-      const response = await updateSchoolAdmin(schoolAdminId, payload);
-      if (response?.status === 200) {
-        console.log("School Admin updated successfully:", response.data);
-        setApiSuccess(true);
+      const response = await schoolAdminService.updateSchoolAdmin(schoolAdminId, payload);
+      console.log("Update response:", response);
+      
+      if (response.success) {
+        toast.success("School Admin updated successfully!");
         setTimeout(() => {
           router.push(`/Super-Admin/Manage-School-Admin?adminId=${adminId}`);
         }, 2000);
       } else {
-        console.error("Failed to update school admin:", response?.data);
-        setApiError(
-          response?.data?.message || "Failed to update school admin."
-        );
+        toast.error(response.message || "Failed to update school admin.");
       }
     } catch (error) {
       console.error("Error updating school admin:", error);
-      setApiError(error.message || "An unexpected error occurred.");
+      toast.error(error.message || "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
@@ -265,216 +222,213 @@ const EditSchoolAdminItem = () => {
     );
   }
 
-  if (errorSchools) {
+  if (errorSchools && schoolsData.length === 0) {
     return (
-      <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
-        {errorSchools}
-      </div>
+      <SuperAdminLayout>
+        <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
+          <DashboardHeader />
+        </div>
+        <div className="bg-[#D4D4D4] overflow-auto flex-1 p-4">
+          <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md">
+            {errorSchools}
+          </div>
+        </div>
+      </SuperAdminLayout>
     );
   }
 
   return (
     <SuperAdminLayout>
-      <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0  z-10 shadow-md  flex justify-between items-center ">
+      <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
         <DashboardHeader />
         <Link href={`/Super-Admin/Manage-School-Admin?adminId=${adminId}`}>
-          <button className="bg-[#07508F] text-white p-2 rounded-lg cursor-pointer ">
+          <button className="bg-[#07508F] text-white p-2 rounded-lg cursor-pointer">
             View All Admin
           </button>
         </Link>
       </div>
-      <div className="bg-[#D4D4D4]  p-4 sm:overflow-auto lg:overflow-hidden ">
-        <div className="sm:flex sm:flex-col sm:gap-2 lg:grid lg:grid-cols-[2.5fr_1fr] overflow-auto  gap-3 lg:h-screen ">
+      <div className="bg-[#D4D4D4] p-4 sm:overflow-auto lg:overflow-hidden">
+        <div className="sm:flex sm:flex-col sm:gap-2 lg:grid lg:grid-cols-[2.5fr_1fr] overflow-auto gap-3 lg:h-screen">
           <div className="bg-[#ffffff] rounded-lg flex flex-col lg:overflow-y-auto lg:max-h-[calc(100vh-95px)] lg:overflow-auto no-scrollbar">
-            {apiSuccess && (
-              <div className="mt-4 pl-6 text-green-500">
-                School Admin updated successfully!
-              </div>
-            )}
-            {apiError && (
-              <div className="mt-4 pl-6 font-bold text-red-500">
-                Error: {apiError}
-              </div>
-            )}
             <div>
-              <p className="font-bold text-xl p-6">
-                Administrative Information
-              </p>
+              <p className="font-bold text-xl p-6">Administrative Information</p>
               <hr className="w-full border-t border-[#978F8F]" />
             </div>
-            <form
-              id="edit-admin"
-              onSubmit={handleSubmit}
-              className="flex-grow flex flex-col  "
-            >
-              <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0 ">
+            <form id="edit-admin" onSubmit={handleSubmit} className="flex-grow flex flex-col">
+              <div className="grid grid-cols-2 mt-6 pl-6 pr-6 gap-3 pb-0">
                 <div className="flex flex-col gap-1 mb-2">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor=""
-                  >
-                    First Name
+                  <label className="text-[#808080] font-semibold text-sm">
+                    Email <span className="text-red-500">*</span>
                   </label>
-
-                  <input
-                    type="text"
-                    id="first_name"
-                    name="first_name"
-                    className={`text-base  ${
-                      formData.first_name !== ""
-                        ? "border-[#01427A]  border-2 text-[#01427A]"
-                        : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
-                    placeholder="Enter First Name"
-                    value={formData.first_name}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1 mb-2 ">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor="surname"
-                  >
-                    Last Name
-                  </label>
-
-                  <input
-                    type="text"
-                    id="surname"
-                    name="surname"
-                    className={`text-base  ${
-                      formData.surname !== ""
-                        ? "border-[#01427A]  border-2 text-[#01427A]"
-                        : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
-                    placeholder="Enter Last Name"
-                    value={formData.surname}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1 mb-2 ">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor="phone_number"
-                  >
-                    Phone Number
-                  </label>
-
-                  <input
-                    type="text"
-                    id="phone_number"
-                    name="phone_number"
-                    className={`text-base  ${
-                      formData.phone_number !== ""
-                        ? "border-[#01427A]  border-2 text-[#01427A]"
-                        : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
-                    placeholder="Enter Phone Number"
-                    value={formData.phone_number}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-                <div className="flex flex-col gap-1 mb-2 ">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor="email"
-                  >
-                    Email
-                  </label>
-
                   <input
                     type="email"
                     id="email"
                     name="email"
-                    className={`text-base  ${
+                    className={`text-base ${
                       formData.email !== ""
-                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                        ? "border-[#01427A] border-2 text-[#01427A]"
                         : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                    } rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm p-2 placeholder:text-[#d4d4d4] placeholder:font-normal font-bold`}
                     placeholder="Enter Email"
                     value={formData.email}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
-                <div className="flex flex-col gap-1 mb-2 ">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor="designation"
-                  >
-                    Designation
-                  </label>
 
+                <div className="flex flex-col gap-1 mb-2">
+                  <label className="text-[#808080] font-semibold text-sm">
+                    Username <span className="text-red-500">*</span>
+                  </label>
                   <input
                     type="text"
-                    id="designation"
-                    name="designation"
-                    className={`text-base  ${
-                      formData.designation !== ""
-                        ? "border-[#01427A]  border-2 text-[#01427A]"
+                    id="username"
+                    name="username"
+                    className={`text-base ${
+                      formData.username !== ""
+                        ? "border-[#01427A] border-2 text-[#01427A]"
                         : "border-[#AEAEAE] border-[1.5px]"
-                    }   rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
-                    placeholder="Enter Designation"
-                    value={formData.designation}
+                    } rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm p-2 placeholder:text-[#d4d4d4] placeholder:font-normal font-bold`}
+                    placeholder="Enter Username"
+                    value={formData.username}
                     onChange={handleInputChange}
                     required
                   />
                 </div>
 
                 <div className="flex flex-col gap-1 mb-2">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor="school"
-                  >
-                    School Name
+                  <label className="text-[#808080] font-semibold text-sm">
+                    First Name
                   </label>
+                  <input
+                    type="text"
+                    id="firstName"
+                    name="firstName"
+                    className={`text-base ${
+                      formData.firstName !== ""
+                        ? "border-[#01427A] border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    } rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm p-2 placeholder:text-[#d4d4d4] placeholder:font-normal font-bold`}
+                    placeholder="Enter First Name"
+                    value={formData.firstName}
+                    onChange={handleInputChange}
+                  />
+                </div>
 
-                  <div className="grid grid-cols-1 ">
+                <div className="flex flex-col gap-1 mb-2">
+                  <label className="text-[#808080] font-semibold text-sm">
+                    Middle Name
+                  </label>
+                  <input
+                    type="text"
+                    id="middleName"
+                    name="middleName"
+                    className={`text-base ${
+                      formData.middleName !== ""
+                        ? "border-[#01427A] border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    } rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm p-2 placeholder:text-[#d4d4d4] placeholder:font-normal font-bold`}
+                    placeholder="Enter Middle Name"
+                    value={formData.middleName}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1 mb-2">
+                  <label className="text-[#808080] font-semibold text-sm">
+                    Surname
+                  </label>
+                  <input
+                    type="text"
+                    id="surname"
+                    name="surname"
+                    className={`text-base ${
+                      formData.surname !== ""
+                        ? "border-[#01427A] border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    } rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm p-2 placeholder:text-[#d4d4d4] placeholder:font-normal font-bold`}
+                    placeholder="Enter Surname"
+                    value={formData.surname}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1 mb-2">
+                  <label className="text-[#808080] font-semibold text-sm">
+                    Phone Number
+                  </label>
+                  <input
+                    type="text"
+                    id="phoneNumber"
+                    name="phoneNumber"
+                    className={`text-base ${
+                      formData.phoneNumber !== ""
+                        ? "border-[#01427A] border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    } rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm p-2 placeholder:text-[#d4d4d4] placeholder:font-normal font-bold`}
+                    placeholder="Enter Phone Number"
+                    value={formData.phoneNumber}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1 mb-2">
+                  <label className="text-[#808080] font-semibold text-sm">
+                    Designation
+                  </label>
+                  <input
+                    type="text"
+                    id="designation"
+                    name="designation"
+                    className={`text-base ${
+                      formData.designation !== ""
+                        ? "border-[#01427A] border-2 text-[#01427A]"
+                        : "border-[#AEAEAE] border-[1.5px]"
+                    } rounded-sm focus:border-[#01427A] focus:border-2 outline-none sm:text-sm p-2 placeholder:text-[#d4d4d4] placeholder:font-normal font-bold`}
+                    placeholder="Enter Designation"
+                    value={formData.designation}
+                    onChange={handleInputChange}
+                  />
+                </div>
+
+                <div className="flex flex-col gap-1 mb-2">
+                  <label className="text-[#808080] font-semibold text-sm">
+                    School Name <span className="text-red-500">*</span>
+                  </label>
+                  <div className="grid grid-cols-1">
                     <BlueDropdown
                       label={
-                        schoolsData.find(
-                          (school) => school.id === formData.school
-                        )?.school_name || "Select School"
+                        schoolsData.find((school) => school.id === formData.schoolId)?.schoolName || "Select School"
                       }
                       items={schoolsData.map((school) => ({
-                        label: school.school_name,
+                        label: school.schoolName,
                         value: school.id,
                         onClick: () =>
                           handleSchoolChange({
-                            label: school.school_name,
+                            label: school.schoolName,
                             value: school.id,
                           }),
                       }))}
                     />
                   </div>
                 </div>
-                <div className="flex flex-col gap-1 mb-2 ">
-                  <label
-                    className="text-[#808080] font-semibold text-sm "
-                    htmlFor=""
-                  >
+
+                <div className="flex flex-col gap-1 mb-2">
+                  <label className="text-[#808080] font-semibold text-sm">
                     User Role
                   </label>
-
                   <input
                     type="text"
                     value="School Admin"
                     readOnly
-                    className="text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] font-bold "
+                    className="text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#01427A] font-bold"
                   />
                 </div>
               </div>
+
               <div className="pt-2 pl-6 pr-6 pb-10">
-                <label
-                  className="text-[#808080] font-semibold text-sm "
-                  htmlFor=""
-                >
-                  Address
-                </label>
-                <div className="grid grid-cols-2 gap-3 mt-1 ">
+                <label className="text-[#808080] font-semibold text-sm">Address</label>
+                <div className="grid grid-cols-2 gap-3 mt-1">
                   <div className="grid grid-cols-1 mb-2">
                     <BlueDropdown
                       label={selectedCountry?.name || "Select Country"}
@@ -493,7 +447,6 @@ const EditSchoolAdminItem = () => {
                       }))}
                     />
                   </div>
-
                   <div className="grid grid-cols-1">
                     <BlueDropdown
                       label={selectedCity?.name || "Select City"}
@@ -505,67 +458,35 @@ const EditSchoolAdminItem = () => {
                   </div>
                 </div>
               </div>
-            </form>
-          </div>
-          <div className="flex flex-col gap-2 h-screen  ">
-            <div className="bg-[#ffffff] rounded-lg drop-shadow-lg p-4  flex flex-col">
-              <p className="font-bold sm:tex-lg xl:text-xl xl:mb-2 sm:mb-4 ">
-                LOGO
-              </p>
-              <div className="flex flex-col items-center justify-center mt-2">
-                <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] p-1 border-[#333333] flex items-center relative  justify-center w-48 h-45">
-                  <div className="w-full h-full">
-                    <img
-                      className="w-full h-full"
-                      src={schoolLogo}
-                      alt="icon"
-                    />
-                    <input
-                      type="file"
-                      id="logo-upload"
-                      className="hidden"
-                      accept="image/*"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-[#ffffff] xl:gap-0 lg:gap-2 h-auto rounded-lg pt-5 pl-5 pr-5 xl:pb-2 pb-8 drop-shadow-lg flex flex-col">
-              <p className="font-bold sm:text-lg xl:text-xl mb-4 ">
-                SUBSCRIPTION PLAN
-              </p>
-              <div>
-                <div className="flex justify-between">
-                  <p className="font-semibold text-xs text-[#9C9B9B]">
-                    Amount Per Student:
-                  </p>
-                  <p className="font-semibold text-xs text-[#9C9B9B]">N1500</p>
-                </div>
 
-                <div className="flex justify-between">
-                  <p className="font-semibold text-xs ">No of Students:</p>
-                  <p className="font-semibold text-xs ">N100</p>
-                </div>
-
-                <div className="flex justify-between">
-                  <p className="font-semibold text-xs ">
-                    Amount Expected to be paid::
-                  </p>
-                  <p className="font-semibold text-xs ">N1500</p>
-                </div>
-              </div>
-
-              <div
-                onClick={() => handleSubmit()}
-                className="flex justify-center pt-4 "
-              >
+              <div className="flex justify-end p-4">
                 <button
                   type="submit"
                   form="edit-admin"
-                  className="bg-[#4084B1] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer "
+                  disabled={loading}
+                  className={`bg-[#4084B1] text-white pt-2 pb-2 pl-12 pr-12 text-sm rounded-lg cursor-pointer ${
+                    loading ? "opacity-50 cursor-not-allowed" : ""
+                  }`}
                 >
-                  Save
+                  {loading ? "Saving..." : "Save Changes"}
                 </button>
+              </div>
+            </form>
+          </div>
+
+          <div className="flex flex-col gap-2 h-screen">
+            <div className="bg-[#ffffff] rounded-lg drop-shadow-lg p-4 flex flex-col">
+              <p className="font-bold sm:text-lg xl:text-xl xl:mb-2 sm:mb-4">LOGO</p>
+              <div className="flex flex-col items-center justify-center mt-2">
+                <div className="mb-4 bg-[#E4E4E4] border-dashed border-[1.5px] p-1 border-[#333333] flex items-center relative justify-center w-48 h-45">
+                  <div className="w-full h-full">
+                    <img className="w-full h-full object-contain" src={schoolLogo} alt="school logo" />
+                    <input type="file" id="logo-upload" className="hidden" accept="image/*" />
+                  </div>
+                </div>
+                <p className="text-xs text-gray-500 text-center">
+                  Logo will be displayed from selected school
+                </p>
               </div>
             </div>
           </div>

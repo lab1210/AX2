@@ -1,19 +1,14 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import { FiEdit3, FiTrash2, FiPlus, FiX } from "react-icons/fi";
-import {
-  createTeachertoClassRelationship,
-  deleteTeacherClassRelationship,
-  getTeacherClassRelationships,
-  updateTeacherClassRelationship,
-} from "../../Service/SchoolAdminAssignmentService";
-import { getTeachers } from "../../Service/teacherService";
-import { getClassArm } from "../../Service/schoolConfig";
+import classArmTeacherService from "@/Service/ClassTeacherService";
+import { getAllTeachers } from "@/Service/TeacherService";
+import classService from "@/Service/ClassService";
+import academicPeriodService from "@/Service/AcademicPeriodService";
 import toast from "react-hot-toast";
 
 const ClassTeacherAssign = () => {
-  const [classTeacherRelationships, setClassTeacherRelationships] = useState(
-    []
-  );
+  const [classTeacherRelationships, setClassTeacherRelationships] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [classArms, setClassArms] = useState([]);
   const [editMode, setEditMode] = useState(false);
@@ -21,6 +16,8 @@ const ClassTeacherAssign = () => {
   const [loading, setLoading] = useState(false);
   const [selectedClassDelete, setSelectedClassDelete] = useState(null);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [academicPeriods, setAcademicPeriods] = useState([]);
+  const [selectedAcademicPeriod, setSelectedAcademicPeriod] = useState("");
 
   const [createFormData, setCreateFormData] = useState({
     assignments: [{ teacher_id: "", class_id: "" }],
@@ -30,30 +27,64 @@ const ClassTeacherAssign = () => {
     teacher_id: "",
     class_id: "",
     relationship_id: "",
+    academic_period_id: "",
   });
 
   useEffect(() => {
     fetchData();
+    fetchAcademicPeriods();
   }, []);
 
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [relationships, teachersRes, classArmsRes] = await Promise.all([
-        getTeacherClassRelationships(),
-        getTeachers(),
-        getClassArm(),
-      ]);
-
-      setClassTeacherRelationships(relationships);
-      setTeachers(teachersRes);
-      setClassArms(classArmsRes.data || classArmsRes);
+      
+      // Get all assignments using the new service
+      const relationshipsResult = await classArmTeacherService.getAllAssignments();
+      const teachersRes = await getAllTeachers(); // Returns { success, data, count }
+      const classArmsRes = await classService.getAllClassArms();
+      const academicPeriodsRes = await academicPeriodService.getAllTerms();
+      
+      // Transform the data to match the expected format
+      const transformedRelationships = (relationshipsResult.data || []).map(item => ({
+        class_teacher_id: item.id,
+        teacher: item.teacherId,
+        teacher_name: item.teacherName?.split(' ')[0] || '',
+        teacher_lastname: item.teacherName?.split(' ')[1] || '',
+        class_assigned: item.classArmId,
+        class_assigned_name: item.classYearName || '',
+        class_assigned_arm: item.classArmName || '',
+        academic_period_id: item.academicPeriodId,
+      }));
+      
+      setClassTeacherRelationships(transformedRelationships);
+      // Extract the teachers array from the response
+      setTeachers(teachersRes.data || []);
+      setClassArms(classArmsRes.data || []);
+      setAcademicPeriods(academicPeriodsRes.data || []);
+      
+      if (academicPeriodsRes.data?.length > 0 && !selectedAcademicPeriod) {
+        setSelectedAcademicPeriod(academicPeriodsRes.data[0].id);
+      }
     } catch (error) {
-      toast.error(
-        "Failed to fetch data: " + (error.message || "Unknown error")
-      );
+      console.error("Fetch data error:", error);
+      toast.error("Failed to fetch data: " + (error.message || "Unknown error"));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchAcademicPeriods = async () => {
+    try {
+      const result = await academicPeriodService.getAllTerms();
+      if (result.success) {
+        setAcademicPeriods(result.data);
+        if (result.data.length > 0 && !selectedAcademicPeriod) {
+          setSelectedAcademicPeriod(result.data[0].id);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch academic periods:", error);
     }
   };
 
@@ -114,21 +145,24 @@ const ClassTeacherAssign = () => {
       }
 
       try {
-        // Create a clean payload without relationship_id
         const updatePayload = {
-          class_assigned: editFormData.class_id,
-          teacher: editFormData.teacher_id,
+          teacherId: editFormData.teacher_id,
+          classArmId: editFormData.class_id,
+          academicPeriodId: editFormData.academic_period_id,
         };
 
-        const response = await updateTeacherClassRelationship(
+        const response = await classArmTeacherService.updateAssignment(
           editFormData.relationship_id,
           updatePayload
         );
 
-        if (response.error) throw new Error(response.error);
-        fetchData();
-        toast.success("Assignment updated successfully");
-        resetForm();
+        if (response.success) {
+          await fetchData();
+          toast.success("Assignment updated successfully");
+          resetForm();
+        } else {
+          toast.error(response.message || "Failed to update assignment");
+        }
       } catch (error) {
         toast.error(error.message || "Failed to update assignment");
       }
@@ -145,12 +179,42 @@ const ClassTeacherAssign = () => {
         return;
       }
 
+      if (!selectedAcademicPeriod) {
+        toast.error("Please select an academic period");
+        return;
+      }
+
       try {
-        const response = await createTeachertoClassRelationship(createFormData);
-        if (response.error) throw new Error(response.error);
-        toast.success("Teachers assigned successfully");
-        await fetchData();
-        resetForm();
+        // Group assignments by teacher
+        const teacherAssignments = new Map();
+        
+        for (const assignment of createFormData.assignments) {
+          if (!teacherAssignments.has(assignment.teacher_id)) {
+            teacherAssignments.set(assignment.teacher_id, []);
+          }
+          teacherAssignments.get(assignment.teacher_id).push(assignment.class_id);
+        }
+        
+        let allSuccess = true;
+        for (const [teacherId, classIdList] of teacherAssignments) {
+          const createData = {
+            teacherId: teacherId,
+            classArmIds: classIdList,
+            academicPeriodId: selectedAcademicPeriod,
+          };
+          
+          const response = await classArmTeacherService.assignTeacherToMultipleArms(createData);
+          if (!response.success) {
+            allSuccess = false;
+            toast.error(`Failed to assign teacher`);
+          }
+        }
+        
+        if (allSuccess) {
+          toast.success("Teachers assigned successfully");
+          await fetchData();
+          resetForm();
+        }
       } catch (error) {
         toast.error(error.message || "Failed to save assignment");
       }
@@ -162,8 +226,8 @@ const ClassTeacherAssign = () => {
       teacher_id: relationship.teacher,
       class_id: relationship.class_assigned,
       relationship_id: relationship.class_teacher_id,
+      academic_period_id: relationship.academic_period_id || "",
     });
-
     setEditMode(true);
   };
 
@@ -180,23 +244,23 @@ const ClassTeacherAssign = () => {
   const handleDelete = async () => {
     if (selectedClassDelete?.class_teacher_id) {
       try {
-        const response = await deleteTeacherClassRelationship(
-          selectedClassDelete?.class_teacher_id
-        );
-        toast.success("Relationship deleted successfully");
-        closeDeleteModal();
-        await fetchData();
+        const response = await classArmTeacherService.deleteAssignment(selectedClassDelete.class_teacher_id);
+        if (response.success) {
+          toast.success("Relationship deleted successfully");
+          closeDeleteModal();
+          await fetchData();
+        } else {
+          toast.error(response.message || "Failed to delete relationship");
+        }
       } catch (error) {
-        toast.error(
-          "Failed to delete relationship: " + (error.message || "Unknown error")
-        );
+        toast.error("Failed to delete relationship: " + (error.message || "Unknown error"));
       }
     }
   };
 
   const resetForm = () => {
     setCreateFormData({ assignments: [{ teacher_id: "", class_id: "" }] });
-    setEditFormData({ teacher_id: "", class_id: "", relationship_id: "" });
+    setEditFormData({ teacher_id: "", class_id: "", relationship_id: "", academic_period_id: "" });
     setEditMode(false);
   };
 
@@ -209,9 +273,7 @@ const ClassTeacherAssign = () => {
             onClick={closeDeleteModal}
           ></div>
           <div className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 p-8">
-            <p className="font-bold text-center text-lg">
-              Delete Class Teacher
-            </p>
+            <p className="font-bold text-center text-lg">Delete Class Teacher</p>
             <div className="text-center pt-3">
               <p className="text-base text-[#858383]">
                 Are you sure want to delete the class teacher
@@ -242,6 +304,7 @@ const ClassTeacherAssign = () => {
           </div>
         </div>
       )}
+      
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
         <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
           <p className="font-bold text-[#07508F]">
@@ -266,52 +329,73 @@ const ClassTeacherAssign = () => {
           </div>
         </div>
 
+        {/* Academic Period Selection for Create Mode */}
+        {!editMode && academicPeriods.length > 0 && (
+          <div className="pl-6 pr-6 mb-4">
+            <div className="flex flex-col gap-2">
+              <label className="text-[0.88rem] text-[#5E6A72]">
+                Academic Period:
+              </label>
+              <select
+                value={selectedAcademicPeriod}
+                onChange={(e) => setSelectedAcademicPeriod(e.target.value)}
+                className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
+              >
+                {academicPeriods.map((period) => (
+                  <option key={period.id} value={period.id}>
+                    {period.name} - {period.yearName}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        )}
+
         <div className="pl-6 pr-6">
           {editMode ? (
             // EDIT MODE FORM - SINGLE ASSIGNMENT
             <div className="grid grid-cols-2 gap-6 mb-4">
               <div className="flex flex-col gap-2">
-                <label className="text-[0.88rem] text-[#5E6A72]">
-                  Teacher:
-                </label>
+                <label className="text-[0.88rem] text-[#5E6A72]">Teacher:</label>
                 <select
                   value={editFormData.teacher_id}
-                  onChange={(e) =>
-                    updateEditFormData("teacher_id", e.target.value)
-                  }
-                  className={`text-base  ${
-                    editFormData.teacher_id !== ""
-                      ? "border-[#0071E3]  border-2 font-bold"
-                      : "border-[#AEAEAE] border-[1.5px] text-[#808080]"
-                  }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal  `}
+                  onChange={(e) => updateEditFormData("teacher_id", e.target.value)}
+                  className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
                 >
                   <option value="">Select Teacher</option>
                   {teachers.map((teacher) => (
-                    <option key={teacher.teacher_id} value={teacher.teacher_id}>
-                      {teacher.first_name} {teacher.last_name}
+                    <option key={teacher.userId} value={teacher.userId}>
+                      {teacher.fullName}
                     </option>
                   ))}
                 </select>
               </div>
               <div className="flex flex-col gap-2">
-                <label className="text-[0.88rem] text-[#5E6A72]">
-                  Class Arm:
-                </label>
+                <label className="text-[0.88rem] text-[#5E6A72]">Class Arm:</label>
                 <select
                   value={editFormData.class_id}
-                  onChange={(e) =>
-                    updateEditFormData("class_id", e.target.value)
-                  }
-                  className={`text-base  ${
-                    editFormData.class_id !== ""
-                      ? "border-[#0071E3]  border-2 font-bold"
-                      : "border-[#AEAEAE] border-[1.5px] text-[#808080]"
-                  }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal  `}
+                  onChange={(e) => updateEditFormData("class_id", e.target.value)}
+                  className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
                 >
                   <option value="">Select Class Arm</option>
                   {classArms.map((classArm) => (
-                    <option key={classArm.class_id} value={classArm.class_id}>
-                      {classArm.class_year_name} ({classArm.arm_name})
+                    <option key={classArm.id} value={classArm.id}>
+                      {classArm.classYearName || classArm.class_year_name} ({classArm.armName || classArm.arm_name})
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div className="flex flex-col gap-2">
+                <label className="text-[0.88rem] text-[#5E6A72]">Academic Period:</label>
+                <select
+                  value={editFormData.academic_period_id}
+                  onChange={(e) => updateEditFormData("academic_period_id", e.target.value)}
+                  className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
+                >
+                  <option value="">Select Academic Period</option>
+                  {academicPeriods.map((period) => (
+                    <option key={period.id} value={period.id}>
+                      {period.name} - {period.yearName}
                     </option>
                   ))}
                 </select>
@@ -321,10 +405,7 @@ const ClassTeacherAssign = () => {
             // CREATE MODE FORM - MULTIPLE ASSIGNMENTS
             <>
               {createFormData.assignments.map((assignment, index) => (
-                <div
-                  key={index}
-                  className="grid grid-cols-2 gap-6 mb-4 relative"
-                >
+                <div key={index} className="grid grid-cols-2 gap-6 mb-4 relative">
                   {createFormData.assignments.length > 1 && (
                     <button
                       type="button"
@@ -335,61 +416,31 @@ const ClassTeacherAssign = () => {
                     </button>
                   )}
                   <div className="flex flex-col gap-2">
-                    <label className="text-[0.88rem] text-[#5E6A72]">
-                      Teacher:
-                    </label>
+                    <label className="text-[0.88rem] text-[#5E6A72]">Teacher:</label>
                     <select
                       value={assignment.teacher_id}
-                      onChange={(e) =>
-                        updateCreateAssignmentField(
-                          index,
-                          "teacher_id",
-                          e.target.value
-                        )
-                      }
-                      className={`text-base  ${
-                        createFormData.assignments[index].teacher_id !== ""
-                          ? "border-[#0071E3]  border-2 font-bold"
-                          : "border-[#AEAEAE] border-[1.5px] text-[#808080]"
-                      }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal  `}
+                      onChange={(e) => updateCreateAssignmentField(index, "teacher_id", e.target.value)}
+                      className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
                     >
                       <option value="">Select Teacher</option>
                       {teachers.map((teacher) => (
-                        <option
-                          key={teacher.teacher_id}
-                          value={teacher.teacher_id}
-                        >
-                          {teacher.first_name} {teacher.last_name}
+                        <option key={teacher.userId} value={teacher.userId}>
+                          {teacher.fullName}
                         </option>
                       ))}
                     </select>
                   </div>
                   <div className="flex flex-col gap-2">
-                    <label className="text-[0.88rem] text-[#5E6A72]">
-                      Class Arm:
-                    </label>
+                    <label className="text-[0.88rem] text-[#5E6A72]">Class Arm:</label>
                     <select
                       value={assignment.class_id}
-                      onChange={(e) =>
-                        updateCreateAssignmentField(
-                          index,
-                          "class_id",
-                          e.target.value
-                        )
-                      }
-                      className={`text-base  ${
-                        createFormData.assignments[index].class_id !== ""
-                          ? "border-[#0071E3]  border-2 font-bold"
-                          : "border-[#AEAEAE] border-[1.5px] text-[#808080]"
-                      }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal  `}
+                      onChange={(e) => updateCreateAssignmentField(index, "class_id", e.target.value)}
+                      className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
                     >
                       <option value="">Select Class Arm</option>
                       {classArms.map((classArm) => (
-                        <option
-                          key={classArm.class_id}
-                          value={classArm.class_id}
-                        >
-                          {classArm.class_year_name} ({classArm.arm_name})
+                        <option key={classArm.id} value={classArm.id}>
+                          {classArm.classYearName || classArm.class_year_name} ({classArm.armName || classArm.arm_name})
                         </option>
                       ))}
                     </select>
@@ -407,6 +458,7 @@ const ClassTeacherAssign = () => {
           )}
         </div>
       </form>
+      
       <hr className="mt-10" />
 
       <div className="flex-shrink-0 mb-2">
@@ -436,10 +488,7 @@ const ClassTeacherAssign = () => {
               <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
                 {paginatedData.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan="4"
-                      className="p-5  text-center border text-gray-500"
-                    >
+                    <td colSpan="4" className="p-5 text-center border text-gray-500">
                       No Assigned Teachers to Class Arms Available
                     </td>
                   </tr>
@@ -447,7 +496,7 @@ const ClassTeacherAssign = () => {
                   paginatedData.map((item, index) => (
                     <tr className="border-b-[#D0D0D0] border-b" key={index}>
                       <td className="p-2 pl-12">
-                        {item.teacher_name + " " + item.teacher_lastname}
+                        {item.teacher_name} {item.teacher_lastname}
                       </td>
                       <td className="p-2">{item.class_assigned_name}</td>
                       <td className="p-2">{item.class_assigned_arm}</td>
@@ -471,16 +520,15 @@ const ClassTeacherAssign = () => {
               </tbody>
             </table>
           </div>
+          
           {/* Pagination controls */}
           {totalPages > 1 && (
             <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
               <button
                 onClick={handlePrevious}
                 disabled={currentPage === 1}
-                className={`px-2 py-1  bg-[#E6ECF2] border ${
-                  currentPage === 1
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-[#EDF0F3]"
+                className={`px-2 py-1 bg-[#E6ECF2] border ${
+                  currentPage === 1 ? "opacity-50 cursor-not-allowed" : "hover:bg-[#EDF0F3]"
                 }`}
               >
                 &lt;
@@ -490,7 +538,7 @@ const ClassTeacherAssign = () => {
                 <button
                   key={index}
                   onClick={() => setCurrentPage(index + 1)}
-                  className={`px-2 py-1   text-xs ${
+                  className={`px-2 py-1 text-xs ${
                     currentPage === index + 1
                       ? "bg-[#07508F] text-white"
                       : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
@@ -503,10 +551,8 @@ const ClassTeacherAssign = () => {
               <button
                 onClick={handleNext}
                 disabled={currentPage === totalPages}
-                className={`px-2 py-1  border bg-[#E6ECF2] ${
-                  currentPage === totalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-[#EDF0F3]"
+                className={`px-2 py-1 border bg-[#E6ECF2] ${
+                  currentPage === totalPages ? "opacity-50 cursor-not-allowed" : "hover:bg-[#EDF0F3]"
                 }`}
               >
                 &gt;

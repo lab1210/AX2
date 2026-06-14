@@ -40,6 +40,7 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+  
     setError("");
     setLoading(true);
 
@@ -63,7 +64,7 @@ export default function Login() {
         }
         
         const dashboardPath = getDashboardPath(user);
-        router.push(dashboardPath);
+        router.replace(dashboardPath);
         toast.success(`Welcome back, ${user.fullName || user.username}!`);
       } else {
         setError(result.message || "Invalid username or password");

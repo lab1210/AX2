@@ -4,9 +4,10 @@ import SuperAdminLayout from "../SuperAdminLayout";
 import DashboardHeader from "../DashboardHeader";
 import { IoClose, IoFilterOutline } from "react-icons/io5";
 import { FaCheck } from "react-icons/fa6";
-import { getComplianceDocs } from "../../../Service/complianceDocService";
-import formatDate from "@/Components/SchoolAdminDashBoard/Formatdate";
-const itemsPerPage = 10; // You can adjust this value
+import complianceService from "@/Service/complianceDocService";
+import toast from "react-hot-toast";
+
+const itemsPerPage = 10;
 
 const ManageCompItem = () => {
   const [complianceData, setComplianceData] = useState([]);
@@ -16,16 +17,38 @@ const ManageCompItem = () => {
   const [filteredData, setFilteredData] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
 
+  // Stats
+  const [pendingTaxCount, setPendingTaxCount] = useState(0);
+  const [pendingCertCount, setPendingCertCount] = useState(0);
+  const [pendingProofCount, setPendingProofCount] = useState(0);
+
   useEffect(() => {
     const fetchComplianceData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await getComplianceDocs();
-        setComplianceData(data);
-        setFilteredData(data);
+        const response = await complianceService.getAllCompliance();
+        console.log("Compliance response:", response);
+        
+        if (response.success) {
+          setComplianceData(response.data);
+          setFilteredData(response.data);
+          
+          // Calculate stats
+          const pendingTax = response.data.filter(item => !item.taxIdentificationNumber).length;
+          const pendingCert = response.data.filter(item => !item.accreditationCertificates).length;
+          const pendingProof = response.data.filter(item => !item.proofOfRegistration).length;
+          
+          setPendingTaxCount(pendingTax);
+          setPendingCertCount(pendingCert);
+          setPendingProofCount(pendingProof);
+        } else {
+          setError(response.message || "Failed to fetch compliance documents");
+          toast.error(response.message || "Failed to fetch compliance documents");
+        }
       } catch (error) {
         setError(error.message || "Failed to fetch compliance documents");
+        toast.error(error.message || "Failed to fetch compliance documents");
       } finally {
         setLoading(false);
       }
@@ -37,47 +60,55 @@ const ManageCompItem = () => {
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentItems = filteredData.slice(indexOfFirstItem, indexOfLastItem);
-
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
-
   const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const handleSearch = (event) => {
-    const searchTerm = event.target.value.toLowerCase();
-    setSearchTerm(searchTerm);
+    const searchTermLower = event.target.value.toLowerCase();
+    setSearchTerm(searchTermLower);
     setCurrentPage(1);
     const filtered = complianceData.filter((item) => {
       return (
-        item.school_name.toLowerCase().includes(searchTerm) ||
-        item.tax_identification_number.toLowerCase().includes(searchTerm) ||
-        item.accreditation_certificates.toLowerCase().includes(searchTerm) ||
-        item.proof_of_registration.toLowerCase().includes(searchTerm) ||
-        (item.uploaded_on &&
-          item.uploaded_on.toLowerCase().includes(searchTerm)) // Check if uploaded_on exists before toLowerCase()
+        (item.schoolName && item.schoolName.toLowerCase().includes(searchTermLower)) ||
+        (item.taxIdentificationNumber && item.taxIdentificationNumber.toLowerCase().includes(searchTermLower)) ||
+        (item.accreditationCertificates && item.accreditationCertificates.toLowerCase().includes(searchTermLower)) ||
+        (item.proofOfRegistration && item.proofOfRegistration.toLowerCase().includes(searchTermLower)) ||
+        (item.status && item.status.toLowerCase().includes(searchTermLower))
       );
     });
     setFilteredData(filtered);
   };
 
   if (loading) {
-    <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-      <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
-    </div>;
-  }
-  if (error) {
     return (
-      <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
-        {error}
+      <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+        <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
       </div>
     );
   }
+
+  if (error) {
+    return (
+      <SuperAdminLayout>
+        <div className="bg-[#ffffff] pl-4 pt-4 pb-3 pr-4 sticky top-0 z-10 shadow-md flex justify-between items-center">
+          <DashboardHeader />
+        </div>
+        <div className="bg-[#D4D4D4] overflow-auto flex-1 p-4">
+          <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md">
+            {error}
+          </div>
+        </div>
+      </SuperAdminLayout>
+    );
+  }
+
   return (
     <SuperAdminLayout>
       <div className="bg-[#ffffff] pl-4 pt-4 pb-3 sm:pr-4 lg:pr-9 sticky top-0 z-10 shadow-md flex justify-between items-center">
         <DashboardHeader />
 
-        <div className="flex items-center gap-4 ">
-          <div className="flex items-center rounded-4xl border lg:min-w-[350px]  border-[#D0D0D0] ">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center rounded-4xl border lg:min-w-[350px] border-[#D0D0D0]">
             <input
               type="text"
               placeholder="Search Compliance Documents..."
@@ -99,8 +130,9 @@ const ManageCompItem = () => {
           </div>
         </div>
       </div>
+      
       <div className="bg-[#D4D4D4] overflow-auto flex-1 p-4">
-        <div className="sm:flex sm:flex-col sm:gap-2 lg:grid lg:grid-cols-[3fr_1fr] overflow-auto  gap-3 lg:h-screen ">
+        <div className="sm:flex sm:flex-col sm:gap-2 lg:grid lg:grid-cols-[3fr_1fr] overflow-auto gap-3 lg:h-screen">
           <div className="overflow-x-auto">
             <table className="min-w-full table-auto border-collapse bg-[#ffffff]">
               <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
@@ -108,120 +140,106 @@ const ManageCompItem = () => {
                   <th className="p-3 pl-10 text-left font-bold px-5 text-[#333333]">
                     School Name
                   </th>
-                  <th className="p-3 text-center  font-bold px-5 text-[#333333]">
+                  <th className="p-3 text-center font-bold px-5 text-[#333333]">
                     Tax Compliance
                   </th>
-                  <th className="p-3 text-center  font-bold px-5 text-[#333333]">
-                    Accredition Doc
+                  <th className="p-3 text-center font-bold px-5 text-[#333333]">
+                    Accreditation Doc
                   </th>
-                  <th className="p-3 text-center  font-bold px-5 text-[#333333]">
+                  <th className="p-3 text-center font-bold px-5 text-[#333333]">
                     Proof of Reg.
                   </th>
-                  <th className="p-3 text-center pr-10  font-bold px-5 text-[#333333]">
-                    Uploaded on
+                  <th className="p-3 text-center pr-10 font-bold px-5 text-[#333333]">
+                    Status
                   </th>
                 </tr>
               </thead>
               <tbody>
-                {filteredData.length > 0 ? (
-                  filteredData.map((item, index) => (
+                {currentItems.length > 0 ? (
+                  currentItems.map((item, index) => (
                     <tr
-                      key={index}
-                      className="border-b-[#D0D0D0] border-b font-semibold text-xs cursor-pointer "
+                      key={item.id || index}
+                      className="border-b-[#D0D0D0] border-b font-semibold text-xs"
                     >
                       <td className="p-3 px-5 pl-10 text-left text-[#333333]">
-                        {item.school_name}
+                        {item.schoolName}
                       </td>
 
-                      <td className="p-3 px-5 font-normal text-center ">
+                      <td className="p-3 px-5 font-normal text-center">
                         <div className="flex items-center justify-center gap-2">
                           <span
                             className={`${
-                              item.tax_identification_number !== ""
-                                ? " text-[#1BB66E] "
-                                : " text-[#F94144] "
-                            }  `}
+                              item.taxIdentificationNumber
+                                ? "text-[#1BB66E]"
+                                : "text-[#F94144]"
+                            }`}
                           >
-                            {item.tax_identification_number !== ""
-                              ? " Uploaded"
-                              : "Unuploaded"}
+                            {item.taxIdentificationNumber ? "Uploaded" : "Not Uploaded"}
                           </span>
                           <span
                             className={`${
-                              item.tax_identification_number !== ""
-                                ? " bg-[#1BB66E]"
-                                : " bg-[#F94144]"
-                            }  text-white text-center rounded-xs`}
+                              item.taxIdentificationNumber ? "bg-[#1BB66E]" : "bg-[#F94144]"
+                            } text-white text-center rounded-xs inline-flex items-center justify-center w-5 h-5`}
                           >
-                            {item.tax_identification_number !== "" ? (
-                              <FaCheck />
-                            ) : (
-                              <IoClose />
-                            )}
+                            {item.taxIdentificationNumber ? <FaCheck size={12} /> : <IoClose size={12} />}
+                          </span>
+                        </div>
+                       </td>
+
+                      <td className="p-3 px-5 text-center font-normal">
+                        <div className="flex items-center justify-center gap-2">
+                          <span
+                            className={`${
+                              item.accreditationCertificates
+                                ? "text-[#1BB66E]"
+                                : "text-[#F94144]"
+                            }`}
+                          >
+                            {item.accreditationCertificates ? "Uploaded" : "Not Uploaded"}
+                          </span>
+                          <span
+                            className={`${
+                              item.accreditationCertificates ? "bg-[#1BB66E]" : "bg-[#F94144]"
+                            } text-white text-center rounded-xs inline-flex items-center justify-center w-5 h-5`}
+                          >
+                            {item.accreditationCertificates ? <FaCheck size={12} /> : <IoClose size={12} />}
                           </span>
                         </div>
                       </td>
 
-                      <td className="p-3  px-5  text-center  font-normal">
+                      <td className="p-3 px-5 text-center font-normal">
                         <div className="flex items-center justify-center gap-2">
                           <span
                             className={`${
-                              item.accreditation_certificates !== ""
-                                ? " text-[#1BB66E] "
-                                : " text-[#F94144] "
-                            }  `}
+                              item.proofOfRegistration
+                                ? "text-[#1BB66E]"
+                                : "text-[#F94144]"
+                            }`}
                           >
-                            {item.accreditation_certificates !== ""
-                              ? "Uploaded"
-                              : "Unuploaded"}
+                            {item.proofOfRegistration ? "Uploaded" : "Not Uploaded"}
                           </span>
                           <span
                             className={`${
-                              item.accreditation_certificates !== ""
-                                ? " bg-[#1BB66E]"
-                                : " bg-[#F94144]"
-                            } text-white text-center rounded-xs`}
+                              item.proofOfRegistration ? "bg-[#1BB66E]" : "bg-[#F94144]"
+                            } text-white text-center rounded-xs inline-flex items-center justify-center w-5 h-5`}
                           >
-                            {item.accreditation_certificates !== "" ? (
-                              <FaCheck />
-                            ) : (
-                              <IoClose />
-                            )}
+                            {item.proofOfRegistration ? <FaCheck size={12} /> : <IoClose size={12} />}
                           </span>
                         </div>
                       </td>
 
-                      <td className="font-normal p-3 px-5 text-center flex items-center gap-2">
+                      <td className="p-3 px-5 text-center">
                         <span
-                          className={`${
-                            item.proof_of_registration !== ""
-                              ? " text-[#1BB66E] "
-                              : " text-[#F94144] "
-                          }  `}
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            item.status === "Approved"
+                              ? "bg-green-100 text-green-800"
+                              : item.status === "Pending Approval"
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-red-100 text-red-800"
+                          }`}
                         >
-                          {item.proof_of_registration !== ""
-                            ? "Uploaded"
-                            : "Unuploaded"}
+                          {item.status || "Pending"}
                         </span>
-                        <span
-                          className={`${
-                            item.proof_of_registration !== ""
-                              ? " bg-[#1BB66E]"
-                              : " bg-[#F94144]"
-                          }  text-white text-center rounded-xs`}
-                        >
-                          {item.proof_of_registration !== "" ? (
-                            <FaCheck />
-                          ) : (
-                            <IoClose />
-                          )}
-                        </span>
-                      </td>
-
-                      <td className="p-3 px-5 text-[#333333] text-center pr-10">
-                        {!item.uploaded_on
-                          ? "N/A"
-                          : formatDate(item.uploaded_on)}
                       </td>
                     </tr>
                   ))
@@ -234,6 +252,7 @@ const ManageCompItem = () => {
                 )}
               </tbody>
             </table>
+            
             {filteredData.length > itemsPerPage && (
               <div className="flex justify-center mt-4 pb-4">
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map(
@@ -256,29 +275,31 @@ const ManageCompItem = () => {
           </div>
 
           <div className="grid grid-rows-3 gap-3">
-            <div className="bg-[#ffffff] flex flex-col gap-9   pt-3 pb-3 pl-5 pr-5 overflow-x-auto">
+            <div className="bg-[#ffffff] flex flex-col gap-9 pt-3 pb-3 pl-5 pr-5 overflow-x-auto">
               <p className="xl:text-base sm:text-sm font-bold">
                 Tax Identification Number
               </p>
-              <div className=" text-7xl font-bold text-[#01427A] ">
-                24
+              <div className="text-7xl font-bold text-[#01427A]">
+                {pendingTaxCount}
                 <span className="text-sm ml-2 text-[#F94144]">Pending</span>
               </div>
             </div>
-            <div className="bg-[#ffffff] flex flex-col gap-9  pt-3 pb-3 pl-5 pr-5 overflow-x-auto">
+            <div className="bg-[#ffffff] flex flex-col gap-9 pt-3 pb-3 pl-5 pr-5 overflow-x-auto">
               <p className="xl:text-base sm:text-sm font-bold">
                 Accreditation Certificate
               </p>
-              <div className=" text-7xl font-bold text-[#410096] ">
-                0<span className="text-sm ml-2 text-[#F94144]">Pending</span>
+              <div className="text-7xl font-bold text-[#410096]">
+                {pendingCertCount}
+                <span className="text-sm ml-2 text-[#F94144]">Pending</span>
               </div>
             </div>
-            <div className="bg-[#ffffff] flex flex-col gap-9  pt-3 pb-3 pl-5 pr-5 overflow-x-auto">
+            <div className="bg-[#ffffff] flex flex-col gap-9 pt-3 pb-3 pl-5 pr-5 overflow-x-auto">
               <p className="xl:text-base sm:text-sm font-bold">
                 Proof of Registration
               </p>
-              <div className=" text-7xl font-bold text-[#F94144] ">
-                24<span className="text-sm ml-2 text-[#F94144]">Pending</span>
+              <div className="text-7xl font-bold text-[#F94144]">
+                {pendingProofCount}
+                <span className="text-sm ml-2 text-[#F94144]">Pending</span>
               </div>
             </div>
           </div>

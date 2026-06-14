@@ -4,12 +4,8 @@ import { FiDownload, FiEdit3 } from "react-icons/fi";
 import { IoFilter, IoSearch } from "react-icons/io5";
 import { RxLetterCaseCapitalize } from "react-icons/rx";
 import Dropdown from "./DropDown2";
-import {
-  getStudenttoClassRelationship,
-  updateStudenttoClassRelationship,
-} from "../../Service/SchoolAdminAssignmentService";
-import { getStudents } from "../../Service/studentService";
-import { getClass, getClassArm } from "../../Service/schoolConfig";
+import studentService from "@/Service/studentService";
+import classService from "@/Service/ClassService";
 import toast from "react-hot-toast";
 
 const StudentAssignPage = () => {
@@ -22,12 +18,12 @@ const StudentAssignPage = () => {
   const [students, setStudents] = useState([]);
   const [classYears, setClassYears] = useState([]);
   const [classArms, setClassArms] = useState([]);
-  const [assignments, setAssignments] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
-    student: "",
-    class_year: "",
-    class_arm: "",
+    studentId: "",
+    classYearId: "",
+    classArmId: "",
   });
 
   const itemsPerPage = 10;
@@ -37,56 +33,70 @@ const StudentAssignPage = () => {
   }, []);
 
   useEffect(() => {
-    if (!formData.class_year) {
+    if (!formData.classYearId) {
       setFilteredArms([]);
       return;
     }
     const arms = (classArms || []).filter(
-      (a) => a.class_year === formData.class_year
+      (a) => a.classYearId === formData.classYearId || a.class_year_id === formData.classYearId
     );
     setFilteredArms(arms);
 
     if (
-      formData.class_arm &&
-      !arms.some((a) => a.class_id === formData.class_arm)
+      formData.classArmId &&
+      !arms.some((a) => a.id === formData.classArmId || a.class_id === formData.classArmId)
     ) {
-      setFormData((prev) => ({ ...prev, class_arm: "" }));
+      setFormData((prev) => ({ ...prev, classArmId: "" }));
     }
-  }, [formData.class_year, classArms]);
+  }, [formData.classYearId, classArms]);
 
   const fetchData = async () => {
     try {
-      const [assignmentsRes, studentsRes, classYearsRes, classArmsRes] =
-        await Promise.all([
-          getStudenttoClassRelationship(),
-          getStudents(),
-          getClass(),
-          getClassArm(),
-        ]);
+      setLoading(true);
+      const [studentsRes, classYearsRes, classArmsRes] = await Promise.all([
+        studentService.getAllStudents(),
+        classService.getAllClassYears(),
+        classService.getAllClassArms(),
+      ]);
 
-      setAssignments(assignmentsRes || []);
-      setStudents(studentsRes || []);
-      setClassYears(classYearsRes?.data || []);
-      setClassArms(classArmsRes?.data || []);
+      if (studentsRes.success) {
+        setStudents(studentsRes.data);
+      } else {
+        toast.error(studentsRes.message || "Failed to fetch students");
+      }
+
+      if (classYearsRes.success) {
+        setClassYears(classYearsRes.data);
+      } else {
+        toast.error(classYearsRes.message || "Failed to fetch class years");
+      }
+
+      if (classArmsRes.success) {
+        setClassArms(classArmsRes.data);
+      } else {
+        toast.error(classArmsRes.message || "Failed to fetch class arms");
+      }
     } catch (error) {
-      toast.error(
-        "Failed to fetch data: " + (error.message || "Unknown error")
-      );
+      toast.error("Failed to fetch data: " + (error.message || "Unknown error"));
+    } finally {
+      setLoading(false);
     }
   };
 
   // Filtering
-  const filteredResults = assignments.filter((assignment) => {
+  const filteredResults = students.filter((student) => {
     if (searchText.trim() === "") return true;
 
     const searchValue = searchText.toLowerCase();
     switch (filterType) {
       case "student_name":
-        return assignment.student_name?.toLowerCase().includes(searchValue);
+        return student.fullName?.toLowerCase().includes(searchValue) ||
+               student.firstName?.toLowerCase().includes(searchValue) ||
+               student.lastName?.toLowerCase().includes(searchValue);
       case "class_year":
-        return assignment.class_year_name?.toLowerCase().includes(searchValue);
+        return student.classYearName?.toLowerCase().includes(searchValue);
       case "class_arm":
-        return assignment.class_arm_name?.toLowerCase().includes(searchValue);
+        return student.classArmName?.toLowerCase().includes(searchValue);
       default:
         return true;
     }
@@ -108,46 +118,58 @@ const StudentAssignPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
-  const handleEdit = (assignment) => {
-    setEditingId(assignment.student_class_id);
+  const handleEdit = (student) => {
+    setEditingId(student.userId);
     setFormData({
-      student: assignment.student,
-      class_year: assignment.class_year_name,
-      class_arm: assignment.class_arm_name,
+      studentId: student.userId,
+      classYearId: student.classYearId || "",
+      classArmId: student.classArmId || "",
     });
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
     setFormData({
-      student: "",
-      class_year: "",
-      class_arm: "",
+      studentId: "",
+      classYearId: "",
+      classArmId: "",
     });
   };
 
-  const handleSaveEdit = async (assignmentId) => {
+  const handleSaveEdit = async (studentId) => {
     try {
-      if (!formData.student || !formData.class_year || !formData.class_arm) {
-        toast.error("Please select all fields");
+      if (!formData.classYearId || !formData.classArmId) {
+        toast.error("Please select both class year and class arm");
         return;
       }
 
-      await updateStudenttoClassRelationship(assignmentId, formData);
-      toast.success("Assignment updated successfully");
-      setEditingId(null);
-      await fetchData();
+      setLoading(true);
+      
+      const updateData = {
+        classYearId: formData.classYearId,
+        classArmId: formData.classArmId,
+      };
+
+      const result = await studentService.updateStudent(studentId, updateData);
+      
+      if (result.success) {
+        toast.success("Student class updated successfully");
+        setEditingId(null);
+        await fetchData();
+      } else {
+        throw new Error(result.message);
+      }
     } catch (error) {
-      toast.error(
-        "Failed to update assignment: " + (error.message || "Unknown error")
-      );
+      toast.error("Failed to update student class: " + (error.message || "Unknown error"));
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleInputChange = (field, value) => {
     setFormData((prev) => {
-      if (field === "class_year") {
-        return { ...prev, class_year: value, class_arm: "" };
+      if (field === "classYearId") {
+        return { ...prev, classYearId: value, classArmId: "" };
       }
       return { ...prev, [field]: value };
     });
@@ -165,7 +187,7 @@ const StudentAssignPage = () => {
   };
 
   const toCSV = (rows) => {
-    const headers = ["Student Name", "Class Year", "Class Arm"];
+    const headers = ["Student Name", "Admission Number", "Class Year", "Class Arm"];
     const escapeCell = (val) => {
       const s = (val ?? "").toString();
       const needsQuotes = /[",\n]/.test(s);
@@ -177,9 +199,10 @@ const StudentAssignPage = () => {
       headers.join(","),
       ...rows.map((r) =>
         [
-          escapeCell(r.student_name),
-          escapeCell(r.class_year_name),
-          escapeCell(r.class_arm_name),
+          escapeCell(r.fullName || `${r.firstName} ${r.lastName}`),
+          escapeCell(r.admissionNumber),
+          escapeCell(r.classYearName),
+          escapeCell(r.classArmName),
         ].join(",")
       ),
     ];
@@ -197,7 +220,7 @@ const StudentAssignPage = () => {
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
 
-    const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 8); // yyyymmddhhmmss
+    const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 8);
     const filename = `student_class_assignments_${ts}.csv`;
 
     const link = document.createElement("a");
@@ -212,8 +235,9 @@ const StudentAssignPage = () => {
   };
 
   return (
-    <div>
-      <div className="overflow-y-auto no-scrollbar h-full">
+    <div className="h-full flex flex-col">
+      {/* Filter and Search Section - Sticky at top */}
+      <div className="flex-shrink-0">
         <div className="flex justify-between items-center gap-5 pt-5 pl-6 pr-6">
           <div className="flex items-center gap-10 relative">
             <div>
@@ -272,162 +296,161 @@ const StudentAssignPage = () => {
             </button>
           </div>
         </div>
+      </div>
 
-        <div className="px-0 mt-10 overflow-y-auto h-full">
-          <div>
-            <table className="min-w-full table-auto">
-              {paginatedData.length > 0 && (
-                <thead className="bg-[#EDF0F3] text-center lg:text-base text-xs">
-                  <tr>
-                    <th className="p-2 bg-[#EDF0F3]">Student Name</th>
-                    <th className="p-2 bg-[#EDF0F3]">Class Year</th>
-                    <th className="p-2 bg-[#EDF0F3]">Class Arm</th>
-                    <th className="p-2 bg-[#EDF0F3]">Actions</th>
-                  </tr>
-                </thead>
-              )}
-              <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
-                {paginatedData.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan="5"
-                      className="p-5 text-center border text-gray-500"
-                    >
-                      No Student to Class Assignments Available
+      {/* Table Section - No overflow hidden, allows dropdown to expand */}
+      <div className="flex-1 mt-10 overflow-visible px-0">
+        <div className="overflow-visible">
+          <table className="min-w-full table-auto">
+            {paginatedData.length > 0 && (
+              <thead className="bg-[#EDF0F3] text-center lg:text-base text-xs sticky top-0 z-10">
+                <tr>
+                  <th className="p-2 bg-[#EDF0F3]">Student Name</th>
+                  <th className="p-2 bg-[#EDF0F3]">Admission No.</th>
+                  <th className="p-2 bg-[#EDF0F3]">Class Year</th>
+                  <th className="p-2 bg-[#EDF0F3]">Class Arm</th>
+                  <th className="p-2 bg-[#EDF0F3]">Actions</th>
+                </tr>
+              </thead>
+            )}
+            <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
+              {paginatedData.length === 0 ? (
+                <tr>
+                  <td colSpan="5" className="p-5 text-center border text-gray-500">
+                    No Student to Class Assignments Available
+                  </td>
+                </tr>
+              ) : (
+                paginatedData.map((student) => (
+                  <tr className="border-b-[#D0D0D0] border-b" key={student.userId}>
+                    <td className="p-2 text-center">
+                      {student.fullName || `${student.firstName} ${student.lastName}`}
                     </td>
-                  </tr>
-                ) : (
-                  paginatedData.map((assignment) => (
-                    <tr
-                      className="border-b-[#D0D0D0] border-b"
-                      key={assignment.student_class_id}
-                    >
-                      <td className="p-2 text-center">
-                        {assignment.student_name}
-                      </td>
-                      <td className="p-2 text-center">
-                        {editingId === assignment.student_class_id ? (
+                    <td className="p-2 text-center">
+                      {student.admissionNumber}
+                    </td>
+                    <td className="p-2 text-center relative">
+                      {editingId === student.userId ? (
+                        <div className="relative">
                           <Dropdown
-                            label={formData.class_year || "Select Class Year"}
+                            label={formData.classYearId 
+                              ? (classYears.find(cy => cy.id === formData.classYearId || cy.class_year_id === formData.classYearId)?.className || "Select Class Year")
+                              : "Select Class Year"}
                             items={classYears.map((classYear) => ({
-                              label: classYear.class_name,
+                              label: classYear.className || classYear.class_name,
                               onClick: () =>
-                                handleInputChange(
-                                  "class_year",
-                                  classYear.class_year_id
-                                ),
+                                handleInputChange("classYearId", classYear.id || classYear.class_year_id),
                             }))}
                           />
-                        ) : (
-                          assignment.class_year_name
-                        )}
-                      </td>
-                      <td className="p-2 text-center">
-                        {editingId === assignment.student_class_id ? (
+                        </div>
+                      ) : (
+                        student.classYearName || "Not Assigned"
+                      )}
+                    </td>
+                    <td className="p-2 text-center relative">
+                      {editingId === student.userId ? (
+                        <div className="relative">
                           <Dropdown
-                            label={formData.class_arm || "Select Class Arm"}
+                            label={formData.classArmId 
+                              ? (filteredArms.find(ca => ca.id === formData.classArmId || ca.class_id === formData.classArmId)?.armName || "Select Class Arm")
+                              : "Select Class Arm"}
                             items={(filteredArms.length
                               ? filteredArms
                               : [
                                   {
-                                    arm_name: "No arms for selected class",
-                                    class_id: null,
+                                    armName: "No arms for selected class",
+                                    id: null,
                                   },
                                 ]
                             ).map((classArm) => ({
-                              label: classArm.class_id
-                                ? classArm.arm_name
+                              label: classArm.id
+                                ? (classArm.armName || classArm.arm_name)
                                 : "No arms for selected class",
-                              onClick: classArm.class_id
+                              onClick: classArm.id
                                 ? () =>
-                                    handleInputChange(
-                                      "class_arm",
-                                      classArm.class_id
-                                    )
+                                    handleInputChange("classArmId", classArm.id || classArm.class_id)
                                 : undefined,
                             }))}
                           />
-                        ) : (
-                          assignment.class_arm_name
-                        )}
-                      </td>
-
-                      <td className="p-2 text-center">
-                        {editingId === assignment.student_class_id ? (
-                          <div className="flex gap-2 justify-center">
-                            <button
-                              onClick={() =>
-                                handleSaveEdit(assignment.student_class_id)
-                              }
-                              className="bg-green-600 text-white px-3 py-1 rounded text-xs hover:bg-green-700"
-                            >
-                              Save
-                            </button>
-                            <button
-                              onClick={handleCancelEdit}
-                              className="bg-gray-500 text-white px-3 py-1 rounded text-xs hover:bg-gray-600"
-                            >
-                              Cancel
-                            </button>
-                          </div>
-                        ) : (
-                          <FiEdit3
-                            onClick={() => handleEdit(assignment)}
-                            className="text-[#80ADCB] cursor-pointer mx-auto"
-                            size={15}
-                          />
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Pagination controls */}
-          {totalPages > 1 && (
-            <div className="flex justify-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
-              <button
-                onClick={handlePrevious}
-                disabled={currentPage === 1}
-                className={`px-3 py-1 bg-[#E6ECF2] border rounded ${
-                  currentPage === 1
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-[#EDF0F3]"
-                }`}
-              >
-                &lt;
-              </button>
-
-              {Array.from({ length: totalPages }, (_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentPage(index + 1)}
-                  className={`px-3 py-1 rounded text-xs ${
-                    currentPage === index + 1
-                      ? "bg-[#07508F] text-white"
-                      : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
-                  }`}
-                >
-                  {index + 1}
-                </button>
-              ))}
-
-              <button
-                onClick={handleNext}
-                disabled={currentPage === totalPages}
-                className={`px-3 py-1 border bg-[#E6ECF2] rounded ${
-                  currentPage === totalPages
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-[#EDF0F3]"
-                }`}
-              >
-                &gt;
-              </button>
-            </div>
-          )}
+                        </div>
+                      ) : (
+                        student.classArmName || "Not Assigned"
+                      )}
+                    </td>
+                    <td className="p-2 text-center">
+                      {editingId === student.userId ? (
+                        <div className="flex gap-2 justify-center">
+                          <button
+                            onClick={() => handleSaveEdit(student.userId)}
+                            disabled={loading}
+                            className="bg-[#07508F] text-white px-3 py-1 rounded text-xs hover:opacity-90 cursor-pointer disabled:opacity-50"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={handleCancelEdit}
+                            className="bg-gray-500 text-white px-3 py-1 rounded text-xs hover:bg-gray-600"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <FiEdit3
+                          onClick={() => handleEdit(student)}
+                          className="text-[#80ADCB] cursor-pointer mx-auto"
+                          size={15}
+                        />
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
+
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold pb-4">
+            <button
+              onClick={handlePrevious}
+              disabled={currentPage === 1}
+              className={`px-3 py-1 bg-[#E6ECF2] border rounded ${
+                currentPage === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#EDF0F3]"
+              }`}
+            >
+              &lt;
+            </button>
+
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`px-3 py-1 rounded text-xs ${
+                  currentPage === index + 1
+                    ? "bg-[#07508F] text-white"
+                    : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              className={`px-3 py-1 border bg-[#E6ECF2] rounded ${
+                currentPage === totalPages
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#EDF0F3]"
+              }`}
+            >
+              &gt;
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

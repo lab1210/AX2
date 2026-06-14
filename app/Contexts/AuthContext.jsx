@@ -3,7 +3,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import authService from '@/services/authService';
+import authService from '@/Service/AuthService';
 import toast from 'react-hot-toast';
 import { useRouter } from 'next/navigation';
 

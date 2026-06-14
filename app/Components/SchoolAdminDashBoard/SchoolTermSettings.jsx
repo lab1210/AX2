@@ -2,18 +2,12 @@
 import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import Dropdown from "./DropDown2";
-import {
-  createTerm,
-  deleteTerm,
-  getAcademicYears,
-  getTerms,
-  UpdateTerm,
-} from "@/Service/schoolConfig";
+import academicPeriodService from "@/Service/AcademicPeriodService";
 import toast from "react-hot-toast";
 
 const SchoolTermSettings = () => {
-  const [term, setTerm] = useState([]);
-  const [years, setYears] = useState([]);
+  const [terms, setTerms] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [selectedTerm, setSelectedTerm] = useState(null);
   const [editTermVisible, setEditTermVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -23,40 +17,44 @@ const SchoolTermSettings = () => {
 
   const [formData, setFormData] = useState({
     name: "",
-    start_date: "",
-    end_date: "",
-    year: "",
+    startDate: "",
+    endDate: "",
+    yearId: "",
   });
 
   useEffect(() => {
     fetchTerms();
-    fetchYears();
+    fetchSessions();
   }, []);
 
   const fetchTerms = async () => {
-    const { data, error } = await getTerms();
-    if (data) setTerm(data);
-    else toast.error(error || "Failed to load terms");
-  };
-  const fetchYears = async () => {
-    const { data, error } = await getAcademicYears();
-    if (data) {
-      setYears(data);
+    const result = await academicPeriodService.getAllTerms(null, true, false);
+    if (result.success) {
+      setTerms(result.data);
     } else {
-      toast.error(error || "Failed to load academic years");
+      toast.error(result.message || "Failed to load terms");
     }
   };
 
-  const getYearName = (yearid) => {
-    const year = years.find((item) => item.year_id === yearid);
-    return year?.name;
+  const fetchSessions = async () => {
+    const result = await academicPeriodService.getAllSessions(true, false);
+    if (result.success) {
+      setSessions(result.data);
+    } else {
+      toast.error(result.message || "Failed to load academic years");
+    }
   };
 
-  const paginatedData = Array.isArray(term)
-    ? term.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
+  const getSessionName = (sessionId) => {
+    const session = sessions.find((item) => item.id === sessionId);
+    return session?.name;
+  };
+
+  const paginatedData = Array.isArray(terms)
+    ? terms.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage)
     : [];
 
-  const totalPages = Math.ceil(term.length / itemsPerPage);
+  const totalPages = Math.ceil(terms.length / itemsPerPage);
   const handlePrevious = () => {
     setCurrentPage((prev) => Math.max(prev - 1, 1));
   };
@@ -75,79 +73,64 @@ const SchoolTermSettings = () => {
       toast.error("Term name is required.");
       return;
     }
-    const existingSession = term.find(
-      (item) => item.name?.toLowerCase() === trimmedName.toLowerCase()
-    );
-
-    if (!editTermVisible && existingSession) {
-      toast.error("Term already exists.");
-      return;
-    }
 
     if (editTermVisible && selectedTerm) {
       try {
-        const updatedTerm = {
-          ...selectedTerm,
+        const updateData = {
           name: selectedTerm.name,
-          start_date: selectedTerm.start_date,
-          end_date: selectedTerm.end_date,
-          year: selectedTerm.year,
+          startDate: selectedTerm.startDate,
+          endDate: selectedTerm.endDate,
+          yearId: selectedTerm.yearId,
           status: selectedTerm.status,
         };
-        const { data, error } = await UpdateTerm(
-          selectedTerm.term_id,
-          updatedTerm
-        );
-        if (error) {
-          toast.error(error || "Failed to update term.");
-          return;
-        }
-        const updatedList = term.map((item) =>
-          item.term_id === selectedTerm.term_id ? data : item
-        );
-        setTerm(updatedList);
-        toast.success("Term updated successfully.");
-        setEditTermVisible(false);
-        setSelectedTerm(null);
 
-        setFormData({
-          name: "",
-          start_date: "",
-          end_date: "",
-          year: "",
-          status: true,
-        });
+        const result = await academicPeriodService.updateTerm(selectedTerm.id, updateData);
+
+        if (result.success) {
+          await fetchTerms();
+          toast.success("Term updated successfully.");
+          setEditTermVisible(false);
+          setSelectedTerm(null);
+          setFormData({
+            name: "",
+            startDate: "",
+            endDate: "",
+            yearId: "",
+          });
+        } else {
+          toast.error(result.message || "Failed to update term.");
+        }
       } catch (error) {
         toast.error("An error occurred while updating.");
       }
     } else {
       try {
-        const createPayload = {
+        const createData = {
           name: formData.name,
-          start_date: formData.start_date,
-          end_date: formData.end_date,
-          year: formData.year,
-          // status: formData.status,
+          startDate: formData.startDate,
+          endDate: formData.endDate,
+          yearId: formData.yearId,
+          status: false,
         };
 
-        const { data, error } = await createTerm(createPayload);
+        const result = await academicPeriodService.createTerm(createData);
 
-        if (error) {
-          toast.error(error || "Failed to add term.");
-        } else {
-          setTerm((prev) => [...prev, data]);
+        if (result.success) {
+          await fetchTerms();
           toast.success("Term added successfully.");
+        } else {
+          toast.error(result.message || "Failed to add term.");
         }
       } catch (err) {
         toast.error("An error occurred while adding.");
       }
     }
+
     setFormData({
       name: "",
-      start_date: "",
-      end_date: "",
-      year: "",
-      status: true,
+      startDate: "",
+      endDate: "",
+      yearId: "",
     });
   };
 
@@ -161,23 +144,39 @@ const SchoolTermSettings = () => {
     setDeleteModalVisible(true);
   };
 
-  // Function to close delete modal
   const closeDeleteModal = () => {
     setSelectedTermDelete(null);
     setDeleteModalVisible(false);
   };
 
   const handleDelete = async () => {
-    if (selectedTermDelete?.term_id) {
+    if (selectedTermDelete?.id) {
       try {
-        const response = await deleteTerm(selectedTermDelete.term_id);
-        fetchTerms();
-        toast.success("Term deleted successfully.");
-
-        closeDeleteModal();
+        const result = await academicPeriodService.deleteTerm(selectedTermDelete.id);
+        if (result.success) {
+          toast.success("Term deleted successfully.");
+          await fetchTerms();
+          closeDeleteModal();
+        } else {
+          toast.error(result.message || "Failed to delete term.");
+        }
       } catch (error) {
         toast.error("Failed to delete term.");
       }
+    }
+  };
+
+  const handleSetActiveTerm = async (termId) => {
+    try {
+      const result = await academicPeriodService.setActiveTerm(termId);
+      if (result.success) {
+        toast.success(result.message || "Term set as active");
+        await fetchTerms();
+      } else {
+        toast.error(result.message || "Failed to set active term");
+      }
+    } catch (error) {
+      toast.error("An error occurred");
     }
   };
 
@@ -199,16 +198,16 @@ const SchoolTermSettings = () => {
                 <span className="font-bold">{selectedTermDelete.name}</span>?
               </p>
             </div>
-            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5">
               <button
                 onClick={handleDelete}
-                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4 py-2"
               >
                 Yes, Delete
               </button>
               <button
                 onClick={closeDeleteModal}
-                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4 py-2"
               >
                 No, Cancel
               </button>
@@ -218,7 +217,7 @@ const SchoolTermSettings = () => {
       )}
 
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
-        <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
+        <div className="flex pt-3 pl-6 pr-6 justify-between mb-2">
           <p className="font-bold text-[#07508F]">
             {editTermVisible ? "Edit Term" : "Set New Term"}
           </p>
@@ -236,9 +235,7 @@ const SchoolTermSettings = () => {
               <input
                 type="text"
                 placeholder="Enter Term"
-                value={
-                  editTermVisible ? selectedTerm.name : formData.name || ""
-                }
+                value={editTermVisible ? selectedTerm?.name || "" : formData.name}
                 onChange={(e) => {
                   const value = e.target.value;
                   editTermVisible
@@ -251,11 +248,7 @@ const SchoolTermSettings = () => {
                         name: value,
                       }));
                 }}
-                className={`text-base  ${
-                  formData.name !== ""
-                    ? "border-[#0071E3]  border-2"
-                    : "border-[#AEAEAE] border-[1.5px]"
-                }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
                 required
               />
             </div>
@@ -264,50 +257,41 @@ const SchoolTermSettings = () => {
                 {editTermVisible ? "Status:" : "Academic Session:"}
               </label>
               {editTermVisible ? (
-                <Dropdown
-                  label={selectedTerm.status ? "Active" : "Inactive"}
-                  items={[
-                    {
-                      label: "Select Status",
-                      onClick: () => {},
-                      disabled: true,
-                    },
-                    {
-                      label: "Active",
-                      onClick: () =>
-                        setSelectedTerm(
-                          { ...selectedTerm, status: true } || ""
-                        ),
-                    },
-                    {
-                      label: "Inactive",
-                      onClick: () =>
-                        setSelectedTerm(
-                          {
-                            ...selectedTerm,
-                            status: false,
-                          } || ""
-                        ),
-                    },
-                  ]}
-                />
+                <div className="flex items-center gap-3">
+                  <span
+                    className={`px-3 py-1 rounded-full text-sm font-medium ${
+                      selectedTerm?.status
+                        ? "bg-green-100 text-green-800"
+                        : "bg-red-100 text-red-800"
+                    }`}
+                  >
+                    {selectedTerm?.status ? "Active" : "Inactive"}
+                  </span>
+                  {!selectedTerm?.status && (
+                    <button
+                      type="button"
+                      onClick={() => handleSetActiveTerm(selectedTerm.id)}
+                      className="text-xs bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700"
+                    >
+                      Set as Active
+                    </button>
+                  )}
+                </div>
               ) : (
                 <Dropdown
-                  label={
-                    getYearName(formData.year) || "Select Academic Session"
-                  }
+                  label={getSessionName(formData.yearId) || "Select Academic Session"}
                   items={[
                     {
                       label: "Select Academic Session",
                       onClick: () => {},
                       disabled: true,
                     },
-                    ...years.map((year) => ({
-                      label: year.name,
+                    ...sessions.map((session) => ({
+                      label: session.name,
                       onClick: () =>
                         setFormData({
                           ...formData,
-                          year: year.year_id,
+                          yearId: session.id,
                         }),
                     })),
                   ]}
@@ -326,23 +310,19 @@ const SchoolTermSettings = () => {
                 placeholder="Start Date"
                 value={
                   editTermVisible
-                    ? selectedTerm.start_date
-                    : formData.start_date || ""
+                    ? selectedTerm?.startDate?.split("T")[0] || ""
+                    : formData.startDate
                 }
                 onChange={(e) => {
                   const value = e.target.value;
                   editTermVisible
                     ? setSelectedTerm((prev) => ({
                         ...prev,
-                        start_date: value,
+                        startDate: value,
                       }))
-                    : setFormData((prev) => ({ ...prev, start_date: value }));
+                    : setFormData((prev) => ({ ...prev, startDate: value }));
                 }}
-                className={`text-base  ${
-                  formData.start_date !== ""
-                    ? "border-[#0071E3]  border-2 font-bold"
-                    : "border-[#AEAEAE] border-[1.5px] placeholder: text-[#B6B6B6] "
-                }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2   placeholder:font-normal  `}
+                className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
                 required
               />
             </div>
@@ -353,36 +333,34 @@ const SchoolTermSettings = () => {
                 placeholder="End Date"
                 value={
                   editTermVisible
-                    ? selectedTerm.end_date
-                    : formData.end_date || ""
+                    ? selectedTerm?.endDate?.split("T")[0] || ""
+                    : formData.endDate
                 }
                 onChange={(e) => {
                   const value = e.target.value;
                   editTermVisible
                     ? setSelectedTerm((prev) => ({
                         ...prev,
-                        end_date: value,
+                        endDate: value,
                       }))
-                    : setFormData((prev) => ({ ...prev, end_date: value }));
+                    : setFormData((prev) => ({ ...prev, endDate: value }));
                 }}
-                className={`text-base  ${
-                  formData.end_date !== ""
-                    ? "border-[#0071E3]  border-2 font-bold"
-                    : "border-[#AEAEAE] border-[1.5px] placeholder: text-[#B6B6B6]"
-                }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2   placeholder:font-normal  `}
+                className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
                 required
               />
             </div>
           </div>
         </div>
       </form>
+
       <hr className="mt-10" />
 
       <div className="flex-shrink-0 mb-2">
         <p className="font-semibold flex justify-center p-3 text-[#333333]">
-          Existing Term
+          Existing Terms
         </p>
       </div>
+
       <div className="px-0">
         <div className="overflow-y-auto max-h-[200px] no-scrollbar">
           <table className="min-w-full table-auto">
@@ -402,27 +380,24 @@ const SchoolTermSettings = () => {
             <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
               {paginatedData.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="3"
-                    className="p-5  text-center border text-gray-500"
-                  >
+                  <td colSpan="6" className="p-5 text-center border text-gray-500">
                     No Data Available
                   </td>
                 </tr>
               ) : (
                 paginatedData.map((item, index) => (
-                  <tr className="border-b-[#D0D0D0] border-b" key={index}>
+                  <tr className="border-b-[#D0D0D0] border-b" key={item.id || index}>
                     <td className="p-2 pl-6">{item.name}</td>
-                    <td className="p-2">{getYearName(item.year)}</td>
-                    <td className="p-2">{item.start_date}</td>
-                    <td className="p-2">{item.end_date}</td>
+                    <td className="p-2">{getSessionName(item.yearId)}</td>
+                    <td className="p-2">{item.startDate?.split("T")[0]}</td>
+                    <td className="p-2">{item.endDate?.split("T")[0]}</td>
                     <td className="p-2">
                       <span
                         className={`${
                           item.status
                             ? "bg-[#E8F8F0] text-[#1BB66E]"
                             : "bg-[#FEECEC] text-[#F94144]"
-                        } rounded-2xl py-1 font-bold`}
+                        } rounded-2xl py-1 font-bold px-3`}
                         style={{
                           minWidth: "70px",
                           display: "inline-block",
@@ -454,45 +429,47 @@ const SchoolTermSettings = () => {
         </div>
 
         {/* Pagination controls */}
-        <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
-          <button
-            onClick={handlePrevious}
-            disabled={currentPage === 1}
-            className={`px-2 py-1  bg-[#E6ECF2] border ${
-              currentPage === 1
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-[#EDF0F3]"
-            }`}
-          >
-            &lt;
-          </button>
-
-          {Array.from({ length: totalPages }, (_, index) => (
+        {totalPages > 1 && (
+          <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
             <button
-              key={index}
-              onClick={() => setCurrentPage(index + 1)}
-              className={`px-2 py-1   text-xs ${
-                currentPage === index + 1
-                  ? "bg-[#07508F] text-white"
-                  : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+              onClick={handlePrevious}
+              disabled={currentPage === 1}
+              className={`px-2 py-1 bg-[#E6ECF2] border ${
+                currentPage === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#EDF0F3]"
               }`}
             >
-              {index + 1}
+              &lt;
             </button>
-          ))}
 
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className={`px-2 py-1  border bg-[#E6ECF2] ${
-              currentPage === totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-[#EDF0F3]"
-            }`}
-          >
-            &gt;
-          </button>
-        </div>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`px-2 py-1 text-xs ${
+                  currentPage === index + 1
+                    ? "bg-[#07508F] text-white"
+                    : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              className={`px-2 py-1 border bg-[#E6ECF2] ${
+                currentPage === totalPages
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#EDF0F3]"
+              }`}
+            >
+              &gt;
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

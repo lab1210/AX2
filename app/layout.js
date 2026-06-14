@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
       </head>
       <body suppressHydrationWarning>
         <div className="app">
-          <Toaster />
+          {/* <Toaster /> */}
           {children}
         </div>
       </body>

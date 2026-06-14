@@ -2,19 +2,13 @@
 import React, { useEffect, useState } from "react";
 import Dropdown from "./DropDown";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
-import {
-  createArm,
-  deleteClassArm,
-  getClass,
-  getClassArm,
-  UpdateClassArm,
-} from "@/Service/schoolConfig";
+import classService from "@/Service/ClassService";
 import toast from "react-hot-toast";
 
 const ClassArm = () => {
   const [classList, setClassList] = useState([]);
-  const [ClassYear, setClassYear] = useState([]);
-  const [selectedClass, setSelectedClass] = useState(null);
+  const [classYears, setClassYears] = useState([]);
+  const [selectedClassArm, setSelectedClassArm] = useState(null);
   const [editClassVisible, setEditClassVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
@@ -22,32 +16,36 @@ const ClassArm = () => {
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
   const [formData, setFormData] = useState({
-    arm_name: "",
-    class_year: "",
+    armName: "",
+    classYearId: "",
   });
 
   useEffect(() => {
     fetchClassArms();
-    fetchClass();
+    fetchClassYears();
   }, []);
 
-  const fetchClass = async () => {
-    const { data, error } = await getClass();
-    if (data) {
-      setClassYear(data);
+  const fetchClassYears = async () => {
+    const result = await classService.getAllClassYears();
+    if (result.success) {
+      setClassYears(result.data);
     } else {
-      toast.error(error || "Failed to load Class years");
+      toast.error(result.message || "Failed to load class years");
     }
   };
 
   const fetchClassArms = async () => {
-    const { data, error } = await getClassArm();
-    if (data) setClassList(data);
-    else toast.error(error || "Failed to load class arms");
+    const result = await classService.getAllClassArms();
+    if (result.success) {
+      setClassList(result.data);
+    } else {
+      toast.error(result.message || "Failed to load class arms");
+    }
   };
-  const getClassYearName = (yearid) => {
-    const year = ClassYear.find((item) => item.class_year_id === yearid);
-    return year?.class_name;
+
+  const getClassName = (classYearId) => {
+    const classYear = classYears.find((item) => item.id === classYearId);
+    return classYear?.className;
   };
 
   const paginatedData = classList.slice(
@@ -67,86 +65,76 @@ const ClassArm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (editClassVisible && selectedClass) {
+    if (editClassVisible && selectedClassArm) {
       try {
-        const updatedClass = {
-          ...selectedClass,
-          arm_name: selectedClass.arm_name,
-          class_year: selectedClass.class_year,
+        const updateData = {
+          armName: selectedClassArm.armName,
+          classYearId: selectedClassArm.classYearId,
         };
-        const { data, error } = await UpdateClassArm(
-          selectedClass.class_id,
-          updatedClass
-        );
-        if (error) {
-          toast.error(error || "Failed to update class arm.");
-          return;
+        const result = await classService.updateClassArm(selectedClassArm.id, updateData);
+        
+        if (result.success) {
+          await fetchClassArms();
+          toast.success("Class Arm updated successfully.");
+          setEditClassVisible(false);
+          setSelectedClassArm(null);
+          setFormData({ armName: "", classYearId: "" });
+        } else {
+          toast.error(result.message || "Failed to update class arm.");
         }
-        const updatedList = classList.map((item) =>
-          item.class_id === selectedClass.class_id ? data : item
-        );
-        setClassList(updatedList);
-        toast.success("Class Arm updated successfully.");
-        setEditClassVisible(false);
-        setSelectedClass(null);
       } catch (error) {
         toast.error("An error occurred while updating.");
       }
     } else {
       try {
-        const createPayload = {
-          arm_name: formData.arm_name,
-          class_year: formData.class_year,
+        const createData = {
+          armName: formData.armName,
+          classYearId: formData.classYearId,
         };
 
-        const { data, error } = await createArm(createPayload);
+        const result = await classService.createClassArm(createData);
 
-        if (error) {
-          toast.error(error || "Failed to add class arm.");
-        } else {
-          setClassList((prev) => [...prev, data]);
+        if (result.success) {
+          await fetchClassArms();
+          setFormData({ armName: "", classYearId: "" });
           toast.success("Class Arm added successfully.");
+        } else {
+          toast.error(result.message || "Failed to add class arm.");
         }
       } catch (err) {
         toast.error("An error occurred while adding.");
       }
     }
-    setFormData({
-      arm_name: "",
-      class_year: "",
-    });
   };
 
-  const handleEdit = (Class) => {
+  const handleEdit = (classArm) => {
     setEditClassVisible(true);
-    setSelectedClass({ ...Class });
+    setSelectedClassArm({ ...classArm });
   };
 
-  const openDeleteModal = (term) => {
-    setSelectedClassDelete(term);
+  const openDeleteModal = (classArm) => {
+    setSelectedClassDelete(classArm);
     setDeleteModalVisible(true);
   };
 
-  // Function to close delete modal
   const closeDeleteModal = () => {
     setSelectedClassDelete(null);
     setDeleteModalVisible(false);
   };
 
   const handleDelete = async () => {
-    if (selectedClassDelete?.class_id) {
+    if (selectedClassDelete?.id) {
       try {
-        const response = await deleteClassArm(selectedClassDelete.class_id);
-        if (response?.status === 204) {
+        const result = await classService.deleteClassArm(selectedClassDelete.id);
+        if (result.success) {
           toast.success("Class Arm deleted successfully.");
-          fetchClassArms();
+          await fetchClassArms();
           closeDeleteModal();
         } else {
-          toast.error("Failed to delete Class Arm.");
-          closeDeleteModal();
+          toast.error(result.message || "Failed to delete class arm.");
         }
       } catch (error) {
-        toast.error("Failed to delete Class Arm.");
+        toast.error("Failed to delete class arm.");
       }
     }
   };
@@ -166,22 +154,19 @@ const ClassArm = () => {
                 Are you sure want to delete the class arm
               </p>
               <p className="text-base text-[#858383]">
-                <span className="font-bold">
-                  {selectedClassDelete?.arm_name}
-                </span>
-                ?
+                <span className="font-bold">{selectedClassDelete?.armName}</span>?
               </p>
             </div>
-            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5">
               <button
                 onClick={handleDelete}
-                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4 py-2"
               >
                 Yes, Delete
               </button>
               <button
                 onClick={closeDeleteModal}
-                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4 py-2"
               >
                 No, Cancel
               </button>
@@ -189,8 +174,9 @@ const ClassArm = () => {
           </div>
         </div>
       )}
+
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
-        <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
+        <div className="flex pt-3 pl-6 pr-6 justify-between mb-2">
           <p className="font-bold text-[#07508F]">
             {editClassVisible ? "Edit Class Arm" : "Set Class Arm"}
           </p>
@@ -208,65 +194,46 @@ const ClassArm = () => {
               <Dropdown
                 label={
                   (editClassVisible
-                    ? getClassYearName(selectedClass.class_year)
-                    : getClassYearName(formData.class_year)) || "Select Class"
+                    ? getClassName(selectedClassArm?.classYearId)
+                    : getClassName(formData.classYearId)) || "Select Class"
                 }
-                items={ClassYear.map((year) => ({
-                  label: year.class_name,
+                items={classYears.map((classYear) => ({
+                  label: classYear.className,
                   onClick: () =>
                     editClassVisible
-                      ? setSelectedClass((prev) => ({
-                          ...prev,
-                          class_year: year.class_year_id,
-                        }))
-                      : setFormData({
-                          ...formData,
-                          class_year: year.class_year_id,
-                        }),
+                      ? setSelectedClassArm((prev) => ({ ...prev, classYearId: classYear.id }))
+                      : setFormData({ ...formData, classYearId: classYear.id }),
                 }))}
               />
             </div>
             <div className="flex flex-col gap-2 mb-2">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Class Arm:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Class Arm:</label>
               <input
                 type="text"
                 placeholder="Enter Class Arm"
-                value={
-                  editClassVisible
-                    ? selectedClass.arm_name
-                    : formData.arm_name || ""
-                }
+                value={editClassVisible ? selectedClassArm?.armName || "" : formData.armName}
                 onChange={(e) => {
                   const value = e.target.value;
                   editClassVisible
-                    ? setSelectedClass((prev) => ({
-                        ...prev,
-                        arm_name: value,
-                      }))
-                    : setFormData((prev) => ({
-                        ...prev,
-                        arm_name: value,
-                      }));
+                    ? setSelectedClassArm((prev) => ({ ...prev, armName: value }))
+                    : setFormData((prev) => ({ ...prev, armName: value }));
                 }}
-                className={`text-base  ${
-                  formData.arm_name !== ""
-                    ? "border-[#0071E3]  border-2"
-                    : "border-[#AEAEAE] border-[1.5px]"
-                }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
                 required
               />
             </div>
           </div>
         </div>
       </form>
+
       <hr />
+
       <div className="flex-shrink-0">
         <p className="font-semibold flex justify-center p-3 text-[#333333]">
-          Existing Class Arm
+          Existing Class Arms
         </p>
       </div>
+
       <div className="px-0">
         <div className="overflow-y-auto max-h-[200px] no-scrollbar">
           <table className="min-w-full table-auto">
@@ -282,18 +249,15 @@ const ClassArm = () => {
             <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
               {paginatedData.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="3"
-                    className="p-5  text-center border text-gray-500"
-                  >
+                  <td colSpan="3" className="p-5 text-center border text-gray-500">
                     No Class Arms Available
                   </td>
                 </tr>
               ) : (
                 paginatedData.map((item, index) => (
-                  <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-12">{item.class_year_name}</td>
-                    <td className="p-2">{item.arm_name}</td>
+                  <tr className="border-b-[#D0D0D0] border-b" key={item.id || index}>
+                    <td className="p-2 pl-12">{item.classYearName}</td>
+                    <td className="p-2">{item.armName}</td>
                     <td className="p-2">
                       <div className="flex gap-4">
                         <FiEdit3
@@ -314,46 +278,49 @@ const ClassArm = () => {
             </tbody>
           </table>
         </div>
-        {/* Pagination controls */}
-        <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
-          <button
-            onClick={handlePrevious}
-            disabled={currentPage === 1}
-            className={`px-2 py-1  bg-[#E6ECF2] border ${
-              currentPage === 1
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-[#EDF0F3]"
-            }`}
-          >
-            &lt;
-          </button>
 
-          {Array.from({ length: totalPages }, (_, index) => (
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
             <button
-              key={index}
-              onClick={() => setCurrentPage(index + 1)}
-              className={`px-2 py-1   text-xs ${
-                currentPage === index + 1
-                  ? "bg-[#07508F] text-white"
-                  : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+              onClick={handlePrevious}
+              disabled={currentPage === 1}
+              className={`px-2 py-1 bg-[#E6ECF2] border ${
+                currentPage === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#EDF0F3]"
               }`}
             >
-              {index + 1}
+              &lt;
             </button>
-          ))}
 
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className={`px-2 py-1  border bg-[#E6ECF2] ${
-              currentPage === totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-[#EDF0F3]"
-            }`}
-          >
-            &gt;
-          </button>
-        </div>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`px-2 py-1 text-xs ${
+                  currentPage === index + 1
+                    ? "bg-[#07508F] text-white"
+                    : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              className={`px-2 py-1 border bg-[#E6ECF2] ${
+                currentPage === totalPages
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#EDF0F3]"
+              }`}
+            >
+              &gt;
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

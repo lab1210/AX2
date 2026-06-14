@@ -7,62 +7,76 @@ import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { IoClose } from "react-icons/io5";
-import { getSchools } from "../../../Service/schoolService"; // Import school service functions
+import schoolService from "@/Service/SchoolService";
+import toast from "react-hot-toast";
 
-const ITEMS_PER_PAGE = 7; // You can adjust this value
+const ITEMS_PER_PAGE = 7;
+
+// Helper function to convert education level enum to string
+const getEducationLevelString = (value) => {
+  const levelMap = {
+    0: "Nursery",
+    1: "Primary",
+    2: "Nursery & Primary",
+    3: "Nursery, Primary & Secondary",
+    4: "Secondary",
+    5: "Primary & Secondary",
+    6: "Tertiary"
+  };
+  return levelMap[value] ?? "Primary";
+};
 
 const ManageSchoolsItem = () => {
   const searchParams = useSearchParams();
   const adminId = searchParams.get("adminId");
+  const router = useRouter();
 
-  // State for all schools data fetched from the API
   const [allSchools, setAllSchools] = useState([]);
-
-  // State for the displayed schools data after filtering and pagination
   const [schoolsData, setSchoolsData] = useState([]);
   const [totalSchools, setTotalSchools] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // State for pagination
   const [currentPage, setCurrentPage] = useState(1);
-
-  // State for search
   const [searchTerm, setSearchTerm] = useState("");
-
-  // State to track selected school for details and deletion
   const [selectedschoolDetail, setselectedschoolDetail] = useState(null);
-
-  // Modal visibility states
   const [detailModalVisible, setDetailModalVisible] = useState(false);
 
-  // Function to fetch all schools without search parameters
+  // Delete modal states
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [selectedSchoolDelete, setSelectedSchoolDelete] = useState(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const [deleteError, setDeleteError] = useState(null);
+  const [deleteSuccess, setDeleteSuccess] = useState(false);
+  const [modalTransform, setModalTransform] = useState("translateX(-100%)");
+  const [modalOpacity, setModalOpacity] = useState(0);
+
   const fetchAllSchools = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await getSchools({}, currentPage, ITEMS_PER_PAGE);
-      if (response?.status === 200) {
-        setAllSchools(response.data.results);
-        setTotalSchools(response.data.count);
+      const response = await schoolService.getAllSchools(searchTerm);
+      console.log("Schools response:", response);
+      
+      if (response.success) {
+        setAllSchools(response.data || []);
+        setTotalSchools(response.count || 0);
       } else {
-        setError(
-          `Failed to fetch schools: ${response?.statusText || "Unknown error"}`
-        );
+        setError(response.message || "Failed to fetch schools");
+        toast.error(response.message || "Failed to fetch schools");
       }
     } catch (err) {
       setError(`Error fetching schools: ${err.message}`);
+      toast.error(`Error fetching schools: ${err.message}`);
     } finally {
       setLoading(false);
     }
-  }, [currentPage]);
+  }, [searchTerm]);
 
-  // Effect to fetch all schools on initial load and when page changes (for initial data)
   useEffect(() => {
     fetchAllSchools();
   }, [fetchAllSchools]);
 
-  // Function to filter schools based on searchTerm
   const filteredSchools = useMemo(() => {
     if (!searchTerm) {
       return allSchools;
@@ -70,16 +84,14 @@ const ManageSchoolsItem = () => {
     const lowerCaseSearchTerm = searchTerm.toLowerCase();
     return allSchools.filter(
       (school) =>
-        school.school_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-        school.short_name.toLowerCase().includes(lowerCaseSearchTerm) ||
-        school.school_type.toLowerCase().includes(lowerCaseSearchTerm) ||
-        (school.registered_by.surname + " " + school.registered_by.first_name)
-          .toLowerCase()
-          .includes(lowerCaseSearchTerm)
+        (school.schoolName && school.schoolName.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (school.shortName && school.shortName.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (school.schoolType !== undefined && school.schoolType.toString().toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (school.city && school.city.toLowerCase().includes(lowerCaseSearchTerm)) ||
+        (school.state && school.state.toLowerCase().includes(lowerCaseSearchTerm))
     );
   }, [allSchools, searchTerm]);
 
-  // Update schoolsData whenever filteredSchools changes (for search)
   useEffect(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
@@ -87,16 +99,64 @@ const ManageSchoolsItem = () => {
     setTotalSchools(filteredSchools.length);
   }, [filteredSchools, currentPage]);
 
-  // Function to open detail modal
   const openDetailModal = (school) => {
     setselectedschoolDetail(school);
     setDetailModalVisible(true);
   };
 
-  // Function to close detail modal
   const closeDetailModal = () => {
     setselectedschoolDetail(null);
     setDetailModalVisible(false);
+  };
+
+  const openDeleteModal = (school, e) => {
+    e.stopPropagation();
+    setDeleteSuccess(false);
+    setDeleteError(null);
+    setSelectedSchoolDelete(school);
+    setDeleteModalVisible(true);
+    setTimeout(() => {
+      setModalTransform("translateX(0)");
+      setModalOpacity(1);
+    }, 0);
+  };
+
+  const closeDeleteModal = () => {
+    setModalTransform("translateX(-100%)");
+    setModalOpacity(0);
+    setTimeout(() => {
+      setSelectedSchoolDelete(null);
+      setDeleteModalVisible(false);
+    }, 300);
+  };
+
+  const handleDeleteSchool = async () => {
+    if (selectedSchoolDelete?.id) {
+      setDeleteLoading(true);
+      setDeleteError(null);
+      setDeleteSuccess(false);
+      try {
+        const response = await schoolService.deleteSchool(selectedSchoolDelete.id);
+        console.log("Delete response:", response);
+        
+        if (response.success) {
+          toast.success(response.message || "School deleted successfully");
+          setDeleteSuccess(true);
+          setTimeout(() => {
+            closeDeleteModal();
+            fetchAllSchools();
+          }, 1500);
+        } else {
+          setDeleteError(response.message || "Failed to delete school");
+          toast.error(response.message || "Failed to delete school");
+        }
+      } catch (err) {
+        setDeleteError(`Error deleting school: ${err.message}`);
+        toast.error(`Error deleting school: ${err.message}`);
+      } finally {
+        setDeleteLoading(false);
+      }
+    }
   };
 
   const handlePageChange = (newPage) => {
@@ -105,38 +165,61 @@ const ManageSchoolsItem = () => {
 
   const handleSearchChange = (event) => {
     setSearchTerm(event.target.value);
-    setCurrentPage(1); // Reset to the first page on search
+    setCurrentPage(1);
   };
 
   const totalPages = Math.ceil(totalSchools / ITEMS_PER_PAGE);
 
-  const renderPaginationButtons = () => {
-    const pageNumbers = [];
-    for (let i = 1; i <= totalPages; i++) {
-      pageNumbers.push(i);
-    }
-
-    return (
-      <div className="flex justify-center mt-4 pb-4">
-        {pageNumbers.map((number) => (
-          <button
-            key={number}
-            onClick={() => handlePageChange(number)}
-            className={`mx-1 px-3 py-1 rounded-md ${
-              currentPage === number
-                ? "bg-[#4084B1] text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
-          >
-            {number}
-          </button>
-        ))}
-      </div>
-    );
-  };
-
   return (
     <SuperAdminLayout>
+      {/* Delete Modal */}
+      {deleteModalVisible && selectedSchoolDelete && (
+        <div className="fixed inset-0 flex justify-center items-center z-50">
+          <div
+            className="absolute inset-0 bg-black/65"
+            onClick={closeDeleteModal}
+          ></div>
+          <div
+            className="relative bg-white rounded-xl shadow-lg min-w-75 z-50 transition-transform pt-10 pb-10 duration-600 ease-in-out"
+            style={{ transform: modalTransform, opacity: modalOpacity }}
+          >
+            <p className="font-bold text-center text-lg">Delete School</p>
+            <div className="text-center pt-3">
+              <p className="text-base text-[#858383]">
+                Are you sure you want to delete
+              </p>
+              <p className="text-base text-[#858383] font-semibold">
+                {selectedSchoolDelete.schoolName}?
+              </p>
+              {deleteError && (
+                <p className="text-red-500 mt-2">{deleteError}</p>
+              )}
+              {deleteSuccess && (
+                <p className="text-green-500 mt-2">
+                  School deleted successfully!
+                </p>
+              )}
+            </div>
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5">
+              <button
+                onClick={handleDeleteSchool}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4 py-2"
+                disabled={deleteLoading}
+              >
+                {deleteLoading ? "Deleting..." : "Yes, Delete"}
+              </button>
+              <button
+                onClick={closeDeleteModal}
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4 py-2"
+              >
+                No, Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Detail Modal */}
       {detailModalVisible && selectedschoolDetail && (
         <div className="fixed inset-0 flex justify-center items-center z-50">
           <div
@@ -156,13 +239,13 @@ const ManageSchoolsItem = () => {
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-sm">School Name:</p>
                 <p className="font-bold text-lg">
-                  {selectedschoolDetail.school_name}
+                  {selectedschoolDetail.schoolName}
                 </p>
               </div>
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-sm">School Short Name:</p>
                 <p className="font-bold text-lg">
-                  {selectedschoolDetail.short_name}
+                  {selectedschoolDetail.shortName}
                 </p>
               </div>
               <div className="flex items-center justify-between">
@@ -174,45 +257,50 @@ const ManageSchoolsItem = () => {
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-sm">Education Level:</p>
                 <p className="font-bold text-lg">
-                  {selectedschoolDetail.education_level}
+                  {getEducationLevelString(selectedschoolDetail.educationLevel)}
                 </p>
               </div>
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-sm">School Type:</p>
                 <p className="font-bold text-lg">
-                  {selectedschoolDetail.school_type}
+                  {selectedschoolDetail.schoolType === 0 ? "Public" : "Private"}
                 </p>
               </div>
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-sm">Phone Number:</p>
                 <p className="font-bold text-lg">
-                  {selectedschoolDetail.phone_number}
+                  {selectedschoolDetail.phoneNumber}
+                </p>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <p className="font-semibold text-sm">City:</p>
+                <p className="font-bold text-lg">
+                  {selectedschoolDetail.city}
                 </p>
               </div>
               <div className="flex items-center justify-between">
-                <p className="font-semibold text-sm">Registered By:</p>
+                <p className="font-semibold text-sm">State:</p>
                 <p className="font-bold text-lg">
-                  {selectedschoolDetail.registered_by.surname +
-                    " " +
-                    selectedschoolDetail.registered_by.first_name}
+                  {selectedschoolDetail.state}
                 </p>
               </div>
               <div className="flex items-center justify-between">
-                <p className="font-semibold text-sm">Address:</p>
+                <p className="font-semibold text-sm">Country:</p>
                 <p className="font-bold text-lg">
-                  {selectedschoolDetail.school_address}
+                  {selectedschoolDetail.country}
                 </p>
               </div>
               <div className="flex items-center justify-between">
                 <p className="font-semibold text-sm">Status:</p>
                 <p
                   className={`font-bold text-lg ${
-                    selectedschoolDetail.status
+                    selectedschoolDetail.isActive
                       ? " text-[#1BB66E] "
                       : " text-[#F94144] "
                   }`}
                 >
-                  {selectedschoolDetail.status ? "Active" : "Inactive"}
+                  {selectedschoolDetail.isActive ? "Active" : "Inactive"}
                 </p>
               </div>
             </div>
@@ -231,6 +319,7 @@ const ManageSchoolsItem = () => {
           </button>
         </Link>
       </div>
+      
       {/* Content */}
       <div className="bg-[#D4D4D4] overflow-auto flex-1 p-4">
         <div className="grid grid-rows-[auto_1fr_auto] gap-3.5">
@@ -253,34 +342,33 @@ const ManageSchoolsItem = () => {
           {/* Table */}
           <div className="bg-[#ffffff] rounded-lg overflow-x-auto">
             {loading ? (
-              <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
+              <div className="flex items-center justify-center h-64">
                 <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
               </div>
             ) : error ? (
-              <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md z-50">
+              <div className="text-center bg-red-200 border border-red-500 text-red-700 px-4 py-2 rounded-md m-4">
                 {error}
               </div>
             ) : (
-              <table className="min-w-full table-auto ">
-                <thead className="bg-[#E6EFF5]  lg:text-sm  sm:text-xs">
+              <table className="min-w-full table-auto">
+                <thead className="bg-[#E6EFF5] lg:text-sm sm:text-xs">
                   <tr className="border-b-[#D0D0D0] border-b">
                     <th className="pt-3 pb-3 pl-10 text-left font-bold text-[#333333]">
                       School Name
                     </th>
-
                     <th className="pt-3 pb-3 text-center font-bold text-[#333333]">
                       School Type
                     </th>
-                    <th className="pt-3 pb-3 text-center  font-bold text-[#333333]">
+                    <th className="pt-3 pb-3 text-center font-bold text-[#333333]">
                       Short Sch Name
                     </th>
-                    <th className="pt-3 pb-3 text-center  font-bold text-[#333333]">
-                      Registered By
+                    <th className="pt-3 pb-3 text-center font-bold text-[#333333]">
+                      City
                     </th>
-                    <th className="pt-3 pb-3 text-center  font-bold text-[#333333]">
+                    <th className="pt-3 pb-3 text-center font-bold text-[#333333]">
                       Status
                     </th>
-                    <th className="pt-3 pb-3 text-center pr-10  font-bold text-[#333333]">
+                    <th className="pt-3 pb-3 text-center pr-10 font-bold text-[#333333]">
                       Modify
                     </th>
                   </tr>
@@ -293,26 +381,24 @@ const ManageSchoolsItem = () => {
                         className="border-b-[#D0D0D0] border-b font-semibold text-[0.85rem] cursor-pointer"
                         onClick={() => openDetailModal(item)}
                       >
-                        <td className="pt-3 pb-3 pl-10  text-left text-[#333333]">
-                          {item.school_name}
+                        <td className="pt-3 pb-3 pl-10 text-left text-[#333333]">
+                          {item.schoolName}
                         </td>
                         <td className="pt-3 pb-3 text-center text-[#333333]">
-                          {item.school_type}
+                          {item.schoolType === 0 ? "Public" : "Private"}
                         </td>
                         <td className="pt-3 pb-3 text-center text-[#333333]">
-                          {item.short_name}
+                          {item.shortName}
                         </td>
                         <td className="pt-3 pb-3 text-center text-[#333333]">
-                          {item.registered_by.surname +
-                            " " +
-                            item.registered_by.first_name}
+                          {item.city}
                         </td>
-                        <td className="pt-3 pb-3 text-center ">
+                        <td className="pt-3 pb-3 text-center">
                           <span
                             className={`${
-                              item.status
+                              item.isActive
                                 ? "bg-[#E8F8F0] text-[#1BB66E]"
-                                : "bg-[#FEECEC] text-[#F94144] "
+                                : "bg-[#FEECEC] text-[#F94144]"
                             } rounded-2xl py-1 text-sm`}
                             style={{
                               minWidth: "80px",
@@ -320,7 +406,7 @@ const ManageSchoolsItem = () => {
                               textAlign: "center",
                             }}
                           >
-                            {item.status ? "Active" : "Inactive"}
+                            {item.isActive ? "Active" : "Inactive"}
                           </span>
                         </td>
                         <td className="pt-3 pb-3 text-[#333333] pr-10">
@@ -334,25 +420,19 @@ const ManageSchoolsItem = () => {
                                 size={15}
                               />
                             </Link>
+                            <FiTrash2
+                              onClick={(e) => openDeleteModal(item, e)}
+                              className="text-[#F94144] cursor-pointer"
+                              size={15}
+                            />
                           </div>
                         </td>
                       </tr>
                     ))
                   ) : (
                     <tr>
-                      <td
-                        colSpan="6"
-                        className="text-center py-4 text-gray-500"
-                      >
-                        {loading ? (
-                          <div className="fixed inset-0 flex items-center justify-center bg-white z-50">
-                            <div className="w-12 h-12 border-4 border-blue-900 border-t-red-500 rounded-full animate-spin"></div>
-                          </div>
-                        ) : error ? (
-                          "Error loading Schools."
-                        ) : (
-                          "No School Found."
-                        )}
+                      <td colSpan="6" className="text-center py-4 text-gray-500">
+                        No schools found.
                       </td>
                     </tr>
                   )}

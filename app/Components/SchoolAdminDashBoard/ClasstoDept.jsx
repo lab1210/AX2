@@ -1,14 +1,10 @@
+"use client";
 import React, { useState, useEffect } from "react";
 import Dropdown from "./DropDown2";
-import { FiEdit3, FiTrash2 } from "react-icons/fi";
-import {
-  createClassDepartmentAssignment,
-  getClassDepartmentAssignments,
-  updateClassDepartmentAssignment,
-  deleteClassDepartmentAssignment,
-  getclassdepartmentbyid,
-} from "../../Service/SchoolAdminAssignmentService";
-import { getClassArm, getDepartment } from "../../Service/schoolConfig";
+import { FiEdit3, FiTrash2, FiPlus, FiX } from "react-icons/fi";
+import classArmDepartmentService from "@/Service/ClassDeptService";
+import academicEntityService from "@/Service/AcademicEntityService";
+import classService from "@/Service/ClassService";
 import toast from "react-hot-toast";
 
 const ClasstoDept = () => {
@@ -18,12 +14,21 @@ const ClasstoDept = () => {
   const [selectedAssignment, setSelectedAssignment] = useState(null);
   const [editMode, setEditMode] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
   const itemsPerPage = 10;
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
 
-  const [formData, setFormData] = useState({
-    classes: "",
-    department: "",
+  // For create mode - can assign multiple class arms to one department
+  const [createFormData, setCreateFormData] = useState({
+    classArmIds: [],
+    departmentId: "",
+  });
+
+  // For edit mode - single mapping update
+  const [editFormData, setEditFormData] = useState({
+    departmentId: "",
+    classArmId: "",
+    mappingId: "",
   });
 
   useEffect(() => {
@@ -32,19 +37,37 @@ const ClasstoDept = () => {
 
   const fetchData = async () => {
     try {
+      setLoading(true);
+      
       const [assignmentsRes, departmentsRes, classesRes] = await Promise.all([
-        getClassDepartmentAssignments(),
-        getDepartment(),
-        getClassArm(),
+        classArmDepartmentService.getAllMappings(),
+        academicEntityService.getAllDepartments(),
+        classService.getAllClassArms(),
       ]);
 
-      setAssignments(assignmentsRes || []);
-      setDepartments(departmentsRes || []);
-      setClasses(classesRes?.data || []);
+      if (assignmentsRes.success) {
+        setAssignments(assignmentsRes.data);
+      } else {
+        toast.error(assignmentsRes.message || "Failed to fetch assignments");
+      }
+      
+      if (departmentsRes.success) {
+        setDepartments(departmentsRes.data);
+      } else {
+        toast.error(departmentsRes.message || "Failed to fetch departments");
+      }
+      
+      if (classesRes.success) {
+        setClasses(classesRes.data);
+      } else {
+        toast.error(classesRes.message || "Failed to fetch classes");
+      }
     } catch (error) {
       toast.error(
         "Failed to fetch data: " + (error.message || "Unknown error")
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,58 +86,150 @@ const ClasstoDept = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
   };
 
+  // Add a new class arm field in create mode
+  const addClassArmField = () => {
+    setCreateFormData((prev) => ({
+      ...prev,
+      classArmIds: [...prev.classArmIds, ""],
+    }));
+  };
+
+  // Remove a class arm field in create mode
+  const removeClassArmField = (index) => {
+    if (createFormData.classArmIds.length <= 1) return;
+    setCreateFormData((prev) => ({
+      ...prev,
+      classArmIds: prev.classArmIds.filter((_, i) => i !== index),
+    }));
+  };
+
+  // Update a specific class arm field
+  const updateCreateClassArmField = (index, value) => {
+    setCreateFormData((prev) => {
+      const updatedClassArmIds = [...prev.classArmIds];
+      updatedClassArmIds[index] = value;
+      return { ...prev, classArmIds: updatedClassArmIds };
+    });
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!formData.classes || !formData.department) {
-      toast.error("Please select both class and department");
-      return;
-    }
-
-    try {
-      if (editMode && selectedAssignment) {
-        await updateClassDepartmentAssignment(
-          selectedAssignment.subject_class_id,
-          formData
-        );
-        toast.success("Assignment updated successfully");
-      } else {
-        await createClassDepartmentAssignment(formData);
-        toast.success("Assignment created successfully");
+    if (editMode) {
+      // EDIT MODE
+      if (!editFormData.departmentId && !editFormData.classArmId) {
+        toast.error("Please select at least one field to update");
+        return;
       }
 
-      await fetchData();
-      resetForm();
-    } catch (error) {
-      toast.error(error.message || "Failed to save assignment");
-      console.error("Submission error:", error);
+      try {
+        setLoading(true);
+        const updateData = {};
+        if (editFormData.departmentId) updateData.departmentId = editFormData.departmentId;
+        if (editFormData.classArmId) updateData.classArmId = editFormData.classArmId;
+        
+        const result = await classArmDepartmentService.updateMapping(
+          editFormData.mappingId,
+          updateData
+        );
+        
+        if (result.success) {
+          toast.success("Assignment updated successfully");
+          await fetchData();
+          resetForm();
+        } else {
+          // Display error message from API
+          toast.error(result.message || "Failed to update assignment");
+          // If there are specific errors, show them
+          if (result.errors && result.errors.length > 0) {
+            result.errors.forEach(err => toast.error(err));
+          }
+        }
+      } catch (error) {
+        toast.error(error.message || "Failed to update assignment");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // CREATE MODE
+      if (!createFormData.departmentId || createFormData.classArmIds.length === 0) {
+        toast.error("Please select a department and at least one class arm");
+        return;
+      }
+
+      const validClassArms = createFormData.classArmIds.filter(id => id);
+      if (validClassArms.length === 0) {
+        toast.error("Please select at least one valid class arm");
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const createData = {
+          classArmIds: validClassArms,
+          departmentId: createFormData.departmentId,
+        };
+        
+        const result = await classArmDepartmentService.createMappings(createData);
+        
+        if (result.success) {
+          // Check if there were any failures
+          if (result.data && result.data.failed > 0) {
+            // Show summary message
+            toast.error(result.data.message || `${result.data.failed} mapping(s) failed`);
+            // Show each specific error
+            if (result.data.errors && result.data.errors.length > 0) {
+              result.data.errors.forEach(err => toast.error(err));
+            }
+            // Show success message for successful ones
+            if (result.data.successful > 0) {
+              toast.success(`${result.data.successful} mapping(s) created successfully`);
+            }
+          } else {
+            toast.success(result.message || "Assignments created successfully");
+          }
+          await fetchData();
+          resetForm();
+        } else {
+          // Display error message from API
+          toast.error(result.message || "Failed to create assignments");
+          // If there are specific errors, show them
+          if (result.errors && result.errors.length > 0) {
+            result.errors.forEach(err => toast.error(err));
+          }
+        }
+      } catch (error) {
+        toast.error(error.message || "Failed to create assignments");
+      } finally {
+        setLoading(false);
+      }
     }
   };
 
   const handleEdit = async (assignment) => {
-    try {
-      const assignmentDetails = await getclassdepartmentbyid(
-        assignment.subject_class_id
-      );
-      setSelectedAssignment(assignmentDetails);
-      setFormData({
-        classes: assignmentDetails.classes,
-        department: assignmentDetails.department,
-      });
-      setEditMode(true);
-    } catch (error) {
-      toast.error("Failed to load assignment details");
-    }
+    setEditFormData({
+      departmentId: assignment.departmentId,
+      classArmId: assignment.classArmId,
+      mappingId: assignment.id,
+    });
+    setEditMode(true);
   };
 
-  const handleDelete = async (assignmentId) => {
+  const handleDelete = async (mappingId) => {
     try {
-      const response = await deleteClassDepartmentAssignment(assignmentId);
-      toast.success("Assignment deleted successfully");
-      fetchData();
-      closeDeleteModal();
+      setLoading(true);
+      const result = await classArmDepartmentService.deleteMapping(mappingId);
+      if (result.success) {
+        toast.success("Assignment deleted successfully");
+        await fetchData();
+        closeDeleteModal();
+      } else {
+        toast.error(result.message || "Failed to delete assignment");
+      }
     } catch (error) {
-      toast.error("Failed to delete assignment");
+      toast.error("Failed to delete assignment: " + (error.message || "Unknown error"));
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -123,30 +238,32 @@ const ClasstoDept = () => {
     setDeleteModalVisible(true);
   };
 
-  // Function to close delete modal
   const closeDeleteModal = () => {
     setSelectedAssignment(null);
     setDeleteModalVisible(false);
   };
 
   const resetForm = () => {
-    setFormData({
-      classes: "",
-      department: "",
+    setCreateFormData({
+      classArmIds: [],
+      departmentId: "",
+    });
+    setEditFormData({
+      departmentId: "",
+      classArmId: "",
+      mappingId: "",
     });
     setEditMode(false);
     setSelectedAssignment(null);
   };
 
   const getClassName = (classId) => {
-    const classItem = classes.find((c) => c.class_id === classId);
-    return classItem ? classItem.arm_name : "Unknown";
+    const classItem = classes.find((c) => c.id === classId);
+    return classItem ? `${classItem.classYearName || classItem.class_year_name} (${classItem.armName || classItem.arm_name})` : "Unknown";
   };
 
   const getDepartmentName = (departmentId) => {
-    const department = departments.find(
-      (d) => d.department_id === departmentId
-    );
+    const department = departments.find((d) => d.id === departmentId);
     return department ? department.name : "Unknown";
   };
 
@@ -168,24 +285,23 @@ const ClasstoDept = () => {
               </p>
               <p className="text-base text-[#858383]">
                 <span className="font-bold">
-                  {selectedAssignment.class_name} from{" "}
-                  {selectedAssignment.department_name}
+                  {selectedAssignment.classArmName} from{" "}
+                  {selectedAssignment.departmentName}
                 </span>
                 ?
               </p>
             </div>
-            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5">
               <button
-                onClick={() =>
-                  handleDelete(selectedAssignment.subject_class_id)
-                } // Pass ID to handleDelete
-                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+                onClick={() => handleDelete(selectedAssignment.id)}
+                disabled={loading}
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4 py-1"
               >
                 Yes, Delete
               </button>
               <button
                 onClick={closeDeleteModal}
-                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4 py-1"
               >
                 No, Cancel
               </button>
@@ -193,6 +309,7 @@ const ClasstoDept = () => {
           </div>
         </div>
       )}
+      
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
         <div className="flex pt-3 pl-6 pr-6 justify-between mb-2">
           <p className="font-bold text-[#07508F]">
@@ -203,63 +320,127 @@ const ClasstoDept = () => {
               <button
                 type="button"
                 onClick={resetForm}
-                className="bg-gray-500 text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
+                className="bg-gray-500 text-white font-bold text-sm px-4 py-1 rounded-sm cursor-pointer hover:opacity-90"
               >
                 Cancel
               </button>
             )}
             <button
               type="submit"
-              className="bg-[#07508F] text-white font-bold text-sm p-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
+              disabled={loading}
+              className="bg-[#07508F] text-white font-bold text-sm px-4 py-1 rounded-sm cursor-pointer hover:opacity-90 disabled:opacity-50"
             >
               {editMode ? "Update" : "Assign"}
             </button>
           </div>
         </div>
+        
         <div className="pl-6 pr-6">
-          <div className="grid grid-cols-2 gap-6">
-            <div className="flex flex-col gap-2">
-              <label className="text-[0.88rem] text-[#5E6A72]">Class:</label>
-              <Dropdown
-                label={
-                  formData.classes
-                    ? getClassName(formData.classes)
-                    : "Select Class"
-                }
-                items={classes.map((classItem) => ({
-                  label: `${classItem.class_year_name}  ${classItem.arm_name}`,
-                  onClick: () =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      classes: classItem.class_id,
-                    })),
-                }))}
-              />
-            </div>
+          {editMode ? (
+            // EDIT MODE - Single mapping update
+            <div className="grid grid-cols-2 gap-6">
+              <div className="flex flex-col gap-2">
+                <label className="text-[0.88rem] text-[#5E6A72]">Class:</label>
+                <Dropdown
+                  label={
+                    editFormData.classArmId
+                      ? getClassName(editFormData.classArmId)
+                      : "Select Class"
+                  }
+                  items={classes.map((classItem) => ({
+                    label: `${classItem.classYearName || classItem.class_year_name} ${classItem.armName || classItem.arm_name}`,
+                    onClick: () =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        classArmId: classItem.id,
+                      })),
+                  }))}
+                />
+              </div>
 
-            <div className="flex flex-col gap-2">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Department:
-              </label>
-              <Dropdown
-                label={
-                  formData.department
-                    ? getDepartmentName(formData.department)
-                    : "Select Department"
-                }
-                items={departments.map((department) => ({
-                  label: department.name,
-                  onClick: () =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      department: department.department_id,
-                    })),
-                }))}
-              />
+              <div className="flex flex-col gap-2">
+                <label className="text-[0.88rem] text-[#5E6A72]">
+                  Department:
+                </label>
+                <Dropdown
+                  label={
+                    editFormData.departmentId
+                      ? getDepartmentName(editFormData.departmentId)
+                      : "Select Department"
+                  }
+                  items={departments.map((department) => ({
+                    label: department.name,
+                    onClick: () =>
+                      setEditFormData((prev) => ({
+                        ...prev,
+                        departmentId: department.id,
+                      })),
+                  }))}
+                />
+              </div>
             </div>
-          </div>
+          ) : (
+            // CREATE MODE - Multiple class arms to one department
+            <>
+              <div className="grid grid-cols-2 gap-6 mb-4">
+                <div className="flex flex-col gap-2">
+                  <label className="text-[0.88rem] text-[#5E6A72]">Department:</label>
+                  <Dropdown
+                    label={
+                      createFormData.departmentId
+                        ? getDepartmentName(createFormData.departmentId)
+                        : "Select Department"
+                    }
+                    items={departments.map((department) => ({
+                      label: department.name,
+                      onClick: () =>
+                        setCreateFormData((prev) => ({
+                          ...prev,
+                          departmentId: department.id,
+                        })),
+                    }))}
+                  />
+                </div>
+              </div>
+              
+              <div className="mb-2">
+                <label className="text-[0.88rem] text-[#5E6A72] block mb-2">Class Arms:</label>
+                {createFormData.classArmIds.map((classArmId, index) => (
+                  <div key={index} className="grid grid-cols-2 gap-6 mb-4 relative">
+                    {createFormData.classArmIds.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeClassArmField(index)}
+                        className="absolute -right-8 top-1/2 transform -translate-y-1/2 text-red-500"
+                      >
+                        <FiX size={18} />
+                      </button>
+                    )}
+                    <div className="flex flex-col gap-2">
+                      <label className="text-[0.88rem] text-[#5E6A72]">Class Arm {index + 1}:</label>
+                      <Dropdown
+                        label={classArmId ? getClassName(classArmId) : "Select Class Arm"}
+                        items={classes.map((classItem) => ({
+                          label: `${classItem.classYearName || classItem.class_year_name} (${classItem.armName || classItem.arm_name})`,
+                          onClick: () => updateCreateClassArmField(index, classItem.id),
+                        }))}
+                      />
+                    </div>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={addClassArmField}
+                  className="flex items-center gap-2 text-[#07508F] text-sm font-medium mb-4"
+                >
+                  <FiPlus /> Add another class arm
+                </button>
+              </div>
+            </>
+          )}
         </div>
       </form>
+      
       <hr className="mt-10" />
 
       <div className="flex-shrink-0 mb-2">
@@ -267,6 +448,7 @@ const ClasstoDept = () => {
           Existing Class to Department Assignments
         </p>
       </div>
+      
       <div className="px-0">
         <div className="overflow-y-auto max-h-[200px] no-scrollbar">
           <table className="min-w-full table-auto">
@@ -278,14 +460,14 @@ const ClasstoDept = () => {
                   <th className="p-2 bg-[#EDF0F3]">Department</th>
                   <th className="p-2 bg-[#EDF0F3]">School</th>
                   <th className="p-2 bg-[#EDF0F3]">Actions</th>
-                </tr>
+                  </tr>
               </thead>
             )}
             <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
               {paginatedData.length === 0 ? (
                 <tr>
                   <td
-                    colSpan="4"
+                    colSpan="5"
                     className="p-5 text-center border text-gray-500"
                   >
                     No Class to Department Assignments Available
@@ -293,11 +475,11 @@ const ClasstoDept = () => {
                 </tr>
               ) : (
                 paginatedData.map((item, index) => (
-                  <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-12">{item.class_year_name}</td>
-                    <td className="p-2">{item.class_arm_name}</td>
-                    <td className="p-2">{item.department_name}</td>
-                    <td className="p-2">{item.school_name || "N/A"}</td>
+                  <tr className="border-b-[#D0D0D0] border-b" key={item.id || index}>
+                    <td className="p-2 pl-12">{item.classYearName}</td>
+                    <td className="p-2">{item.classArmName}</td>
+                    <td className="p-2">{item.departmentName}</td>
+                    <td className="p-2">{item.schoolName || "N/A"}</td>
                     <td className="p-2">
                       <div className="flex gap-4">
                         <FiEdit3

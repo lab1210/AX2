@@ -74,6 +74,7 @@ class AuthService {
       roles: user?.roles || [],
       schoolId: user?.schoolId || null,
       schoolName: user?.schoolName || null,
+      schoolLogo: user?.schoolLogo || null,
       isSchoolActive: user?.isSchoolActive ?? true,
     };
   }
@@ -130,7 +131,7 @@ class AuthService {
           } catch (refreshError) {
             this.logout();
             if (typeof window !== "undefined") {
-              window.location.href = "/login";
+              window.location.href = "/";
             }
             return Promise.reject(refreshError);
           }

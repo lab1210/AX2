@@ -1,9 +1,9 @@
 "use client";
-import React, { createContext, Suspense, useEffect, useState } from "react";
+import React, { createContext, Suspense, useEffect, useState, useContext } from "react";
 import styles from "../../School-Admin/css/spinner.module.css";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { MdWarning } from "react-icons/md";
-import { getAuthToken } from "../../Service/AuthService";
+import authService from "@/Service/AuthService";
 import SchoolAdminLeft from "../SchoolAdminDashBoard/LeftSideBar";
 import DashboardHeader from "../SchoolAdminDashBoard/DashboardHeader";
 import { Toaster } from "react-hot-toast";
@@ -13,21 +13,34 @@ const SchoolAdminLayoutContext = createContext(null);
 export const useSchoolAdminLayout = () => {
   return useContext(SchoolAdminLayoutContext);
 };
+
 const SchoolAdminLayout = ({ children }) => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
+  const pathname = usePathname();
   const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
       setIsLoading(true);
-      const token = getAuthToken();
-      if (token) {
-        setIsAuthenticated(true);
+      const token = authService.getAccessToken();
+      const user = authService.getUser();
+      
+      if (token && user) {
+        // Check if user has SchoolAdmin role
+        const hasSchoolAdminRole = user.roles?.includes("SchoolAdmin");
+        
+        if (hasSchoolAdminRole) {
+          setIsAuthenticated(true);
+        } else {
+          setIsAuthenticated(false);
+          authService.logout();
+          router.push("/");
+        }
       } else {
         setIsAuthenticated(false);
-        if (router.pathname !== "/") {
+        if (pathname !== "/") {
           router.push("/");
         }
       }
@@ -37,17 +50,31 @@ const SchoolAdminLayout = ({ children }) => {
     checkAuth();
 
     const handleStorage = (event) => {
-      if (event.key === "authToken" && !event.newValue) {
+      if (event.key === "accessToken" && !event.newValue) {
         setIsAuthenticated(false);
-        if (router.pathname !== "/") {
-          router.push("/");
-        }
+        router.push("/");
       }
     };
     window.addEventListener("storage", handleStorage);
 
     return () => window.removeEventListener("storage", handleStorage);
-  }, [router]);
+  }, [router, pathname]);
+
+  // Check token expiration periodically
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const checkTokenExpiration = () => {
+      const token = authService.getAccessToken();
+      if (!token) {
+        setIsAuthenticated(false);
+        router.push("/");
+      }
+    };
+
+    const interval = setInterval(checkTokenExpiration, 60000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, router]);
 
   useEffect(() => {
     const checkScreenSize = () => {
@@ -59,9 +86,16 @@ const SchoolAdminLayout = ({ children }) => {
 
     return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
+
   const authContextValue = {
     isAuthenticated,
     isLoading,
+    user: authService.getUser(),
+    logout: () => {
+      authService.logout();
+      setIsAuthenticated(false);
+      router.push("/");
+    },
   };
 
   if (isLoading) {
@@ -89,18 +123,19 @@ const SchoolAdminLayout = ({ children }) => {
       </div>
     );
   }
+
   return (
     <SchoolAdminLayoutContext.Provider value={authContextValue}>
       <div className="grid sm:grid-cols-[200px_auto] xl:grid-cols-[220px_auto] overflow-hidden w-screen h-screen">
-        <div className="bg-[#004080] max-h-screen ">
-          <Suspense>
+        <div className="bg-[#004080] max-h-screen">
+          <Suspense fallback={<div className={styles.loadingContainer}><div className={styles.spinner}></div></div>}>
             <SchoolAdminLeft />
           </Suspense>
         </div>
         <div className="grid grid-rows-[68px_1fr] lg:h-full sm:min-h-screen">
           <DashboardHeader />
-          <Toaster />
-          <div className="h-full  lg:overflow-hidden overflow-y-auto">
+          <Toaster position="top-right" />
+          <div className="h-full lg:overflow-hidden overflow-y-auto">
             {children}
           </div>
         </div>

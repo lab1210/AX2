@@ -7,7 +7,7 @@ import { TbDashboard } from "react-icons/tb";
 import { AiOutlineFileProtect } from "react-icons/ai";
 import { IoChatboxEllipsesOutline } from "react-icons/io5";
 import { LiaUserShieldSolid } from "react-icons/lia";
-import { logout } from "../../Service/AuthService";
+import AuthService from "@/Service/AuthService";
 
 const LeftSidebar = () => {
   const router = useRouter();
@@ -16,10 +16,12 @@ const LeftSidebar = () => {
   const pathname = usePathname();
   const handleLogout = async () => {
     try {
-      await logout();
+      await AuthService.logout(); // Use authService.logout() instead of logout()
+      toast.success("Logged out successfully");
       router.push("/");
     } catch (error) {
       console.error("Logout failed:", error);
+      toast.error("Logout failed. Please try again.");
     }
   };
 

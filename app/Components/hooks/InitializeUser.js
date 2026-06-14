@@ -3,45 +3,50 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import {
-  clearAuthToken,
-  getAuthToken,
-  getUserDetails,
-  refreshToken,
-} from "@/Service/AuthService";
+import authService from "@/Service/AuthService";
 
 export const useInitializeUser = (setUser, setIsLoading) => {
   const router = useRouter();
 
   useEffect(() => {
     const initializeUser = async () => {
-      const token = getAuthToken();
+      const token = authService.getAccessToken();
+      
       if (!token) {
-        router.push("/");
+        router.push("/login");
         return;
       }
+      
       try {
-        const userDetails = getUserDetails();
+        const userDetails = authService.getUserDetails();
+        console.log("User details from auth:", userDetails);
         setUser(userDetails);
         setIsLoading(false);
       } catch (err) {
+        console.error("Error getting user details:", err);
+        
         try {
-          const newToken = await refreshToken(token);
+          // Try to refresh the token
+          const newToken = await authService.refreshToken();
+          
           if (newToken) {
-            const refreshedUserDetails = getUserDetails();
+            const refreshedUserDetails = authService.getUserDetails();
             setUser(refreshedUserDetails);
+            setIsLoading(false);
           } else {
-            clearAuthToken();
-            router.push("/");
+            authService.clearTokens();
+            router.push("/login");
           }
-        } catch (refresherr) {
-          clearAuthToken();
-          router.push("/");
+        } catch (refreshErr) {
+          console.error("Refresh token failed:", refreshErr);
+          authService.clearTokens();
+          router.push("/login");
         } finally {
           setIsLoading(false);
         }
       }
     };
+    
     initializeUser();
   }, [router, setUser, setIsLoading]);
 };

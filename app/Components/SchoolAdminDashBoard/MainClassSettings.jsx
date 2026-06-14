@@ -1,15 +1,9 @@
 "use client";
-
 import React, { useEffect, useState } from "react";
 import Dropdown from "./DropDown";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
-import {
-  createClass,
-  deleteClass,
-  getAcademicYears,
-  getClass,
-  UpdateClass,
-} from "@/Service/schoolConfig";
+import classService from "@/Service/ClassService";
+import academicPeriodService from "@/Service/AcademicPeriodService";
 import toast from "react-hot-toast";
 
 const MainClassSettings = () => {
@@ -17,14 +11,14 @@ const MainClassSettings = () => {
   const [editClassVisible, setEditClassVisible] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
-  const [years, setYears] = useState([]);
+  const [academicYears, setAcademicYears] = useState([]);
   const [classList, setClassList] = useState([]);
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [selectedClassDelete, setSelectedClassDelete] = useState(null);
 
   const [formData, setFormData] = useState({
-    year: "",
-    class_name: "",
+    yearId: "",
+    className: "",
   });
 
   const paginatedData = classList.slice(
@@ -42,26 +36,30 @@ const MainClassSettings = () => {
   };
 
   useEffect(() => {
-    fetchClass();
-    fetchYears();
+    fetchClasses();
+    fetchAcademicYears();
   }, []);
 
-  const fetchYears = async () => {
-    const { data, error } = await getAcademicYears();
-    if (data) {
-      setYears(data);
+  const fetchAcademicYears = async () => {
+    const result = await academicPeriodService.getAllSessions(true, false);
+    if (result.success) {
+      setAcademicYears(result.data);
     } else {
-      toast.error(error || "Failed to load academic years");
+      toast.error(result.message || "Failed to load academic years");
     }
   };
 
-  const fetchClass = async () => {
-    const { data, error } = await getClass();
-    if (data) setClassList(data);
-    else toast.error(error || "Failed to load classes");
+  const fetchClasses = async () => {
+    const result = await classService.getAllClassYears();
+    if (result.success) {
+      setClassList(result.data);
+    } else {
+      toast.error(result.message || "Failed to load classes");
+    }
   };
-  const getYearName = (yearid) => {
-    const year = years.find((item) => item.year_id === yearid);
+
+  const getYearName = (yearId) => {
+    const year = academicYears.find((item) => item.id === yearId);
     return year?.name;
   };
 
@@ -69,101 +67,84 @@ const MainClassSettings = () => {
     e.preventDefault();
 
     const trimmedName = editClassVisible
-      ? selectedClass?.class_name?.trim()
-      : formData.class_name?.trim();
+      ? selectedClass?.className?.trim()
+      : formData.className?.trim();
 
     if (!trimmedName) {
       toast.error("Class name is required.");
       return;
     }
 
-    const existingClass = classList.find(
-      (item) => item.class_name?.toLowerCase() === trimmedName.toLowerCase()
-    );
-
-    if (!editClassVisible && existingClass) {
-      toast.error("Class already exists.");
-      return;
-    }
-
     if (editClassVisible && selectedClass) {
       try {
-        const updatedClass = {
-          ...selectedClass,
-          year: selectedClass.year,
-          class_name: selectedClass.class_name,
+        const updateData = {
+          className: selectedClass.className,
+          yearId: selectedClass.yearId,
         };
-        const { data, error } = await UpdateClass(
-          selectedClass.class_year_id,
-          updatedClass
-        );
-        if (error) {
-          toast.error(error || "Failed to update class.");
-          return;
+        const result = await classService.updateClassYear(selectedClass.id, updateData);
+        
+        if (result.success) {
+          await fetchClasses();
+          toast.success("Class updated successfully.");
+          setEditClassVisible(false);
+          setSelectedClass(null);
+          setFormData({ yearId: "", className: "" });
+        } else {
+          toast.error(result.message || "Failed to update class.");
         }
-        const updatedList = classList.map((item) =>
-          item.class_year_id === selectedClass.class_year_id ? data : item
-        );
-        setClassList(updatedList);
-        toast.success("Class updated successfully.");
-        setEditClassVisible(false);
-        setSelectedClass(null);
       } catch (error) {
         toast.error("An error occurred while updating.");
       }
     } else {
       try {
-        const createPayload = {
-          year: formData.year,
-          class_name: formData.class_name,
+        const createData = {
+          yearId: formData.yearId,
+          className: formData.className,
         };
 
-        const { data, error } = await createClass(createPayload);
+        const result = await classService.createClassYear(createData);
 
-        if (error) {
-          toast.error(error || "Failed to add class.");
-        } else {
-          setClassList((prev) => [...prev, data]);
-          setFormData({
-            year: "",
-            class_name: "",
-          });
+        if (result.success) {
+          await fetchClasses();
+          setFormData({ yearId: "", className: "" });
           toast.success("Class added successfully.");
+        } else {
+          toast.error(result.message || "Failed to add class.");
         }
       } catch (err) {
         toast.error("An error occurred while adding.");
       }
     }
-    setFormData({
-      year: "",
-      class_name: "",
-    });
   };
 
-  const handleEdit = (Class) => {
+  const handleEdit = (classItem) => {
     setEditClassVisible(true);
-    setSelectedClass({ ...Class });
+    setSelectedClass({ ...classItem });
   };
-  const openDeleteModal = (term) => {
-    setSelectedClassDelete(term);
+
+  const openDeleteModal = (classItem) => {
+    setSelectedClassDelete(classItem);
     setDeleteModalVisible(true);
   };
 
-  // Function to close delete modal
   const closeDeleteModal = () => {
     setSelectedClassDelete(null);
     setDeleteModalVisible(false);
   };
 
   const handleDelete = async () => {
-    if (selectedClassDelete?.class_year_id) {
+    if (selectedClassDelete?.id) {
       try {
-        const response = await deleteClass(selectedClassDelete.class_year_id);
-        fetchClass();
-        toast.success("Class deleted successfully.");
-        closeDeleteModal();
+        const result = await classService.deleteClassYear(selectedClassDelete.id);
+        if (result.success) {
+          toast.success("Class deleted successfully.");
+          await fetchClasses();
+          closeDeleteModal();
+        } else {
+          toast.error(result.message || "Failed to delete class.");
+        }
       } catch (error) {
-        toast.error("Failed to delete Class.");
+        toast.error("Failed to delete class.");
       }
     }
   };
@@ -183,22 +164,19 @@ const MainClassSettings = () => {
                 Are you sure want to delete the class
               </p>
               <p className="text-base text-[#858383]">
-                <span className="font-bold">
-                  {selectedClassDelete?.class_name}
-                </span>
-                ?
+                <span className="font-bold">{selectedClassDelete?.className}</span>?
               </p>
             </div>
-            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5">
               <button
                 onClick={handleDelete}
-                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4 py-2"
               >
                 Yes, Delete
               </button>
               <button
                 onClick={closeDeleteModal}
-                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4 py-2"
               >
                 No, Cancel
               </button>
@@ -206,12 +184,11 @@ const MainClassSettings = () => {
           </div>
         </div>
       )}
+
       <form onSubmit={handleSubmit} className="mb-3 flex-shrink-0">
-        <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
+        <div className="flex pt-3 pl-6 pr-6 justify-between mb-2">
           <p className="font-bold text-[#07508F]">
-            {editClassVisible
-              ? "Edit Class Management"
-              : "Set Class Management"}
+            {editClassVisible ? "Edit Class Management" : "Set Class Management"}
           </p>
           <button
             type="submit"
@@ -227,65 +204,46 @@ const MainClassSettings = () => {
               <input
                 type="text"
                 placeholder="Enter Class"
-                value={
-                  editClassVisible
-                    ? selectedClass.class_name
-                    : formData.class_name || ""
-                }
+                value={editClassVisible ? selectedClass?.className || "" : formData.className}
                 onChange={(e) => {
                   const value = e.target.value;
                   editClassVisible
-                    ? setSelectedClass((prev) => ({
-                        ...prev,
-                        class_name: value,
-                      }))
-                    : setFormData((prev) => ({
-                        ...prev,
-                        class_name: value,
-                      }));
+                    ? setSelectedClass((prev) => ({ ...prev, className: value }))
+                    : setFormData((prev) => ({ ...prev, className: value }));
                 }}
-                className={`text-base  ${
-                  formData.class_name !== ""
-                    ? "border-[#0071E3]  border-2"
-                    : "border-[#AEAEAE] border-[1.5px]"
-                }   rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm  p-2  placeholder:text-[#d4d4d4] placeholder:font-normal font-bold `}
+                className="text-base border-[#AEAEAE] border-[1.5px] rounded-sm focus:border-[#0071E3] focus:border-2 outline-none sm:text-sm p-2"
                 required
               />
             </div>
             <div className="flex flex-col gap-2">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Academic Session:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Academic Session:</label>
               <Dropdown
                 label={
                   (editClassVisible
-                    ? getYearName(selectedClass.year)
-                    : getYearName(formData.year)) || "Select Academic Session"
+                    ? getYearName(selectedClass?.yearId)
+                    : getYearName(formData.yearId)) || "Select Academic Session"
                 }
-                items={years.map((year) => ({
+                items={academicYears.map((year) => ({
                   label: year.name,
                   onClick: () =>
                     editClassVisible
-                      ? setSelectedClass((prev) => ({
-                          ...prev,
-                          year: year.year_id,
-                        }))
-                      : setFormData({
-                          ...formData,
-                          year: year.year_id,
-                        }),
+                      ? setSelectedClass((prev) => ({ ...prev, yearId: year.id }))
+                      : setFormData({ ...formData, yearId: year.id }),
                 }))}
               />
             </div>
           </div>
         </div>
       </form>
+
       <hr />
+
       <div className="flex-shrink-0">
         <p className="font-semibold flex justify-center p-3 text-[#333333]">
           Existing Classes
         </p>
       </div>
+
       <div className="px-0">
         <div className="overflow-y-auto max-h-[300px] no-scrollbar">
           <table className="min-w-full table-auto">
@@ -301,18 +259,15 @@ const MainClassSettings = () => {
             <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
               {paginatedData.length === 0 ? (
                 <tr>
-                  <td
-                    colSpan="3"
-                    className="p-5  text-center border text-gray-500"
-                  >
+                  <td colSpan="3" className="p-5 text-center border text-gray-500">
                     No Classes Available
                   </td>
                 </tr>
               ) : (
                 paginatedData.map((item, index) => (
-                  <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                    <td className="p-2 pl-12">{item.class_name}</td>
-                    <td className="p-2">{getYearName(item.year)}</td>
+                  <tr className="border-b-[#D0D0D0] border-b" key={item.id || index}>
+                    <td className="p-2 pl-12">{item.className}</td>
+                    <td className="p-2">{getYearName(item.yearId)}</td>
                     <td className="p-2">
                       <div className="flex gap-4">
                         <FiEdit3
@@ -333,46 +288,49 @@ const MainClassSettings = () => {
             </tbody>
           </table>
         </div>
-        {/* Pagination controls */}
-        <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
-          <button
-            onClick={handlePrevious}
-            disabled={currentPage === 1}
-            className={`px-2 py-1  bg-[#E6ECF2] border ${
-              currentPage === 1
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-[#EDF0F3]"
-            }`}
-          >
-            &lt;
-          </button>
 
-          {Array.from({ length: totalPages }, (_, index) => (
+        {/* Pagination controls */}
+        {totalPages > 1 && (
+          <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
             <button
-              key={index}
-              onClick={() => setCurrentPage(index + 1)}
-              className={`px-2 py-1   text-xs ${
-                currentPage === index + 1
-                  ? "bg-[#07508F] text-white"
-                  : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+              onClick={handlePrevious}
+              disabled={currentPage === 1}
+              className={`px-2 py-1 bg-[#E6ECF2] border ${
+                currentPage === 1
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#EDF0F3]"
               }`}
             >
-              {index + 1}
+              &lt;
             </button>
-          ))}
 
-          <button
-            onClick={handleNext}
-            disabled={currentPage === totalPages}
-            className={`px-2 py-1  border bg-[#E6ECF2] ${
-              currentPage === totalPages
-                ? "opacity-50 cursor-not-allowed"
-                : "hover:bg-[#EDF0F3]"
-            }`}
-          >
-            &gt;
-          </button>
-        </div>
+            {Array.from({ length: totalPages }, (_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`px-2 py-1 text-xs ${
+                  currentPage === index + 1
+                    ? "bg-[#07508F] text-white"
+                    : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+                }`}
+              >
+                {index + 1}
+              </button>
+            ))}
+
+            <button
+              onClick={handleNext}
+              disabled={currentPage === totalPages}
+              className={`px-2 py-1 border bg-[#E6ECF2] ${
+                currentPage === totalPages
+                  ? "opacity-50 cursor-not-allowed"
+                  : "hover:bg-[#EDF0F3]"
+              }`}
+            >
+              &gt;
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

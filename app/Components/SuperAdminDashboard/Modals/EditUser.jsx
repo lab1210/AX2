@@ -1,8 +1,5 @@
 "use client";
-import React, { useState } from "react";
-import { Country, State, City } from "country-state-city";
-import { BiChevronDown } from "react-icons/bi";
-import BlueDropdown from "@/Components/BlueDropDown";
+import React, { useState, useEffect } from "react";
 
 const EditUser = ({
   onClose,
@@ -13,170 +10,181 @@ const EditUser = ({
   success,
   onSave,
 }) => {
-  const [selectedCountry, setSelectedCountry] = useState(null);
-  const [selectedState, setSelectedState] = useState(null);
-  const [selectedCity, setSelectedCity] = useState(null);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    middleName: "",
+    surName: "",
+    phoneNumber: "",
+    address: "",
+    email: "",
+    username: "",
+  });
 
-  const countries = Country.getAllCountries();
-  const states = selectedCountry
-    ? State.getStatesOfCountry(selectedCountry.isoCode)
-    : [];
-  const cities = selectedState
-    ? City.getCitiesOfState(selectedState.countryCode, selectedState.isoCode)
-    : [];
+  // Populate form when user data is available
+  useEffect(() => {
+    console.log("EditUser received user data:", user);
+    
+    if (user) {
+      setFormData({
+        firstName: user.firstName || "",
+        middleName: user.middleName || "",
+        surName: user.surName || "",
+        phoneNumber: user.phoneNumber || "",
+        address: user.address || "",
+        email: user.email || "",
+        username: user.username || "",
+      });
+    }
+  }, [user]);
 
-  const handleCountryChange = (selected) => {
-    setSelectedCountry(selected);
-    setSelectedState(null);
-    setSelectedCity(null);
-    setFormData({ ...formData, address: selected?.name || "" });
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
   };
 
-  const handleStateChange = (selected) => {
-    setSelectedState(selected);
-    setSelectedCity(null);
-    setFormData({
-      ...formData,
-      address: `${selectedCountry?.name || ""}, ${selected?.name || ""}`,
-    });
-  };
-
-  const handleCityChange = (selected) => {
-    setSelectedCity(selected);
-    setFormData({
-      ...formData,
-      address: `${selectedCountry?.name || ""}, ${selectedState?.name || ""}, ${
-        selected?.name || ""
-      }`,
-    });
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    const updateData = {
+      email: formData.email || null,
+      username: formData.username || null,
+      firstName: formData.firstName || null,
+      middleName: formData.middleName || null,
+      surName: formData.surName || null,
+      phoneNumber: formData.phoneNumber || null,
+      address: formData.address || null,
+    };
+    console.log("Submitting update data:", updateData);
+    onSave(updateData);
   };
 
   return (
-    <form>
+    <form onSubmit={handleSubmit}>
       <div className="grid grid-cols-3 mt-7 gap-6 pl-6 pr-6">
         <div className="flex flex-col gap-1">
-          <label className="text-[#808080] text-sm font-semibold" htmlFor="">
+          <label className="text-[#808080] text-sm font-semibold" htmlFor="firstName">
             First Name
           </label>
-
           <input
             type="text"
-            className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+            name="firstName"
+            value={formData.firstName}
+            onChange={handleInputChange}
+            className="text-base focus:outline-none font-bold text-[#01427A] rounded-lg sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
             placeholder="Enter First Name"
           />
         </div>
+        
         <div className="flex flex-col gap-1">
-          <label className="text-[#808080] text-sm font-semibold" htmlFor="">
-            Surname
+          <label className="text-[#808080] text-sm font-semibold" htmlFor="middleName">
+            Middle Name
           </label>
-
           <input
             type="text"
-            className="text-base focus:outline-accent-foreground font-bold text-[#01427A] rounded-lg  sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+            name="middleName"
+            value={formData.middleName}
+            onChange={handleInputChange}
+            className="text-base focus:outline-none font-bold text-[#01427A] rounded-lg sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
+            placeholder="Enter Middle Name"
+          />
+        </div>
+        
+        <div className="flex flex-col gap-1">
+          <label className="text-[#808080] text-sm font-semibold" htmlFor="surName">
+            Surname
+          </label>
+          <input
+            type="text"
+            name="surName"
+            value={formData.surName}
+            onChange={handleInputChange}
+            className="text-base focus:outline-none font-bold text-[#01427A] rounded-lg sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
             placeholder="Enter Surname"
           />
         </div>
+        
         <div className="flex flex-col gap-1">
-          <label className="text-[#808080] text-sm font-semibold" htmlFor="">
+          <label className="text-[#808080] text-sm font-semibold" htmlFor="phoneNumber">
             Phone Number
           </label>
-
           <input
-            type="text"
-            className="font-bold text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] placeholder:text-[#07508F] "
+            type="tel"
+            name="phoneNumber"
+            value={formData.phoneNumber}
+            onChange={handleInputChange}
+            className="font-bold text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] placeholder:text-[#07508F]"
             placeholder="Enter Phone No"
           />
         </div>
 
         <div className="flex flex-col gap-1">
-          <label className="text-[#808080] text-sm font-semibold" htmlFor="">
+          <label className="text-[#808080] text-sm font-semibold" htmlFor="email">
             Email
           </label>
-
           <input
             type="email"
-            className="font-bold text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] placeholder:text-[#07508F] "
+            name="email"
+            value={formData.email}
+            onChange={handleInputChange}
+            className="text-base focus:outline-none font-bold text-[#01427A] rounded-lg sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
             placeholder="Enter Email"
           />
         </div>
 
         <div className="flex flex-col gap-1 mb-2">
-          <label className="text-[#808080] text-sm font-semibold" htmlFor="">
-            Create Password
+          <label className="text-[#808080] text-sm font-semibold" htmlFor="username">
+            Username
           </label>
-
           <input
             type="text"
-            className="font-bold text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] placeholder:text-[#07508F] "
-            placeholder="Enter Password"
-          />
-        </div>
-
-        <div className="flex flex-col gap-1 mb-2">
-          <label className="text-[#808080] text-sm font-semibold" htmlFor="">
-            Create Username
-          </label>
-
-          <input
-            type="text"
-            className="font-bold text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] placeholder:text-[#07508F] "
+            name="username"
+            value={formData.username}
+            onChange={handleInputChange}
+            className="text-base focus:outline-none font-bold text-[#01427A] rounded-lg sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A]"
             placeholder="Enter Username"
           />
         </div>
       </div>
 
+      {/* Address field - simple text input */}
       <div className="pt-4 pl-6 pr-6 pb-0">
-        <label className="text-[#808080] font-semibold" htmlFor="">
+        <label className="text-[#808080] font-semibold" htmlFor="address">
           Address
         </label>
-        <div className="grid grid-cols-3 gap-3 mt-1 ">
-          <div className="grid grid-cols-1 mb-2">
-            <BlueDropdown
-              label={selectedCountry?.name || "Select Country"}
-              items={countries.map((country) => ({
-                label: country.name,
-                onClick: () => handleCountryChange(country),
-              }))}
-            />
-          </div>
-          <div className="grid grid-cols-1 mb-2">
-            <BlueDropdown
-              label={selectedState?.name || "Select State"}
-              items={states.map((state) => ({
-                label: state.name,
-                onClick: () => handleStateChange(state),
-              }))}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 mb-2">
-            <BlueDropdown
-              label={selectedCity?.name || "Select City"}
-              items={cities.map((city) => ({
-                label: city.name,
-                onClick: () => handleCityChange(city),
-              }))}
-            />
-          </div>
-        </div>
+        <textarea
+          name="address"
+          value={formData.address}
+          onChange={handleInputChange}
+          rows={3}
+          className="w-full text-base focus:outline-none font-bold text-[#01427A] rounded-lg sm:text-sm border-[2px] p-2 border-[#01427A] placeholder:text-[#01427A] resize-none"
+          placeholder="Enter full address"
+        />
       </div>
+      
       <div className="grid grid-cols-3 mt-5 gap-6 pl-6 pr-6">
         <div className="flex flex-col gap-1">
           <label className="text-[#808080] text-sm font-semibold" htmlFor="">
             User Role
           </label>
-
           <input
             type="text"
             defaultValue="Super Admin"
             readOnly
-            className="text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] font-bold "
+            className="text-base text-[#07508F] rounded-lg focus:outline-none sm:text-sm border-[2px] p-2 border-[#07508F] font-bold"
           />
         </div>
       </div>
-      <div className="pt-8 pl-6 pr-6  ">
-        <button className="bg-[#07508F] rounded-md w-full pt-2 pb-2 text-white font-bold cursor-pointer">
-          Save
+      
+      <div className="pt-8 pl-6 pr-6">
+        {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+        {success && <p className="text-green-500 text-sm mb-2">User updated successfully!</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className={`bg-[#07508F] rounded-md w-full pt-2 pb-2 text-white font-bold cursor-pointer ${
+            loading ? "opacity-50 cursor-not-allowed" : ""
+          }`}
+        >
+          {loading ? "Saving..." : "Save Changes"}
         </button>
       </div>
     </form>
