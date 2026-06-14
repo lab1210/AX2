@@ -4,15 +4,25 @@ import SchoolAdminLayout from "../SchoolAdminLayout";
 import RightSide from "../RightSide";
 import SchoolYearSettings from "../SchoolYearSettings";
 import SchoolTermSettings from "../SchoolTermSettings";
+import FeeManagement from "../FeeConfig";
+import SubscriptionPayment from "../SubscriptionPayment";
+
 const SchoolSettings = () => {
-  const [activeTab, setActiveTab] = useState("School Year Management");
+  const [activeTab, setActiveTab] = useState("Subscription Payment");
+
+  const tabs = [
+    "Subscription Payment",
+    "School Year Management",
+    "School Term Management",
+    "Fee Management",
+  ];
 
   return (
     <SchoolAdminLayout>
-      <div className="lg:grid lg:grid-cols-[1fr_270px] flex flex-col sm:gap-6 lg:gap-0 bg-[#F9FAFE] lg:h-full  pt-3 pl-2 pr-1 lg:pb-0 pb-3 overflow-y-auto">
+      <div className="lg:grid lg:grid-cols-[1fr_270px] flex flex-col sm:gap-6 lg:gap-0 bg-[#F9FAFE] lg:h-full pt-3 pl-2 pr-1 lg:pb-0 pb-3 overflow-y-auto">
         <div className="bg-white h-full mr-2 lg:overflow-y-auto no-scrollbar sm:pb-3 lg:pb-0">
-          <div className="pt-3 text-sm flex gap-5 pl-6">
-            {["School Year Management", "School Term Management"].map((tab) => (
+          <div className="pt-3 text-sm flex gap-5 pl-6 overflow-x-auto whitespace-nowrap">
+            {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -32,8 +42,10 @@ const SchoolSettings = () => {
             ))}
           </div>
           <hr className="mt-1.5" />
+          {activeTab === "Subscription Payment" && <SubscriptionPayment />}
           {activeTab === "School Year Management" && <SchoolYearSettings />}
           {activeTab === "School Term Management" && <SchoolTermSettings />}
+          {activeTab === "Fee Management" && <FeeManagement />}
         </div>
         <div className="h-full lg:overflow-hidden">
           <RightSide />

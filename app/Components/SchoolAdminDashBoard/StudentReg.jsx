@@ -2,9 +2,9 @@
 import toast from "react-hot-toast";
 import { Country, State, City } from "country-state-city";
 import React, { useEffect, useState } from "react";
-import { SchoolAdminRegisterStudent } from "@/Service/StudentRegService";
+import studentService from "@/Service/studentService";
+import classService from "@/Service/ClassService";
 import DropDownLight from "./DropDownwithlightborder";
-import { getClass, getClassArm } from "@/Service/schoolConfig";
 import { FiEye, FiEyeOff } from "react-icons/fi";
 
 const StudentReg = () => {
@@ -21,39 +21,36 @@ const StudentReg = () => {
   const nigeria = Country.getAllCountries().find(
     (country) => country.name === "Nigeria"
   );
+  
   const [formData, setFormData] = useState({
-    user: {
-      username: "",
-      email: "",
-      password: "",
-    },
-    first_name: "",
-    last_name: "",
-    middle_name: "",
-    date_of_birth: "",
+    email: "",
+    username: "",
+    password: "",
+    firstName: "",
+    lastName: "",
+    middleName: "",
+    dateOfBirth: "",
     gender: "",
     country: nigeria ? "Nigeria" : "",
     countryCode: nigeria ? nigeria.isoCode : "",
     state: "",
+    stateCode: "",
     city: "",
-    region: "default",
-    admission_number: "",
-    admission_date: "",
+    admissionNumber: "",
+    admissionDate: "",
     status: "Active",
-    parent_first_name: "",
-    parent_last_name: "",
-    parent_middle_name: "",
-    parent_occupation: "",
-    parent_email: "default",
-    parent_emergency_contact: "",
-    address: "default",
-    parent_contact_info: "",
-    parent_relationship: "",
-    class_year: "",
-    class_arm: "",
+    parentFirstName: "",
+    parentLastName: "",
+    parentOccupation: "",
+    parentContactInfo: "",
+    parentEmergencyContact: "",
+    parentRelationship: "",
+    address: "",
+    classYearId: "",
+    classArmId: "",
   });
 
-  const handleInputChange = (field, value, nested = false) => {
+  const handleInputChange = (field, value) => {
     if (errors[field]) {
       setErrors((prev) => {
         const newErrors = { ...prev };
@@ -61,22 +58,10 @@ const StudentReg = () => {
         return newErrors;
       });
     }
-
-    if (nested) {
-      const [parent, child] = field.split(".");
-      setFormData((prev) => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value,
-        },
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [field]: value,
-      }));
-    }
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const getFieldError = (fieldName) => {
@@ -92,47 +77,36 @@ const StudentReg = () => {
       : "border border-[#B6B6B6]";
   };
 
-  const getDropdownErrorClass = (fieldName) => {
-    return errors[fieldName] ? "border-2 border-red-500" : "";
-  };
-
   useEffect(() => {
-    const fetchClassArms = async () => {
-      const { data, error } = await getClassArm();
-      if (data) {
-        setClassArms(data);
-        setFilteredClassArms(data); // Initialize with all class arms
-      } else toast.error(error || "Failed to load class arms");
+    const fetchClassData = async () => {
+      const [yearsRes, armsRes] = await Promise.all([
+        classService.getAllClassYears(),
+        classService.getAllClassArms(),
+      ]);
+      if (yearsRes.success) setClassYears(yearsRes.data);
+      if (armsRes.success) setClassArms(armsRes.data);
     };
-    const fetchClasses = async () => {
-      const { data, error } = await getClass();
-      if (data) setClassYears(data);
-      else toast.error(error || "Failed to load classes");
-    };
-    fetchClasses();
-    fetchClassArms();
+    fetchClassData();
   }, []);
 
   useEffect(() => {
-    if (formData.class_year) {
+    if (formData.classYearId) {
       const filtered = classArms.filter(
-        (arm) => arm.class_year === formData.class_year
+        (arm) => arm.classYearId === formData.classYearId
       );
       setFilteredClassArms(filtered);
-      if (!filtered.some((arm) => arm.class_id === formData.class_arm)) {
-        setFormData((prev) => ({ ...prev, class_arm: "" }));
+      if (!filtered.some((arm) => arm.id === formData.classArmId)) {
+        setFormData((prev) => ({ ...prev, classArmId: "" }));
       }
     } else {
-      setFilteredClassArms(classArms);
+      setFilteredClassArms([]);
     }
-  }, [formData.class_year, classArms]);
+  }, [formData.classYearId, classArms]);
 
-  //Setting countries
   useEffect(() => {
     setCountries(Country.getAllCountries());
   }, []);
 
-  //Student country
   useEffect(() => {
     if (formData.countryCode) {
       const fetchedStates = State.getStatesOfCountry(formData.countryCode);
@@ -141,7 +115,6 @@ const StudentReg = () => {
     }
   }, [formData.countryCode]);
 
-  //student cities
   useEffect(() => {
     if (formData.countryCode && formData.stateCode) {
       const fetchedCities = City.getCitiesOfState(
@@ -158,43 +131,87 @@ const StudentReg = () => {
     setLoading(true);
     setErrors({});
 
-    try {
-      const response = await SchoolAdminRegisterStudent(formData);
-      toast.success("Student registered successfully");
+    // Validation
+    if (!formData.firstName || !formData.lastName || !formData.email || 
+        !formData.username || !formData.password || !formData.admissionNumber) {
+      toast.error("Please fill in all required fields");
+      setLoading(false);
+      return;
+    }
 
-      setFormData({
-        user: {
-          username: "",
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const submitData = {
+        email: formData.email,
+        username: formData.username,
+        password: formData.password,
+        firstName: formData.firstName,
+        middleName: formData.middleName,
+        lastName: formData.lastName,
+        dateOfBirth: formData.dateOfBirth || null,
+        gender: formData.gender,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        country: formData.country,
+        admissionNumber: formData.admissionNumber,
+        admissionDate: formData.admissionDate || null,
+        status: formData.status,
+        parentFirstName: formData.parentFirstName,
+        parentLastName: formData.parentLastName,
+        parentOccupation: formData.parentOccupation,
+        parentContactInfo: formData.parentContactInfo,
+        parentEmergencyContact: formData.parentEmergencyContact,
+        parentRelationship: formData.parentRelationship,
+        classYearId: formData.classYearId || null,
+        classArmId: formData.classArmId || null,
+      };
+      
+      const result = await studentService.createStudent(submitData);
+      
+      if (result.success) {
+        toast.success("Student registered successfully!");
+        
+        // Reset form
+        setFormData({
           email: "",
+          username: "",
           password: "",
-        },
-        first_name: "",
-        last_name: "",
-        middle_name: "",
-        date_of_birth: "",
-        gender: "",
-        country: nigeria ? "Nigeria" : "",
-        countryCode: nigeria ? nigeria.isoCode : "",
-        state: "",
-        city: "",
-        region: "default",
-        admission_number: "",
-        admission_date: "",
-        status: "Active",
-        parent_first_name: "",
-        parent_last_name: "",
-        parent_middle_name: "",
-        parent_occupation: "",
-        parent_email: "default",
-        parent_emergency_contact: "",
-        address: "default",
-        parent_contact_info: "",
-        parent_relationship: "",
-        class_year: "",
-        class_arm: "",
-      });
+          firstName: "",
+          lastName: "",
+          middleName: "",
+          dateOfBirth: "",
+          gender: "",
+          country: nigeria ? "Nigeria" : "",
+          countryCode: nigeria ? nigeria.isoCode : "",
+          state: "",
+          stateCode: "",
+          city: "",
+          admissionNumber: "",
+          admissionDate: "",
+          status: "Active",
+          parentFirstName: "",
+          parentLastName: "",
+          parentOccupation: "",
+          parentContactInfo: "",
+          parentEmergencyContact: "",
+          parentRelationship: "",
+          address: "",
+          classYearId: "",
+          classArmId: "",
+        });
+      } else {
+        toast.error(result.message || "Failed to register student");
+        if (result.errors) setErrors(result.errors);
+      }
     } catch (error) {
-      console.log("Error while registering student", error);
+      console.error("Registration error:", error);
+      toast.error(error.message || "Error registering student");
     } finally {
       setLoading(false);
     }
@@ -203,182 +220,138 @@ const StudentReg = () => {
   return (
     <div>
       <form onSubmit={handleSubmit} className="flex-shrink-0">
-        <div className=" pt-5 pl-6 pr-6 mb-2 ">
+        <div className="pt-5 pl-6 pr-6 mb-2">
           <p className="font-bold text-[#07508F]">Personal Information</p>
         </div>
         <div className="pl-6 pr-6">
           <div className="grid grid-cols-3 gap-x-6 gap-y-3">
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">
-                First Name:
+                First Name: <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 placeholder="Enter First Name"
-                value={formData.first_name || ""}
-                onChange={(e) =>
-                  handleInputChange("first_name", e.target.value)
-                }
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
-                  "first_name",
-                  formData.first_name
+                value={formData.firstName}
+                onChange={(e) => handleInputChange("firstName", e.target.value)}
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm ${getInputBorderClass(
+                  "firstName",
+                  formData.firstName
                 )}`}
                 required
               />
-              {errors.first_name && (
-                <p className="text-red-500 text-xs mt-1">
-                  {getFieldError("first_name")}
-                </p>
+              {errors.firstName && (
+                <p className="text-red-500 text-xs mt-1">{getFieldError("firstName")}</p>
               )}
             </div>
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Middle Name:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Middle Name:</label>
               <input
                 type="text"
                 placeholder="Enter Middle Name"
-                value={formData.middle_name || ""}
-                onChange={(e) =>
-                  handleInputChange("middle_name", e.target.value)
-                }
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
-                  "middle_name",
-                  formData.middle_name
+                value={formData.middleName}
+                onChange={(e) => handleInputChange("middleName", e.target.value)}
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm ${getInputBorderClass(
+                  "middleName",
+                  formData.middleName
                 )}`}
-                required
               />
-              {errors.middle_name && (
-                <p className="text-red-500 text-xs mt-1">
-                  {getFieldError("middle_name")}
-                </p>
-              )}
             </div>
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">
-                Last Name:
+                Last Name: <span className="text-red-500">*</span>
               </label>
               <input
                 type="text"
                 placeholder="Enter Last Name"
-                value={formData.last_name || ""}
-                onChange={(e) => handleInputChange("last_name", e.target.value)}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
-                  "last_name",
-                  formData.last_name
+                value={formData.lastName}
+                onChange={(e) => handleInputChange("lastName", e.target.value)}
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm ${getInputBorderClass(
+                  "lastName",
+                  formData.lastName
                 )}`}
                 required
               />
-              {errors.last_name && (
-                <p className="text-red-500 text-xs mt-1">
-                  {getFieldError("last_name")}
-                </p>
+              {errors.lastName && (
+                <p className="text-red-500 text-xs mt-1">{getFieldError("lastName")}</p>
               )}
             </div>
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">Username:</label>
+              <label className="text-[0.88rem] text-[#5E6A72]">
+                Username: <span className="text-red-500">*</span>
+              </label>
               <input
                 type="text"
                 placeholder="Enter Username"
-                value={formData.user.username || ""}
-                onChange={(e) =>
-                  handleInputChange("user.username", e.target.value, true)
-                }
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
-                  "user.username",
-                  formData.user.username
+                value={formData.username}
+                onChange={(e) => handleInputChange("username", e.target.value)}
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm ${getInputBorderClass(
+                  "username",
+                  formData.username
                 )}`}
                 required
               />
-              {errors.user?.username && (
-                <p className="text-red-500 text-xs mt-1">
-                  {getFieldError("user.username")}
-                </p>
+              {errors.username && (
+                <p className="text-red-500 text-xs mt-1">{getFieldError("username")}</p>
               )}
             </div>
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">Email:</label>
+              <label className="text-[0.88rem] text-[#5E6A72]">
+                Email: <span className="text-red-500">*</span>
+              </label>
               <input
                 type="email"
                 placeholder="Enter Email"
-                value={formData.user.email || ""}
-                onChange={(e) =>
-                  handleInputChange("user.email", e.target.value, true)
-                }
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
-                  "user.email",
-                  formData.user.email
+                value={formData.email}
+                onChange={(e) => handleInputChange("email", e.target.value)}
+                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm ${getInputBorderClass(
+                  "email",
+                  formData.email
                 )}`}
                 required
               />
-              {errors.user?.email && (
-                <p className="text-red-500 text-xs mt-1">
-                  {getFieldError("user.email")}
-                </p>
+              {errors.email && (
+                <p className="text-red-500 text-xs mt-1">{getFieldError("email")}</p>
               )}
             </div>
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">Password:</label>
+              <label className="text-[0.88rem] text-[#5E6A72]">
+                Password: <span className="text-red-500">*</span>
+              </label>
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
-                  id="password"
-                  placeholder="Create Password"
-                  value={formData.user.password || ""}
-                  onChange={(e) => {
-                    const value = e.target.value;
-                    setFormData((prev) => ({
-                      ...prev,
-                      user: {
-                        ...prev.user,
-                        password: value,
-                      },
-                    }));
-                  }}
-                  className={`w-full focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                    formData.user.password !== ""
-                      ? "border-2 border-[#0071E3]"
-                      : "border border-[#B6B6B6]"
-                  }`}
+                  placeholder="Create Password (min 6 chars)"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange("password", e.target.value)}
+                  className={`w-full focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm ${getInputBorderClass(
+                    "password",
+                    formData.password
+                  )}`}
                   required
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword((s) => !s)}
-                  aria-label={showPassword ? "Hide password" : "Show password"}
-                  aria-pressed={showPassword}
-                  className="absolute inset-y-0 right-0 flex items-center justify-center px-2
-                                           text-[#808080] hover:text-[#01427A] focus:outline-none"
-                  tabIndex={0}
+                  className="absolute inset-y-0 right-0 flex items-center justify-center px-2 text-[#808080] hover:text-[#01427A] focus:outline-none"
                 >
-                  {showPassword ? (
-                    <FiEyeOff className="w-5 h-5" />
-                  ) : (
-                    <FiEye className="w-5 h-5" />
-                  )}
+                  {showPassword ? <FiEyeOff className="w-5 h-5" /> : <FiEye className="w-5 h-5" />}
                 </button>
               </div>
+              {errors.password && (
+                <p className="text-red-500 text-xs mt-1">{getFieldError("password")}</p>
+              )}
             </div>
           </div>
+          
           <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-3">
             <div className="flex flex-col gap-x-1">
               <label className="text-[0.88rem] text-[#5E6A72]">DOB:</label>
               <input
                 type="date"
-                value={formData.date_of_birth || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    date_of_birth: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.date_of_birth !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
-                required
+                value={formData.dateOfBirth}
+                onChange={(e) => handleInputChange("dateOfBirth", e.target.value)}
+                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm border border-[#B6B6B6]"
               />
             </div>
             <div className="flex flex-col gap-x-1">
@@ -386,149 +359,123 @@ const StudentReg = () => {
               <DropDownLight
                 label={formData.gender || "Select Gender"}
                 items={[
-                  {
-                    label: "Male",
-                    onClick: () =>
-                      setFormData({ ...formData, gender: "Male" } || ""),
-                  },
-                  {
-                    label: "Female",
-                    onClick: () =>
-                      setFormData({ ...formData, gender: "Female" } || ""),
-                  },
+                  { label: "Male", onClick: () => handleInputChange("gender", "Male") },
+                  { label: "Female", onClick: () => handleInputChange("gender", "Female") },
                 ]}
               />
             </div>
           </div>
+          
           <div className="grid grid-cols-3 gap-x-6 gap-y-3 mt-3">
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">Address:</label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Country:</label>
               <DropDownLight
                 label={formData.country || "Select Country"}
                 items={countries.map((country) => ({
                   label: country.name,
-                  onClick: () =>
+                  onClick: () => {
                     setFormData((prev) => ({
                       ...prev,
                       country: country.name,
                       countryCode: country.isoCode,
-                    })),
+                    }));
+                  },
                 }))}
               />
             </div>
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#FFFFFF]">Address</label>
+              <label className="text-[0.88rem] text-[#FFFFFF]">State</label>
               <DropDownLight
                 label={formData.state || "Select State"}
                 items={states.map((state) => ({
                   label: state.name,
-                  onClick: () =>
+                  onClick: () => {
                     setFormData((prev) => ({
                       ...prev,
                       state: state.name,
                       stateCode: state.isoCode,
-                    })),
+                    }));
+                  },
                 }))}
               />
             </div>
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#FFFFFF]">Address</label>
+              <label className="text-[0.88rem] text-[#FFFFFF]">City</label>
               <DropDownLight
                 label={formData.city || "Select City"}
                 items={cities.map((city) => ({
                   label: city.name,
-                  onClick: () =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      city: city.name,
-                    })),
+                  onClick: () => setFormData((prev) => ({ ...prev, city: city.name })),
                 }))}
               />
             </div>
           </div>
+          
+          <div className="flex flex-col gap-x-1 mt-3">
+            <label className="text-[0.88rem] text-[#5E6A72]">Address:</label>
+            <input
+              type="text"
+              placeholder="Enter Address"
+              value={formData.address}
+              onChange={(e) => handleInputChange("address", e.target.value)}
+              className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm border border-[#B6B6B6]"
+            />
+          </div>
         </div>
-        <div className=" pt-8 pl-6 pr-6 mb-2 ">
+
+        <div className="pt-8 pl-6 pr-6 mb-2">
           <p className="font-bold text-[#07508F]">Admission Information</p>
         </div>
-        <div className="grid grid-cols-2 pl-6 pr-6 gap-x-3 gap-y-0">
+        
+        <div className="grid grid-cols-2 pl-6 pr-6 gap-x-6 gap-y-3">
           <div className="flex flex-col gap-x-1">
             <label className="text-[0.88rem] text-[#5E6A72]">
-              Admission Number:
+              Admission Number: <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               placeholder="Enter Admission Number"
-              value={formData.admission_number || ""}
-              onChange={(e) =>
-                handleInputChange("admission_number", e.target.value)
-              }
-              className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${getInputBorderClass(
-                "admission_number",
-                formData.admission_number
+              value={formData.admissionNumber}
+              onChange={(e) => handleInputChange("admissionNumber", e.target.value)}
+              className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm ${getInputBorderClass(
+                "admissionNumber",
+                formData.admissionNumber
               )}`}
               required
             />
-            {errors.admission_number && (
-              <p className="text-red-500 text-xs mt-1">
-                {getFieldError("admission_number")}
-              </p>
+            {errors.admissionNumber && (
+              <p className="text-red-500 text-xs mt-1">{getFieldError("admissionNumber")}</p>
             )}
           </div>
           <div className="flex flex-col gap-x-1">
-            <label className="text-[0.88rem] text-[#5E6A72]">
-              Admission Date:
-            </label>
+            <label className="text-[0.88rem] text-[#5E6A72]">Admission Date:</label>
             <input
               type="date"
-              value={formData.admission_date || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setFormData((prev) => ({
-                  ...prev,
-                  admission_date: value,
-                }));
-              }}
-              className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                formData.admission_date !== ""
-                  ? "border-2 border-[#0071E3]"
-                  : "border border-[#B6B6B6]"
-              }`}
-              required
+              value={formData.admissionDate}
+              onChange={(e) => handleInputChange("admissionDate", e.target.value)}
+              className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm border border-[#B6B6B6]"
             />
           </div>
           <div className="flex flex-col gap-x-1">
             <label className="text-[0.88rem] text-[#5E6A72]">Class Year</label>
             <DropDownLight
-              label={
-                classYears.find((y) => y.class_year_id === formData.class_year)
-                  ?.class_name || "Select Class Year"
-              }
+              label={classYears.find((y) => y.id === formData.classYearId)?.className || "Select Class Year"}
               items={classYears.map((year) => ({
-                label: year.class_name,
-                onClick: () =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    class_year: year.class_year_id,
-                  })),
+                label: year.className,
+                onClick: () => setFormData((prev) => ({ ...prev, classYearId: year.id, classArmId: "" })),
               }))}
             />
           </div>
           <div className="flex flex-col gap-x-1">
             <label className="text-[0.88rem] text-[#FFFFFF]">Class Arm</label>
             <DropDownLight
-              label={formData.class_arm || "Select Class Arm"}
+              label={filteredClassArms.find((a) => a.id === formData.classArmId)?.armName || "Select Class Arm"}
               items={filteredClassArms.map((arm) => ({
-                label: arm.arm_name,
-                onClick: () =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    class_arm: arm.class_id,
-                  })),
+                label: arm.armName,
+                onClick: () => setFormData((prev) => ({ ...prev, classArmId: arm.id })),
               }))}
             />
           </div>
-        </div>
-        <div className="grid grid-cols-3 pl-6 pr-6 gap-y-3 mt-3">
           <div className="flex flex-col gap-x-1">
             <label className="text-[0.88rem] text-[#5E6A72]">Status:</label>
             <div
@@ -538,7 +485,7 @@ const StudentReg = () => {
               onClick={() => {
                 setFormData((prev) => ({
                   ...prev,
-                  status: formData.status === "Active" ? "In-active" : "Active",
+                  status: prev.status === "Active" ? "Inactive" : "Active",
                 }));
               }}
             >
@@ -546,191 +493,83 @@ const StudentReg = () => {
             </div>
           </div>
         </div>
-        <div className=" pt-8 pl-6 pr-6 mb-2 ">
+
+        <div className="pt-8 pl-6 pr-6 mb-2">
           <p className="font-bold text-[#07508F]">Parents Information</p>
         </div>
+        
         <div className="pl-6 pr-6">
           <div className="grid grid-cols-3 gap-x-6 gap-y-3">
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Parent's First Name:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Parent First Name:</label>
               <input
                 type="text"
                 placeholder="Enter First Name"
-                value={formData.parent_first_name || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    parent_first_name: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.parent_first_name !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
-                required
+                value={formData.parentFirstName}
+                onChange={(e) => handleInputChange("parentFirstName", e.target.value)}
+                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm border border-[#B6B6B6]"
               />
             </div>
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Parent's Middle Name:
-              </label>
-              <input
-                type="text"
-                placeholder="Enter Middle Name"
-                value={formData.parent_middle_name || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    parent_middle_name: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.parent_middle_name !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
-                required
-              />
-            </div>
-            <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Parent's Last Name:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Parent Last Name:</label>
               <input
                 type="text"
                 placeholder="Enter Last Name"
-                value={formData.parent_last_name || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    parent_last_name: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.parent_last_name !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
-                required
+                value={formData.parentLastName}
+                onChange={(e) => handleInputChange("parentLastName", e.target.value)}
+                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm border border-[#B6B6B6]"
               />
             </div>
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Parent's Occupation:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Parent Occupation:</label>
               <input
                 type="text"
                 placeholder="Enter Occupation"
-                value={formData.parent_occupation || ""}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  setFormData((prev) => ({
-                    ...prev,
-                    parent_occupation: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.parent_occupation !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
-                required
+                value={formData.parentOccupation}
+                onChange={(e) => handleInputChange("parentOccupation", e.target.value)}
+                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm border border-[#B6B6B6]"
               />
             </div>
-
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Parent's Phone Number:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Parent Phone Number:</label>
               <input
                 type="tel"
-                inputMode="numeric"
-                pattern="[0-9]*"
                 placeholder="Enter Phone Number"
-                value={formData.parent_contact_info || ""}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, ""); // Remove non-digits
-                  setFormData((prev) => ({
-                    ...prev,
-                    parent_contact_info: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.parent_contact_info !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
-                required
+                value={formData.parentContactInfo}
+                onChange={(e) => handleInputChange("parentContactInfo", e.target.value)}
+                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm border border-[#B6B6B6]"
               />
             </div>
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Emergency Contact:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Emergency Contact:</label>
               <input
                 type="tel"
-                pattern="[0-9]*"
-                inputMode="numeric"
-                placeholder="Enter Emergency"
-                value={formData.parent_emergency_contact || ""}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/\D/g, ""); // Remove non-digits
-                  setFormData((prev) => ({
-                    ...prev,
-                    parent_emergency_contact: value,
-                  }));
-                }}
-                className={`focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm  ${
-                  formData.parent_emergency_contact !== ""
-                    ? "border-2 border-[#0071E3]"
-                    : "border border-[#B6B6B6]"
-                }`}
-                required
+                placeholder="Enter Emergency Contact"
+                value={formData.parentEmergencyContact}
+                onChange={(e) => handleInputChange("parentEmergencyContact", e.target.value)}
+                className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] p-1.5 text-sm rounded-sm border border-[#B6B6B6]"
               />
             </div>
-
             <div className="flex flex-col gap-x-1">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Relationship:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Relationship:</label>
               <DropDownLight
-                label={formData.parent_relationship || "Select Relationship"}
+                label={formData.parentRelationship || "Select Relationship"}
                 items={[
-                  {
-                    label: "Father",
-                    onClick: () =>
-                      setFormData(
-                        { ...formData, parent_relationship: "Father" } || ""
-                      ),
-                  },
-                  {
-                    label: "Mother",
-                    onClick: () =>
-                      setFormData(
-                        { ...formData, parent_relationship: "Mother" } || ""
-                      ),
-                  },
-                  {
-                    label: "Guardian",
-                    onClick: () =>
-                      setFormData(
-                        { ...formData, parent_relationship: "Guardian" } || ""
-                      ),
-                  },
+                  { label: "Father", onClick: () => handleInputChange("parentRelationship", "Father") },
+                  { label: "Mother", onClick: () => handleInputChange("parentRelationship", "Mother") },
+                  { label: "Guardian", onClick: () => handleInputChange("parentRelationship", "Guardian") },
                 ]}
               />
             </div>
           </div>
 
           <div className="flex justify-end mb-5 mt-10">
-            <button className="bg-[#01427A] text-sm text-white font-bold py-1.5 cursor-pointer hover:opacity-80 px-5 rounded-sm">
-              Save
+            <button
+              type="submit"
+              disabled={loading}
+              className="bg-[#01427A] text-sm text-white font-bold py-1.5 cursor-pointer hover:opacity-80 px-5 rounded-sm disabled:opacity-50"
+            >
+              {loading ? "Saving..." : "Save"}
             </button>
           </div>
         </div>

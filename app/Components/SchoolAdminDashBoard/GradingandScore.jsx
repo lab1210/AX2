@@ -1,130 +1,176 @@
 "use client";
-import {
-  AddAnnualweigh,
-  AddResultVisibility,
-  createGrading,
-  deleteGrade,
-  getAnnualweigh,
-  getGrading,
-  getResultVisibility,
-  UpdateAnnualWeigh,
-  UpdateGrade,
-  UpdateResultVisibility,
-} from "@/Service/ResultService";
-import { getClass, getDepartment, getTerms } from "@/Service/schoolConfig";
 import React, { useEffect, useState } from "react";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
 import Dropdown from "./DropDown2";
+import resultManagementService from "@/Service/ResultService";
+import classService from "@/Service/ClassService";
+import academicEntityService from "@/Service/AcademicEntityService";
+import academicPeriodService from "@/Service/AcademicPeriodService";
 import toast from "react-hot-toast";
 
 const GradingandScore = () => {
-  const [message, setMessage] = useState("");
-  const [messageType, setMessageType] = useState(""); // 'success' or 'error'
-  const [grade, setgrade] = useState([]);
-  const [selectedGrade, setselectedGrade] = useState(null);
-  const [editGradeVisible, seteditGradeVisible] = useState(false);
+  const [grade, setGrade] = useState([]);
+  const [selectedGrade, setSelectedGrade] = useState(null);
+  const [editGradeVisible, setEditGradeVisible] = useState(false);
   const [currentPageforgrade, setCurrentPageforgrade] = useState(1);
-  const [currentPageforterm, setCurrentPageforterm] = useState(1);
   const itemsPerPage = 5;
   const [classYear, setClassYear] = useState([]);
-  const [term, setTerm] = useState([]);
-  const [departmentList, setDepartmentList] = useState([]);
-  const [deleteModalVisibleforgrade, setDeleteModalVisibleforgrade] =
-    useState(false);
-  const [selectedGradeDelete, setselectedGradeDelete] = useState(null);
-  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [selectedWeightDelete, setselectedWeightDelete] = useState(null);
-
-  const [Weight, setWeight] = useState({});
-  const [originalWeights, setOriginalWeights] = useState({});
+  const [termsForSession, setTermsForSession] = useState([]); // Terms for selected session
+  const [sessions, setSessions] = useState([]);
+  const [deleteModalVisibleforgrade, setDeleteModalVisibleforgrade] = useState(false);
+  const [selectedGradeDelete, setSelectedGradeDelete] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const [toggle, setToggle] = useState({});
   const [toggleFormData, setToggleFormData] = useState({
-    term_result_open: false,
-    annual_result_open: false,
-  });
-  //Grade Aspect
-  const [GradeFormData, setGradeFormData] = useState({
-    min_score: "",
-    max_score: "",
-    grade: "",
-    remarks: "",
+    isTermResultOpen: false,
+    isAnnualResultOpen: false,
   });
 
-  const toggleWeightEdit = (termId) => {
-    setWeight((prevState) => ({
-      ...prevState,
-      [termId]: !prevState[termId],
-    }));
-  };
+  const [gradeFormData, setGradeFormData] = useState({
+    minScore: "",
+    maxScore: "",
+    gradeName: "",
+    remark: "",
+  });
 
   const [computationFormData, setComputationFormData] = useState({
-    class_year: "",
-    department: "",
-    first_term_weight: "",
-    second_term_weight: "",
-    third_term_weight: "",
+    classYearId: "",
+    sessionId: "",
+    termWeights: {} // Store weights by termId
   });
 
-  useEffect(() => {
-    const fetchGrade = async () => {
-      const { data, error } = await getGrading();
-      if (data) setgrade(data);
-      else setMessage(error || "Failed to load grading system");
-    };
-    const fetchClass = async () => {
-      const { data, error } = await getClass();
-      if (data) {
-        setClassYear(data);
-      } else {
-        setMessage(error || "Failed to load Class years");
-      }
-    };
-    const fetchTerms = async () => {
-      const { data, error } = await getTerms();
-      if (data) setTerm(data);
-      else setMessage(error || "Failed to load terms");
-    };
-    const fetchDepartments = async () => {
-      const { data, error } = await getDepartment();
-      if (data) setDepartmentList(data);
-      else setMessage(error || "Failed to load departments");
-    };
-    fetchDepartments();
-    fetchTerms();
-    fetchClass();
-    fetchGrade();
-  }, []);
+  const [originalWeights, setOriginalWeights] = useState({});
 
-  const getClassYearName = (yearid) => {
-    const year = classYear.find((item) => item.class_year_id === yearid);
-    return year?.class_name;
-  };
-  const getDepartmentName = (depID) => {
-    const year = departmentList.find((item) => item.department_id === depID);
-    return year?.name;
-  };
-  const getTermName = (yearid) => {
-    const terms = term.find((item) => item.term_id === yearid);
-    return terms?.name;
-  };
   useEffect(() => {
-    const fetchVisibility = async () => {
-      const { data, error } = await getResultVisibility();
-      console.log("Fetched visibility:", data, "Error:", error);
-
-      if (Array.isArray(data) && data.length > 0) {
-        setToggle(data[0]);
-        setToggleFormData({
-          term_result_open: data[0].term_result_open,
-          annual_result_open: data[0].annual_result_open,
-        });
-      } else if (error) {
-        toast.error(error || "Failed to load result visibility");
-      }
-    };
+    fetchGrades();
+    fetchClassYears();
+    fetchSessions();
     fetchVisibility();
   }, []);
+
+  // Fetch terms when session changes (include inactive terms)
+  useEffect(() => {
+    if (computationFormData.sessionId) {
+      fetchTermsForSession(computationFormData.sessionId);
+    } else {
+      setTermsForSession([]);
+    }
+  }, [computationFormData.sessionId]);
+
+  // Fetch annual weights when class year and session are selected
+  useEffect(() => {
+    if (computationFormData.classYearId && computationFormData.sessionId) {
+      fetchAnnualWeights();
+    }
+  }, [computationFormData.classYearId, computationFormData.sessionId]);
+
+  const fetchGrades = async () => {
+    try {
+      setLoading(true);
+      const result = await resultManagementService.getAllGrades();
+      if (result.success) {
+        setGrade(result.data);
+      } else {
+        toast.error(result.message || "Failed to load grades");
+      }
+    } catch (error) {
+      toast.error("Failed to load grades");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchClassYears = async () => {
+    try {
+      const result = await classService.getAllClassYears();
+      if (result.success) {
+        setClassYear(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch class years:", error);
+    }
+  };
+
+  const fetchSessions = async () => {
+    try {
+      const result = await academicPeriodService.getAllSessions();
+      if (result.success) {
+        setSessions(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch sessions:", error);
+    }
+  };
+
+  const fetchTermsForSession = async (sessionId) => {
+    try {
+      // Include inactive terms to get all First, Second, Third terms
+      const result = await academicPeriodService.getAllTerms(sessionId, true, false);
+      if (result.success) {
+        // Sort terms by sequence
+        const sortedTerms = result.data.sort((a, b) => (a.sequence || 0) - (b.sequence || 0));
+        setTermsForSession(sortedTerms);
+      }
+    } catch (error) {
+      console.error("Failed to fetch terms:", error);
+    }
+  };
+
+  const fetchVisibility = async () => {
+    try {
+      const result = await resultManagementService.getAllVisibilities();
+      if (result.success && result.data.length > 0) {
+        setToggle(result.data[0]);
+        setToggleFormData({
+          isTermResultOpen: result.data[0].isTermResultOpen,
+          isAnnualResultOpen: result.data[0].isAnnualResultOpen,
+        });
+      }
+    } catch (error) {
+      console.error("Failed to fetch visibility:", error);
+    }
+  };
+
+  const fetchAnnualWeights = async () => {
+    try {
+      const result = await resultManagementService.getAnnualWeightSummary(
+        computationFormData.classYearId,
+        computationFormData.sessionId
+      );
+      if (result.success && result.data) {
+        const weights = result.data.termWeights || [];
+        const weightsMap = {};
+        weights.forEach(w => {
+          weightsMap[w.termId] = w.weight;
+        });
+        setComputationFormData(prev => ({
+          ...prev,
+          termWeights: weightsMap
+        }));
+        setOriginalWeights(weightsMap);
+      } else {
+        // No weights found, initialize empty
+        setComputationFormData(prev => ({
+          ...prev,
+          termWeights: {}
+        }));
+        setOriginalWeights({});
+      }
+    } catch (error) {
+      console.error("Failed to fetch annual weights:", error);
+    }
+  };
+
+  const getClassYearName = (yearId) => {
+    const year = classYear.find((item) => item.id === yearId);
+    return year?.className;
+  };
+
+  const getSessionName = (sessionId) => {
+    const session = sessions.find((item) => item.id === sessionId);
+    return session?.name;
+  };
 
   const paginatedDataforgrade = Array.isArray(grade)
     ? grade.slice(
@@ -132,46 +178,33 @@ const GradingandScore = () => {
         currentPageforgrade * itemsPerPage
       )
     : [];
-  const paginatedDataforAnnualweigh = Array.isArray(term)
-    ? term.slice(
-        (currentPageforterm - 1) * itemsPerPage,
-        currentPageforterm * itemsPerPage
-      )
-    : [];
 
   const totalPages = Math.ceil(grade.length / itemsPerPage);
-  const totalPagesforterm = Math.ceil(term.length / itemsPerPage);
+
   const handlePrevious = () => {
     setCurrentPageforgrade((prev) => Math.max(prev - 1, 1));
-  };
-  const handlePreviousterm = () => {
-    setCurrentPageforterm((prev) => Math.max(prev - 1, 1));
   };
 
   const handleNext = () => {
     setCurrentPageforgrade((prev) => Math.min(prev + 1, totalPages));
-  };
-  const handleNextterm = () => {
-    setCurrentPageforterm((prev) => Math.min(prev + 1, totalPages));
   };
 
   const handleSubmitForGrading = async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    // Validate min_score is less than max_score
-    if (
-      parseInt(GradeFormData.min_score) >= parseInt(GradeFormData.max_score)
-    ) {
+    const minScore = parseInt(gradeFormData.minScore);
+    const maxScore = parseInt(gradeFormData.maxScore);
+
+    if (minScore >= maxScore) {
       toast.error("Minimum score must be less than maximum score");
       return;
     }
 
-    // Check for duplicate grade letter (case insensitive)
     const gradeLetterExists = grade.some(
       (item) =>
-        item.grade.toLowerCase() === GradeFormData.grade.toLowerCase() &&
-        (!editGradeVisible || item.id !== selectedGrade?.id) // Skip current grade when editing
+        item.gradeName?.toLowerCase() === gradeFormData.gradeName?.toLowerCase() &&
+        (!editGradeVisible || item.id !== selectedGrade?.id)
     );
 
     if (gradeLetterExists) {
@@ -179,20 +212,12 @@ const GradingandScore = () => {
       return;
     }
 
-    // Check for overlapping score ranges
     const rangeOverlaps = grade.some((item) => {
-      // Skip current grade when editing
       if (editGradeVisible && item.id === selectedGrade?.id) return false;
-
-      const newMin = parseInt(GradeFormData.min_score);
-      const newMax = parseInt(GradeFormData.max_score);
-      const existingMin = parseInt(item.min_score);
-      const existingMax = parseInt(item.max_score);
-
       return (
-        (newMin >= existingMin && newMin <= existingMax) ||
-        (newMax >= existingMin && newMax <= existingMax) ||
-        (newMin <= existingMin && newMax >= existingMax)
+        (minScore >= item.minScore && minScore <= item.maxScore) ||
+        (maxScore >= item.minScore && maxScore <= item.maxScore) ||
+        (minScore <= item.minScore && maxScore >= item.maxScore)
       );
     });
 
@@ -201,97 +226,90 @@ const GradingandScore = () => {
       return;
     }
 
-    if (editGradeVisible && selectedGrade) {
-      try {
-        const updatedData = {
-          ...selectedGrade,
-          min_score: selectedGrade.min_score,
-          max_score: selectedGrade.max_score,
-          grade: selectedGrade.grade,
-          remarks: selectedGrade.remarks,
-        };
+    try {
+      setLoading(true);
+      if (editGradeVisible && selectedGrade) {
+        const result = await resultManagementService.updateGrade(selectedGrade.id, {
+          minScore: minScore,
+          maxScore: maxScore,
+          gradeName: gradeFormData.gradeName,
+          remark: gradeFormData.remark,
+        });
 
-        const { data, error } = await UpdateGrade(
-          selectedGrade.id,
-          updatedData
-        );
-
-        if (error) {
-          throw new Error(error);
-        }
-
-        const updatedList = grade.map((item) =>
-          item.id === selectedGrade.id ? data : item
-        );
-        setgrade(updatedList);
-        toast.success("Grade updated successfully.");
-        seteditGradeVisible(false);
-        setselectedGrade(null);
-      } catch (err) {
-        toast.error("An error occurred while updating.");
-      }
-    } else {
-      try {
-        const { data, error } = await createGrading(GradeFormData);
-
-        if (error) {
-          toast.error(error || "Failed to add grade.");
+        if (result.success) {
+          await fetchGrades();
+          toast.success("Grade updated successfully.");
+          setEditGradeVisible(false);
+          setSelectedGrade(null);
         } else {
-          setgrade((prev) => [...prev, data]);
-          toast.success("Grade added successfully.");
+          toast.error(result.message);
         }
-      } catch (err) {
-        toast.error("An error occurred while adding.");
+      } else {
+        const result = await resultManagementService.createGrade({
+          minScore: minScore,
+          maxScore: maxScore,
+          gradeName: gradeFormData.gradeName,
+          remark: gradeFormData.remark,
+        });
+
+        if (result.success) {
+          await fetchGrades();
+          toast.success("Grade added successfully.");
+        } else {
+          toast.error(result.message);
+        }
       }
+    } catch (error) {
+      toast.error("An error occurred while saving grade.");
+    } finally {
+      setLoading(false);
     }
 
-    // Reset form
     setGradeFormData({
-      min_score: "",
-      max_score: "",
-      grade: "",
-      remarks: "",
+      minScore: "",
+      maxScore: "",
+      gradeName: "",
+      remark: "",
     });
   };
-  const handleEdit = (grade) => {
-    seteditGradeVisible(true);
-    setselectedGrade({ ...grade });
+
+  const handleEdit = (gradeItem) => {
+    setEditGradeVisible(true);
+    setSelectedGrade(gradeItem);
+    setGradeFormData({
+      minScore: gradeItem.minScore?.toString() || "",
+      maxScore: gradeItem.maxScore?.toString() || "",
+      gradeName: gradeItem.gradeName || "",
+      remark: gradeItem.remark || "",
+    });
   };
 
-  const openDeleteModal = (school) => {
-    setselectedGradeDelete(school);
+  const openDeleteModal = (gradeItem) => {
+    setSelectedGradeDelete(gradeItem);
     setDeleteModalVisibleforgrade(true);
   };
 
-  // Function to close delete modal
   const closeDeleteModal = () => {
-    setselectedGradeDelete(null);
+    setSelectedGradeDelete(null);
     setDeleteModalVisibleforgrade(false);
   };
 
-  const openDeleteModalforweigh = (school) => {
-    setselectedWeightDelete(school);
-    setDeleteModalVisible(true);
-  };
-
-  // Function to close delete modal
-  const closeDeleteModalforweigh = () => {
-    setselectedWeightDelete(null);
-    setDeleteModalVisible(false);
-  };
   const handleDelete = async () => {
     if (selectedGradeDelete?.id) {
       try {
-        const response = await deleteGrade(selectedGradeDelete.id);
-        if (response?.status === 204) {
+        setLoading(true);
+        const result = await resultManagementService.deleteGrade(selectedGradeDelete.id);
+        if (result.success) {
           toast.success("Grade deleted successfully.");
+          await fetchGrades();
           closeDeleteModal();
         } else {
-          toast.error("Failed to delete Grade.");
-          closeDeleteModal();
+          toast.error(result.message);
         }
       } catch (error) {
-        toast.success("Failed to delete Grade.");
+        toast.error("Failed to delete grade.");
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -307,149 +325,77 @@ const GradingandScore = () => {
     setToggleFormData(updatedData);
 
     try {
-      let data, error;
-
+      setLoading(true);
+      let result;
       if (toggle.id) {
-        ({ data, error } = await UpdateResultVisibility(
-          toggle.id,
-          updatedData
-        ));
+        result = await resultManagementService.updateVisibility(toggle.id, updatedData);
       } else {
-        ({ data, error } = await AddResultVisibility(updatedData));
-
-        // ✅ Add this: update toggle with returned `data` (including the new ID)
-        if (data?.id) {
-          setToggle(data); // so future toggle uses PATCH not POST
+        const activeTerm = termsForSession.length > 0 ? termsForSession[0] : null;
+        result = await resultManagementService.createOrUpdateVisibility({
+          termId: activeTerm?.id,
+          ...updatedData,
+        });
+        if (result.success && result.data?.id) {
+          setToggle(result.data);
         }
       }
 
-      if (error) throw new Error(error);
-
-      toast.success(`${name.replaceAll("_", " ")} updated successfully.`);
+      if (result.success) {
+        toast.success(`${name.replace(/([A-Z])/g, ' $1').toLowerCase()} updated successfully.`);
+      } else {
+        toast.error(result.message);
+      }
     } catch (error) {
-      toast.error(`Failed to update ${name.replaceAll("_", " ")}`);
+      toast.error(`Failed to update ${name.replace(/([A-Z])/g, ' $1').toLowerCase()}`);
+    } finally {
+      setLoading(false);
     }
   };
 
-  useEffect(() => {
-    const fetchAnnualWeight = async () => {
-      if (computationFormData.class_year && computationFormData.department) {
-        const { data, error } = await getAnnualweigh();
-        if (error) {
-          toast.error(error);
-          return;
-        }
-
-        const match = data.find(
-          (item) =>
-            item.class_year === computationFormData.class_year &&
-            item.department === computationFormData.department
-        );
-
-        if (match) {
-          setComputationFormData((prev) => ({
-            ...prev,
-            first_term_weight: match.first_term_weight,
-            second_term_weight: match.second_term_weight,
-            third_term_weight: match.third_term_weight,
-            id: match.id, // Store id for update later
-          }));
-          setOriginalWeights({
-            first_term_weight: match.first_term_weight,
-            second_term_weight: match.second_term_weight,
-            third_term_weight: match.third_term_weight,
-          });
-        } else {
-          setComputationFormData((prev) => ({
-            ...prev,
-            first_term_weight: "",
-            second_term_weight: "",
-            third_term_weight: "",
-            id: null,
-          }));
-
-          setOriginalWeights({});
-        }
+  const handleWeightChange = (termId, value) => {
+    setComputationFormData(prev => ({
+      ...prev,
+      termWeights: {
+        ...prev.termWeights,
+        [termId]: parseFloat(value) || 0
       }
-    };
+    }));
+  };
 
-    fetchAnnualWeight();
-  }, [computationFormData.class_year, computationFormData.department]);
+  const handleSaveAnnualWeight = async () => {
+    const termWeights = termsForSession.map(term => ({
+      termId: term.id,
+      weight: computationFormData.termWeights[term.id] || 0
+    }));
 
-  const handleSaveAnnualWeight = async (e) => {
-    e.preventDefault();
-
-    const total =
-      parseFloat(computationFormData.first_term_weight || 0) +
-      parseFloat(computationFormData.second_term_weight || 0) +
-      parseFloat(computationFormData.third_term_weight || 0);
+    const total = termWeights.reduce((sum, tw) => sum + tw.weight, 0);
 
     if (Math.abs(total - 1) > 0.001) {
-      toast.error("Total weight must equal 1.");
+      toast.error(`Total weight must equal 1 (100%). Current total: ${total}`);
       return;
     }
 
-    const payload = {
-      class_year: computationFormData.class_year,
-      department: computationFormData.department,
-      first_term_weight: parseFloat(computationFormData.first_term_weight),
-      second_term_weight: parseFloat(computationFormData.second_term_weight),
-      third_term_weight: parseFloat(computationFormData.third_term_weight),
-    };
-
     try {
-      let response;
-      if (computationFormData.id) {
-        response = await UpdateAnnualWeigh(computationFormData.id, payload);
-      } else {
-        response = await AddAnnualweigh(payload);
-      }
-
-      if (response?.error) {
-        throw new Error(
-          response.error || "Failed to save weight configuration."
-        );
-      }
-
-      toast.success("Weight configuration saved successfully.");
-
-      // Update the original weights to match the saved values
-      setOriginalWeights({
-        first_term_weight: computationFormData.first_term_weight,
-        second_term_weight: computationFormData.second_term_weight,
-        third_term_weight: computationFormData.third_term_weight,
+      setLoading(true);
+      const result = await resultManagementService.createOrUpdateWeights({
+        classYearId: computationFormData.classYearId,
+        sessionId: computationFormData.sessionId,
+        termWeights: termWeights,
       });
 
-      // Close all edit modes
-      setWeight({});
-
-      // If this was a new entry, update the ID
-      if (!computationFormData.id && response?.data?.id) {
-        setComputationFormData((prev) => ({
-          ...prev,
-          id: response.data.id,
-        }));
-      }
-
-      // Refresh the weights data
-      const { data } = await getAnnualweigh();
-      const match = data.find(
-        (item) =>
-          item.class_year === computationFormData.class_year &&
-          item.department === computationFormData.department
-      );
-
-      if (match) {
-        setOriginalWeights({
-          first_term_weight: match.first_term_weight,
-          second_term_weight: match.second_term_weight,
-          third_term_weight: match.third_term_weight,
-        });
+      if (result.success) {
+        toast.success("Weight configuration saved successfully.");
+        await fetchAnnualWeights();
+      } else {
+        toast.error(result.message);
       }
     } catch (error) {
-      toast.error(error.message || "Failed to save weight configuration.");
+      toast.error("Failed to save weight configuration.");
+    } finally {
+      setLoading(false);
     }
   };
+
   return (
     <div className="pr-1 h-full overflow-y-auto">
       {deleteModalVisibleforgrade && selectedGradeDelete && (
@@ -465,19 +411,19 @@ const GradingandScore = () => {
                 Are you sure want to delete the Grade
               </p>
               <p className="text-base text-[#858383]">
-                <span className="font-bold">{selectedGradeDelete.grade}</span>?
+                <span className="font-bold">{selectedGradeDelete?.gradeName}</span>?
               </p>
             </div>
-            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5">
               <button
                 onClick={handleDelete}
-                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4 py-2"
               >
                 Yes, Delete
               </button>
               <button
                 onClick={closeDeleteModal}
-                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4 py-2"
               >
                 No, Cancel
               </button>
@@ -486,15 +432,17 @@ const GradingandScore = () => {
         </div>
       )}
 
-      <div className="pb-5 pt-3  bg-white">
-        <form onSubmit={handleSubmitForGrading} className="mb-3 ">
-          <div className="flex pt-3 pl-6 pr-6 justify-between mb-2 ">
+      {/* Grading System Section */}
+      <div className="pb-5 pt-3 bg-white">
+        <form onSubmit={handleSubmitForGrading} className="mb-3">
+          <div className="flex pt-3 pl-6 pr-6 justify-between mb-2">
             <p className="font-bold text-[#07508F]">Grading System</p>
             <button
               type="submit"
-              className="bg-[#07508F] text-white font-bold text-sm px-3 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
+              disabled={loading}
+              className="bg-[#07508F] text-white font-bold text-sm px-3 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90 disabled:opacity-50"
             >
-              {!editGradeVisible ? "+ Add Grade" : "Set Grade"}
+              {!editGradeVisible ? "+ Add Grade" : "Save Grade"}
             </button>
           </div>
           <div className="pl-6 pr-6">
@@ -503,94 +451,46 @@ const GradingandScore = () => {
                 <label className="text-[0.88rem] text-[#5E6A72]">Grade:</label>
                 <input
                   type="text"
-                  name="name"
                   placeholder="Enter Grade"
-                  value={
-                    editGradeVisible
-                      ? selectedGrade?.grade
-                      : GradeFormData.grade
-                  }
+                  value={editGradeVisible ? selectedGrade?.gradeName : gradeFormData.gradeName}
                   onChange={(e) => {
                     const value = e.target.value;
                     editGradeVisible
-                      ? setselectedGrade((prev) => ({
-                          ...prev,
-                          grade: value,
-                        }))
-                      : setGradeFormData((prev) => ({
-                          ...prev,
-                          grade: value,
-                        }));
+                      ? setSelectedGrade((prev) => ({ ...prev, gradeName: value }))
+                      : setGradeFormData((prev) => ({ ...prev, gradeName: value }));
                   }}
-                  className={`${
-                    GradeFormData.grade !== "" ||
-                    (editGradeVisible && selectedGrade?.grade !== "")
-                      ? "border-[#0071E3]"
-                      : "border-[#B6B6B6]"
-                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
+                  className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm"
                   required
                 />
               </div>
 
-              <div className="flex flex-col gap-2 mb-2 ">
+              <div className="flex flex-col gap-2 mb-2">
                 <label className="text-[0.88rem] text-[#5E6A72]">Range:</label>
-                <div className="grid grid-cols-2 gap-2 ">
+                <div className="grid grid-cols-2 gap-2">
                   <input
                     type="number"
-                    name="name"
-                    placeholder="Enter Min Score"
-                    value={
-                      editGradeVisible
-                        ? selectedGrade?.min_score
-                        : GradeFormData.min_score
-                    }
+                    placeholder="Min Score"
+                    value={editGradeVisible ? selectedGrade?.minScore : gradeFormData.minScore}
                     onChange={(e) => {
                       const value = e.target.value;
                       editGradeVisible
-                        ? setselectedGrade((prev) => ({
-                            ...prev,
-                            min_score: value,
-                          }))
-                        : setGradeFormData((prev) => ({
-                            ...prev,
-                            min_score: value,
-                          }));
+                        ? setSelectedGrade((prev) => ({ ...prev, minScore: value }))
+                        : setGradeFormData((prev) => ({ ...prev, minScore: value }));
                     }}
-                    className={`${
-                      GradeFormData.min_score !== "" ||
-                      (editGradeVisible && selectedGrade?.min_score !== "")
-                        ? "border-[#0071E3]"
-                        : "border-[#B6B6B6]"
-                    } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
+                    className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm"
                     required
                   />
                   <input
                     type="number"
-                    name="name"
-                    placeholder="Enter Max Score"
-                    value={
-                      editGradeVisible
-                        ? selectedGrade?.max_score
-                        : GradeFormData.max_score
-                    }
+                    placeholder="Max Score"
+                    value={editGradeVisible ? selectedGrade?.maxScore : gradeFormData.maxScore}
                     onChange={(e) => {
                       const value = e.target.value;
                       editGradeVisible
-                        ? setselectedGrade((prev) => ({
-                            ...prev,
-                            max_score: value,
-                          }))
-                        : setGradeFormData((prev) => ({
-                            ...prev,
-                            max_score: value,
-                          }));
+                        ? setSelectedGrade((prev) => ({ ...prev, maxScore: value }))
+                        : setGradeFormData((prev) => ({ ...prev, maxScore: value }));
                     }}
-                    className={`${
-                      GradeFormData.max_score !== "" ||
-                      (editGradeVisible && selectedGrade?.max_score !== "")
-                        ? "border-[#0071E3]"
-                        : "border-[#B6B6B6]"
-                    } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
+                    className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm"
                     required
                   />
                 </div>
@@ -599,31 +499,15 @@ const GradingandScore = () => {
                 <label className="text-[0.88rem] text-[#5E6A72]">Remark:</label>
                 <input
                   type="text"
-                  name="name"
                   placeholder="Enter Remark"
-                  value={
-                    editGradeVisible
-                      ? selectedGrade?.remarks
-                      : GradeFormData.remarks
-                  }
+                  value={editGradeVisible ? selectedGrade?.remark : gradeFormData.remark}
                   onChange={(e) => {
                     const value = e.target.value;
                     editGradeVisible
-                      ? setselectedGrade((prev) => ({
-                          ...prev,
-                          remarks: value,
-                        }))
-                      : setGradeFormData((prev) => ({
-                          ...prev,
-                          remarks: value,
-                        }));
+                      ? setSelectedGrade((prev) => ({ ...prev, remark: value }))
+                      : setGradeFormData((prev) => ({ ...prev, remark: value }));
                   }}
-                  className={`${
-                    GradeFormData.remarks !== "" ||
-                    (editGradeVisible && selectedGrade?.remarks !== "")
-                      ? "border-[#0071E3]"
-                      : "border-[#B6B6B6]"
-                  } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm `}
+                  className="focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6] border-[1.5px] p-1.5 text-sm rounded-sm"
                   required
                 />
               </div>
@@ -633,39 +517,32 @@ const GradingandScore = () => {
         <hr className="mt-10" />
 
         <div className="flex-shrink-0 mb-2">
-          <p className="font-semibold flex justify-center p-3 text-[#333333]">
-            Existing Grades
-          </p>
+          <p className="font-semibold flex justify-center p-3 text-[#333333]">Existing Grades</p>
         </div>
         <div className="px-0">
           <div className="overflow-y-auto max-h-[200px] no-scrollbar">
             <table className="min-w-full table-auto">
-              {paginatedDataforgrade.length > 0 && (
-                <thead className="bg-[#EDF0F3] text-center sticky top-0 z-10 lg:text-base text-xs">
-                  <tr>
-                    <th className="p-2 bg-[#EDF0F3]">Grade</th>
-                    <th className="p-2 bg-[#EDF0F3]">Range</th>
-                    <th className="p-2 bg-[#EDF0F3]">Remark</th>
-                    <th className="p-2 bg-[#EDF0F3]">Actions</th>
-                  </tr>
-                </thead>
-              )}
+              <thead className="bg-[#EDF0F3] text-center sticky top-0 z-10 lg:text-base text-xs">
+                <tr>
+                  <th className="p-2 bg-[#EDF0F3]">Grade</th>
+                  <th className="p-2 bg-[#EDF0F3]">Range</th>
+                  <th className="p-2 bg-[#EDF0F3]">Remark</th>
+                  <th className="p-2 bg-[#EDF0F3]">Actions</th>
+                </tr>
+              </thead>
               <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
                 {paginatedDataforgrade.length === 0 ? (
                   <tr>
-                    <td
-                      colSpan="5"
-                      className="p-5  text-center border text-gray-500"
-                    >
+                    <td colSpan="4" className="p-5 text-center border text-gray-500">
                       No Data Available
                     </td>
                   </tr>
                 ) : (
                   paginatedDataforgrade.map((item, index) => (
-                    <tr className="border-b-[#D0D0D0] border-b" key={index}>
-                      <td className="p-2 text-center">{item.grade}</td>
-                      <td className="p-2 text-center">{`${item.min_score}-${item.max_score}`}</td>
-                      <td className="p-2 text-center">{item.remarks}</td>
+                    <tr className="border-b-[#D0D0D0] border-b" key={item.id || index}>
+                      <td className="p-2 text-center">{item.gradeName}</td>
+                      <td className="p-2 text-center">{`${item.minScore}-${item.maxScore}`}</td>
+                      <td className="p-2 text-center">{item.remark}</td>
                       <td className="p-2 text-center">
                         <div className="flex gap-4 items-center justify-center">
                           <FiEdit3
@@ -688,53 +565,56 @@ const GradingandScore = () => {
           </div>
 
           {/* Pagination controls */}
-          <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
-            <button
-              onClick={handlePrevious}
-              disabled={currentPageforgrade === 1}
-              className={`px-2 py-1  bg-[#E6ECF2] border ${
-                currentPageforgrade === 1
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-[#EDF0F3]"
-              }`}
-            >
-              &lt;
-            </button>
-
-            {Array.from({ length: totalPages }, (_, index) => (
+          {totalPages > 1 && (
+            <div className="flex justify-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
               <button
-                key={index}
-                onClick={() => setCurrentPageforgrade(index + 1)}
-                className={`px-2 py-1   text-xs ${
-                  currentPageforgrade === index + 1
-                    ? "bg-[#07508F] text-white"
-                    : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+                onClick={handlePrevious}
+                disabled={currentPageforgrade === 1}
+                className={`px-2 py-1 bg-[#E6ECF2] border ${
+                  currentPageforgrade === 1
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-[#EDF0F3]"
                 }`}
               >
-                {index + 1}
+                &lt;
               </button>
-            ))}
 
-            <button
-              onClick={handleNext}
-              disabled={currentPageforgrade === totalPages}
-              className={`px-2 py-1  border bg-[#E6ECF2] ${
-                currentPageforgrade === totalPages
-                  ? "opacity-50 cursor-not-allowed"
-                  : "hover:bg-[#EDF0F3]"
-              }`}
-            >
-              &gt;
-            </button>
-          </div>
+              {Array.from({ length: totalPages }, (_, index) => (
+                <button
+                  key={index}
+                  onClick={() => setCurrentPageforgrade(index + 1)}
+                  className={`px-2 py-1 text-xs ${
+                    currentPageforgrade === index + 1
+                      ? "bg-[#07508F] text-white"
+                      : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+                  }`}
+                >
+                  {index + 1}
+                </button>
+              ))}
+
+              <button
+                onClick={handleNext}
+                disabled={currentPageforgrade === totalPages}
+                className={`px-2 py-1 border bg-[#E6ECF2] ${
+                  currentPageforgrade === totalPages
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-[#EDF0F3]"
+                }`}
+              >
+                &gt;
+              </button>
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Result Visibility Section */}
       <div className="pb-5 pt-3 mt-5 bg-white rounded-lg">
         <div className="pt-3 pl-6 pr-6 mb-5">
           <p className="font-bold text-[#07508F]">Result Visibility</p>
         </div>
         <div className="pl-6 pr-6 space-y-4">
-          {/* Term Result Visibility */}
           <div className="flex items-center justify-between">
             <label className="text-[0.88rem] text-[#5E6A72]">
               Term Result Visibility
@@ -742,8 +622,8 @@ const GradingandScore = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                name="term_result_open"
-                checked={toggleFormData.term_result_open}
+                name="isTermResultOpen"
+                checked={toggleFormData.isTermResultOpen}
                 onChange={handleToggleChange}
                 className="sr-only peer"
               />
@@ -752,7 +632,6 @@ const GradingandScore = () => {
             </label>
           </div>
 
-          {/* Annual Result Visibility */}
           <div className="flex items-center justify-between">
             <label className="text-[0.88rem] text-[#5E6A72]">
               Annual Result Visibility
@@ -760,8 +639,8 @@ const GradingandScore = () => {
             <label className="relative inline-flex items-center cursor-pointer">
               <input
                 type="checkbox"
-                name="annual_result_open"
-                checked={toggleFormData.annual_result_open}
+                name="isAnnualResultOpen"
+                checked={toggleFormData.isAnnualResultOpen}
                 onChange={handleToggleChange}
                 className="sr-only peer"
               />
@@ -772,192 +651,123 @@ const GradingandScore = () => {
         </div>
       </div>
 
-      <div className="pb-5 pt-3 mt-5 bg-white   rounded-lg">
+      {/* Score Entry and Computation Section */}
+      <div className="pb-5 pt-3 mt-5 bg-white rounded-lg">
         <div className="pt-3 pl-6 pr-6 mb-5 flex justify-between items-center">
-          <p className="font-bold text-[#07508F]">
-            Score Entry and Computation
-          </p>
+          <p className="font-bold text-[#07508F]">Score Entry and Computation</p>
           <button
             onClick={handleSaveAnnualWeight}
-            disabled={
-              !computationFormData.class_year || !computationFormData.department
-            }
+            disabled={!computationFormData.classYearId || !computationFormData.sessionId || loading}
             className={`bg-[#07508F] text-white font-bold text-sm px-8 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90 ${
-              !computationFormData.class_year || !computationFormData.department
-                ? "cursor-not-allowed"
+              !computationFormData.classYearId || !computationFormData.sessionId
+                ? "opacity-50 cursor-not-allowed"
                 : ""
             }`}
           >
             Save
           </button>
         </div>
-        <form>
-          <div className="pl-6 pr-6 space-y-4 mb-3">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="flex flex-col gap-2 mb-2">
-                <label className="text-[0.88rem] text-[#5E6A72]">
-                  Set Class:
-                </label>
-                <Dropdown
-                  label={
-                    getClassYearName(computationFormData.class_year) ||
-                    "Select Class"
-                  }
-                  items={classYear.map((t) => ({
-                    label: t.class_name,
-                    onClick: () =>
-                      setComputationFormData({
-                        ...computationFormData,
-                        class_year: t.class_year_id,
-                      }),
-                  }))}
-                />
-              </div>
-              <div className="flex flex-col gap-2 mb-2">
-                <label className="text-[0.88rem] text-[#5E6A72]">
-                  Set Department:
-                </label>
-                <Dropdown
-                  label={
-                    getDepartmentName(computationFormData.department) ||
-                    "Select Department"
-                  }
-                  items={departmentList.map((t) => ({
-                    label: t.name,
-                    onClick: () =>
-                      setComputationFormData({
-                        ...computationFormData,
-                        department: t.department_id,
-                      }),
-                  }))}
-                />
-              </div>
+        <div className="pl-6 pr-6 space-y-4 mb-3">
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col gap-2 mb-2">
+              <label className="text-[0.88rem] text-[#5E6A72]">Set Class:</label>
+              <Dropdown
+                label={getClassYearName(computationFormData.classYearId) || "Select Class"}
+                items={classYear.map((t) => ({
+                  label: t.className,
+                  onClick: () =>
+                    setComputationFormData({
+                      ...computationFormData,
+                      classYearId: t.id,
+                    }),
+                }))}
+              />
+            </div>
+            <div className="flex flex-col gap-2 mb-2">
+              <label className="text-[0.88rem] text-[#5E6A72]">Set Session:</label>
+              <Dropdown
+                label={getSessionName(computationFormData.sessionId) || "Select Session"}
+                items={sessions.map((t) => ({
+                  label: t.name,
+                  onClick: () =>
+                    setComputationFormData({
+                      ...computationFormData,
+                      sessionId: t.id,
+                    }),
+                }))}
+              />
             </div>
           </div>
-          <hr className="text-gray-200 mt-10" />
-          <div className="flex-shrink-0 mb-2">
-            <p className="font-semibold flex justify-center p-3 text-[#333333]">
-              Set Term Annual Weigh
-            </p>
-          </div>
-          <div className="px-0">
-            <div>
-              <table className="min-w-full table-auto">
-                {paginatedDataforAnnualweigh.length > 0 && (
-                  <thead className="bg-[#EDF0F3] text-center sticky top-0 z-10 lg:text-base text-xs">
-                    <tr>
-                      <th className="p-2  bg-[#EDF0F3]">Term</th>
-                      <th className="p-2 bg-[#EDF0F3]">Input Score</th>
-                      <th className="p-2 bg-[#EDF0F3]">Action</th>
-                    </tr>
-                  </thead>
+        </div>
+        <hr className="text-gray-200 mt-10" />
+        <div className="flex-shrink-0 mb-2">
+          <p className="font-semibold flex justify-center p-3 text-[#333333]">Set Term Annual Weight</p>
+        </div>
+        <div className="px-0">
+          <div>
+            <table className="min-w-full table-auto">
+              <thead className="bg-[#EDF0F3] text-center sticky top-0 z-10 lg:text-base text-xs">
+                <tr>
+                  <th className="p-2 bg-[#EDF0F3]">Term</th>
+                  <th className="p-2 bg-[#EDF0F3]">Weight</th>
+                  <th className="p-2 bg-[#EDF0F3]">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {termsForSession.length === 0 ? (
+                  <tr>
+                    <td colSpan="3" className="p-5 text-center border text-gray-500">
+                      {computationFormData.sessionId ? "No terms found for this session" : "Select a session first"}
+                    </td>
+                  </tr>
+                ) : (
+                  termsForSession.map((termItem) => {
+                    const weight = computationFormData.termWeights[termItem.id] || "";
+                    const originalWeight = originalWeights[termItem.id] || "";
+                    const isChanged = weight !== "" && parseFloat(weight) !== parseFloat(originalWeight);
+
+                    return (
+                      <tr className="border-b-[#D0D0D0] border-b" key={termItem.id}>
+                        <td className="p-2 text-center">{termItem.name}</td>
+                        <td className="p-2 text-center">
+                          <input
+                            type="number"
+                            step="0.01"
+                            className={`rounded p-1 w-24 text-center focus:border-[#99C4EF] outline-none border ${
+                              weight !== "" ? "border-[#99C4EF]" : "border-[#A4A4A4]"
+                            }`}
+                            placeholder="0.00"
+                            min={0}
+                            max={1}
+                            value={weight}
+                            onChange={(e) => handleWeightChange(termItem.id, e.target.value)}
+                          />
+                        </td>
+                        <td className="p-2 text-center">
+                          {isChanged && (
+                            <button
+                              type="button"
+                              onClick={() => handleWeightChange(termItem.id, originalWeight)}
+                              className="bg-gray-500 text-white text-xs px-3 py-1 rounded cursor-pointer hover:opacity-90"
+                            >
+                              Reset
+                            </button>
+                          )}
+                          {!weight && !originalWeight && (
+                            <div className="text-gray-400 text-xs">Not set</div>
+                          )}
+                          {!isChanged && weight && (
+                            <div className="text-green-600 text-xs">Saved</div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
-                <tbody className="xl:text-sm text-xs text-[#333333] font-medium">
-                  {paginatedDataforAnnualweigh.length === 0 ? (
-                    <tr>
-                      <td
-                        colSpan="3"
-                        className="p-5  text-center border text-gray-500"
-                      >
-                        No Data Available
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedDataforAnnualweigh.map((item, index) => {
-                      let termKey = "";
-                      const termName = item.name.toLowerCase();
-
-                      if (
-                        termName.includes("first") ||
-                        termName.includes("1")
-                      ) {
-                        termKey = "first_term_weight";
-                      } else if (
-                        termName.includes("second") ||
-                        termName.includes("2")
-                      ) {
-                        termKey = "second_term_weight";
-                      } else if (
-                        termName.includes("third") ||
-                        termName.includes("3")
-                      ) {
-                        termKey = "third_term_weight";
-                      }
-
-                      const inputValue = computationFormData[termKey];
-                      const originalValue = originalWeights[termKey];
-
-                      const isSynced =
-                        parseFloat(inputValue) === parseFloat(originalValue);
-
-                      return (
-                        <tr
-                          className="border-b-[#D0D0D0]  border-b"
-                          key={index}
-                        >
-                          <td className="p-2 text-center ">{item.name}</td>
-                          <td className="p-2 text-center ">
-                            <input
-                              type="number"
-                              required
-                              className={` ${
-                                Weight[item.term_id] || isSynced
-                                  ? "text-sm"
-                                  : "border  text-xs"
-                              }  placeholder:text-[#000] rounded p-1  w-24 placeholder:text-center focus:border-[#99C4EF] outline-none text-center ${
-                                computationFormData[termKey] !== "" &&
-                                computationFormData[termKey] !== undefined
-                                  ? "border-[#99C4EF]"
-                                  : "border-[#A4A4A4]"
-                              }`}
-                              placeholder={
-                                Weight[item.term_id] ? "" : "Enter Weigh"
-                              }
-                              readOnly={Weight[item.term_id] ? true : false}
-                              min={0}
-                              step={0.1}
-                              value={computationFormData[termKey] || ""}
-                              onChange={(e) =>
-                                setComputationFormData((prev) => ({
-                                  ...prev,
-                                  [termKey]: e.target.value,
-                                }))
-                              }
-                            />
-                          </td>
-                          <td className="p-2 text-center ">
-                            {isSynced ? (
-                              <div className="flex gap-4 items-center justify-center">
-                                <FiEdit3
-                                  className="text-[#80ADCB] cursor-pointer"
-                                  size={15}
-                                  onClick={() => toggleWeightEdit(item.term_id)}
-                                />
-                                <FiTrash2
-                                  className="text-[#F94144] cursor-pointer"
-                                  size={15}
-                                />
-                              </div>
-                            ) : (
-                              <div className="flex items-center justify-center">
-                                <div
-                                  onClick={() => toggleWeightEdit(item.term_id)}
-                                  className="bg-[#07508F]   text-white  text-xs px-5 py-1 rounded cursor-pointer hover:opacity-90"
-                                >
-                                  Set
-                                </div>
-                              </div>
-                            )}
-                          </td>
-                        </tr>
-                      );
-                    })
-                  )}
-                </tbody>
-              </table>
-            </div>
+              </tbody>
+            </table>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

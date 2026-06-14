@@ -1,27 +1,34 @@
 "use client";
 import React, { useState } from "react";
 import SchoolAdminLayout from "../SchoolAdminLayout";
-import RightSide from "../RightSide";
 import ResultSettings from "../Result-Settings";
 import GradingandScore from "../GradingandScore";
 import ViewStudentResult from "../ViewStudentResult";
 import Broadsheet from "../BroadSheet";
+import CalculateResult from "../CalculateResult";
+import CommentTopics from "../CommentTopic";
+import Promotion from "../Promotion";
 
 const Results = () => {
   const [activeTab, setActiveTab] = useState("Result Setting");
+
+  const tabs = [
+    "Result Setting",
+    "Grading & Score Computation",
+    "Calculate Result",
+    "View Student's Result",
+    "Broadsheet",
+    "Comment Topics",
+    "Promotion",
+  ];
 
   return (
     <SchoolAdminLayout>
       <div className="w-full h-full flex flex-col bg-[#F9FAFE] pt-3 pl-2 pr-1 pb-3 overflow-hidden">
         {/* Tabs section – fixed, no scroll */}
         <div className="bg-white mr-2 pb-2">
-          <div className="pt-3 xl:text-sm text-xs flex xl:gap-10 gap-5 pl-6 whitespace-nowrap overflow-hidden">
-            {[
-              "Result Setting",
-              "Grading & Score Computation",
-              "View Student's Result",
-              "Broadsheet",
-            ].map((tab) => (
+          <div className="pt-3 xl:text-sm text-xs flex xl:gap-10 gap-5 pl-6 whitespace-nowrap overflow-x-auto no-scrollbar">
+            {tabs.map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
@@ -40,15 +47,17 @@ const Results = () => {
               </button>
             ))}
           </div>
-          
         </div>
 
         {/* Content section – scrollable vertically */}
         <div className="mt-2 flex-1 overflow-y-auto no-scrollbar min-h-0">
           {activeTab === "Result Setting" && <ResultSettings />}
           {activeTab === "Grading & Score Computation" && <GradingandScore />}
+          {activeTab === "Calculate Result" && <CalculateResult />}
           {activeTab === "View Student's Result" && <ViewStudentResult />}
           {activeTab === "Broadsheet" && <Broadsheet />}
+          {activeTab === "Comment Topics" && <CommentTopics />}
+          {activeTab === "Promotion" && <Promotion />}
         </div>
       </div>
     </SchoolAdminLayout>

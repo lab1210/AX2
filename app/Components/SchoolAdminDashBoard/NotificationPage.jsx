@@ -1,45 +1,51 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import {
-  createNotifications,
-  DeleteNotification,
-  getNotifications,
-  UpdateNotification,
-} from "../../Service/NotificationService";
 import Dropdown from "./DropDown2";
 import { RxLetterCaseCapitalize } from "react-icons/rx";
 import { IoFilter, IoSearch } from "react-icons/io5";
 import { FiEdit3, FiTrash2 } from "react-icons/fi";
+import notificationService from "@/Service/NotificationService";
 import toast from "react-hot-toast";
 import formatdate from "../SchoolAdminDashBoard/Formatdate";
 
 const NotificationPage = () => {
-  const role = ["Teacher", "Student", "Everyone"];
-
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
-  const [selectedDelete, setselectedDelete] = useState(null);
-
+  const [selectedDelete, setSelectedDelete] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [editVisible, setEditVisible] = useState(false);
-  const [selected, setselected] = useState(null);
-
+  const [selected, setSelected] = useState(null);
   const [filterType, setFilterType] = useState("title");
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
   const [searchText, setSearchText] = useState("");
-
   const [notifications, setNotifications] = useState([]);
+  const [sentNotifications, setSentNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showSent, setShowSent] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [accessibleClasses, setAccessibleClasses] = useState([]);
+  const [accessibleSubjects, setAccessibleSubjects] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
-  const [formData, setformData] = useState({
+  const [formData, setFormData] = useState({
     title: "",
     content: "",
-    recipient_group: "",
-    notification_type: "",
+    recipientGroup: "",
+    type: "",
+    targetId: "",
   });
 
-  // Content editor modal state
   const [showContentModal, setShowContentModal] = useState(false);
   const [tempContent, setTempContent] = useState("");
+
+  const recipientGroups = [
+    { label: "All Users", value: "All" },
+    { label: "All Students", value: "Students" },
+    { label: "All Teachers", value: "Teachers" },
+    { label: "All Class Teachers", value: "ClassTeachers" },
+    { label: "All Subject Teachers", value: "SubjectTeachers" },
+    { label: "Specific Class", value: "SpecificClass" },
+    { label: "Specific Subject", value: "SpecificSubject" },
+  ];
 
   const notificationTypes = [
     { label: "Information", value: "Information" },
@@ -47,48 +53,109 @@ const NotificationPage = () => {
     { label: "Alert", value: "Alert" },
   ];
 
-  const fetchData = async () => {
+  useEffect(() => {
+    fetchAllData();
+    checkUserRole();
+  }, []);
+
+  const checkUserRole = async () => {
     try {
-      const notificationRes = await getNotifications();
-      if (notificationRes) {
-        setNotifications(notificationRes);
+      const userDetails = notificationService.getUserDetails?.();
+      const roles = userDetails?.roles || [];
+      setIsAdmin(roles.includes("SchoolAdmin"));
+    } catch (error) {
+      console.error("Failed to check user role:", error);
+    }
+  };
+
+  const fetchAllData = async () => {
+    await Promise.all([
+      fetchNotifications(),
+      fetchStats(),
+      fetchAccessibleClasses(),
+      fetchAccessibleSubjects(),
+    ]);
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      setLoading(true);
+      const result = await notificationService.getMyNotifications();
+      if (result.success) {
+        setNotifications(result.data);
       } else {
-        toast.error("Failed to fetch notifications");
+        toast.error(result.message);
+      }
+      
+      // Fetch sent notifications if admin or teacher
+      const sentResult = await notificationService.getSentNotifications();
+      if (sentResult.success) {
+        setSentNotifications(sentResult.data);
       }
     } catch (error) {
-      toast.error("Failed to fetch data");
+      toast.error("Failed to fetch notifications");
     } finally {
       setLoading(false);
     }
   };
 
-  useEffect(() => {
-    fetchData();
-  }, []);
+  const fetchStats = async () => {
+    try {
+      const result = await notificationService.getNotificationStats();
+      if (result.success) {
+        setStats(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch stats:", error);
+    }
+  };
+
+  const fetchAccessibleClasses = async () => {
+    try {
+      const result = await notificationService.getMyAccessibleClasses();
+      if (result.success) {
+        setAccessibleClasses(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch classes:", error);
+    }
+  };
+
+  const fetchAccessibleSubjects = async () => {
+    try {
+      const result = await notificationService.getMySubjects();
+      if (result.success) {
+        setAccessibleSubjects(result.data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch subjects:", error);
+    }
+  };
 
   const openDeleteModal = (item) => {
-    setselectedDelete(item);
+    setSelectedDelete(item);
     setDeleteModalVisible(true);
   };
 
   const closeDeleteModal = () => {
-    setselectedDelete(null);
+    setSelectedDelete(null);
     setDeleteModalVisible(false);
   };
 
   const handleEdit = (notification) => {
     setEditVisible(true);
-    setselected({ ...notification });
-    setformData({
+    setSelected(notification);
+    setFormData({
       title: notification.title,
       content: notification.content,
-      recipient_group: notification.recipient_group,
-      notification_type: notification.notification_type,
+      recipientGroup: notification.recipientGroup,
+      type: notification.type,
+      targetId: notification.targetId || "",
     });
   };
 
   const handleInputChange = (field, value) => {
-    setformData((prev) => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
@@ -96,41 +163,43 @@ const NotificationPage = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!formData.title || !formData.content || !formData.recipientGroup || !formData.type) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    // Validate target ID for specific groups
+    if ((formData.recipientGroup === "SpecificClass" || formData.recipientGroup === "SpecificSubject") && !formData.targetId) {
+      toast.error("Please select a target class or subject");
+      return;
+    }
+
     try {
       const payload = {
         title: formData.title,
         content: formData.content,
-        recipient_group: formData.recipient_group,
-        notification_type: formData.notification_type,
+        recipientGroup: formData.recipientGroup,
+        type: formData.type,
+        targetId: formData.targetId || null,
       };
 
-      let response;
+      let result;
       if (editVisible && selected) {
-        response = await UpdateNotification(selected.notification_id, payload);
+        result = await notificationService.updateNotification(selected.id, payload);
       } else {
-        response = await createNotifications(payload);
+        result = await notificationService.sendNotification(payload);
       }
 
-      if (response?.error) {
-        toast.error("Failed to create or update notification");
-        return;
+      if (result.success) {
+        await fetchAllData();
+        toast.success(
+          editVisible ? "Notification updated successfully" : "Notification sent successfully"
+        );
+        resetForm();
+      } else {
+        toast.error(result.message);
       }
-
-      await fetchData();
-      toast.success(
-        editVisible
-          ? "Notification updated successfully"
-          : "Notification created successfully"
-      );
-
-      setEditVisible(false);
-      setselected(null);
-      setformData({
-        title: "",
-        content: "",
-        recipient_group: "",
-        notification_type: "",
-      });
     } catch (error) {
       toast.error("An error occurred while processing your request");
     }
@@ -139,68 +208,99 @@ const NotificationPage = () => {
   const handleDelete = async () => {
     if (!selectedDelete) return;
     try {
-      const response = await DeleteNotification(selectedDelete.notification_id);
-      if (response?.error) {
-        toast.error(response.error);
-        return;
+      const result = await notificationService.deleteNotification(selectedDelete.id);
+      if (result.success) {
+        await fetchAllData();
+        toast.success("Notification deleted successfully");
+        closeDeleteModal();
+      } else {
+        toast.error(result.message);
       }
-      await fetchData();
-      toast.success("Notification deleted successfully");
-      closeDeleteModal();
     } catch (error) {
       toast.error("An error occurred while deleting the notification");
     }
   };
 
-  // Pagination
-  const itemsPerPage = 10;
+  const handleMarkAsRead = async (notificationId) => {
+    try {
+      const result = await notificationService.markAsRead(notificationId);
+      if (result.success) {
+        await fetchNotifications();
+        await fetchStats();
+        toast.success("Marked as read");
+      }
+    } catch (error) {
+      toast.error("Failed to mark as read");
+    }
+  };
+
+  const handleMarkAllAsRead = async () => {
+    try {
+      const result = await notificationService.markAllAsRead();
+      if (result.success) {
+        await fetchNotifications();
+        await fetchStats();
+        toast.success(result.message);
+      }
+    } catch (error) {
+      toast.error("Failed to mark all as read");
+    }
+  };
+
+  const resetForm = () => {
+    setEditVisible(false);
+    setSelected(null);
+    setFormData({
+      title: "",
+      content: "",
+      recipientGroup: "",
+      type: "",
+      targetId: "",
+    });
+  };
+
+  const openContentModal = () => {
+    setTempContent(formData.content || "");
+    setShowContentModal(true);
+  };
+
+  const closeContentModal = () => {
+    setShowContentModal(false);
+  };
+
+  const saveContentFromModal = () => {
+    setFormData((prev) => ({ ...prev, content: tempContent }));
+    setShowContentModal(false);
+  };
 
   // Filtering
+  const displayNotifications = showSent ? sentNotifications : notifications;
+  
   const filteredNotifications =
     searchText.trim() === ""
-      ? notifications
-      : notifications.filter((d) => {
+      ? displayNotifications
+      : displayNotifications.filter((d) => {
           const lowerSearch = searchText.toLowerCase();
           if (filterType === "title") {
             return (d.title || "").toLowerCase().includes(lowerSearch);
           }
           if (filterType === "type") {
-            return (d.notification_type || "")
-              .toLowerCase()
-              .includes(lowerSearch);
+            return (d.typeName || d.type || "").toLowerCase().includes(lowerSearch);
           }
           if (filterType === "user") {
-            return (d.recipient_group || "")
-              .toLowerCase()
-              .includes(lowerSearch);
+            return (d.recipientGroupName || d.recipientGroup || "").toLowerCase().includes(lowerSearch);
           }
           return false;
         });
 
   const paginatedData = filteredNotifications.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    (currentPage - 1) * 10,
+    currentPage * 10
   );
-  const totalPages = Math.ceil(filteredNotifications.length / itemsPerPage);
+  const totalPages = Math.ceil(filteredNotifications.length / 10);
   const handlePrevious = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
   const handleNext = () =>
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
-
-  // Content modal helpers
-  const openContentModal = () => {
-    setTempContent(formData.content || "");
-    setShowContentModal(true);
-  };
-  const closeContentModal = () => {
-    setShowContentModal(false);
-  };
-  const saveContentFromModal = () => {
-    if (editVisible && selected) {
-      setselected((prev) => ({ ...prev, content: tempContent }));
-    }
-    setformData((prev) => ({ ...prev, content: tempContent }));
-    setShowContentModal(false);
-  };
 
   return (
     <div className="pr-1 w-full h-full overflow-y-auto no-scrollbar">
@@ -221,16 +321,16 @@ const NotificationPage = () => {
                 <span className="font-bold">{selectedDelete.title}</span>?
               </p>
             </div>
-            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5 ">
+            <div className="font-bold text-md items-center justify-center pt-3 flex gap-5">
               <button
                 onClick={handleDelete}
-                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-white bg-[#F94144] rounded-md pl-4 pr-4 py-2"
               >
                 Yes, Delete
               </button>
               <button
                 onClick={closeDeleteModal}
-                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4"
+                className="cursor-pointer text-[#333333] bg-[#EBEBEB] rounded-md pl-4 pr-4 py-2"
               >
                 No, Cancel
               </button>
@@ -258,7 +358,6 @@ const NotificationPage = () => {
                 Close
               </button>
             </div>
-
             <textarea
               value={tempContent}
               onChange={(e) => setTempContent(e.target.value)}
@@ -266,7 +365,6 @@ const NotificationPage = () => {
               placeholder="Type your full notification content here..."
               style={{ minHeight: "55vh", whiteSpace: "pre-wrap" }}
             />
-
             <div className="mt-4 flex justify-end gap-3">
               <button
                 onClick={closeContentModal}
@@ -287,214 +385,294 @@ const NotificationPage = () => {
         </div>
       )}
 
+      {/* Stats Cards */}
+      {stats && (
+        <div className="grid grid-cols-5 gap-3 mb-4 px-6">
+          <div className="bg-white rounded-lg shadow-sm border p-3 text-center">
+            <p className="text-xl font-bold text-[#07508F]">{stats.totalReceived}</p>
+            <p className="text-xs text-gray-500">Total</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border p-3 text-center">
+            <p className="text-xl font-bold text-red-500">{stats.unreadCount}</p>
+            <p className="text-xs text-gray-500">Unread</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border p-3 text-center">
+            <p className="text-xl font-bold text-green-500">{stats.readCount}</p>
+            <p className="text-xs text-gray-500">Read</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border p-3 text-center">
+            <p className="text-xl font-bold text-blue-500">{stats.informationCount || 0}</p>
+            <p className="text-xs text-gray-500">Info</p>
+          </div>
+          <div className="bg-white rounded-lg shadow-sm border p-3 text-center">
+            <p className="text-xl font-bold text-orange-500">{stats.alertCount || 0}</p>
+            <p className="text-xs text-gray-500">Alerts</p>
+          </div>
+        </div>
+      )}
+
       {/* Form */}
-      <form onSubmit={handleSubmit} className="mb-3 pb-5 pt-3  bg-white">
-        <div className="flex pt-3 pl-6 pr-6 justify-between mb-5 ">
+      <form onSubmit={handleSubmit} className="mb-3 pb-5 pt-3 bg-white">
+        <div className="flex pt-3 pl-6 pr-6 justify-between mb-5">
           <p className="font-bold text-[#07508F]">
             {editVisible ? "Edit Notification" : "Create Notification"}
           </p>
-          <button
-            type="submit"
-            className="bg-[#07508F] text-white font-bold text-sm px-5 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
-          >
-            {editVisible ? "Save" : "Create"}
-          </button>
+          <div className="flex gap-3">
+            {editVisible && (
+              <button
+                type="button"
+                onClick={resetForm}
+                className="bg-gray-500 text-white font-bold text-sm px-5 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
+              >
+                Cancel
+              </button>
+            )}
+            <button
+              type="submit"
+              className="bg-[#07508F] text-white font-bold text-sm px-5 pt-1 pb-1 rounded-sm cursor-pointer hover:opacity-90"
+            >
+              {editVisible ? "Save" : "Send"}
+            </button>
+          </div>
         </div>
 
         <div className="pl-6 pr-6">
           <div className="grid grid-cols-2 gap-3">
-            {/* Title */}
             <div className="flex flex-col gap-2 mb-2">
               <label className="text-[0.88rem] text-[#5E6A72]">Title:</label>
               <input
                 type="text"
-                name="title"
                 placeholder="Enter Title"
                 value={formData.title}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (editVisible && selected) {
-                    setselected((prev) => ({ ...prev, title: value }));
-                  }
-                  setformData((prev) => ({ ...prev, title: value }));
-                }}
-                className={`${
-                  formData.title !== "" ||
-                  (editVisible && selected?.title !== "")
-                    ? "border-[#0071E3] font-bold border-2"
-                    : "border-[#B6B6B6] border-[1.5px]"
-                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm `}
+                onChange={(e) => handleInputChange("title", e.target.value)}
+                className="focus:outline-[#0071E3] placeholder:text-sm border-[1.5px] p-1.5 text-sm rounded-sm border-[#B6B6B6]"
                 required
               />
             </div>
 
-            {/* Content (click to open modal) */}
             <div className="flex flex-col gap-2 mb-2">
               <label className="text-[0.88rem] text-[#5E6A72]">Content:</label>
               <input
                 type="text"
-                name="content"
-                placeholder="Enter Content"
-                value={
-                  formData.content
-                    ? formData.content.length > 65
-                      ? `${formData.content.slice(0, 65)}…`
-                      : formData.content
-                    : ""
-                }
+                placeholder="Click to enter content"
+                value={formData.content ? (formData.content.length > 65 ? `${formData.content.slice(0, 65)}…` : formData.content) : ""}
                 readOnly
                 onClick={openContentModal}
-                onFocus={openContentModal}
-                className={`cursor-text ${
-                  formData.content !== "" ||
-                  (editVisible && selected?.content !== "")
-                    ? "border-[#0071E3] font-bold border-2"
-                    : "border-[#B6B6B6] border-[1.5px]"
-                } focus:outline-[#0071E3] placeholder:text-sm placeholder:text-[#B6B6B6]  p-1.5 text-sm rounded-sm `}
+                className="cursor-pointer focus:outline-[#0071E3] placeholder:text-sm border-[1.5px] p-1.5 text-sm rounded-sm border-[#B6B6B6] bg-gray-50"
                 required
               />
-              {/* <p className="text-[11px] text-[#8b8b8b]">
-                Click the field to open a large editor.
-              </p> */}
             </div>
 
-            {/* Recipient */}
             <div className="flex flex-col gap-2 mb-2">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Recipient:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Recipient:</label>
               <Dropdown
-                label={formData.recipient_group || "Select Recipient"}
-                items={role.map((roleItem) => ({
-                  label: roleItem,
-                  onClick: () => handleInputChange("recipient_group", roleItem),
+                label={formData.recipientGroup ? recipientGroups.find(r => r.value === formData.recipientGroup)?.label : "Select Recipient"}
+                items={recipientGroups.map((group) => ({
+                  label: group.label,
+                  onClick: () => {
+                    handleInputChange("recipientGroup", group.value);
+                    handleInputChange("targetId", "");
+                  },
                 }))}
               />
             </div>
 
-            {/* Type */}
             <div className="flex flex-col gap-2 mb-2">
-              <label className="text-[0.88rem] text-[#5E6A72]">
-                Notification Type:
-              </label>
+              <label className="text-[0.88rem] text-[#5E6A72]">Type:</label>
               <Dropdown
-                label={formData.notification_type || "Select type"}
+                label={formData.type || "Select type"}
                 items={notificationTypes.map((item) => ({
                   label: item.label,
-                  onClick: () =>
-                    setformData((prev) => ({
-                      ...prev,
-                      notification_type: item.value,
-                    })),
+                  onClick: () => handleInputChange("type", item.value),
                 }))}
               />
             </div>
+
+            {(formData.recipientGroup === "SpecificClass" || formData.recipientGroup === "SpecificSubject") && (
+              <div className="flex flex-col gap-2 mb-2">
+                <label className="text-[0.88rem] text-[#5E6A72]">
+                  {formData.recipientGroup === "SpecificClass" ? "Select Class" : "Select Subject"}:
+                </label>
+                <Dropdown
+                  label={
+                    formData.targetId
+                      ? formData.recipientGroup === "SpecificClass"
+                        ? accessibleClasses.find(c => c.id === formData.targetId)?.className
+                        : accessibleSubjects.find(s => s.id === formData.targetId)?.name
+                      : `Select ${formData.recipientGroup === "SpecificClass" ? "Class" : "Subject"}`
+                  }
+                  items={(formData.recipientGroup === "SpecificClass" ? accessibleClasses : accessibleSubjects).map((item) => ({
+                    label: formData.recipientGroup === "SpecificClass" ? item.className : item.name,
+                    onClick: () => handleInputChange("targetId", item.id),
+                  }))}
+                />
+              </div>
+            )}
           </div>
         </div>
       </form>
 
-      <hr className=" text-[#A7B9CC]/50 mt-10" />
+      <hr className="text-[#A7B9CC]/50 mt-10" />
 
       {/* Toolbar */}
-      <div className="w-full grid grid-cols-[auto_1fr] gap-10 items-center mb-3 pl-6 pr-6">
-        <div className="w-full relative inline-block">
+      <div className="w-full flex flex-wrap justify-between items-center gap-4 mb-3 pl-6 pr-6 mt-4">
+        <div className="flex gap-3">
           <button
-            onClick={() => setShowFilterDropdown(!showFilterDropdown)}
-            className="flex items-center text-[#01427A] hover:text-white hover:bg-[#01427A] cursor-pointer text-sm gap-2 border-[1.5px] rounded border-[#01427A] py-2 px-3"
+            onClick={() => setShowSent(false)}
+            className={`px-4 py-1 rounded-md text-sm transition-all ${
+              !showSent ? "bg-[#07508F] text-white" : "bg-gray-200 text-gray-700"
+            }`}
           >
-            <span className="hidden xl:block">Filter by</span>
-            <IoFilter size={18} />
+            Received
           </button>
-
-          {showFilterDropdown && (
-            <div className="absolute left-0 mt-2 bg-white border rounded shadow-lg z-10 min-w-[150px]">
-              {[
-                { label: "Title", value: "title" },
-                { label: "Type", value: "type" },
-                { label: "User", value: "user" },
-              ].map((type) => (
-                <button
-                  key={type.value}
-                  onClick={() => {
-                    setFilterType(type.value);
-                    setShowFilterDropdown(false);
-                  }}
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-[#01427A]/10 border-b last:border-none flex items-center gap-2"
-                >
-                  <RxLetterCaseCapitalize />
-                  {type.label}
-                </button>
-              ))}
-            </div>
+          <button
+            onClick={() => setShowSent(true)}
+            className={`px-4 py-1 rounded-md text-sm transition-all ${
+              showSent ? "bg-[#07508F] text-white" : "bg-gray-200 text-gray-700"
+            }`}
+          >
+            Sent
+          </button>
+          {!showSent && stats?.unreadCount > 0 && (
+            <button
+              onClick={handleMarkAllAsRead}
+              className="text-sm text-blue-600 hover:underline"
+            >
+              Mark all as read
+            </button>
           )}
         </div>
 
-        <div className="relative w-full">
-          <IoSearch
-            className="text-[#AEAEAE] absolute left-0 top-2.5 mr-10 ml-3 "
-            size={18}
-          />
-          <input
-            value={searchText}
-            onChange={(e) => setSearchText(e.target.value)}
-            type="text"
-            className="placeholder:text-[#AEAEAE] xl:placeholder:text-sm placeholder:text-xs rounded py-1 pl-10 pr-12 border-[1.5px] w-full"
-            placeholder={`Type here to filter by ${filterType}`}
-          />
+        <div className="flex items-center gap-3">
+          <div className="relative inline-block">
+            <button
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)}
+              className="flex items-center text-[#01427A] hover:text-white hover:bg-[#01427A] cursor-pointer text-sm gap-2 border-[1.5px] rounded border-[#01427A] py-1 px-3"
+            >
+              <span className="hidden xl:block">Filter by</span>
+              <IoFilter size={18} />
+            </button>
+            {showFilterDropdown && (
+              <div className="absolute left-0 mt-2 bg-white border rounded shadow-lg z-10 min-w-[150px]">
+                {[
+                  { label: "Title", value: "title" },
+                  { label: "Type", value: "type" },
+                  { label: "Recipient", value: "user" },
+                ].map((type) => (
+                  <button
+                    key={type.value}
+                    onClick={() => {
+                      setFilterType(type.value);
+                      setShowFilterDropdown(false);
+                    }}
+                    className="w-full text-left px-4 py-2 text-sm hover:bg-[#01427A]/10 border-b last:border-none flex items-center gap-2"
+                  >
+                    <RxLetterCaseCapitalize />
+                    {type.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="relative w-64">
+            <IoSearch
+              className="text-[#AEAEAE] absolute left-3 top-1/2 transform -translate-y-1/2"
+              size={18}
+            />
+            <input
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              type="text"
+              className="placeholder:text-[#AEAEAE] text-sm rounded py-1 pl-10 pr-4 border-[1.5px] w-full"
+              placeholder={`Filter by ${filterType}`}
+            />
+          </div>
         </div>
       </div>
 
-      {/* List */}
-      <div className="pl-6 pr-6 flex flex-col gap-5 mt-8">
+      {/* Notifications List */}
+      <div className="pl-6 pr-6 flex flex-col gap-5 mt-4">
         {loading ? (
-          <div className="flex justify-center items-center mt-10 h-full">
-            <p className="text-center text-sm text-[#858383]">Loading…</p>
+          <div className="flex justify-center items-center mt-10">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#07508F]"></div>
           </div>
         ) : paginatedData.length === 0 ? (
-          <div className="flex justify-center items-center mt-10 h-full">
+          <div className="flex justify-center items-center mt-10">
             <p className="text-center text-sm text-[#858383]">
-              No notifications found
+              No {showSent ? "sent" : ""} notifications found
             </p>
           </div>
         ) : (
           paginatedData.map((item) => (
             <div
-              key={item.notification_id}
-              className="flex flex-col bg-white rounded-xl border-2 border-[#0B0A0A]/10 p-4"
+              key={item.id}
+              className={`flex flex-col bg-white rounded-xl border-2 p-4 ${
+                !item.isRead && !showSent ? "border-blue-300 bg-blue-50/30" : "border-[#0B0A0A]/10"
+              }`}
             >
-              <div className="flex justify-between items-center mb-5">
-                <div className="flex flex-col gap-1">
-                  <p className="font-medium text-[#333333]">{item.title}</p>
-                  <p className="text-sm text-[#333333]">{item.content}</p>
+              <div className="flex justify-between items-start mb-3">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <p className="font-semibold text-[#333333]">{item.title}</p>
+                    {!item.isRead && !showSent && (
+                      <span className="text-xs bg-blue-500 text-white px-2 py-0.5 rounded-full">New</span>
+                    )}
+                  </div>
+                  <p className="text-sm text-[#555555]">{item.content}</p>
+                  {showSent && item.recipientCount !== undefined && (
+                    <p className="text-xs text-gray-400 mt-2">
+                      Sent to {item.recipientCount} recipients
+                    </p>
+                  )}
                 </div>
-                <p className="text-sm font-light text-[#333333]">
-                  {formatdate(item.created_at)}
+                <p className="text-xs text-gray-400 ml-4 whitespace-nowrap">
+                  {formatdate(item.sentAt)}
                 </p>
               </div>
               <div className="flex justify-between items-center">
-                <div className="flex items-center gap-5">
-                  <div className="bg-[#9747FF]/30 p-2.5 py-1 rounded-sm">
-                    <p className="text-sm font-medium text-[#9747FF]">
-                      {item.recipient_group}
+                <div className="flex items-center gap-3">
+                  <div className={`p-1.5 px-3 rounded-sm ${
+                    item.typeName === "Information" ? "bg-blue-100 text-blue-700" :
+                    item.typeName === "Alert" ? "bg-red-100 text-red-700" :
+                    "bg-yellow-100 text-yellow-700"
+                  }`}>
+                    <p className="text-xs font-medium">{item.typeName || item.type}</p>
+                  </div>
+                  <div className="bg-purple-100 p-1.5 px-3 rounded-sm">
+                    <p className="text-xs font-medium text-purple-700">
+                      {item.recipientGroupName || item.recipientGroup}
                     </p>
                   </div>
-                  <div className="bg-[#2D9CFB]/25 p-2.5 py-1 rounded-sm">
-                    <p className="text-sm font-medium text-[#1983DE]">
-                      {item.notification_type}
-                    </p>
-                  </div>
+                  {showSent && item.targetName && (
+                    <div className="bg-green-100 p-1.5 px-3 rounded-sm">
+                      <p className="text-xs font-medium text-green-700">{item.targetName}</p>
+                    </div>
+                  )}
                 </div>
-                <div className="flex justify-end items-center gap-3">
-                  <FiEdit3
-                    onClick={() => handleEdit(item)}
-                    className="text-[#80ADCB] cursor-pointer"
-                    size={15}
-                  />
-                  <FiTrash2
-                    onClick={() => openDeleteModal(item)}
-                    className="text-[#F94144] cursor-pointer"
-                    size={15}
-                  />
+                <div className="flex items-center gap-3">
+                  {!showSent && !item.isRead && (
+                    <button
+                      onClick={() => handleMarkAsRead(item.id)}
+                      className="text-xs text-blue-500 hover:underline"
+                    >
+                      Mark as read
+                    </button>
+                  )}
+                  {isAdmin && (
+                    <>
+                      <FiEdit3
+                        onClick={() => handleEdit(item)}
+                        className="text-[#80ADCB] cursor-pointer hover:text-[#07508F]"
+                        size={15}
+                      />
+                      <FiTrash2
+                        onClick={() => openDeleteModal(item)}
+                        className="text-[#F94144] cursor-pointer hover:text-red-600"
+                        size={15}
+                      />
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -503,45 +681,59 @@ const NotificationPage = () => {
       </div>
 
       {/* Pagination */}
-      <div className="flex justify-self-end pr-6 items-center gap-2 mt-3 text-sm text-[#01427A] font-semibold">
-        <button
-          onClick={handlePrevious}
-          disabled={currentPage === 1}
-          className={`px-2 py-1 bg-[#E6ECF2] border ${
-            currentPage === 1
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-[#EDF0F3]"
-          }`}
-        >
-          &lt;
-        </button>
-
-        {Array.from({ length: totalPages }, (_, index) => (
+      {totalPages > 1 && (
+        <div className="flex justify-end pr-6 items-center gap-2 mt-5 pb-4 text-sm text-[#01427A] font-semibold">
           <button
-            key={index}
-            onClick={() => setCurrentPage(index + 1)}
-            className={`px-2 py-1 text-xs ${
-              currentPage === index + 1
-                ? "bg-[#07508F] text-white"
-                : "hover:bg-[#EDF0F3] bg-[#FAFAFA]"
+            onClick={handlePrevious}
+            disabled={currentPage === 1}
+            className={`px-2 py-1 bg-[#E6ECF2] border rounded ${
+              currentPage === 1
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-[#EDF0F3] cursor-pointer"
             }`}
           >
-            {index + 1}
+            &lt;
           </button>
-        ))}
 
-        <button
-          onClick={handleNext}
-          disabled={currentPage === totalPages || totalPages === 0}
-          className={`px-2 py-1 border bg-[#E6ECF2] ${
-            currentPage === totalPages || totalPages === 0
-              ? "opacity-50 cursor-not-allowed"
-              : "hover:bg-[#EDF0F3]"
-          }`}
-        >
-          &gt;
-        </button>
-      </div>
+          {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+            let pageNum;
+            if (totalPages <= 5) {
+              pageNum = i + 1;
+            } else if (currentPage <= 3) {
+              pageNum = i + 1;
+            } else if (currentPage >= totalPages - 2) {
+              pageNum = totalPages - 4 + i;
+            } else {
+              pageNum = currentPage - 2 + i;
+            }
+            return (
+              <button
+                key={pageNum}
+                onClick={() => setCurrentPage(pageNum)}
+                className={`px-2 py-1 text-xs rounded ${
+                  currentPage === pageNum
+                    ? "bg-[#07508F] text-white"
+                    : "hover:bg-[#EDF0F3] bg-[#FAFAFA] cursor-pointer"
+                }`}
+              >
+                {pageNum}
+              </button>
+            );
+          })}
+
+          <button
+            onClick={handleNext}
+            disabled={currentPage === totalPages}
+            className={`px-2 py-1 border bg-[#E6ECF2] rounded ${
+              currentPage === totalPages
+                ? "opacity-50 cursor-not-allowed"
+                : "hover:bg-[#EDF0F3] cursor-pointer"
+            }`}
+          >
+            &gt;
+          </button>
+        </div>
+      )}
     </div>
   );
 };

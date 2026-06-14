@@ -14,6 +14,8 @@ class SubscriptionService {
     return authService.getAxiosInstance();
   }
 
+  // ==================== SUPER ADMIN ENDPOINTS ====================
+
   // Create a new subscription
   async createSubscription(subscriptionData) {
     console.log("createSubscription called with:", subscriptionData);
@@ -267,6 +269,105 @@ class SubscriptionService {
       };
     }
   }
+
+  // ==================== SCHOOL ADMIN ENDPOINTS ====================
+
+  /**
+   * Get current school's subscription (SchoolAdmin only)
+   * GET /api/Subscription/my-subscription
+   */
+  async getCurrentSubscription() {
+    console.log("getCurrentSubscription called");
+    try {
+      const axiosInstance = this.getAxiosInstance();
+      const response = await axiosInstance.get('/Subscription/my-subscription');
+      console.log("Get current subscription response:", response.data);
+      return {
+        success: true,
+        data: response.data,
+        message: 'Subscription fetched successfully'
+      };
+    } catch (error) {
+      console.error("Get current subscription error:", error.response?.data);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'No subscription found',
+        data: null
+      };
+    }
+  }
+
+  /**
+   * Get current school's bill (SchoolAdmin only)
+   * GET /api/Subscription/my-bill
+   */
+  async getMyBill() {
+    console.log("getMyBill called");
+    try {
+      const axiosInstance = this.getAxiosInstance();
+      const response = await axiosInstance.get('/Subscription/my-bill');
+      console.log("Get my bill response:", response.data);
+      return {
+        success: true,
+        data: response.data,
+        message: 'Bill fetched successfully'
+      };
+    } catch (error) {
+      console.error("Get my bill error:", error.response?.data);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch bill'
+      };
+    }
+  }
+
+  /**
+   * Get current school's receipt (SchoolAdmin only)
+   * GET /api/Subscription/my-receipt
+   */
+  async getMyReceipt() {
+    console.log("getMyReceipt called");
+    try {
+      const axiosInstance = this.getAxiosInstance();
+      const response = await axiosInstance.get('/Subscription/my-receipt');
+      console.log("Get my receipt response:", response.data);
+      return {
+        success: true,
+        data: response.data,
+        message: 'Receipt fetched successfully'
+      };
+    } catch (error) {
+      console.error("Get my receipt error:", error.response?.data);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch receipt'
+      };
+    }
+  }
+
+  /**
+   * Get current school's subscription status (SchoolAdmin only)
+   * GET /api/Subscription/my-status
+   */
+  async getMySubscriptionStatus() {
+    console.log("getMySubscriptionStatus called");
+    try {
+      const axiosInstance = this.getAxiosInstance();
+      const response = await axiosInstance.get('/Subscription/my-status');
+      console.log("Get subscription status response:", response.data);
+      return {
+        success: true,
+        data: response.data,
+        message: 'Subscription status fetched successfully'
+      };
+    } catch (error) {
+      console.error("Get subscription status error:", error.response?.data);
+      return {
+        success: false,
+        message: error.response?.data?.message || 'Failed to fetch subscription status'
+      };
+    }
+  }
 }
 
 // Export singleton instance
@@ -274,6 +375,7 @@ const subscriptionService = new SubscriptionService();
 export default subscriptionService;
 
 // Export individual functions for backward compatibility
+// Super Admin exports
 export const createSubscription = async (data) => {
   return await subscriptionService.createSubscription(data);
 };
@@ -320,4 +422,21 @@ export const generateBill = async (subscriptionId) => {
 
 export const sendBillToSchool = async (subscriptionId) => {
   return await subscriptionService.sendBillToSchool(subscriptionId);
+};
+
+// School Admin exports
+export const getCurrentSubscription = async () => {
+  return await subscriptionService.getCurrentSubscription();
+};
+
+export const getMyBill = async () => {
+  return await subscriptionService.getMyBill();
+};
+
+export const getMyReceipt = async () => {
+  return await subscriptionService.getMyReceipt();
+};
+
+export const getMySubscriptionStatus = async () => {
+  return await subscriptionService.getMySubscriptionStatus();
 };

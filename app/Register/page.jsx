@@ -1,281 +1,92 @@
 "use client";
-import { useState } from "react";
-import Link from "next/link";
-import { PiEyeLight } from "react-icons/pi";
-import { IoEyeOffOutline, IoChevronBackSharp } from "react-icons/io5";
+import React from "react";
 import { useRouter } from "next/navigation";
-import LeftAuth from "../Components/LeftAuth";
-import Modal from "react-modal";
-import useModalStyles from "../Components/testModal";
-import Get_token from "../Components/get-token";
-import { verifyOtp } from "../Service/RegisterService";
-import toast from "react-hot-toast";
-Modal.setAppElement(".app");
-const Register = () => {
+import LeftAuth from "@/Components/LeftAuth";
+import { IoChevronBackSharp } from "react-icons/io5";
+
+const RegisterRole = () => {
   const router = useRouter();
-  const [showPassword, setShowPassword] = useState(false);
-  const [schoolid, setSchoolid] = useState("");
-  const [Pin, setPin] = useState("");
-  const [schooliderror, setSchooliderror] = useState("");
-  const [pinerror, setPinerror] = useState("");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [token, setToken] = useState("");
-  const [classYears, setClassYears] = useState([]); // New state for class years
 
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
-  const customStyles = useModalStyles();
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
+  const handleRoleSelection = (role) => {
+    const formattedRole = role.toLowerCase();
+    router.push(`/Register/${formattedRole}/Registration-Form`);
   };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSchooliderror("");
-    setPinerror("");
-
-    if (!schoolid || !Pin) {
-      if (!schoolid) setSchooliderror("School ID is required");
-      if (!Pin) setPinerror("Pin is required");
-      return;
-    }
-
-    try {
-      const result = await verifyOtp(Pin, schoolid);
-      console.log("Full API response:", result);
-
-      // Save user and temp token
-      localStorage.setItem("user", JSON.stringify({ schoolid, pin: Pin }));
-      setToken(result.temp_token);
-
-      // Update state and save to localStorage in one go
-      setClassYears(result.class_years || []);
-
-      // Save to localStorage after state is updated
-      localStorage.setItem(
-        "classYears",
-        JSON.stringify(result.class_years || [])
-      );
-
-      console.log(result.class_years);
-      openModal();
-      setSchoolid("");
-      setPin("");
-    } catch (error) {
-      const errorMsg =
-        error.response?.data?.error ||
-        error.response?.data?.detail ||
-        error.message;
-
-      if (errorMsg.toLowerCase().includes("school")) {
-        setSchooliderror(errorMsg);
-      } else if (
-        errorMsg.toLowerCase().includes("otp") ||
-        errorMsg.toLowerCase().includes("pin")
-      ) {
-        setPinerror(errorMsg);
-      } else {
-        toast.error("Verification failed: " + errorMsg);
-      }
-    }
-  };
+  
 
   return (
     <>
-      {/* overlay */}
-      <div
-        className={`fixed inset-0 bg-[rgba(0,0,0,0.3)] z-[999] transition-opacity ${
-          isModalOpen
-            ? "opacity-100 pointer-events-auto"
-            : "opacity-0 pointer-events-none"
-        }`}
-      ></div>
-
-      {/* ─── Desktop & Tablet-up View ─────────────────────────────── */}
-      <div className="hidden lg:flex w-full h-auto bg-[rgba(217,217,217,0.4)] relative">
-        <LeftAuth className={`${isModalOpen ? "opacity-60" : ""}`} />
-        <div
-          className={`flex flex-col items-center justify-center w-full md:w-[55%] lg:w-1/2 bg-white ${
-            isModalOpen ? "opacity-60" : ""
-          }`}
-        >
-          <div className="shadow-[0px_4px_10px_4px_rgba(0,0,0,0.15)] rounded-lg px-[30px] py-[45px] lg:px-[60px] lg:py-[60px]">
-            <div className="w-[300px]">
-              <div className="text-center mb-8">
-                <h1 className="text-[45px] font-bold mb-2">Register Now</h1>
-                <p className="text-black/50 font-bold text-xs">
-                  Kindly provide the requested information to register.
-                </p>
-              </div>
-              <form onSubmit={handleSubmit}>
-                <div className="flex flex-col mb-4">
-                  <label className="text-sm font-bold" htmlFor="SchoolID">
-                    School ID
-                  </label>
-                  <input
-                    className="bg-[#f0eeed] rounded mt-1 px-4 py-3 text-xs placeholder:text-[rgba(0,0,0,0.2)]"
-                    type="text"
-                    value={schoolid}
-                    placeholder="Enter School ID"
-                    onChange={(e) => setSchoolid(e.target.value)}
-                    required
-                  />
-                  {schooliderror && (
-                    <p className="text-[#f2645c] text-xs font-bold mt-1">
-                      {schooliderror}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex flex-col mb-4">
-                  <div className="flex justify-between items-center">
-                    <label className="text-sm font-bold" htmlFor="Pin">
-                      PIN
-                    </label>
-                  </div>
-                  <div className="relative">
-                    <input
-                      className="bg-[#f0eeed] rounded mt-1 px-4 py-3 text-xs w-full placeholder:text-[rgba(0,0,0,0.2)]"
-                      type={showPassword ? "text" : "password"}
-                      placeholder="Enter Pin"
-                      value={Pin}
-                      onChange={(e) => setPin(e.target.value)}
-                      required
-                    />
-                    <button
-                      type="button"
-                      onClick={togglePasswordVisibility}
-                      className="absolute right-3 top-4"
-                    >
-                      {showPassword ? (
-                        <PiEyeLight className="w-5 h-5" />
-                      ) : (
-                        <IoEyeOffOutline className="w-5 h-5" />
-                      )}
-                    </button>
-                  </div>
-                  {pinerror && (
-                    <p className="text-[#f2645c] text-xs font-bold mt-1">
-                      {pinerror}
-                    </p>
-                  )}
-                </div>
-                <div className="mt-8">
-                  <button
-                    type="submit"
-                    className="w-full bg-[#01427a] text-white rounded px-4 py-3 text-sm font-bold hover:bg-[#01427a]/80 transition-colors"
-                  >
-                    REGISTER
-                  </button>
-                </div>
-              </form>
-              <p className="text-xs text-black/20 font-bold  mt-4">
-                Already Registered?{" "}
-                <span
-                  onClick={() => router.push("/")}
-                  className="text-[#f47458] hover:underline cursor-pointer"
-                >
-                  Log In here
-                </span>
+      <div className="hidden lg:flex w-full h-auto bg-[rgba(217,217,217,0.4)]">
+        <LeftAuth />
+        <div className="flex flex-col items-center justify-center w-full md:w-[55%] lg:w-1/2 bg-white">
+          <div className="shadow-[0px_4px_10px_4px_rgba(0,0,0,0.15)] rounded-lg px-8 py-16 md:px-12 md:py-20 lg:px-16 lg:py-24">
+            <div className="text-center mb-10">
+              <h1 className="text-4xl md:text-5xl font-bold mb-2">
+                Register As
+              </h1>
+              <p className="text-sm md:text-base text-black/50 font-bold">
+                Select your role to continue the registration process
               </p>
             </div>
-          </div>
-        </div>
-        <Modal
-          isOpen={isModalOpen}
-          onRequestClose={closeModal}
-          style={customStyles}
-          contentLabel="Get Token"
-        >
-          <Get_token token={token} />
-        </Modal>
-      </div>
-
-      {/* ─── Mobile View ──── */}
-      <div className="lg:hidden flex flex-col items-center w-full bg-white space-y-6 p-2">
-        <div className="relative w-full flex items-center justify-center">
-          <button
-            onClick={() => router.back()}
-            className="absolute top-4 left-4 text-black z-99"
-          >
-            <IoChevronBackSharp className="w-6 h-6" />
-          </button>
-          <img
-            src="/loginimage.svg"
-            alt="Illustration"
-            className="z-10 md:w-1/2 p-6"
-          />
-        </div>
-
-        <h1 className="text-2xl font-bold text-center">Register Now</h1>
-
-        <form onSubmit={handleSubmit} className="w-full px-6 space-y-4">
-          <div className="flex flex-col">
-            <label className="text-sm font-bold">School ID</label>
-            <input
-              type="text"
-              value={schoolid}
-              onChange={(e) => setSchoolid(e.target.value)}
-              placeholder="Enter School ID"
-              className="bg-[#f0eeed] rounded mt-1 px-4 py-3 text-xs placeholder:text-[rgba(0,0,0,0.2)]"
-              required
-            />
-            {schooliderror && (
-              <p className="text-[#f2645c] text-xs font-bold mt-1">
-                {schooliderror}
-              </p>
-            )}
-          </div>
-
-          <div className="flex flex-col">
-            <label className="text-sm font-bold">PIN</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={Pin}
-                onChange={(e) => setPin(e.target.value)}
-                placeholder="Enter PIN"
-                className="bg-[#f0eeed] rounded mt-1 px-4 py-3 text-xs w-full placeholder:text-[rgba(0,0,0,0.2)]"
-                required
-              />
+            <div className="flex flex-col gap-4">
               <button
-                type="button"
-                onClick={togglePasswordVisibility}
-                className="absolute right-3 top-4"
+                onClick={() => handleRoleSelection("Teacher")}
+                className="bg-[#01427a] text-white rounded px-4 py-3 text-sm md:text-base font-bold hover:bg-[#01427a]/80 transition-colors"
               >
-                {showPassword ? (
-                  <PiEyeLight className="w-5 h-5" />
-                ) : (
-                  <IoEyeOffOutline className="w-5 h-5" />
-                )}
+                Teacher
+              </button>
+              <button
+                onClick={() => handleRoleSelection("Student")}
+                className="bg-white text-[#01427a] border border-[#01427a] rounded px-4 py-3 text-sm md:text-base font-bold hover:text-white hover:bg-[#01427a] transition-colors"
+              >
+                Student
               </button>
             </div>
-            {pinerror && (
-              <p className="text-[#f2645c] text-xs font-bold mt-1">
-                {pinerror}
-              </p>
-            )}
           </div>
-
-          <button
-            type="submit"
-            className="w-full bg-[#01427a] text-white rounded px-4 py-2 text-sm font-bold hover:bg-[#01427a]/80 transition-colors"
-          >
-            REGISTER
-          </button>
-
-          <div className="flex flex-row gap-1">
-            <p className="text-left text-xs text-black md:text-sm">
-              Already Registered?{" "}
-            </p>
-            <p className="text-[#01427a] text-xs md:text-sm">
-              <Link href={"/"}>Log In here</Link>
-            </p>
-          </div>
-        </form>
+        </div>
       </div>
+
+      {/* ─── mobile & tablet view ───────*/}
+      <div className="bg-[#f2f2f2] w-full flex flex-col items-center justify-center lg:hidden">
+        <div className="flex items-center justify-center bg-[#01427A] rounded-b-[45%] h-96 p-3">
+          <button onClick={() => router.back()} className="self-start mb-4">
+            <IoChevronBackSharp className="w-6 h-6 text-white " />
+          </button>
+          <div className="items-center justify-center">
+            <img
+              src="/loginimage.svg"
+              alt="Logo"
+              className="z-10 flex items-center"
+            />
+          </div>
+        </div>
+        <div className="w-full p-5">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-800 mb-2">
+              Register As
+            </h1>
+            <p className="text-sm text-gray-500 font-bold">
+              Select your role to continue the registration process
+            </p>
+          </div>
+          <div className="flex flex-col space-y-4">
+            <button
+              onClick={() => handleRoleSelection("Teacher")}
+              className="bg-[#01427a] text-white rounded py-3 text-sm font-bold hover:bg-[#01427a]/80 transition-colors"
+            >
+              Teacher
+            </button>
+            <button
+              onClick={() => handleRoleSelection("Student")}
+              className="bg-white text-[#01427a] border border-[#01427a] rounded py-3 text-sm font-bold hover:text-white hover:bg-[#01427a] transition-colors"
+            >
+              Student
+            </button>
+          </div>
+        </div>
+      </div>
+
     </>
   );
 };
 
-export default Register;
+export default RegisterRole;

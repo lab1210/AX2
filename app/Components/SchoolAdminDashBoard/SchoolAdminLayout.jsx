@@ -36,12 +36,12 @@ const SchoolAdminLayout = ({ children }) => {
         } else {
           setIsAuthenticated(false);
           authService.logout();
-          router.push("/");
+          window.location.href = "/"
         }
       } else {
         setIsAuthenticated(false);
         if (pathname !== "/") {
-          router.push("/");
+          window.location.href = "/"
         }
       }
       setIsLoading(false);
@@ -52,7 +52,7 @@ const SchoolAdminLayout = ({ children }) => {
     const handleStorage = (event) => {
       if (event.key === "accessToken" && !event.newValue) {
         setIsAuthenticated(false);
-        router.push("/");
+        window.location.href = "/"
       }
     };
     window.addEventListener("storage", handleStorage);
@@ -68,7 +68,7 @@ const SchoolAdminLayout = ({ children }) => {
       const token = authService.getAccessToken();
       if (!token) {
         setIsAuthenticated(false);
-        router.push("/");
+        window.location.href = "/"
       }
     };
 
@@ -94,7 +94,7 @@ const SchoolAdminLayout = ({ children }) => {
     logout: () => {
       authService.logout();
       setIsAuthenticated(false);
-      router.push("/");
+      window.location.href = "/"
     },
   };
 
